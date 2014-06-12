@@ -2,6 +2,6 @@
 #define LIBFASTER_H
 
 #include "fdd.h"
-#include "context.h"
+#include "fastContext.h"
 
 #endif
