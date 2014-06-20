@@ -6,6 +6,6 @@
 
 #include "fastContext.h"
 
-char detectType(const char * tName);
+fddType decodeType(size_t typeCode);
 
 #endif

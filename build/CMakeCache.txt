@@ -223,20 +223,11 @@ MPI_EXTRA_LIBRARY:STRING=/usr/lib/libmpi.so;/usr/lib/x86_64-linux-gnu/libdl.so;/
 //MPI library to link against
 MPI_LIBRARY:FILEPATH=/usr/lib/libmpi_cxx.so
 
-//The directory containing a CMake configuration file for MPI_REQUIRED.
-MPI_REQUIRED_DIR:PATH=MPI_REQUIRED_DIR-NOTFOUND
-
 //C++ compiler flags for OpenMP parallization
 OpenMP_CXX_FLAGS:STRING=-fopenmp
 
 //C compiler flags for OpenMP parallization
 OpenMP_C_FLAGS:STRING=-fopenmp
-
-//Value Computed by CMake
-distriblocks_BINARY_DIR:STATIC=/home/home/mtcs/pesquisa/faster/build
-
-//Value Computed by CMake
-distriblocks_SOURCE_DIR:STATIC=/home/home/mtcs/pesquisa/faster/src
 
 //Value Computed by CMake
 faster-examples_BINARY_DIR:STATIC=/home/home/mtcs/pesquisa/faster/build/examples

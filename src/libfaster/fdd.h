@@ -19,23 +19,26 @@ template <class T> class fdd : public fddBase{
 		template <typename U>
 		fdd(U &c) {
 			context = &c;
-			id = c.createFDD( detectType( typeid(T).name() ) );
+			id = c.createFDD( typeid(T).hash_code() );
+			c.fddList.insert(c.fddList.begin(), this);
 		}
 
 		// Create a fdd from a array in memory
 		template <typename U>
 		fdd(U &c, T * data, size_t size) {
 			context = &c;
-			id = c.createFDD( detectType( typeid(T).name() ) );
+			id = c.createFDD( typeid(T).hash_code() );
 			c.parallelize(data, size, id);
+			c.fddList.insert(c.fddList.begin(), this);
 		}
 
 		// Create a fdd from a vector in memory
 		template <typename U>
 		fdd(U &c, std::vector<T> &data) {
 			context = &c;
-			id = c.createFDD( detectType( typeid(T).name() ) );
+			id = c.createFDD( typeid(T).hash_code() );
 			c.parallelize(data.data(), data.length(), id);
+			c.fddList.insert(c.fddList.begin(), this);
 		}
 
 		// Create a fdd from a file
@@ -43,6 +46,7 @@ template <class T> class fdd : public fddBase{
 		fdd(U &c, const char * fileName) {
 			context = &c;
 			id = c.readFDD(fileName);
+			c.fddList.insert(c.fddList.begin(), this);
 		}
 
 		~fdd(){
@@ -54,10 +58,11 @@ template <class T> class fdd : public fddBase{
 			unsigned long int newFddId = newFdd->id;
 
 			context->enqueueTask(Map, id, newFddId, funcId);
-			context->fddList.push_back( newFdd );
+			context->fddList.insert( context->fddList.begin(), newFdd );
 
 			return newFdd;
 		}
+
 
 		// Run a Reduce
 		T reduce( int funcId ){

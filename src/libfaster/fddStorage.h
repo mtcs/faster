@@ -11,13 +11,14 @@ template <class T> class fddStorage;
 template <class T> 
 class fddStorage {
 	public:
-		fddStorage() {
-			type = detectType( typeid(T).name() );
-			localData = NULL;
+		fddStorage(){
+			size = 0;
+			allocSize = 200;
+			localData = new T[allocSize];
 		}
-
 		fddStorage(T * data, size_t s, unsigned int lowId, unsigned int highId) : fddStorage(){
 			setData(data, s, lowId, highId);
+			allocSize = s;
 		}
 
 		~fddStorage(){
@@ -26,26 +27,65 @@ class fddStorage {
 			}
 		}
 
-		void setData( T * data, size_t s, unsigned int lowId, unsigned int highId){
-			localData = new T[s];
+		void setData( T * data, size_t s){
+			grow(s);
 			memcpy(localData, data, s * sizeof ( T ) );
 			size = s;
-			dataRange.first = lowId;
-			dataRange.second = highId;
+			allocSize = s;
 		}
 
-		void setOwnership(unsigned int f, unsigned int s){
-			ownership.first = f;
-			ownership.second = s;
+		T * getData(){
+			return localData;
 		}
+
+		size_t getSize(){
+			return size;
+		}
+
+		 T & operator[](size_t ref){
+			 return localData[ref];
+		 }
+
+		 void grow(size_t toSize){
+			 if (allocSize < toSize){
+			 	if ((allocSize * 1.8) < toSize){
+					toSize = allocSize * 1.8;
+				}
+				
+				T * newStorage = new T [toSize];
+
+				if (size >0) 
+					memcpy(newStorage, localData, size * sizeof( T ) );
+				
+				delete [] localData;
+				
+				localData = newStorage;
+				allocSize = toSize;
+			 }
+		 }
+		 void shrink(){
+			 if ( (size > 0) && (allocSize > size) ){
+				T * newStorage = new T [size];
+				
+				memcpy(newStorage, localData, size * sizeof( T ) );
+
+				delete [] localData;
+				
+				localData = newStorage;
+				allocSize = size;
+			 }
+		 }
+
+		 void insert(T & item){
+			grow(allocSize + 1);
+			localData[size++] = item;	
+		 }
 
 	private:
-		fddType type;
 		size_t size;
+		size_t allocSize;
 
 		T * localData;
-		std::pair<unsigned int, unsigned int> dataRange;
-		std::pair<unsigned int, unsigned int> ownership;
 };
 
 

@@ -28,5 +28,5 @@ link_directories(${MPI_CXX_LIBRARIES})
 #include_directories("/usr/include/openmpi/")
 set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
 
-add_library(libfaster libfaster.cpp fdd.cpp fddStorage.cpp fastContext.cpp worker.cpp workerFdd.cpp misc.cpp fastComm.cpp fddBase.cpp)
+add_library(libfaster libfaster.cpp fdd.cpp fddStorage.cpp fastContext.cpp worker.cpp workerFdd.cpp misc.cpp fastComm.cpp)
 target_link_libraries (libfaster  ${EXTRA_LIBS})

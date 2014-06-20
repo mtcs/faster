@@ -9,7 +9,7 @@ enum fddType{
 	Float,
 	Double,
 	String,
-	Object
+	Custom
 };
 
 enum fddOpType{
@@ -34,6 +34,7 @@ class fastTask{
 		unsigned long int destFDD;
 		fddOpType	operationType;
 		unsigned int	functionId;
+		unsigned long int result;
 };
 
 #endif

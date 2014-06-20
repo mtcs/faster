@@ -11,17 +11,21 @@ string
 -
 mpi.h
 -
+sstream
+-
 fddBase.h
 /home/home/mtcs/pesquisa/faster/src/examples/../libfaster/fddBase.h
 
 /home/home/mtcs/pesquisa/faster/src/examples/../libfaster/fastContext.h
 string
 -
-list
+vector
 -
 queue
 -
 typeinfo
+-
+math.h
 -
 fastComm.h
 /home/home/mtcs/pesquisa/faster/src/examples/../libfaster/fastComm.h
@@ -60,6 +64,8 @@ fastContext.h
 iostream
 -
 stdlib.h
+-
+omp.h
 -
 libfaster.h
 /home/home/mtcs/pesquisa/faster/src/examples/libfaster.h
