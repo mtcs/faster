@@ -24,6 +24,8 @@ class fddBase{
 		unsigned long int id;
 		unsigned long int totalBlocks;
 		unsigned long int size;
+	public:
+		void setSize(size_t &s){ size = s; }
 };
 
 
@@ -34,7 +36,9 @@ class fastTask{
 		unsigned long int destFDD;
 		fddOpType	operationType;
 		unsigned int	functionId;
-		unsigned long int result;
+		void * result;
+		size_t resultSize;
+		size_t workersFinished;
 };
 
 #endif

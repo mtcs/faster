@@ -15,7 +15,18 @@ class workerFddBase{
 		fddType type;
 
 	public:
+		workerFddBase(unsigned int ident, fddType t) : id(ident), type(t) { }
+		
+		virtual ~workerFddBase(){}
+
 		fddType getType(){ return type; }
+
+		virtual void setData( void *, 	size_t){}
+		
+		virtual void * getData(){return NULL;}
+		virtual size_t getSize(){return 0;}
+
+		virtual size_t itemSize(){return 0;}
 
 };
 
@@ -26,40 +37,34 @@ class workerFdd : public workerFddBase{
 		fddStorage <T> localData;
 
 	public:
-		void setData(T * data, size_t size){
+		void setData(void * data, size_t size) override{
 			localData.setData(data, size);
 		}
 
-		workerFdd(unsigned int ident, fddType t){
-			id = ident;
-			type = t;
+		workerFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){} 
+
+		workerFdd(unsigned int ident, fddType t, size_t size) : workerFddBase(ident, t){ 
+			localData.grow(size);
 		}
 
-		T & operator[](size_t ref){
-			return localData[ref];
-		}
+		~workerFdd(){}
 
-		T * getData(){
-			return localData.getData();
-		}
-		size_t getSize(){
-			return localData.getSize();
-		}
+		T & operator[](size_t ref){ return localData[ref]; }
+		void * getData() override{ return localData.getData(); }
+		size_t getSize() override{ return localData.getSize(); }
+		size_t itemSize() override{ return sizeof(T); }
 
-		void insert(T & in){
-			localData.insert(in);
-		}
+		void insert(T & in){ localData.insert(in); }
+		void shrink(){ localData.shrink(); }
 
-		void shrink(){
-			localData.shrink();
-		}
+		// --------- FUNCTIONS ----------
 
 		// Real blocking processing functions
 		template <typename U>
 		void map (workerFdd<U> & dest, U (*mapFunc)(T & input)){
 			size_t s = localData.getSize();
 
-			#pragma omp parallel for 
+			//#pragma omp parallel for 
 			for (int i = 0; i < s; ++i){
 				dest[i] = mapFunc(localData[i]);
 			}
@@ -75,31 +80,35 @@ class workerFdd : public workerFddBase{
 		void reduce (T &result, T (*reduceFunc)(T & A, T & B)){
 			size_t s = localData.getSize();
 
-			#pragma omp parallel 
+			//#pragma omp parallel 
 			{
-				int nT = omp_get_num_threads();
-				int tN = omp_get_thread_num();
-				T partResult = localData[tN];
+				//int nT = omp_get_num_threads();
+				//int tN = omp_get_thread_num();
+				//T partResult = localData[tN];
+				T partResult = localData[0];
 
-				#pragma omp for 
-				for (int i = nT; i < s; ++i){
+				//#pragma omp for 
+				//for (int i = nT; i < s; ++i){
+				for (int i = 1; i < s; ++i){
 					partResult = reduceFunc(partResult, localData[i]);
+					std::cerr << localData[i] << " ";
 				}
-				#pragma omp master
+				//#pragma omp master
 				result = partResult;
 				
-				#pragma omp barrier
+				//#pragma omp barrier
 				
-				#pragma omp critical
-				if (omp_get_thread_num() != 0){
-					result = reduceFunc(result, partResult);
-				}
+				//#pragma omp critical
+				//if (omp_get_thread_num() != 0){
+					//result = reduceFunc(result, partResult);
+				//}
 			}
 		}
 
 		void bulkReduce (T &result, T (*bulkReduceFunc)(T * input, size_t size)){
 			result = bulkReduceFunc(localData.getData(), localData.getSize());
 		}
+
 };
 
 #endif

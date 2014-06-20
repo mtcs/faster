@@ -19,34 +19,43 @@ template <class T> class fdd : public fddBase{
 		template <typename U>
 		fdd(U &c) {
 			context = &c;
-			id = c.createFDD( typeid(T).hash_code() );
-			c.fddList.insert(c.fddList.begin(), this);
+			id = c.createFDD(this, typeid(T).hash_code() );
+		}
+
+		// Create a empty fdd with a pre allocated size
+		template <typename U>
+		fdd(U &c, size_t size) {
+			context = &c;
+			id = c.createFDD(this,  typeid(T).hash_code(), size);
+			this->size = size;
 		}
 
 		// Create a fdd from a array in memory
 		template <typename U>
 		fdd(U &c, T * data, size_t size) {
 			context = &c;
-			id = c.createFDD( typeid(T).hash_code() );
+			id = c.createFDD(this,  typeid(T).hash_code(), size);
+			this->size = size;
 			c.parallelize(data, size, id);
-			c.fddList.insert(c.fddList.begin(), this);
 		}
 
 		// Create a fdd from a vector in memory
 		template <typename U>
 		fdd(U &c, std::vector<T> &data) {
 			context = &c;
-			id = c.createFDD( typeid(T).hash_code() );
+			id = c.createFDD(this,  typeid(T).hash_code(), data.size() );
+			this->size = data.size();
 			c.parallelize(data.data(), data.length(), id);
-			c.fddList.insert(c.fddList.begin(), this);
 		}
 
 		// Create a fdd from a file
 		template <typename U>
 		fdd(U &c, const char * fileName) {
 			context = &c;
-			id = c.readFDD(fileName);
-			c.fddList.insert(c.fddList.begin(), this);
+			id = c.readFDD(this, fileName);
+
+			// Recover FDD information (size, ? etc )
+			context->getFDDInfo(size);
 		}
 
 		~fdd(){
@@ -54,11 +63,17 @@ template <class T> class fdd : public fddBase{
 
 		// Run a Map
 		template <typename U> fdd<U> * map( int funcId ){
-			fdd<U> * newFdd = new fdd<U>(*context);
+			fdd<U> * newFdd = new fdd<U>(*context, size);
 			unsigned long int newFddId = newFdd->id;
+			char result;
 
+			// Send task
 			context->enqueueTask(Map, id, newFddId, funcId);
-			context->fddList.insert( context->fddList.begin(), newFdd );
+
+			// Receive results
+			for (int i = 1; i < context->numProcs(); ++i){
+				context->recvTaskResult(id, &result, size);
+			}
 
 			return newFdd;
 		}
@@ -68,8 +83,26 @@ template <class T> class fdd : public fddBase{
 		T reduce( int funcId ){
 			T result;
 
+			// Send task
 			unsigned long int reduceTaskId = context->enqueueTask(Reduce, id, 0, funcId);
-			result = context->collectTaskResult<T>(reduceTaskId);
+
+			// Receive results
+			for (int i = 1; i < context->numProcs(); ++i){
+				unsigned long int id;
+				T partResult;
+
+				context->recvTaskResult(id, &partResult, size);
+				if (size != sizeof(T)) std::cerr << "Error receiving result (wrong size)";
+
+				// Do the rest of the reduces
+				if( i == 1){
+					result = partResult;
+				}else{
+					T (*reduceFunc)(T&, T&) = (T (*)(T&, T&)) context->funcTable[funcId];
+					reduceFunc(result, partResult);
+				}
+
+			}
 
 			return result;
 		}

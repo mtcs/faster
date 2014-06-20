@@ -28,7 +28,7 @@ class worker{
 		void run();
 
 		// Worker functions
-		void createFDD (unsigned long int id, fddType type);
+		void createFDD (unsigned long int id, fddType type, size_t size);
 		void destroyFDD(unsigned long int id);
 		void setFDDData(unsigned long int id, void * data, size_t size);
 		void getFDDData(unsigned long int id, void *& data, size_t &size);

@@ -59,22 +59,26 @@ class fastContext{
 		void ** funcTable;
 		fastComm * comm;
 
-		std::queue<fastTask> taskQueue;
+		std::vector<fastTask *> taskList;
 
-		unsigned long int createFDD(size_t typeCode);
-		unsigned long int readFDD(const char * fileName);
+		unsigned long int createFDD(fddBase * ref, size_t typeCode);
+		unsigned long int createFDD(fddBase * ref, size_t typeCode, size_t size);
+		unsigned long int readFDD(fddBase * ref, const char * fileName);
+		void getFDDInfo(size_t & size);
+		int numProcs(){ return comm->numProcs; }
+		
 
 		unsigned long int enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId);
 
-		template <typename T> T collectTaskResult(unsigned long int taskId){
-			size_t rSize;
-			void * result;
-			double time;
-			for (int i = 1; i < comm->numProcs; ++i){
-				comm->recvTaskResult( id, result, rSize, time );
-				std::cerr << "    R:TaskResult" << result << '\n';
-			}
+		void recvTaskResult(unsigned long int &id, void * result, size_t & size){
+				double time;
+
+				std::cerr << "    R:TaskResult" << id << '\n';
+				comm->recvTaskResult(id, result, size, time);
+
+				taskList[id]->workersFinished++;
 		}
+
 
 		template <typename T> T * collectRDD(unsigned long int id, size_t s){
 			T * data = new T[s];
@@ -100,8 +104,8 @@ class fastContext{
 
 			for (int i = 1; i < comm->numProcs; ++i){
 				//comm->sendFDDSetData(id, i, &data[(i - 1) * blocksPerProc * settings->blockSize], size * sizeof(T));
-				comm->sendFDDSetData(id, i, &data[(i - 1) * sizePerProc], sizePerProc);
-				std::cerr << "    S:FDDSetData" << i << sizePerProc <<'\n';
+				comm->sendFDDSetData(id, i, &data[(i - 1) * sizePerProc], sizePerProc*sizeof(T));
+				std::cerr << "    S:FDDSetData P" << i << " " << id << " " << sizePerProc*sizeof(T) <<'\n';
 			}
 			comm->waitForReq(comm->numProcs - 1);
 		}

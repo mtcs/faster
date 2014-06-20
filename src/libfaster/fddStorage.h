@@ -10,6 +10,11 @@ template <class T> class fddStorage;
 // Stores worker's FDD data locally
 template <class T> 
 class fddStorage {
+	private:
+		size_t size;
+		size_t allocSize;
+
+		T * localData;
 	public:
 		fddStorage(){
 			size = 0;
@@ -27,11 +32,10 @@ class fddStorage {
 			}
 		}
 
-		void setData( T * data, size_t s){
-			grow(s);
-			memcpy(localData, data, s * sizeof ( T ) );
-			size = s;
-			allocSize = s;
+		void setData( void * data, size_t s){
+			grow(s / sizeof(T));
+			memcpy(localData, data, s );
+			size = s / sizeof(T);
 		}
 
 		T * getData(){
@@ -48,7 +52,7 @@ class fddStorage {
 
 		 void grow(size_t toSize){
 			 if (allocSize < toSize){
-			 	if ((allocSize * 1.8) < toSize){
+			 	if ((allocSize * 1.8) > toSize){
 					toSize = allocSize * 1.8;
 				}
 				
@@ -77,15 +81,10 @@ class fddStorage {
 		 }
 
 		 void insert(T & item){
-			grow(allocSize + 1);
+			grow(size + 1);
 			localData[size++] = item;	
 		 }
 
-	private:
-		size_t size;
-		size_t allocSize;
-
-		T * localData;
 };
 
 

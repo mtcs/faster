@@ -24,6 +24,7 @@ enum commMode {
 #define MSG_FDDDATAID 		0x0080
 #define MSG_FDDDATA 		0x0100
 #define MSG_TASKRESULT		0x0200
+#define MSG_FDDINFO		0x0400
 #define MSG_FINISH 		0x8000
 
 #define FDDTYPE_NULL 		0x00
@@ -142,10 +143,10 @@ class fastComm{
 		void recvTask(fastTask & task);
 
 		void sendTaskResult(unsigned long int id, void * res, size_t size, double time);
-		void recvTaskResult(unsigned long int id, void *& res, size_t &size, double &time);
+		void recvTaskResult(unsigned long int id, void * res, size_t &size, double &time);
 
-		void sendCreateFDD(unsigned long int id, fddType type);
-		void recvCreateFDD(unsigned long int &id, fddType &type);
+		void sendCreateFDD(unsigned long int id, fddType type, size_t size);
+		void recvCreateFDD(unsigned long int &id, fddType &type, size_t & size);
 
 		void sendDestroyFDD(unsigned long int id);
 		void recvDestroyFDD(unsigned long int &id);
@@ -161,6 +162,9 @@ class fastComm{
 
 		void sendReadFDDFile(unsigned long int id, std::string filename, size_t size, size_t offset, int dest);
 		void recvReadFDDFile(unsigned long int &id, std::string & filename, size_t &size, size_t & offset);
+
+		void sendFDDInfo(size_t size);
+		void recvFDDInfo(size_t &size);
 
 		void sendCollect(unsigned long int id);
 		void recvCollect(unsigned long int &id);

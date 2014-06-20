@@ -32,45 +32,52 @@ void worker::run(){
 		switch(tag){
 			case MSG_TASK:
 				comm->recvTask(task);
-				std::cerr << "    R:Task " << '\n';
+				std::cerr << "    R:Task " << task.id;
 				solve(task); // TODO Separate in a different thread ?
+				std::cerr << ".\n";
 				break;
 
 			case MSG_CREATEFDD:
-				comm->recvCreateFDD(id, type);
-				std::cerr << "    R:CreateFdd " << id << " " << (int) type << '\n';
-				createFDD(id, type);
+				comm->recvCreateFDD(id, type, size);
+				std::cerr << "    R:CreateFdd " << id << " " << (int) type << " " << size/4096 << "KB";
+				createFDD(id, type, size);
+				std::cerr << ".\n";
 				break;
 
 			case MSG_DESTROYFDD:
 				comm->recvDestroyFDD(id);
-				std::cerr << "    R:DestroyFdd " << id << '\n';
+				std::cerr << "    R:DestroyFdd " << id;
 				destroyFDD(id);
+				std::cerr << ".\n";
 				break;
 
 			case MSG_FDDSETDATAID:
 				comm->recvFDDSetData(id, data, size);
-				std::cerr << "    R:SetFddData " << id << ' ' << size << '\n';
+				std::cerr << "    R:SetFddData " << id << ' ' << size;
 				setFDDData(id, data, size);
+				std::cerr << ".\n";
 				break;
 
 			case MSG_READFDDFILE:
 				comm->recvReadFDDFile(id, name, size, offset);
-				std::cerr << "    R:ReadFddFile " << id << name << '\n';
+				std::cerr << "    R:ReadFddFile " << id << name;
 				readFDDFile(id, name, size, offset);
+				std::cerr << ".\n";
 				break;
 
 			case MSG_COLLECT:
 				comm->recvCollect(id);
-				std::cerr << "    R:Collect " << id << '\n';
+				std::cerr << "    R:Collect " << id;
 				getFDDData(id, data, size);
 				comm->sendFDDData(id, 0, data, size);
+				std::cerr << ".\n";
 				break;
 
 			case MSG_FINISH:
 				comm->recvFinish();
-				std::cerr << "    R:FINISH " << '\n';
+				std::cerr << "    R:FINISH ";
 				finished = true;
+				std::cerr << ".\n";
 				break;
 			default:
 				break;
@@ -86,46 +93,36 @@ template <typename T> workerFdd<T> * decodeFDD(workerFddBase * fddBase){
 	return (workerFdd<int> *) fddBase;
 }
 
-void worker::createFDD (unsigned long int id, fddType type){
-	std::cerr << "      Create FDD: " << id << " " << (int) type << ' ';
+void worker::createFDD (unsigned long int id, fddType type, size_t size){
+	workerFddBase * newFdd;
 	switch (type){
-		case Int: {
-			workerFdd<int> * newFdd = new workerFdd<int>(id, type);
-			fddList.insert(fddList.end(), newFdd);
-			std::cerr << "Int ";
+		case Int: 
+			newFdd = new workerFdd<int>(id, type, size);
 			break;
-		}
-		case LongInt: {
-			std::cerr << "LongInt ";
+		case LongInt:
+			newFdd = new workerFdd<long int>(id, type, size);
 			break;
-		}
-		case Float: {
-			std::cerr << "Float ";
+		case Float:
+			newFdd = new workerFdd<float>(id, type, size);
 			break;
-		}
-		case Double: {
-			std::cerr << "Double ";
+		case Double:
+			newFdd = new workerFdd<double>(id, type, size);
 			break;
-		}
-		case String: {
-			std::cerr << "String ";
+		case String:
+			newFdd = new workerFdd<std::string>(id, type, size);
 	 		break;
-		}
-		case Custom: {
-			std::cerr << "Custom ";
+		case Custom:
+			//newFdd = new workerFdd<void *>(id, type, size);
 	 		break;
-		}
-		case Null: {
-			std::cerr << "Null ";
+		case Null:
 			break;
-		}
-		default: {
-			std::cerr << "Communication error!";
+		default:
+			newFdd = new workerFdd<int>(id, type, size);
 			break;
-		}
 	}
-	std::cerr << "LIST SIZE: " << fddList.size() << '\n';
+	fddList.insert(fddList.end(), newFdd);
 }
+
 
 void worker::destroyFDD(unsigned long int id){
 	delete fddList[id];
@@ -135,22 +132,18 @@ void worker::destroyFDD(unsigned long int id){
 void worker::setFDDData(unsigned long int id, void * data, size_t size){
 	workerFddBase * fdd = fddList[id];
 
-	if (fdd == NULL) return;
+	if (fdd == NULL) { std::cerr << "ERROR: Could not find FDD!"; exit(201); }
 
-	if (fdd->getType() == Int){
-		workerFdd<int> * decFdd = (workerFdd<int> *) fdd;
-		decFdd->setData( (int *) data, size * sizeof(int) );
-	}
+	fdd->setData( data, size );
 }
 
 void worker::getFDDData(unsigned long int id, void *& data, size_t &size){
 	workerFddBase * fdd = fddList[id];
 
-	if (fdd->getType() == Int){
-		workerFdd<int> * decFdd = (workerFdd<int> *) fdd;
-		data = decFdd->getData();
-		size = decFdd->getSize();
-	}
+	if (fdd == NULL) { std::cerr << "ERROR: Could not find FDD!"; exit(201); }
+
+	data = fdd->getData();
+	size = fdd->getSize();
 }
 
 void worker::readFDDFile(unsigned long int id, std::string &filename, size_t size, size_t offset){
@@ -170,13 +163,17 @@ void worker::readFDDFile(unsigned long int id, std::string &filename, size_t siz
 	if ( c == '\n' ){
 		newFdd->insert(line);
 	}
-
+	
 	while( size_t(inFile.tellg()) < (offset + size) ){
 		std::getline( inFile, line ); 
 
 		newFdd->insert(line);
 	}
 	newFdd->shrink();
+
+	std::cerr << "    S:FDDInfo ";
+	comm->sendFDDInfo(newFdd->getSize());
+
 }
 
 
@@ -191,12 +188,15 @@ void worker::apply(fastTask &task, workerFdd<U> * dest, workerFdd<T> * src){
 		case Map:
 			src->map(*dest, ( U (*)(T &) ) funcTable[task.functionId]);
 			result = 0;
+			std::cerr << " S:RESULT Map ";
+			comm->sendTaskResult(task.id, &result, sizeof(char), 0);
 			break;
 		case Reduce:
 			src->reduce(result, ( T (*)(T&, T&) ) funcTable[task.functionId]);
+			std::cerr << " S:RESULT Reduce " << result;
+			comm->sendTaskResult(task.id, &result, sizeof(T), 0);
 			break;
 	}
-	comm->sendTaskResult(task.id, &result, sizeof(T), 0);
 }
 
 template <typename T>

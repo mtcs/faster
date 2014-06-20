@@ -108,7 +108,7 @@ void fastComm::sendTaskResult(unsigned long int id, void * res, size_t size, dou
 	MPI_Send(buffer.data(), buffer.size() , MPI_BYTE, 0, MSG_TASKRESULT, MPI_COMM_WORLD);
 }
 
-void fastComm::recvTaskResult(unsigned long int id, void *& res, size_t & size, double & time){
+void fastComm::recvTaskResult(unsigned long int id, void * res, size_t & size, double & time){
 
 	buffer.reset();
 
@@ -118,12 +118,12 @@ void fastComm::recvTaskResult(unsigned long int id, void *& res, size_t & size, 
 	buffer.read(res, size);
 }
 
-void fastComm::sendCreateFDD(unsigned long int id, fddType type){
+void fastComm::sendCreateFDD(unsigned long int id, fddType type, size_t size){
 	char typeC = encodeFDDType(type);
 
 	buffer.reset();
 
-	buffer << id << typeC ;
+	buffer << id << typeC << size;
 
 	//std::cerr << '(' << id << ' ' << (int) typeC << ":" << buffer.size() << ')';
 
@@ -134,15 +134,14 @@ void fastComm::sendCreateFDD(unsigned long int id, fddType type){
 	MPI_Waitall( numProcs - 1, req, status);
 }
 
-void fastComm::recvCreateFDD(unsigned long int &id, fddType &type){
+void fastComm::recvCreateFDD(unsigned long int &id, fddType &type, size_t &size){
 	char t;
 
 	buffer.reset();
 
 	MPI_Recv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_CREATEFDD, MPI_COMM_WORLD, status);	
 
-	buffer >> id;
-	buffer >> t;
+	buffer >> id >> t >> size;
 	type = decodeFDDType(t);
 
 	//std::cerr << '(' << id << ' ' << (int) t << ":" << buffer.size()  << ')';
@@ -242,6 +241,16 @@ void fastComm::recvReadFDDFile(unsigned long int &id, std::string & filename, si
 	MPI_Recv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_READFDDFILE, MPI_COMM_WORLD, status);	
 	buffer >> id >> size >> offset >> filename;
 }
+
+
+void fastComm::sendFDDInfo(size_t size){
+	MPI_Send( &size, sizeof(size_t), MPI_BYTE, 0, MSG_FDDINFO, MPI_COMM_WORLD);
+}
+
+void fastComm::recvFDDInfo(size_t &size){
+	MPI_Recv(&size, sizeof(long unsigned int), MPI_BYTE, MPI_ANY_SOURCE, MSG_FDDINFO, MPI_COMM_WORLD, status);
+}
+
 
 void fastComm::sendCollect(unsigned long int id){
 	for (int i = 1; i < numProcs; ++i){

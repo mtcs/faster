@@ -14,7 +14,7 @@ int map1(int & input){
 void bulkMap1(int * output, int * input, size_t size){
 	#pragma omp parallel for 
 	for (int i = 0 ; i < size ; ++i){
-		output[i] = input[i] / 2;
+		output[i] = input[i] * 2;
 	}
 
 }
@@ -58,7 +58,7 @@ int main(int argc, char ** argv){
 	int rawdata[NUMITEMS];
 
 	for ( int i = 0; i < NUMITEMS; ++i )
-		rawdata[i] = i+1;
+		rawdata[i] = 1;
 
 	cout << "Import Data" << '\n';
 	fdd <int> data(fc, rawdata, NUMITEMS);

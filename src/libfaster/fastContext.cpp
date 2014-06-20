@@ -28,21 +28,30 @@ fastContext::fastContext(const fastSettings & s, void **& ft){
 
 
 fastContext::~fastContext(){ 
+	// Tell workers to go home!
+	std::cerr << "    S:CreateFdd ";
+	comm->sendFinish();
+
 	// Clean process
 	fddList.clear();
+	taskList.clear();
 	delete comm;
 	delete settings;
 }
 
 
-unsigned long int fastContext::createFDD(size_t typeCode){
+unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode, size_t size){
 	
 	fddType type = decodeType(typeCode);
-	comm->sendCreateFDD(numFDDs, type);
+	comm->sendCreateFDD(numFDDs, type, size);
 
 	std::cerr << "    S:CreateFdd " << numFDDs << " " << (int) type << '\n';
+	fddList.insert(fddList.begin(), ref);
 	
 	return numFDDs++;
+}
+unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode){
+	return createFDD(ref, typeCode, 0);
 }
 
 // Propagate FDD destruction to other machines
@@ -57,11 +66,10 @@ size_t findFileSize(const char* filename)
 	return in.tellg(); 
 }
 
-unsigned long int fastContext::readFDD(const char * fileName){
+unsigned long int fastContext::readFDD(fddBase * ref, const char * fileName){
 	//send read fdd n. numFdds from file fileName
 	size_t fileSize = findFileSize(fileName);
 	size_t dataPerProc = fileSize / (comm->numProcs - 1);
-
 
 	for (int i = 1; i < comm->numProcs; ++i){
 		comm->sendReadFDDFile(numFDDs, std::string(fileName), dataPerProc, i * dataPerProc, i);
@@ -74,6 +82,17 @@ unsigned long int fastContext::readFDD(const char * fileName){
 	return numFDDs++;
 }
 
+void fastContext::getFDDInfo(size_t & s){
+	size_t size, sum = 0;
+
+	for (int i = 1; i < comm->numProcs; ++i){
+		comm->recvFDDInfo(size);
+		sum += size;
+	}
+
+	s = sum;
+}
+
 unsigned long int fastContext::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId){
 	fastTask * newTask = new fastTask();
 	newTask->id = numTasks++;
@@ -84,6 +103,8 @@ unsigned long int fastContext::enqueueTask(fddOpType opT, unsigned long int idSr
 	// TODO do this later on a shceduler?
 	comm->sendTask(newTask);
 	std::cerr << "    S:Task" << newTask->id << '\n';
+
+	taskList.insert(taskList.end(), newTask);
 
 	return newTask->id;
 }
