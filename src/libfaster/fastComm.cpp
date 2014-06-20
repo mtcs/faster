@@ -87,16 +87,25 @@ void fastComm::waitForReq(int numReqs){
 }
 
 
-void fastComm::sendTask(fastTask * &t){
+void fastComm::sendTask(fastTask &task){
+	buffer.reset();
+
+	buffer << task.id << task.operationType << task.destFDD << task.srcFDD << task.functionId;
+
 	for (int i = 1; i < numProcs; ++i){
-		MPI_Isend(t, sizeof(fastTask) , MPI_BYTE, i, MSG_TASK, MPI_COMM_WORLD, &req[i-1]);
+		MPI_Isend(buffer.data(), buffer.size(), MPI_BYTE, i, MSG_TASK, MPI_COMM_WORLD, &req[i-1]);
 	}
 	MPI_Waitall( numProcs - 1, req, status);
 }
 
 void fastComm::recvTask(fastTask & task){
 	MPI_Status stat;
-	MPI_Recv(&task, sizeof(fastTask), MPI_BYTE, 0, MSG_TASK, MPI_COMM_WORLD, &stat);	
+
+	buffer.reset();
+
+	MPI_Recv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_TASK, MPI_COMM_WORLD, &stat);	
+	
+	buffer >> task.id >> task.operationType >> task.destFDD >> task.srcFDD >> task.functionId;
 }
 
 void fastComm::sendTaskResult(unsigned long int id, void * res, size_t size, double time){

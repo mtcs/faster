@@ -139,7 +139,7 @@ class fastComm{
 		void probeMsgs(int & tag);
 		void waitForReq(int numReqs);
 		
-		void sendTask(fastTask * &t);
+		void sendTask(fastTask & task);
 		void recvTask(fastTask & task);
 
 		void sendTaskResult(unsigned long int id, void * res, size_t size, double time);

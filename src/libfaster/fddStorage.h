@@ -17,13 +17,17 @@ class fddStorage {
 		T * localData;
 	public:
 		fddStorage(){
-			size = 0;
 			allocSize = 200;
 			localData = new T[allocSize];
+			size = 0;
 		}
-		fddStorage(T * data, size_t s, unsigned int lowId, unsigned int highId) : fddStorage(){
-			setData(data, s, lowId, highId);
+		fddStorage(size_t s){
 			allocSize = s;
+			localData = new T[s];
+			size = s;
+		}
+		fddStorage(T * data, size_t s) : fddStorage(s){
+			memcpy(localData, data, s*sizeof(T) );
 		}
 
 		~fddStorage(){
@@ -38,17 +42,11 @@ class fddStorage {
 			size = s / sizeof(T);
 		}
 
-		T * getData(){
-			return localData;
-		}
+		T * getData(){ return localData; }
+		size_t getSize(){ return size; }
+		void   setSize(size_t s){ grow(s); size = s; }
 
-		size_t getSize(){
-			return size;
-		}
-
-		 T & operator[](size_t ref){
-			 return localData[ref];
-		 }
+		 T & operator[](size_t ref){ return localData[ref]; }
 
 		 void grow(size_t toSize){
 			 if (allocSize < toSize){

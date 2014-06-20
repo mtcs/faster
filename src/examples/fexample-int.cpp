@@ -3,12 +3,12 @@
 #include <omp.h>
 #include "libfaster.h"
 
-#define NUMITEMS 100*1000
+#define NUMITEMS 100
 
 using namespace std;
 
 int map1(int & input){
-	return input / 2;
+	return input * 2;
 }
 
 void bulkMap1(int * output, int * input, size_t size){

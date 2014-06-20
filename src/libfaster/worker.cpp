@@ -32,14 +32,14 @@ void worker::run(){
 		switch(tag){
 			case MSG_TASK:
 				comm->recvTask(task);
-				std::cerr << "    R:Task " << task.id;
+				std::cerr << "    R:Task ID:" << task.id << " F:" << task.functionId << " ";
 				solve(task); // TODO Separate in a different thread ?
 				std::cerr << ".\n";
 				break;
 
 			case MSG_CREATEFDD:
 				comm->recvCreateFDD(id, type, size);
-				std::cerr << "    R:CreateFdd " << id << " " << (int) type << " " << size/4096 << "KB";
+				std::cerr << "    R:CreateFdd ID:" << id << " T:" << (int) type << " S:" << size << "B";
 				createFDD(id, type, size);
 				std::cerr << ".\n";
 				break;

@@ -43,7 +43,7 @@ fastContext::~fastContext(){
 unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode, size_t size){
 	
 	fddType type = decodeType(typeCode);
-	comm->sendCreateFDD(numFDDs, type, size);
+	comm->sendCreateFDD(numFDDs, type, size/(comm->numProcs-1));
 
 	std::cerr << "    S:CreateFdd " << numFDDs << " " << (int) type << '\n';
 	fddList.insert(fddList.begin(), ref);
@@ -99,10 +99,11 @@ unsigned long int fastContext::enqueueTask(fddOpType opT, unsigned long int idSr
 	newTask->srcFDD = idSrc;
 	newTask->destFDD = idRes;
 	newTask->operationType = opT;
+	newTask->functionId = funcId;
 
 	// TODO do this later on a shceduler?
-	comm->sendTask(newTask);
-	std::cerr << "    S:Task" << newTask->id << '\n';
+	comm->sendTask(*newTask);
+	std::cerr << "    S:Task ID:" << newTask->id << " F:" << funcId<< '\n';
 
 	taskList.insert(taskList.end(), newTask);
 

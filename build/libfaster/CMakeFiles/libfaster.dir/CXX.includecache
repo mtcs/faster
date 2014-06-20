@@ -70,10 +70,6 @@ fastContext.h
 workerFdd.h
 /home/home/mtcs/pesquisa/faster/src/libfaster/workerFdd.h
 
-/home/home/mtcs/pesquisa/faster/src/libfaster/workerFdd.cpp
-workerFdd.h
-/home/home/mtcs/pesquisa/faster/src/libfaster/workerFdd.h
-
 /home/home/mtcs/pesquisa/faster/src/libfaster/workerFdd.h
 omp.h
 -

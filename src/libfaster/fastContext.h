@@ -104,8 +104,9 @@ class fastContext{
 
 			for (int i = 1; i < comm->numProcs; ++i){
 				//comm->sendFDDSetData(id, i, &data[(i - 1) * blocksPerProc * settings->blockSize], size * sizeof(T));
-				comm->sendFDDSetData(id, i, &data[(i - 1) * sizePerProc], sizePerProc*sizeof(T));
-				std::cerr << "    S:FDDSetData P" << i << " " << id << " " << sizePerProc*sizeof(T) <<'\n';
+				std::cerr << "    S:FDDSetData P" << i << " " << id << " " << sizePerProc * sizeof(T) << "B";
+				comm->sendFDDSetData(id, i, &data[(i - 1) * sizePerProc], sizePerProc * sizeof(T));
+				std::cerr << ".\n";
 			}
 			comm->waitForReq(comm->numProcs - 1);
 		}

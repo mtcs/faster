@@ -44,12 +44,12 @@ class workerFdd : public workerFddBase{
 		workerFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){} 
 
 		workerFdd(unsigned int ident, fddType t, size_t size) : workerFddBase(ident, t){ 
-			localData.grow(size);
+			localData.setSize(size);
 		}
 
 		~workerFdd(){}
 
-		T & operator[](size_t ref){ return localData[ref]; }
+		T & operator[](size_t address){ return localData[address]; }
 		void * getData() override{ return localData.getData(); }
 		size_t getSize() override{ return localData.getSize(); }
 		size_t itemSize() override{ return sizeof(T); }
@@ -64,10 +64,13 @@ class workerFdd : public workerFddBase{
 		void map (workerFdd<U> & dest, U (*mapFunc)(T & input)){
 			size_t s = localData.getSize();
 
+			std::cerr << "START " << id << " " << s << "  ";
+
 			//#pragma omp parallel for 
 			for (int i = 0; i < s; ++i){
 				dest[i] = mapFunc(localData[i]);
 			}
+			std::cerr << "END ";
 		}		
 
 		template <typename U>
@@ -79,6 +82,7 @@ class workerFdd : public workerFddBase{
 
 		void reduce (T &result, T (*reduceFunc)(T & A, T & B)){
 			size_t s = localData.getSize();
+			std::cerr << "START " << id << " " << s << " | ";
 
 			//#pragma omp parallel 
 			{
@@ -91,7 +95,7 @@ class workerFdd : public workerFddBase{
 				//for (int i = nT; i < s; ++i){
 				for (int i = 1; i < s; ++i){
 					partResult = reduceFunc(partResult, localData[i]);
-					std::cerr << localData[i] << " ";
+					std::cerr << localData[i] << "->" << partResult << "\n";
 				}
 				//#pragma omp master
 				result = partResult;
@@ -103,6 +107,7 @@ class workerFdd : public workerFddBase{
 					//result = reduceFunc(result, partResult);
 				//}
 			}
+			std::cerr << "END ";
 		}
 
 		void bulkReduce (T &result, T (*bulkReduceFunc)(T * input, size_t size)){
