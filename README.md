@@ -44,20 +44,20 @@ How it works
 
 Faster works on distributed datasets called FDDs. These datasets are (or will be) fault tolerant data storages responsible to store data and handle distributed functions. Those functions can be predefined or customized by the user. Next we provide a example of a simple program that uses Faster libraries;
 
-#### 1. Initialize a context and start workers:
+1. Initialize a context and start workers:
 
 ```cpp
 fastContext fc();
 ``` 
 
-#### 2. Register your custom functions:
+2. Register your custom functions:
 	
 ```cpp
 fc.registerFunction((void*) &map1);
 fc.registerFunction((void*) &reduce1);
 ```
 
-#### 3. Start workers: 
+3. Start workers: 
 
 ```cpp
 fc.startWorkers();
@@ -66,13 +66,13 @@ fc.startWorkers();
 Every program must have at least one worker 
 __WARNING: in MPI mode, the code before this call is executed by all processes and the code after is NOT.__
 
-#### 4. Create a FDD dataset. In this case we will use a int array already in memory:
+4. Create a FDD dataset. In this case we will use a int array already in memory:
 
 ```cpp
 fdd <int> data(fc, data, [NUMBER_OF_ITEMS]);
 ```
 
-#### 5. Apply your functions to your data and get the result:
+5. Apply your functions to your data and get the result:
 
 ```cpp
 int result = data.map<int>((void*) &map1)->reduce((void*) &reduce1)/NUMITEMS;
