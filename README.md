@@ -46,75 +46,85 @@ Faster works on distributed datasets called FDDs. These datasets are (or will be
 
 #### 1. Initialize a context and start workers:
 
-	`fastContext fc();`
-
+```cpp
+fastContext fc();
+``` 
 
 #### 2. Register your custom functions:
 	
-	`fc.registerFunction((void*) &map1);
-	fc.registerFunction((void*) &reduce1);`
+```cpp
+fc.registerFunction((void*) &map1);
+fc.registerFunction((void*) &reduce1);
+```
 
 #### 3. Start workers: 
 
-	`fc.startWorkers();`
+```cpp
+fc.startWorkers();
+```
 	
 Every program must have at least one worker 
 __WARNING: in MPI mode, the code before this call is executed by all processes and the code after is NOT.__
 
 #### 4. Create a FDD dataset. In this case we will use a int array already in memory:
 
-	`fdd <int> data(fc, data, [NUMBER_OF_ITEMS]);`
+```cpp
+fdd <int> data(fc, data, [NUMBER_OF_ITEMS]);
+```
 
 #### 5. Apply your functions to your data and get the result:
 
-	`int result = data.map<int>((void*) &map1)->reduce((void*) &reduce1)/NUMITEMS;`
+```cpp
+int result = data.map<int>((void*) &map1)->reduce((void*) &reduce1)/NUMITEMS;
+```
 
 A full example would be:
 
-	#include <iostream>
-	#include "libfaster.h"
+```cpp
+#include <iostream>
+#include "libfaster.h"
 
-	#define NUMITEMS 100*1000
+#define NUMITEMS 100*1000
 
-	using namespace std;
+using namespace std;
 
-	int map1(int & input){
-		return input * 2;
-	}
-
-
-	int reduce1(int &a, int &b){
-		return a + b;
-	}
+int map1(int & input){
+	return input * 2;
+}
 
 
-	int main(int argc, char ** argv){
-		cout << "Init FastLib" << '\n';
-		fastContext fc("local");
+int reduce1(int &a, int &b){
+	return a + b;
+}
 
-		fc.registerFunction((void*) &map1);
-		fc.registerFunction((void*) &reduce1);
 
-		fc.startWorkers();
+int main(int argc, char ** argv){
+	cout << "Init FastLib" << '\n';
+	fastContext fc("local");
 
-		cout << "Generate Data" << '\n';
-		int rawdata[NUMITEMS];
+	fc.registerFunction((void*) &map1);
+	fc.registerFunction((void*) &reduce1);
 
-		for ( int i = 0; i < NUMITEMS; ++i )
-			rawdata[i] = 1;
+	fc.startWorkers();
 
-		cout << "Import Data" << '\n';
-		fdd <int> data(fc, rawdata, NUMITEMS);
+	cout << "Generate Data" << '\n';
+	int rawdata[NUMITEMS];
 
-		cout << "Process Data" << '\n';
-		int result = data.map<int>((void*) &map1)->reduce((void*) &reduce1)/NUMITEMS;
+	for ( int i = 0; i < NUMITEMS; ++i )
+		rawdata[i] = 1;
 
-		cout << "DONE!" << '\n';
-		std::cout << result << "\n";
+	cout << "Import Data" << '\n';
+	fdd <int> data(fc, rawdata, NUMITEMS);
 
-		return 0;
-	}
-
+	cout << "Process Data" << '\n';
+	int result = data.map<int>((void*) &map1)->reduce((void*) &reduce1)/NUMITEMS;
+		
+	cout << "DONE!" << '\n';
+	std::cout << result << "\n";
+	
+	return 0;
+}
+```
 
 
 
