@@ -64,6 +64,7 @@ fc.startWorkers();
 ```
 	
 Every program must have at least one worker 
+
 __WARNING: in MPI mode, the code before this call is executed by all processes and the code after is NOT.__
 
 4. Create a FDD dataset. In this case we will use a int array already in memory:
