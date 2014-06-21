@@ -34,7 +34,7 @@ TODO list:
 * Array FDD template
 * Pair FDD template
 * Block balancing
-...
+* ...
 * FDD Fault tolerance
 
 
@@ -46,28 +46,28 @@ Faster works on distributed datasets called FDDs. These datasets are (or will be
 
 1. Initialize a context and start workers:
 
-	fastContext fc();
+	`fastContext fc();`
 
 
 2. Register your custom functions:
 	
-	fc.registerFunction((void*) &map1);
-	fc.registerFunction((void*) &reduce1);
+	`fc.registerFunction((void*) &map1);
+	fc.registerFunction((void*) &reduce1);`
 
 3. Start workers: 
 
-	fc.startWorkers();
+	`fc.startWorkers();`
 	
 Every program must have at least one worker 
 __WARNING: in MPI mode, the code before this call is executed by all processes and the code after is NOT.__
 
 4. Create a FDD dataset. In this case we will use a int array already in memory:
 
-	fdd <int> data(fc, data, [NUMBER_OF_ITEMS]);
+	`fdd <int> data(fc, data, [NUMBER_OF_ITEMS]);`
 
 5. Apply your functions to your data and get the result:
 
-	int result = data.map<int>((void*) &map1)->reduce((void*) &reduce1)/NUMITEMS;
+	`int result = data.map<int>((void*) &map1)->reduce((void*) &reduce1)/NUMITEMS;`
 
 A full example would be:
 
