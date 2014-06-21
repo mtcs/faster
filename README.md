@@ -1,11 +1,11 @@
 Faster
 ======
-Super Fast Distributed Computing
+####Super Fast Distributed Computing
 
 Faster is a distributed computing framework designed to be fast, efficient and flexible. It is designed to work well in small and large heterogeneous clusters. Although, we are still in heavy development.
 
 
-Planned Features:
+__Planned Features:__
 
 * High level distributed computing framework.
 * Implemented in C++ for speed. 
@@ -20,14 +20,14 @@ Planned Features:
 Implementation Progress:
 -----------------------
 
-Done:
+__Done:__
 
 * Basic FDD templates (single item per line and no dynamic balancing).
 * Distributed functions: map, bulkMap, reduce and bulkReduce.
 * Process handling using MPI.
 * MPI communication interface.
 
-TODO list:
+__TODO list:__
 
 * FlatMap function
 * Block traking
