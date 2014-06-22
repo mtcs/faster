@@ -19,20 +19,14 @@ int main(int argc, char ** argv){
 	// Init Faster Framework
 	cout << "Init FastLib" << '\n';
 	fastContext fc("local");
-
 	fc.registerFunction((void*) &map1);
 	fc.registerFunction((void*) &reduce1);
 
 	fc.startWorkers();
 
-	cout << "Generate Data" << '\n';
-	int rawdata[NUMITEMS];
-
-	for ( int i = 0; i < NUMITEMS; ++i )
-		rawdata[i] = 1;
 
 	cout << "Import Data" << '\n';
-	fdd <int> data(fc, rawdata, NUMITEMS);
+	fdd <int> data(fc, "test.txt");
 
 	cout << "Process Data" << '\n';
 	int result = data.map<int>((void*) &map1)->reduce((void*) &reduce1);
