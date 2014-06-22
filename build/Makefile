@@ -42,10 +42,10 @@ EQUALS = =
 CMAKE_EDIT_COMMAND = /usr/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/home/mtcs/pesquisa/faster/src
+CMAKE_SOURCE_DIR = /home/home/mtcs/Dropbox/pesquisa/faster/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/home/mtcs/pesquisa/faster/build
+CMAKE_BINARY_DIR = /home/home/mtcs/Dropbox/pesquisa/faster/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -72,9 +72,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/home/mtcs/pesquisa/faster/build/CMakeFiles /home/home/mtcs/pesquisa/faster/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/home/mtcs/Dropbox/pesquisa/faster/build/CMakeFiles /home/home/mtcs/Dropbox/pesquisa/faster/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/home/mtcs/pesquisa/faster/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/home/mtcs/Dropbox/pesquisa/faster/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -115,6 +115,19 @@ fserver/fast:
 .PHONY : fserver/fast
 
 #=============================================================================
+# Target rules for targets named fexample-bulk-int
+
+# Build rule for target.
+fexample-bulk-int: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 fexample-bulk-int
+.PHONY : fexample-bulk-int
+
+# fast build rule for target.
+fexample-bulk-int/fast:
+	$(MAKE) -f examples/CMakeFiles/fexample-bulk-int.dir/build.make examples/CMakeFiles/fexample-bulk-int.dir/build
+.PHONY : fexample-bulk-int/fast
+
+#=============================================================================
 # Target rules for targets named fexample-int
 
 # Build rule for target.
@@ -126,6 +139,19 @@ fexample-int: cmake_check_build_system
 fexample-int/fast:
 	$(MAKE) -f examples/CMakeFiles/fexample-int.dir/build.make examples/CMakeFiles/fexample-int.dir/build
 .PHONY : fexample-int/fast
+
+#=============================================================================
+# Target rules for targets named fexample-intfile
+
+# Build rule for target.
+fexample-intfile: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 fexample-intfile
+.PHONY : fexample-intfile
+
+# fast build rule for target.
+fexample-intfile/fast:
+	$(MAKE) -f examples/CMakeFiles/fexample-intfile.dir/build.make examples/CMakeFiles/fexample-intfile.dir/build
+.PHONY : fexample-intfile/fast
 
 #=============================================================================
 # Target rules for targets named libfaster
@@ -149,7 +175,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... fserver"
+	@echo "... fexample-bulk-int"
 	@echo "... fexample-int"
+	@echo "... fexample-intfile"
 	@echo "... libfaster"
 .PHONY : help
 

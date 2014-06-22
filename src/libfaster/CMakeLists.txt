@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(libfaster)
 
+add_definitions(-O3)
+add_definitions(-ggdb)
+
 set (libfaster_VERSION_MAJOR 0)
 set (libfaster_VERSION_MINOR 1)
 
@@ -27,6 +30,8 @@ link_directories(${MPI_CXX_LIBRARIES})
 #set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
 #include_directories("/usr/include/openmpi/")
 set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
+
+set (EXTRA_LIBS ${EXTRA_LIBS} efence)
 
 add_library(libfaster libfaster.cpp fdd.cpp fddStorage.cpp fastContext.cpp worker.cpp workerFdd.cpp misc.cpp fastComm.cpp)
 target_link_libraries (libfaster  ${EXTRA_LIBS})

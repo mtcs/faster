@@ -4,6 +4,8 @@
 
 char encodeFDDType(fddType type){
 	switch (type){
+		case Char:
+			return FDDTYPE_CHAR;
 		case Int:
 			return FDDTYPE_INT;
 		case LongInt:
@@ -22,6 +24,8 @@ char encodeFDDType(fddType type){
 }
 fddType decodeFDDType(char type){
 	switch (type){
+		case FDDTYPE_CHAR:
+			return Char;
 		case FDDTYPE_INT:
 			return Int;
 		case FDDTYPE_LONGINT:
@@ -57,7 +61,7 @@ bool fastComm::isDriver(){
 
 fastComm::fastComm(const std::string master){
 	//MPI_Init (&argc, &argv);
-	MPI_Init (NULL, NULL);
+	MPI_Init (0, NULL);
 	MPI_Comm_size (MPI_COMM_WORLD, &numProcs);
 	MPI_Comm_rank (MPI_COMM_WORLD, &procId);
 	
@@ -117,7 +121,7 @@ void fastComm::sendTaskResult(unsigned long int id, void * res, size_t size, dou
 	MPI_Send(buffer.data(), buffer.size() , MPI_BYTE, 0, MSG_TASKRESULT, MPI_COMM_WORLD);
 }
 
-void fastComm::recvTaskResult(unsigned long int id, void * res, size_t & size, double & time){
+void fastComm::recvTaskResult(unsigned long int &id, void * res, size_t & size, double & time){
 
 	buffer.reset();
 

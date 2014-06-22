@@ -32,6 +32,12 @@ set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
 include_directories ("${PROJECT_SOURCE_DIR}/../libfaster")
 set (EXTRA_LIBS ${EXTRA_LIBS} libfaster)
 
+set (EXTRA_LIBS ${EXTRA_LIBS} efence)
+
 add_executable(fexample-int fexample-int.cpp)
+add_executable(fexample-bulk-int fexample-bulk-int.cpp)
+add_executable(fexample-intfile fexample-intfile.cpp)
 
 target_link_libraries (fexample-int  ${EXTRA_LIBS})
+target_link_libraries (fexample-bulk-int  ${EXTRA_LIBS})
+target_link_libraries (fexample-intfile  ${EXTRA_LIBS})

@@ -22,7 +22,7 @@ class worker{
 		char * buffer;
 		void ** funcTable;
 
-		worker(fastComm * c, void **& ft);
+		worker(fastComm * c, void ** ft);
 		~worker();
 
 		void run();
@@ -35,10 +35,12 @@ class worker{
 		void setFDDOwnership(unsigned long int id, size_t low, size_t up);
 		void readFDDFile(unsigned long int id, std::string &filename, size_t size, size_t offset);
 
-		template <typename T, typename U>
-		void apply(fastTask &task, workerFdd<U> * dest, workerFdd<T> * src);
+		//template <typename T, typename U>
+		//void apply(fastTask &task, workerFdd<U> * dest, workerFdd<T> * src);
+
 		template <typename T>
-		void preapply(fastTask &task, workerFdd<T> * dest);
+		void preapply(fastTask &task, workerFdd<T> * destFDD);
+		
 		void solve(fastTask & task);
 };
 

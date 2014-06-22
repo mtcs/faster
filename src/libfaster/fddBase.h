@@ -4,6 +4,7 @@
 
 enum fddType{
 	Null,
+	Char,
 	Int,
 	LongInt,
 	Float,
@@ -14,7 +15,11 @@ enum fddType{
 
 enum fddOpType{
 	Map,
+	BulkMap,
+	FlatMap,
+	BulkFlatMap,
 	Reduce,
+	BulkReduce
 };
 
 

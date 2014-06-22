@@ -1,3 +1,0 @@
-/home/home/mtcs/pesquisa/faster/build/examples/CMakeFiles/fexample-int.dir
-/home/home/mtcs/pesquisa/faster/build/server/CMakeFiles/fserver.dir
-/home/home/mtcs/pesquisa/faster/build/libfaster/CMakeFiles/libfaster.dir

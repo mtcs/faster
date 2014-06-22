@@ -5,7 +5,7 @@
 #include "fastComm.h"
 #include "worker.h"
 
-worker::worker(fastComm * c, void **& ft){
+worker::worker(fastComm * c, void ** ft){
 	std::cerr << "  Starting Worker" << '\n';
 	funcTable = ft;
 	comm = c;
@@ -109,7 +109,7 @@ void worker::createFDD (unsigned long int id, fddType type, size_t size){
 			newFdd = new workerFdd<double>(id, type, size);
 			break;
 		case String:
-			newFdd = new workerFdd<std::string>(id, type, size);
+			//newFdd = new workerFdd<std::string>(id, type, size);
 	 		break;
 		case Custom:
 			//newFdd = new workerFdd<void *>(id, type, size);
@@ -149,6 +149,9 @@ void worker::getFDDData(unsigned long int id, void *& data, size_t &size){
 void worker::readFDDFile(unsigned long int id, std::string &filename, size_t size, size_t offset){
 
 	workerFdd<std::string> * newFdd = new workerFdd<std::string>(id, String);
+
+	if (newFdd == NULL) { std::cerr << "ERROR: Could not find FDD!"; exit(201); }
+
 	fddList.insert(fddList.end(), newFdd);
 
 	// TODO Treat other kinds of input files
@@ -181,7 +184,7 @@ void worker::readFDDFile(unsigned long int id, std::string &filename, size_t siz
 
 
 
-template <typename T, typename U>
+/*template <typename T, typename U>
 void worker::apply(fastTask &task, workerFdd<U> * dest, workerFdd<T> * src){
 	T result;
 	switch (task.operationType){
@@ -207,17 +210,50 @@ void worker::preapply(fastTask &task, workerFdd<T> * dest){
 		workerFdd<int> * srcFDD = (workerFdd<int> *) src;
 		apply(task, dest, srcFDD);
 	}
+}// */
+
+template <typename T>
+void worker::preapply(fastTask &task, workerFdd<T> * destFDD){
+	workerFddBase * src = fddList[task.srcFDD];
+
+	void * result = new void *[src->itemSize()];
+	size_t rSize;
+
+	src->apply(funcTable[task.functionId], task.operationType, destFDD, result, rSize);
+	std::cerr << " S:RESULT ";
+	comm->sendTaskResult(task.id, result, rSize, 0);
 }
 
 void worker::solve(fastTask &task){
 
-	if (task.operationType == Reduce){
-		preapply<int>(task, NULL);
+	if ( (task.operationType == Reduce) ||
+		(task.operationType == BulkReduce)){
+		workerFdd<char> * fdd;
+		preapply(task, (workerFdd<char> *) fdd);
+
 	}else{
 		workerFddBase * fdd = fddList[task.destFDD];
-		if (fdd->getType() == Int){
-			workerFdd<int> * destFDD = (workerFdd<int> *) fdd;
-			preapply(task, destFDD);
+		switch (fdd->getType()){
+			case Char:
+				preapply(task, (workerFdd<char> *) fdd);
+				break;
+			case Int:
+				preapply(task, (workerFdd<int> *) fdd);
+				break;
+			case LongInt:
+				preapply(task, (workerFdd<long int> *) fdd);
+				break;
+			case Float:
+				preapply(task, (workerFdd<float> *) fdd);
+				break;
+			case Double:
+				preapply(task, (workerFdd<double> *) fdd);
+				break;
+			case String:
+				preapply(task, (workerFdd<std::basic_string<char>> *) fdd);
+				break;
+			default:
+				break;
 		}
 	}
 }

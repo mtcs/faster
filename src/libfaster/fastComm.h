@@ -28,12 +28,13 @@ enum commMode {
 #define MSG_FINISH 		0x8000
 
 #define FDDTYPE_NULL 		0x00
-#define FDDTYPE_INT 		0x01
-#define FDDTYPE_LONGINT 	0x02
-#define FDDTYPE_FLOAT 		0x03
-#define FDDTYPE_DOUBLE 		0x04
-#define FDDTYPE_STRING 		0x05
-#define FDDTYPE_OBJECT 		0x06
+#define FDDTYPE_CHAR 		0x01
+#define FDDTYPE_INT 		0x02
+#define FDDTYPE_LONGINT 	0x03
+#define FDDTYPE_FLOAT 		0x04
+#define FDDTYPE_DOUBLE 		0x05
+#define FDDTYPE_STRING 		0x06
+#define FDDTYPE_OBJECT 		0x07
 
 #include "fddBase.h" 
 
@@ -143,7 +144,7 @@ class fastComm{
 		void recvTask(fastTask & task);
 
 		void sendTaskResult(unsigned long int id, void * res, size_t size, double time);
-		void recvTaskResult(unsigned long int id, void * res, size_t &size, double &time);
+		void recvTaskResult(unsigned long int &id, void * res, size_t &size, double &time);
 
 		void sendCreateFDD(unsigned long int id, fddType type, size_t size);
 		void recvCreateFDD(unsigned long int &id, fddType &type, size_t & size);

@@ -4,26 +4,13 @@
 #include "fastContext.h"
 
 // Create a context with local as master
-fastContext::fastContext(const fastSettings & s, void **& ft){
+fastContext::fastContext(const fastSettings & s){
 
-	funcTable = ft;
 	settings = new fastSettings(s);
 	comm = new fastComm( s.getMaster() );
 	numFDDs = 0;
 	numTasks = 0;
 
-	// Create a Worker context and exit after finished
-	if ( ! comm->isDriver() ){
-		// Start worker role
-		worker worker(comm, ft);
-
-		worker.run();
-
-		// Clean process
-		delete comm; 
-		delete settings; 
-		exit(0);
-	}// */
 }
 
 
@@ -39,6 +26,21 @@ fastContext::~fastContext(){
 	delete settings;
 }
 
+void fastContext::startWorkers(){
+	// Create a Worker context and exit after finished
+	if ( ! comm->isDriver() ){
+		// Start worker role
+		worker worker(comm, funcTable.data());
+
+		worker.run();
+
+		// Clean process
+		delete comm; 
+		delete settings; 
+		exit(0);
+	}// */
+
+}
 
 unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode, size_t size){
 	
@@ -100,6 +102,7 @@ unsigned long int fastContext::enqueueTask(fddOpType opT, unsigned long int idSr
 	newTask->destFDD = idRes;
 	newTask->operationType = opT;
 	newTask->functionId = funcId;
+	newTask->workersFinished = 0;
 
 	// TODO do this later on a shceduler?
 	comm->sendTask(*newTask);

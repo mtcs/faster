@@ -45,9 +45,17 @@ class fastContext{
 	friend class worker;
 
 	public:
-		fastContext( std::string m, void ** ft): fastContext(fastSettings(m), ft){}
-		fastContext( const fastSettings & s, void **& ft);
+		fastContext( std::string m): fastContext(fastSettings(m)){}
+		fastContext( const fastSettings & s);
 		~fastContext();
+
+		void registerFunction(void * funcP){
+			std::cerr << "  Register " << funcP ;
+			funcTable.insert(funcTable.end(), funcP);
+			std::cerr << ".\n";
+		}
+
+		void startWorkers();
 
 	private:
 		int id;
@@ -56,10 +64,18 @@ class fastContext{
 		fastSettings * settings;
 		//std::list< std::pair<void *, fddType> > fddList;
 		std::vector< fddBase * > fddList;
-		void ** funcTable;
+		std::vector<void*> funcTable;
 		fastComm * comm;
 
 		std::vector<fastTask *> taskList;
+
+		int findFunc(void * funcP){
+			std::cerr << "  Find Function " << funcP ;
+			for( int i = 0; i < funcTable.size(); ++i){
+				if (funcTable[i] == funcP)
+					return i;
+			}
+		}
 
 		unsigned long int createFDD(fddBase * ref, size_t typeCode);
 		unsigned long int createFDD(fddBase * ref, size_t typeCode, size_t size);
@@ -103,7 +119,6 @@ class fastContext{
 			int sizePerProc = size/ (comm->numProcs - 1);
 
 			for (int i = 1; i < comm->numProcs; ++i){
-				//comm->sendFDDSetData(id, i, &data[(i - 1) * blocksPerProc * settings->blockSize], size * sizeof(T));
 				std::cerr << "    S:FDDSetData P" << i << " " << id << " " << sizePerProc * sizeof(T) << "B";
 				comm->sendFDDSetData(id, i, &data[(i - 1) * sizePerProc], sizePerProc * sizeof(T));
 				std::cerr << ".\n";
