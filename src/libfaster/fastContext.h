@@ -50,9 +50,9 @@ class fastContext{
 		~fastContext();
 
 		void registerFunction(void * funcP){
-			std::cerr << "  Register " << funcP ;
+			//std::cerr << "  Register " << funcP ;
 			funcTable.insert(funcTable.end(), funcP);
-			std::cerr << ".\n";
+			//std::cerr << ".\n";
 		}
 
 		void startWorkers();
@@ -70,8 +70,8 @@ class fastContext{
 		std::vector<fastTask *> taskList;
 
 		int findFunc(void * funcP){
-			std::cerr << "  Find Function " << funcP ;
-			for( int i = 0; i < funcTable.size(); ++i){
+			//std::cerr << "  Find Function " << funcP ;
+			for( size_t i = 0; i < funcTable.size(); ++i){
 				if (funcTable[i] == funcP)
 					return i;
 			}
@@ -89,8 +89,8 @@ class fastContext{
 		void recvTaskResult(unsigned long int &id, void * result, size_t & size){
 				double time;
 
-				std::cerr << "    R:TaskResult" << id << '\n';
 				comm->recvTaskResult(id, result, size, time);
+				std::cerr << "    R:TaskResult " << id << "Result:"  << * (int*)result << '\n';
 
 				taskList[id]->workersFinished++;
 		}
@@ -113,7 +113,7 @@ class fastContext{
 
 		// Propagate FDD data to other machines
 		template <typename T>
-		void parallelize(T * data, size_t size, unsigned long int id ){
+		void parallelize(unsigned long int id, T * data, size_t size){
 			//int numBlocks = ceil ( size / settings->blockSize );
 			//int blocksPerProc = numBlocks / (comm->numProcs - 1); // TODO DYNAMICALLY VARIATE BLOCK PER PROC LATER
 			int sizePerProc = size/ (comm->numProcs - 1);
@@ -124,6 +124,17 @@ class fastContext{
 				std::cerr << ".\n";
 			}
 			comm->waitForReq(comm->numProcs - 1);
+		}
+
+		template <typename T>
+		void parallelize(unsigned long int id, T ** data, size_t * dataSizes, size_t size){
+			int sizePerProc = size/ (comm->numProcs - 1);
+
+			for (int i = 1; i < comm->numProcs; ++i){
+				std::cerr << "    S:FDDSetData P" << i << " " << id << " " << sizePerProc * sizeof(T) << "B";
+				comm->sendFDDSetData(id, i, (void **) &data[(i - 1) * sizePerProc], dataSizes, size, sizeof(T));
+				std::cerr << ".\n";
+			}
 		}
 
 		void destroyFDD(unsigned long int id);

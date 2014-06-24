@@ -16,15 +16,18 @@ enum commMode {
 
 #define MSG_TASK 		0x0001
 #define MSG_CREATEFDD 		0x0002
-#define MSG_DESTROYFDD 		0x0004
-#define MSG_FDDSETDATAID 	0x0008
-#define MSG_FDDSETDATA 		0x0010
-#define MSG_READFDDFILE		0x0020
-#define MSG_COLLECT		0x0040
-#define MSG_FDDDATAID 		0x0080
-#define MSG_FDDDATA 		0x0100
-#define MSG_TASKRESULT		0x0200
-#define MSG_FDDINFO		0x0400
+#define MSG_DESTROYFDD 		0x0003
+#define MSG_FDDSETDATAID 	0x0004
+#define MSG_FDDSETDATA 		0x0005
+#define MSG_FDDSET2DDATAID 	0x0006
+#define MSG_FDDSET2DDATASIZES	0x0007
+#define MSG_FDDSET2DDATA 	0x0008
+#define MSG_READFDDFILE		0x0009
+#define MSG_COLLECT		0x0010
+#define MSG_FDDDATAID 		0x0011
+#define MSG_FDDDATA 		0x0012
+#define MSG_TASKRESULT		0x0013
+#define MSG_FDDINFO		0x0014
 #define MSG_FINISH 		0x8000
 
 #define FDDTYPE_NULL 		0x00
@@ -33,8 +36,13 @@ enum commMode {
 #define FDDTYPE_LONGINT 	0x03
 #define FDDTYPE_FLOAT 		0x04
 #define FDDTYPE_DOUBLE 		0x05
-#define FDDTYPE_STRING 		0x06
-#define FDDTYPE_OBJECT 		0x07
+#define FDDTYPE_STRING 		0x07
+#define FDDTYPE_CHARP 		0x08
+#define FDDTYPE_INTP 		0x09
+#define FDDTYPE_LONGINTP 	0x0A
+#define FDDTYPE_FLOATP 		0x0B
+#define FDDTYPE_DOUBLEP		0x0C
+#define FDDTYPE_OBJECT 		0x06
 
 #include "fddBase.h" 
 
@@ -61,6 +69,7 @@ class fastCommBuffer{
 		char * pos(){ return &_data[_size]; }
 		size_t size(){ return _size; }
 		size_t free(){ return _allocatedSize - _size; }
+		void advance(size_t pos){ _size += pos; }
 
 		void grow(size_t s){
 			if (_allocatedSize < s){
@@ -71,14 +80,14 @@ class fastCommBuffer{
 		}
 
 		void print(){
-			for (int i = 0; i < _size; ++i){
+			for (size_t i = 0; i < _size; ++i){
 				std::cout << (int) _data[i] << ' ';
 			}
 		}
 
 		// WRITE Data
 		template <typename T>
-		void write(T v, size_t s){
+		void write(T &v, size_t s){
 			memcpy( &_data[_size], &v, s );
 			_size += s;
 		}
@@ -131,6 +140,24 @@ class fastCommBuffer{
 // Responsible for process communication
 class fastComm{
 	friend class fastContext;
+	private:
+		MPI_Status * status;
+		MPI_Request * req;
+		MPI_Request * req2;
+		fastCommBuffer buffer;
+		fastCommBuffer buffer2;
+
+		commMode mode;
+		int numProcs;
+		int procId;
+		double timeStart, timeEnd;
+
+		void sendDataGeneric(unsigned long int id, int dest, void * data, size_t size, int tagID, int tagData);
+		void recvDataGeneric(unsigned long int &id, void *& data, size_t &size, int tagID, int tagData);
+
+		void sendDataGeneric(unsigned long int id, int dest, void ** data, size_t * lineSize, size_t size, size_t itemSize, int tagID, int tagDataSize, int tagData);
+		void recvDataGeneric(unsigned long int &id, void **& data, size_t * lineSize, size_t &size, int tagID, int tagDataSize, int tagData);
+
 	public:
 		fastComm(const std::string master);
 		~fastComm();
@@ -155,6 +182,9 @@ class fastComm{
 		void sendFDDSetData(unsigned long int id, int dest, void * data, size_t size);
 		void recvFDDSetData(unsigned long int &id, void *& data, size_t &size);
 
+		void sendFDDSetData(unsigned long int id, int dest, void ** data, size_t * dataSizes, size_t size, size_t itemSize);
+		void recvFDDSetData(unsigned long int &id, void **& data, size_t * dataSizes, size_t &size);
+
 		void sendFDDData(unsigned long int id, int dest, void * data, size_t size);
 		void recvFDDData(unsigned long int &id, void *& data, size_t &size);
 
@@ -174,16 +204,6 @@ class fastComm{
 		void recvFinish();
 
 
-	private:
-		MPI_Status * status;
-		MPI_Request * req;
-		MPI_Request * req2;
-		fastCommBuffer buffer;
-
-		commMode mode;
-		int numProcs;
-		int procId;
-		double timeStart, timeEnd;
 
 
 };

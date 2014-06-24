@@ -23,6 +23,8 @@ void worker::run(){
 		unsigned long int id;
 		fddType type;
 		void * data;
+		void ** data2D;
+		size_t * lineSizes;
 		size_t size, offset;
 		std::string name;
 
@@ -55,6 +57,13 @@ void worker::run(){
 				comm->recvFDDSetData(id, data, size);
 				std::cerr << "    R:SetFddData " << id << ' ' << size;
 				setFDDData(id, data, size);
+				std::cerr << ".\n";
+				break;
+
+			case MSG_FDDSET2DDATAID:
+				comm->recvFDDSetData(id, data2D, lineSizes, size);
+				std::cerr << "    R:SetFddData " << id << ' ' << size;
+				setFDDData(id, data2D, lineSizes, size);
 				std::cerr << ".\n";
 				break;
 
@@ -96,6 +105,11 @@ template <typename T> workerFdd<T> * decodeFDD(workerFddBase * fddBase){
 void worker::createFDD (unsigned long int id, fddType type, size_t size){
 	workerFddBase * newFdd;
 	switch (type){
+		case Null:
+			break;
+		case Char: 
+			newFdd = new workerFdd<char>(id, type, size);
+			break;
 		case Int: 
 			newFdd = new workerFdd<int>(id, type, size);
 			break;
@@ -108,17 +122,30 @@ void worker::createFDD (unsigned long int id, fddType type, size_t size){
 		case Double:
 			newFdd = new workerFdd<double>(id, type, size);
 			break;
-		case String:
-			//newFdd = new workerFdd<std::string>(id, type, size);
-	 		break;
+		case CharP: 
+			newFdd = new workerFdd<char *>(id, type, size);
+			break;
+		case IntP: 
+			newFdd = new workerFdd<int *>(id, type, size);
+			break;
+		case LongIntP:
+			newFdd = new workerFdd<long int *>(id, type, size);
+			break;
+		case FloatP:
+			newFdd = new workerFdd<float *>(id, type, size);
+			break;
+		case DoubleP:
+			newFdd = new workerFdd<double *>(id, type, size);
+			break;
 		case Custom:
 			//newFdd = new workerFdd<void *>(id, type, size);
 	 		break;
-		case Null:
-			break;
-		default:
-			newFdd = new workerFdd<int>(id, type, size);
-			break;
+		case String:
+			newFdd = new workerFdd<std::string>(id, type, size);
+	 		break;
+		//default:
+		//	newFdd = new workerFdd<int>(id, type, size);
+		//	break;
 	}
 	fddList.insert(fddList.end(), newFdd);
 }
@@ -135,6 +162,14 @@ void worker::setFDDData(unsigned long int id, void * data, size_t size){
 	if (fdd == NULL) { std::cerr << "ERROR: Could not find FDD!"; exit(201); }
 
 	fdd->setData( data, size );
+}
+
+void worker::setFDDData(unsigned long int id, void ** data, size_t * lineSizes, size_t size){
+	workerFddBase * fdd = fddList[id];
+
+	if (fdd == NULL) { std::cerr << "ERROR: Could not find FDD!"; exit(201); }
+
+	fdd->setData( data, lineSizes, size );
 }
 
 void worker::getFDDData(unsigned long int id, void *& data, size_t &size){
@@ -216,12 +251,17 @@ template <typename T>
 void worker::preapply(fastTask &task, workerFdd<T> * destFDD){
 	workerFddBase * src = fddList[task.srcFDD];
 
-	void * result = new void *[src->itemSize()];
+	T result;
 	size_t rSize;
+	char r = 0;
 
-	src->apply(funcTable[task.functionId], task.operationType, destFDD, result, rSize);
+	src->apply(funcTable[task.functionId], task.operationType, destFDD, &result, rSize);
 	std::cerr << " S:RESULT ";
-	comm->sendTaskResult(task.id, result, rSize, 0);
+	if ((task.operationType == Reduce)||
+			(task.operationType == BulkReduce))
+		comm->sendTaskResult(task.id, &result, src->itemSize(), 0);
+	else
+		comm->sendTaskResult(task.id, &r, sizeof(char), 0);
 }
 
 void worker::solve(fastTask &task){
@@ -234,6 +274,8 @@ void worker::solve(fastTask &task){
 	}else{
 		workerFddBase * fdd = fddList[task.destFDD];
 		switch (fdd->getType()){
+			case Null:
+				break;
 			case Char:
 				preapply(task, (workerFdd<char> *) fdd);
 				break;
@@ -249,10 +291,26 @@ void worker::solve(fastTask &task){
 			case Double:
 				preapply(task, (workerFdd<double> *) fdd);
 				break;
+			case CharP:
+				preapply(task, (workerFdd<char *> *) fdd);
+				break;
+			case IntP:
+				preapply(task, (workerFdd<int *> *) fdd);
+				break;
+			case LongIntP:
+				preapply(task, (workerFdd<long int *> *) fdd);
+				break;
+			case FloatP:
+				preapply(task, (workerFdd<float *> *) fdd);
+				break;
+			case DoubleP:
+				preapply(task, (workerFdd<double *> *) fdd);
+				break;
+			case Custom:
+				//preapply(task, (workerFdd<void *> *) fdd);
+				break;
 			case String:
 				preapply(task, (workerFdd<std::basic_string<char>> *) fdd);
-				break;
-			default:
 				break;
 		}
 	}

@@ -56,7 +56,7 @@ int main(int argc, char ** argv){
 	fdd <int> data(fc, rawdata, NUMITEMS);
 
 	cout << "Process Data" << '\n';
-	int result = data.bulkMap<int>((void*)&bulkMap1)->bulkReduce((void*)&bulkReduce1);
+	int result = data.bulkMap<int>(&bulkMap1)->bulkReduce(&bulkReduce1);
 
 	cout << "DONE!" << '\n';
 	std::cout << result << "\n";

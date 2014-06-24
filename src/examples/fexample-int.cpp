@@ -35,10 +35,11 @@ int main(int argc, char ** argv){
 	fdd <int> data(fc, rawdata, NUMITEMS);
 
 	cout << "Process Data" << '\n';
-	int result = data.map<int>((void*) &map1)->reduce((void*) &reduce1);
+	int result = data.map<int>(&map1)->reduce(&reduce1);
 
 	cout << "DONE!" << '\n';
-	std::cout << result << "\n";
+
+	std::cout << "Resut:" << result << "\n";
 
 	return 0;
 }
