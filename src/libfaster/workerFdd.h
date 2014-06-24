@@ -99,7 +99,7 @@ class workerFdd : public workerFddBase{
 					std::cerr << "FlatMap ";
 					break;
 				case BulkFlatMap:
-					//bulkFlatMap(*dest, ( PbulkFlatMapFunctionP<T,U> ) func);
+					bulkFlatMap(*dest, ( PbulkFlatMapFunctionP<T,U> ) func);
 					std::cerr << "BulkFlatMap ";
 					break;
 			}
@@ -160,8 +160,9 @@ class workerFdd : public workerFddBase{
 
 				#pragma omp for 
 				for (int i = 0; i < s; ++i){
+					std::list<U> r = flatMapFunc(localData[i]);
 
-					partResultList = flatMapFunc(localData[i]);
+					partResultList.insert(partResultList.end(), r.begin(), r.end());
 				}
 
 				#pragma omp critical
@@ -181,16 +182,15 @@ class workerFdd : public workerFddBase{
 
 				#pragma omp for 
 				for (int i = 0; i < s; ++i){
+					std::list<std::pair<U, size_t>> r = flatMapFunc(localData[i]);
 
-					partResultList = flatMapFunc(localData[i]);
-					
+					partResultList.insert(partResultList.end(), r.begin(), r.end());
 				}
 
 				#pragma omp critical
 				resultList.insert(resultList.end(), partResultList.begin(), partResultList.end() );
 
 			}
-
 			dest.insert<U>(resultList);
 		}
 
@@ -198,6 +198,7 @@ class workerFdd : public workerFddBase{
 		void bulkFlatMap(workerFdd<U> & dest,  bulkFlatMapFunctionP<T,U> bulkFlatMapFunc ){
 			U * result;
 			size_t rSize;
+
 			bulkFlatMapFunc(result, rSize, localData.getData(), localData.getSize());
 			dest.setData(result, rSize);
 		}
@@ -206,15 +207,16 @@ class workerFdd : public workerFddBase{
 			U * result;
 			size_t * rDataSizes;
 			size_t rSize;
-			bulkFlatMapFunc(result, rDataSizes, rSize, localData.getData(), localData.getSize());
-			dest.setData(result, rDataSizes, rSize);
+
+			bulkFlatMapFunc( result, rDataSizes, rSize, (T*) localData.getData(), localData.getSize());
+			dest.setData( (void**) result, rDataSizes, rSize);
 		}
 
 		// REDUCE
 		T reduce (reduceFunctionP<T> reduceFunc){
+			T result;
 			size_t s = localData.getSize();
 			std::cerr << "START " << id << " " << s << " | ";
-			T result;
 
 			#pragma omp parallel 
 			{
@@ -334,19 +336,19 @@ class workerFdd<T *> : public workerFddBase{
 		void _apply(void * func, fddOpType op, workerFdd<U> * dest, void * result, size_t & rSize){
 			switch (op){
 				case Map:
-					//map(*dest, (mapPFunctionP<T,U>) func);
+					map(*dest, (mapPFunctionP<T,U>) func);
 					std::cerr << "Map";
 					break;
 				case BulkMap:
-					//bulkMap(*dest, ( bulkMapPFunctionP<T,U> ) func);
+					bulkMap(*dest, ( bulkMapPFunctionP<T,U> ) func);
 					std::cerr << "BulkMap ";
 					break;
 				case FlatMap:
-					//flatMap(*dest, ( flatMapPFunctionP<T,U> ) func);
+					flatMap(*dest, ( flatMapPFunctionP<T,U> ) func);
 					std::cerr << "FlatMap ";
 					break;
 				case BulkFlatMap:
-					//bulkFlatMap(*dest, ( bulkFlatMapPFunctionP<T,U> ) func);
+					bulkFlatMap(*dest, ( bulkFlatMapPFunctionP<T,U> ) func);
 					std::cerr << "BulkFlatMap ";
 					break;
 			}
@@ -354,30 +356,30 @@ class workerFdd<T *> : public workerFddBase{
 		
 		// Pointer -> Pointer
 		template <typename U>
-		void _applyP(void * func, fddOpType op, workerFdd<U *> * dest, void * result, size_t & rSize){
+		void _applyP(void * func, fddOpType op, workerFdd<U> * dest, void * result, size_t & rSize){
 			switch (op){
 				case Map:
-					//map(*dest, (PmapPFunctionP<T,U>) func);
+					map(*dest, (PmapPFunctionP<T,U>) func);
 					std::cerr << "Map";
 					break;
 				case BulkMap:
-					//bulkMap(*dest, ( PbulkMapPFunctionP<T,U> ) func);
+					bulkMap(*dest, ( PbulkMapPFunctionP<T,U> ) func);
 					std::cerr << "BulkMap ";
 					break;
 				case FlatMap:
-					//flatMap(*dest, ( PflatMapPFunctionP<T,U> ) func);
+					flatMap(*dest, ( PflatMapPFunctionP<T,U> ) func);
 					std::cerr << "FlatMap ";
 					break;
 				case BulkFlatMap:
-					//bulkFlatMap(*dest, ( PbulkFlatMapPFunctionP<T,U> ) func);
+					bulkFlatMap(*dest, ( PbulkFlatMapPFunctionP<T,U> ) func);
 					std::cerr << "BulkFlatMap ";
 					break;
 				case Reduce:
-					//reduce( (T*) result, ( PreducePFunctionP<T> ) func);
+					result = reduce(rSize, ( PreducePFunctionP<T> ) func);
 					std::cerr << "Reduce " ;
 					break;
 				case BulkReduce:
-					//bulkReduce( (T*) result, ( PbulkReducePFunctionP<T> ) func);
+					result = bulkReduce(rSize, ( PbulkReducePFunctionP<T> ) func);
 					std::cerr << "BulkReduce ";
 					break;
 			}
@@ -413,46 +415,85 @@ class workerFdd<T *> : public workerFddBase{
 			//std::cerr << "END ";
 		}		
 
-		/*template <typename U>
+		template <typename U>
 		void bulkMap (workerFdd<U> & dest, bulkMapPFunctionP<T,U> bulkMapFunc){
 			size_t s = localData.getSize();
+			size_t * ls = localData.getLineSizes();
 
-			bulkMapFunc((U*)dest.getData(), (T *)localData.getData(), s);
+			bulkMapFunc((U*) dest.getData(), (T **)localData.getData(), ls, s);
+		}
+		template <typename U>
+		void bulkMap (workerFdd<U> & dest, PbulkMapPFunctionP<T,U> bulkMapFunc){
+			size_t s = localData.getSize();
+			size_t * ls = localData.getLineSizes();
+
+			bulkMapFunc((U*) dest.getData(), dest.getLineSizes(), (T **)localData.getData(), ls, s);
 		}
 
 		template <typename U>
 		void flatMap(workerFdd<U> & dest,  flatMapPFunctionP<T,U> flatMapFunc ){
 			size_t s = localData.getSize();
+			std::list<U> resultList;
 
-			#pragma omp parallel for 
-			for (int i = 0; i < s; ++i){
-				std::list<U> resultList;
+			#pragma omp parallel
+			{
+				std::list<U> partResultList;
+				#pragma omp for 
+				for (int i = 0; i < s; ++i){
+					std::list<U>r = flatMapFunc(localData[i], localData.getLineSizes()[i]);
 
-				resultList = flatMapFunc(localData[i]);
-				
-				#pragma omp critical
-				{
-					//Copy result to the FDD array
-					dest.insert<U>(resultList);
+					resultList.insert(resultList.end(), partResultList.begin(), partResultList.end() );
 				}
+
+				//Copy result to the FDD array
+				#pragma omp critical
+				resultList.insert(resultList.end(), partResultList.begin(), partResultList.end() );
 			}
+			dest.insert<U>(resultList);
+		}
+		template <typename U>
+		void flatMap(workerFdd<U> & dest,  PflatMapPFunctionP<T,U> flatMapFunc ){
+			size_t s = localData.getSize();
+			std::list<std::pair<U, size_t>> resultList;
+
+			#pragma omp parallel
+			{
+				std::list<std::pair<U, size_t>> partResultList;
+				#pragma omp for 
+				for (int i = 0; i < s; ++i){
+					std::list<std::pair<U, size_t>>r = flatMapFunc(localData[i], localData.getLineSizes()[i]);
+
+					resultList.insert(resultList.end(), partResultList.begin(), partResultList.end() );
+				}
+
+				//Copy result to the FDD array
+				#pragma omp critical
+				resultList.insert(resultList.end(), partResultList.begin(), partResultList.end() );
+			}
+			dest.insert<U>(resultList);
 		}
 
 		template <typename U>
 		void bulkFlatMap(workerFdd<U> & dest,  bulkFlatMapPFunctionP<T,U> bulkFlatMapFunc ){
-			size_t s = localData.getSize();
+			U * result;
+			size_t rSize;
 
-			std::list<U> resultList;
+			bulkFlatMapFunc( result, rSize, (T**) localData.getData(), localData.getLineSizes(), localData.getSize());
+			dest.setData(result, rSize);
+		}
+		template <typename U>
+		void bulkFlatMap(workerFdd<U> & dest,  PbulkFlatMapPFunctionP<T,U> bulkFlatMapFunc ){
+			U * result;
+			size_t * rDataSizes;
+			size_t rSize;
 
-			resultList = bulkFlatMapFunc( (T*) localData.getData(), localData.getSize());
-				
-			//Copy result to the FDD array
-			dest.insert<U>(resultList);
-
+			bulkFlatMapFunc( result, rDataSizes, rSize, (T**) localData.getData(), localData.getLineSizes(), localData.getSize());
+			dest.setData(result, rSize);
 		}
 
 		// REDUCE
-		void reduce (T *result, reducePFunctionP<T> reduceFunc){
+		T * reduce (size_t & rSize, PreducePFunctionP<T> reduceFunc){
+			T * result;
 			size_t s = localData.getSize();
 			//std::cerr << "START " << id << " " << s << " | ";
 
@@ -460,33 +501,54 @@ class workerFdd<T *> : public workerFddBase{
 			{
 				int nT = omp_get_num_threads();
 				int tN = omp_get_thread_num();
-				T partResult = localData[tN];
+				T * partResult = localData[tN];
+				T * a, * b;
+				size_t partRSize, aSize, bSize;
 
 				#pragma omp master
 				std::cerr << tN << "(" << nT << ")";
 
 				#pragma omp for 
 				for (int i = nT; i < s; ++i){
-					partResult = reduceFunc(partResult, localData[i]);
+					a = partResult;
+					b = localData[i];
+					aSize = partRSize;
+					bSize = localData.getLineSizes()[i];
+					
+					reduceFunc(partResult, partRSize, a, aSize, b, bSize);
+					
+					delete [] a;
+					delete [] b;
 				}
 				#pragma omp master
-				*result = partResult;
+				result = partResult;
 				
 				#pragma omp barrier
 				
 				#pragma omp critical
 				if (omp_get_thread_num() != 0){
-					*result = reduceFunc(*result, partResult);
+					a = result;
+					b = partResult;
+					aSize = rSize;
+					bSize = partRSize;
+					
+					reduceFunc(result, rSize, a, aSize, b, bSize);
+
+					delete [] a;
+					delete [] b;
 				}
 			}
 			//std::cerr << "END ";
+			return result;
 		}
 
-		void bulkReduce (T *result, bulkReducePFunctionP<T> bulkReduceFunc){
-			*result = bulkReduceFunc((T*) localData.getData(), localData.getSize());
+		T * bulkReduce (size_t & rSize, PbulkReducePFunctionP<T> bulkReduceFunc){
+			T * result;
+			bulkReduceFunc(result, rSize, (T**) localData.getData(), localData.getLineSizes(), localData.getSize());
+			return result;
 		}
 
-		*/
+		
 
 	public:
 		workerFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){} 

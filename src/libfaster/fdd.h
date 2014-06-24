@@ -237,7 +237,7 @@ class fdd<T *> : public fddBase{
 					rSize = prSize;
 				}else{
 					// TODO
-					reducePFunctionP<T> reduceFunc = ( reducePFunctionP<T> ) context->funcTable[funcId];
+					PreducePFunctionP<T> reduceFunc = ( PreducePFunctionP<T> ) context->funcTable[funcId];
 					partResult2 = result;
 					reduceFunc(result, rSize, partResult2, rSize, partResult, prSize);
 					delete [] partResult;
@@ -322,10 +322,10 @@ class fdd<T *> : public fddBase{
 		}
 
 		// Run a Reduce
-		inline std::vector<T> reduce(reducePFunctionP<T> funcP  ){
+		inline std::vector<T> reduce(PreducePFunctionP<T> funcP  ){
 			return _reduce((void*) funcP, Reduce);
 		}
-		inline std::vector<T> bulkReduce(bulkReducePFunctionP<T> funcP  ){
+		inline std::vector<T> bulkReduce(PbulkReducePFunctionP<T> funcP  ){
 			return _reduce((void*) funcP, BulkReduce);
 		}
 		

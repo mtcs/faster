@@ -59,7 +59,7 @@ class fastTask{
 template <typename T, typename U>
 using mapFunctionP = U (*) (T & input);
 template <typename T, typename U>
-using PmapFunctionP = void (*) (U &, size_t &outputSize, T & input);
+using PmapFunctionP = void (*) (U & output, size_t &outputSize, T & input);
 
 template <typename T, typename U>
 using bulkMapFunctionP = void (*) (U * output, T * input, size_t size);
@@ -74,7 +74,7 @@ using PflatMapFunctionP = std::list<std::pair<U,size_t>>  (*) (T & input);
 template <typename T, typename U>
 using bulkFlatMapFunctionP = void (*) (U *& output, size_t & outputSize, T * input, size_t size);
 template <typename T, typename U>
-using PbulkFlatMapFunctionP = void (*) (U *& output, size_t * outputDataSizes, size_t & outputSize, T * input, size_t size);
+using PbulkFlatMapFunctionP = void (*) (U *& output, size_t *& outputDataSizes, size_t & outputSize, T * input, size_t size);
 
 template <typename T>
 using reduceFunctionP = T (*) (T & a, T & b);
@@ -88,19 +88,19 @@ using bulkReduceFunctionP = T (*) (T * input, size_t size);
 template <typename T, typename U>
 using mapPFunctionP = U (*) (T * input, size_t size);
 template <typename T, typename U>
-using PmapPFunctionP = void (U & output, size_t & outputSize, T * input, size_t size);
+using PmapPFunctionP = void (*) (U & output, size_t & outputSize, T * input, size_t size);
 
 
 template <typename T, typename U>
-using bulkMapPFunctionP = void (*) (U *& output, T ** input, size_t * inputDataSizes, size_t size);
+using bulkMapPFunctionP = void (*) (U * output, T ** input, size_t * inputDataSizes, size_t size);
 template <typename T, typename U>
-using PbulkMapPFunctionP = void (*) (U *& output, size_t *& outputDataSizes, T ** input, size_t * inputDataSizes, size_t size);
+using PbulkMapPFunctionP = void (*) (U * output, size_t * outputDataSizes, T ** input, size_t * inputDataSizes, size_t size);
 
 
 template <typename T, typename U>
 using flatMapPFunctionP = std::list<U> (*) (T *& input, size_t size);
 template <typename T, typename U>
-using PflatMapPFunctionP = std::list<std::pair<U,size_t>> (*) (T *& input, size_t size);
+using PflatMapPFunctionP = std::list<std::pair<U, size_t>> (*) (T *& input, size_t size);
 
 
 template <typename T, typename U>
@@ -111,10 +111,10 @@ using PbulkFlatMapPFunctionP = void (*) (U *& output, size_t * outputDataSizes, 
 
 // Reduce
 template <typename T>
-using reducePFunctionP = void (*) (T *& output, size_t & outputDataSizes, T * a, size_t sizeA, T * b, size_t sizeB);
+using PreducePFunctionP = void (*) (T *& output, size_t & outputDataSizes, T * a, size_t sizeA, T * b, size_t sizeB);
 
 
 template <typename T>
-using bulkReducePFunctionP = void (*) (T *& output, size_t & outputDataSizes, T ** input, size_t * inputDataSizes, size_t size);
+using PbulkReducePFunctionP = void (*) (T *& output, size_t & outputDataSizes, T ** input, size_t * inputDataSizes, size_t size);
 
 #endif
