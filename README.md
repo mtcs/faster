@@ -22,18 +22,18 @@ Implementation Progress:
 
 __Done:__
 
-* Basic FDD templates (single item per line and no dynamic balancing).
-* Distributed functions: map, bulkMap, reduce and bulkReduce.
+* Basic FDD and Array FDD templates (with no dynamic balancing yet).
+* Distributed functions: map, bulkMap, flatMap, bulkFlatMap, reduce and bulkReduce.
 * Process handling using MPI.
 * MPI communication interface.
 
 __TODO list:__
 
-* FlatMap function
+* Pair (indexed) FDD template
+* Local variables
+* Global Variables
 * Block traking
-* Array FDD template
-* Pair FDD template
-* Block balancing
+* Dynamic Block load balancing
 * ...
 * FDD Fault tolerance
 
