@@ -33,5 +33,5 @@ set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
 
 set (EXTRA_LIBS ${EXTRA_LIBS} efence)
 
-add_library(libfaster libfaster.cpp fdd.cpp fddStorage.cpp fastContext.cpp worker.cpp workerFdd.cpp misc.cpp fastComm.cpp)
+add_library(libfaster libfaster.cpp fdd.cpp fddStorage.cpp fastContext.cpp worker.cpp workerFdd.cpp misc.cpp fastComm.cpp fastCommBuffer.cpp)
 target_link_libraries (libfaster  ${EXTRA_LIBS})

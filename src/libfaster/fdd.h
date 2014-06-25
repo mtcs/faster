@@ -6,9 +6,7 @@
 #include <stdio.h>
 #include <list>
 
-template <class T> class fdd;
-class fddBase;
-
+#include "fddBase.h"
 #include "fastContext.h"
 #include "fddStorage.h"
 #include "misc.h"
@@ -27,7 +25,7 @@ class fdd : public fddBase{
 		fdd<U> * _map( void * funcP, fddOpType op){
 		//fdd<U> * _map( int funcId, fddOpType op){
 			fdd<U> * newFdd = new fdd<U>(*context, size);
-			unsigned long int newFddId = newFdd->id;
+			unsigned long int newFddId = newFdd->getId();
 			char result;
 			size_t rSize;
 
@@ -50,33 +48,33 @@ class fdd : public fddBase{
 			T result;
 			int funcId = context->findFunc(funcP);
 			//std::cerr << " " << funcId << ".\n";
+			T * partResult = new T[context->numProcs() - 1];
+			size_t rSize;
+			unsigned long int id;
 
 			// Send task
 			unsigned long int reduceTaskId = context->enqueueTask(op, id, 0, funcId);
 
 			// Receive results
-			for (int i = 1; i < context->numProcs(); ++i){
-				unsigned long int id;
-				T partResult;
-				size_t rSize;
-
-				context->recvTaskResult(id, &partResult, rSize);
-				if (rSize != sizeof(T)) std::cerr << "Error receiving result (wrong size)";
-
-				// Do the rest of the reduces
-				if (op == Reduce){
-					if( i == 1){
-						result = partResult;
-					}else{
-							reduceFunctionP<T> reduceFunc = (reduceFunctionP<T>) context->funcTable[funcId];
-							result = reduceFunc(result, partResult);
-					}
-				}else{
-					// TODO do bulkreduce	
-				}
-
+			for (int i = 0; i < (context->numProcs() - 1); ++i){
+				context->recvTaskResult(id, &partResult[i], rSize);
 			}
 
+			// Finish applying reduces
+			if (op == Reduce){
+				reduceFunctionP<T> reduceFunc = (reduceFunctionP<T>) context->funcTable[funcId];
+				result = partResult[0];
+				for (int i = 1; i < (context->numProcs() - 1); ++i){
+					result = reduceFunc(result, partResult[i]);
+				}
+			}else{
+				bulkReduceFunctionP<T> bulkReduceFunc = (bulkReduceFunctionP<T>) context->funcTable[funcId];
+				result = bulkReduceFunc(partResult, context->numProcs() - 1);
+				// TODO do bulkreduce	
+			}
+
+
+			delete [] partResult;
 			return result;
 		}
 
@@ -175,7 +173,10 @@ class fdd : public fddBase{
 		
 		// --------------- FDD Builtin functions ------------- // 
 		// Collect a FDD
-		T * collect( ){
+		std::vector<T> * collect( ){
+			return context->collectRDD<T>(id);
+		}
+		void * _collect( ) override{
 			return context->collectRDD<T>(id);
 		}
 
@@ -193,7 +194,7 @@ class fdd<T *> : public fddBase{
 		fdd<U> * _map( void * funcP, fddOpType op){
 		//fdd<U> * _map( int funcId, fddOpType op){
 			fdd<U> * newFdd = new fdd<U>(*context, size);
-			unsigned long int newFddId = newFdd->id;
+			unsigned long int newFddId = newFdd->getId();
 			char result;
 			size_t rSize;
 
@@ -217,37 +218,47 @@ class fdd<T *> : public fddBase{
 			int funcId = context->findFunc(funcP);
 			T * result; 
 			size_t rSize; 
+			T ** partResult = new T*[context->numProcs() -1];
+			size_t * partrSize = new size_t[context->numProcs() - 1];
+			unsigned long int id;
 			//std::cerr << " " << funcId << ".\n";
 
 			// Send task
 			unsigned long int reduceTaskId = context->enqueueTask(op, id, 0, funcId);
-
+			
 			// Receive results
-			for (int i = 1; i < context->numProcs(); ++i){
-				unsigned long int id;
-				T * partResult;
-				T * partResult2;
-				size_t prSize;
+			for (int i = 0; i < (context->numProcs() - 1); ++i){
+				context->recvTaskResult(id, &partResult[i], partrSize[i]);
+			}
 
-				context->recvTaskResult(id, &partResult, prSize);
+
+			// Finish applying reduces
+			if (op == Reduce){
+				T * pResult;
+				size_t prSize;
+				
+				PreducePFunctionP<T> reduceFunc = ( PreducePFunctionP<T> ) context->funcTable[funcId];
+
+				result = partResult[0];
+				rSize = partrSize[0];
 
 				// Do the rest of the reduces
-				if( i == 1){
-					result = partResult;
-					rSize = prSize;
-				}else{
+				for (int i = 1; i < (context->numProcs() - 1); ++i){
 					// TODO
-					PreducePFunctionP<T> reduceFunc = ( PreducePFunctionP<T> ) context->funcTable[funcId];
-					partResult2 = result;
-					reduceFunc(result, rSize, partResult2, rSize, partResult, prSize);
-					delete [] partResult;
-					delete [] partResult2;
+					pResult = result;
+					prSize = rSize;
+					reduceFunc(result, rSize, pResult, prSize, partResult[i], partrSize[i]);
+					delete [] pResult;
 				}
 
+			}else{
+				PbulkReducePFunctionP<T> bulkReduceFunc = (PbulkReducePFunctionP<T>) context->funcTable[funcId];
+				bulkReduceFunc(result, rSize, partResult, partrSize, context->numProcs() - 1);
 			}
 			std::vector<T> vResult(rSize);
-			memcpy(vResult.data(), result, rSize);
+			vResult.assign(result,  result + rSize);
 
+			delete [] partResult;
 			return vResult;
 		}
 
@@ -277,6 +288,7 @@ class fdd<T *> : public fddBase{
 
 		~fdd(){
 		}
+
 
 		// -------------- FDD Functions Parameter Specification --------------- //
 		// These need to be specialized because they can return a pointer or not 
@@ -331,9 +343,13 @@ class fdd<T *> : public fddBase{
 		
 		// --------------- FDD Builtin functions ------------- // 
 		// Collect a FDD
-		T * collect( ){
+		std::vector<T*> * collect( ) {
+			return context->collectRDD<T>(id);
+		}
+		void * _collect( ) override{
 			return context->collectRDD<T>(id);
 		}
 
 };
+
 #endif

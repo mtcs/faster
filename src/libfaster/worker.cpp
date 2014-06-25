@@ -69,7 +69,7 @@ void worker::run(){
 
 			case MSG_READFDDFILE:
 				comm->recvReadFDDFile(id, name, size, offset);
-				std::cerr << "    R:ReadFddFile " << id << name;
+				std::cerr << "    R:ReadFddFile " << id <<" F:" << name<< "(offset:" << offset << ")" ;
 				readFDDFile(id, name, size, offset);
 				std::cerr << ".\n";
 				break;
@@ -159,7 +159,7 @@ void worker::destroyFDD(unsigned long int id){
 void worker::setFDDData(unsigned long int id, void * data, size_t size){
 	workerFddBase * fdd = fddList[id];
 
-	if (fdd == NULL) { std::cerr << "ERROR: Could not find FDD!"; exit(201); }
+	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
 
 	fdd->setData( data, size );
 }
@@ -167,7 +167,7 @@ void worker::setFDDData(unsigned long int id, void * data, size_t size){
 void worker::setFDDData(unsigned long int id, void ** data, size_t * lineSizes, size_t size){
 	workerFddBase * fdd = fddList[id];
 
-	if (fdd == NULL) { std::cerr << "ERROR: Could not find FDD!"; exit(201); }
+	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
 
 	fdd->setData( data, lineSizes, size );
 }
@@ -175,38 +175,49 @@ void worker::setFDDData(unsigned long int id, void ** data, size_t * lineSizes, 
 void worker::getFDDData(unsigned long int id, void *& data, size_t &size){
 	workerFddBase * fdd = fddList[id];
 
-	if (fdd == NULL) { std::cerr << "ERROR: Could not find FDD!"; exit(201); }
+	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
 
 	data = fdd->getData();
 	size = fdd->getSize();
 }
 
 void worker::readFDDFile(unsigned long int id, std::string &filename, size_t size, size_t offset){
+	std::string line; 
+	char c;
 
 	workerFdd<std::string> * newFdd = new workerFdd<std::string>(id, String);
 
-	if (newFdd == NULL) { std::cerr << "ERROR: Could not find FDD!"; exit(201); }
+	if (newFdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
 
 	fddList.insert(fddList.end(), newFdd);
 
 	// TODO Treat other kinds of input files
 	std::ifstream inFile(filename, std::ifstream::in);
-	inFile.seekg(offset - 1, inFile.beg);
-	
-	char c = inFile.get();
-	std::string line; 
-	std::getline( inFile, line ); 
-	
-	// If the other process doesn't have this line get it
-	if ( c == '\n' ){
-		newFdd->insert(line);
+
+	if ( ! inFile.good() ){
+		std::cerr << "\nERROR: Could not read input File " << filename << "\n";
+		exit(202);
+	}
+
+
+	if( offset > 0){
+		inFile.seekg(offset-1, inFile.beg);
+		c = inFile.get();
+		// If the other process doesn't have this line, get it!
+		if ( c == '\n' ) {
+			std::getline( inFile, line ); 
+			newFdd->insert(line);
+		}
 	}
 	
+	// Start reading lines
 	while( size_t(inFile.tellg()) < (offset + size) ){
 		std::getline( inFile, line ); 
 
 		newFdd->insert(line);
 	}
+	inFile.close();
+
 	newFdd->shrink();
 
 	std::cerr << "    S:FDDInfo ";
@@ -216,36 +227,6 @@ void worker::readFDDFile(unsigned long int id, std::string &filename, size_t siz
 
 
 
-
-
-
-/*template <typename T, typename U>
-void worker::apply(fastTask &task, workerFdd<U> * dest, workerFdd<T> * src){
-	T result;
-	switch (task.operationType){
-		case Map:
-			src->map(*dest, ( U (*)(T &) ) funcTable[task.functionId]);
-			result = 0;
-			std::cerr << " S:RESULT Map ";
-			comm->sendTaskResult(task.id, &result, sizeof(char), 0);
-			break;
-		case Reduce:
-			src->reduce(result, ( T (*)(T&, T&) ) funcTable[task.functionId]);
-			std::cerr << " S:RESULT Reduce " << result;
-			comm->sendTaskResult(task.id, &result, sizeof(T), 0);
-			break;
-	}
-}
-
-template <typename T>
-void worker::preapply(fastTask &task, workerFdd<T> * dest){
-	workerFddBase * src = fddList[task.srcFDD];
-
-	if (src->getType() == Int){
-		workerFdd<int> * srcFDD = (workerFdd<int> *) src;
-		apply(task, dest, srcFDD);
-	}
-}// */
 
 template <typename T>
 void worker::preapply(fastTask &task, workerFdd<T> * destFDD){

@@ -5,14 +5,23 @@ template <class T> class fddStorage;
 
 #include "misc.h"
 
+class fddStorageBase{
+	protected:
+		size_t size;
+		size_t allocSize;
+
+	public:
+		virtual void grow(size_t toSize){ }
+		size_t getSize(){ return size; }
+		void   setSize(size_t s){ grow(s); size = s; }
+};
+
 
 // FDD storage place
 // Stores worker's FDD data locally
 template <class T> 
-class fddStorage {
+class fddStorage : public fddStorageBase {
 	private:
-		size_t size;
-		size_t allocSize;
 
 		T * localData;
 	public:
@@ -54,8 +63,8 @@ class fddStorage {
 
 		 void grow(size_t toSize){
 			 if (allocSize < toSize){
-			 	if ((allocSize * 1.8) > toSize){
-					toSize = allocSize * 1.8;
+			 	if ((allocSize * 2) > toSize){
+					toSize = allocSize * 2;
 				}
 				
 				T * newStorage = new T [toSize];
@@ -90,14 +99,11 @@ class fddStorage {
 };
 
 template <class T> 
-class fddStorage <T *>{
+class fddStorage <T *> : public fddStorageBase {
 	private:
-		size_t size;
 		size_t * lineSizes;
-		size_t allocSize;
-		//size_t itemSize;
-
 		T ** localData;
+
 	public:
 		fddStorage(){
 			allocSize = 200;
@@ -134,15 +140,13 @@ class fddStorage <T *>{
 
 		T ** getData(){ return localData; }
 		size_t * getLineSizes(){ return lineSizes; }
-		size_t getSize(){ return size; }
-		void   setSize(size_t s){ grow(s); size = s; }
 
 		 T * & operator[](size_t ref){ return localData[ref]; }
 
 		 void grow(size_t toSize){
 			 if (allocSize < toSize){
-			 	if ((allocSize * 1.8) > toSize){
-					toSize = allocSize * 1.8;
+			 	if ((allocSize * 2) > toSize){
+					toSize = allocSize * 2;
 				}
 				
 				size_t * newLineSizes = new size_t [toSize];
@@ -184,11 +188,9 @@ class fddStorage <T *>{
 };
 
 template <> 
-class fddStorage <void *>{
+class fddStorage <void *> : public fddStorageBase {
 	private:
-		size_t size;
 		size_t * lineSizes;
-		size_t allocSize;
 
 		void ** localData;
 	public:
@@ -227,15 +229,13 @@ class fddStorage <void *>{
 
 		void ** getData(){ return localData; }
 		size_t * getLineSizes(){ return lineSizes; }
-		size_t getSize(){ return size; }
-		void   setSize(size_t s){ grow(s); size = s; }
 
 		 void * & operator[](size_t ref){ return localData[ref]; }
 
 		 void grow(size_t toSize){
 			 if (allocSize < toSize){
-			 	if ((allocSize * 1.8) > toSize){
-					toSize = allocSize * 1.8;
+			 	if ((allocSize * 2) > toSize){
+					toSize = allocSize * 2;
 				}
 				
 				size_t * newLineSizes = new size_t [toSize];
@@ -277,11 +277,8 @@ class fddStorage <void *>{
 };
 
 template <> 
-class fddStorage <std::string> {
+class fddStorage <std::string> : public fddStorageBase {
 	private:
-		size_t size;
-		size_t allocSize;
-
 		std::string * localData;
 	public:
 		fddStorage(){
@@ -295,7 +292,8 @@ class fddStorage <std::string> {
 			size = s;
 		}
 		fddStorage(std::string * data, size_t s) : fddStorage(s){
-			memcpy(localData, data, s*sizeof(std::string) );
+			for ( size_t i = 0; i < s; ++i )
+				localData[i] = data[i];
 		}
 
 		~fddStorage(){
@@ -306,7 +304,6 @@ class fddStorage <std::string> {
 
 		void setData( void * data, size_t s){
 			grow(s / sizeof(std::string));
-			//memcpy(localData, data, s );
 			for ( size_t i = 0; i < s; ++i){
 				localData[i] = ((std::string*) data)[s];
 			}
@@ -317,21 +314,19 @@ class fddStorage <std::string> {
 		}
 
 		std::string * getData(){ return localData; }
-		size_t getSize(){ return size; }
-		void   setSize(size_t s){ grow(s); size = s; }
-
 		std::string & operator[](size_t ref){ return localData[ref]; }
 
 		 void grow(size_t toSize){
 			 if (allocSize < toSize){
-			 	if ((allocSize * 1.8) > toSize){
-					toSize = allocSize * 1.8;
+			 	if ((allocSize * 2) > toSize){
+					toSize = allocSize * 2;
 				}
 				
 				std::string * newStorage = new std::string [toSize];
 
 				if (size >0) 
-					memcpy(newStorage, localData, size * sizeof( std::string ) );
+					for ( size_t i = 0; i < size; ++i)
+						newStorage[i] = localData[i];
 				
 				delete [] localData;
 				
@@ -343,7 +338,8 @@ class fddStorage <std::string> {
 			 if ( (size > 0) && (allocSize > size) ){
 				 std::string * newStorage = new std::string [size];
 				
-				memcpy(newStorage, localData, size * sizeof( std::string ) );
+				for ( size_t i = 0; i < size; ++i)
+					newStorage[i] = localData[i];
 
 				delete [] localData;
 				

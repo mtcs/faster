@@ -12,8 +12,6 @@ enum commMode {
 	Mesos
 };
 
-#define BUFFER_INITIAL_SIZE 4*1024*1024
-
 #define MSG_TASK 		0x0001
 #define MSG_CREATEFDD 		0x0002
 #define MSG_DESTROYFDD 		0x0003
@@ -45,95 +43,11 @@ enum commMode {
 #define FDDTYPE_OBJECT 		0x06
 
 #include "fddBase.h" 
+#include "fastCommBuffer.h" 
 
 char encodeFDDType(fddType type);
 
-class fastCommBuffer{
-	private:
-		char * _data;
-		size_t _size;
-		size_t _allocatedSize;
-	public:
-		fastCommBuffer(){
-			reset();
-			_allocatedSize = BUFFER_INITIAL_SIZE;
-			_data = new char [_allocatedSize];
-		}
-		~fastCommBuffer(){
-			delete [] _data;
-		}
 
-		void reset(){ _size = 0; }
-
-		char * data(){ return _data; }
-		char * pos(){ return &_data[_size]; }
-		size_t size(){ return _size; }
-		size_t free(){ return _allocatedSize - _size; }
-		void advance(size_t pos){ _size += pos; }
-
-		void grow(size_t s){
-			if (_allocatedSize < s){
-				delete [] _data;
-				_allocatedSize = std::max(size_t(1.5*_allocatedSize), s + _allocatedSize);
-				_data = new char[_allocatedSize];
-			}
-		}
-
-		void print(){
-			for (size_t i = 0; i < _size; ++i){
-				std::cout << (int) _data[i] << ' ';
-			}
-		}
-
-		// WRITE Data
-		template <typename T>
-		void write(T &v, size_t s){
-			memcpy( &_data[_size], &v, s );
-			_size += s;
-		}
-
-		template <typename T>
-		void write(T * v, size_t s){
-			memcpy( &_data[_size], v, s );
-			_size += s;
-		}
-
-		template <typename T>
-		void write(T v){
-			write( v, sizeof(T) );
-		}
-
-		
-		// READ Data
-		template <typename T>
-		void read(T & v, size_t s){
-			memcpy(&v, &_data[_size], s );
-			_size += s;
-		}
-		template <typename T>
-		void read(T * v, size_t s){
-			memcpy(v, &_data[_size], s );
-			_size += s;
-		}
-		template <typename T>
-		void read(T & v){
-			read( v, sizeof(T) );
-		}
-
-		// Operators
-
-		template <typename T>
-		fastCommBuffer & operator<<(T v){
-			write(v);
-			return *this;
-		}
-
-		template <typename T>
-		fastCommBuffer & operator>>(T & v){
-			read(v);
-			return *this;
-		}
-};
 
 
 // Communications class
@@ -152,11 +66,17 @@ class fastComm{
 		int procId;
 		double timeStart, timeEnd;
 
+		// 1D array
 		void sendDataGeneric(unsigned long int id, int dest, void * data, size_t size, int tagID, int tagData);
 		void recvDataGeneric(unsigned long int &id, void *& data, size_t &size, int tagID, int tagData);
-
+		// 2D array
 		void sendDataGeneric(unsigned long int id, int dest, void ** data, size_t * lineSize, size_t size, size_t itemSize, int tagID, int tagDataSize, int tagData);
 		void recvDataGeneric(unsigned long int &id, void **& data, size_t * lineSize, size_t &size, int tagID, int tagDataSize, int tagData);
+		// For String and Vector
+		template <typename T>
+		void sendDataGeneric(unsigned long int id, int dest, T * data, size_t size, int tagID, int tagDataSize, int tagData);
+		template <typename T>
+		void recvDataGeneric(unsigned long int &id, T *& data, size_t &size, int tagID, int tagDataSize, int tagData);
 
 	public:
 		fastComm(const std::string master);
@@ -173,24 +93,34 @@ class fastComm{
 		void sendTaskResult(unsigned long int id, void * res, size_t size, double time);
 		void recvTaskResult(unsigned long int &id, void * res, size_t &size, double &time);
 
-		void sendCreateFDD(unsigned long int id, fddType type, size_t size);
+		void sendCreateFDD(unsigned long int id, fddType type, size_t size, int dest);
 		void recvCreateFDD(unsigned long int &id, fddType &type, size_t & size);
 
 		void sendDestroyFDD(unsigned long int id);
 		void recvDestroyFDD(unsigned long int &id);
 
+		// Set Data
 		void sendFDDSetData(unsigned long int id, int dest, void * data, size_t size);
 		void recvFDDSetData(unsigned long int &id, void *& data, size_t &size);
 
 		void sendFDDSetData(unsigned long int id, int dest, void ** data, size_t * dataSizes, size_t size, size_t itemSize);
 		void recvFDDSetData(unsigned long int &id, void **& data, size_t * dataSizes, size_t &size);
 
+		void sendFDDSetData(unsigned long int id, int dest, std::string * data, size_t size);
+		void recvFDDSetData(unsigned long int &id, std::string *& data, size_t &size);
+
+		template <typename T>
+		void sendFDDSetData(unsigned long int id, int dest, std::vector<T> * data, size_t size);
+		template <typename T>
+		void recvFDDSetData(unsigned long int &id, std::vector<T> *& data, size_t &size);
+
+
+		// Data
 		void sendFDDData(unsigned long int id, int dest, void * data, size_t size);
 		void recvFDDData(unsigned long int &id, void *& data, size_t &size);
 
-		void sendFDDDataOwn(unsigned long int id, size_t low, size_t up, int dest);
-		void recvFDDDataOwn(unsigned long int &id, size_t &low, size_t &up);
 
+		// Read File
 		void sendReadFDDFile(unsigned long int id, std::string filename, size_t size, size_t offset, int dest);
 		void recvReadFDDFile(unsigned long int &id, std::string & filename, size_t &size, size_t & offset);
 

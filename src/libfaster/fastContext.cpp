@@ -42,12 +42,27 @@ void fastContext::startWorkers(){
 
 }
 
+int fastContext::findFunc(void * funcP){
+	//std::cerr << "  Find Function " << funcP ;
+	for( size_t i = 0; i < funcTable.size(); ++i){
+		if (funcTable[i] == funcP)
+			return i;
+	}
+}
+
 unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode, size_t size){
 	
 	fddType type = decodeType(typeCode);
-	comm->sendCreateFDD(numFDDs, type, size/(comm->numProcs-1));
 
-	std::cerr << "    S:CreateFdd " << numFDDs << " " << (int) type << '\n';
+	for (int i = 1; i < comm->numProcs; ++i){
+		size_t dataPerProc = size / (comm->numProcs - 1);
+		int rem = size % (comm->numProcs -1);
+		if (i <= rem)
+			dataPerProc += 1;
+		comm->sendCreateFDD(numFDDs, type, dataPerProc, i);
+
+		std::cerr << "    S:CreateFdd " << numFDDs << " " << (int) type << '\n';
+	}
 	fddList.insert(fddList.begin(), ref);
 	
 	return numFDDs++;
@@ -57,10 +72,6 @@ unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode){
 }
 
 // Propagate FDD destruction to other machines
-void fastContext::destroyFDD(unsigned long int id){
-	comm->sendDestroyFDD(id);
-}
-
 size_t findFileSize(const char* filename)
 {
 	std::ifstream in(filename, std::ifstream::in | std::ifstream::binary);
@@ -71,10 +82,15 @@ size_t findFileSize(const char* filename)
 unsigned long int fastContext::readFDD(fddBase * ref, const char * fileName){
 	//send read fdd n. numFdds from file fileName
 	size_t fileSize = findFileSize(fileName);
-	size_t dataPerProc = fileSize / (comm->numProcs - 1);
+	size_t offset = 0;
 
 	for (int i = 1; i < comm->numProcs; ++i){
-		comm->sendReadFDDFile(numFDDs, std::string(fileName), dataPerProc, i * dataPerProc, i);
+		size_t dataPerProc = fileSize / (comm->numProcs - 1);
+		int rem = fileSize % (comm->numProcs -1);
+		if (i <= rem)
+			dataPerProc += 1;
+		comm->sendReadFDDFile(numFDDs, std::string(fileName), dataPerProc, offset, i);
+		offset += dataPerProc;
 	}
 
 	std::cerr << "    S:ReadFdd";
@@ -85,14 +101,12 @@ unsigned long int fastContext::readFDD(fddBase * ref, const char * fileName){
 }
 
 void fastContext::getFDDInfo(size_t & s){
-	size_t size, sum = 0;
-
+	s = 0;
 	for (int i = 1; i < comm->numProcs; ++i){
+		size_t size;
 		comm->recvFDDInfo(size);
-		sum += size;
+		s += size;
 	}
-
-	s = sum;
 }
 
 unsigned long int fastContext::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId){
@@ -111,6 +125,23 @@ unsigned long int fastContext::enqueueTask(fddOpType opT, unsigned long int idSr
 	taskList.insert(taskList.end(), newTask);
 
 	return newTask->id;
+}
+
+void fastContext::recvTaskResult(unsigned long int &id, void * result, size_t & size){
+	double time;
+
+	comm->recvTaskResult(id, result, size, time);
+	std::cerr << "    R:TaskResult " << id << "Result:"  << * (int*)result << '\n';
+
+	taskList[id]->workersFinished++;
+}
+
+
+
+
+
+void fastContext::destroyFDD(unsigned long int id){
+	comm->sendDestroyFDD(id);
 }
 
 
