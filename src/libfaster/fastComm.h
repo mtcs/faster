@@ -117,7 +117,7 @@ class fastComm{
 
 		// Data
 		void sendFDDData(unsigned long int id, int dest, void * data, size_t size);
-		void recvFDDData(unsigned long int &id, void *& data, size_t &size);
+		void recvFDDData(unsigned long int &id, void * data, size_t &size);
 
 
 		// Read File

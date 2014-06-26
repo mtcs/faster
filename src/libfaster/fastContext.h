@@ -47,6 +47,7 @@ class fastSettings{
 class fastContext{
 
 	template <class T> friend class fdd;
+	template <class T> friend class fddCore;
 	friend class worker;
 
 	public:

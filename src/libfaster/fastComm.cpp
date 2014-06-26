@@ -388,7 +388,7 @@ void fastComm::sendFDDData(unsigned long int id, int dest, void * data, size_t s
 	sendDataGeneric(id, dest, data, size, MSG_FDDDATAID, MSG_FDDDATA);
 }
 
-void fastComm::recvFDDData(unsigned long int &id, void *& data, size_t &size){
+void fastComm::recvFDDData(unsigned long int &id, void * data, size_t &size){
 	recvDataGeneric(id, data, size, MSG_FDDDATAID, MSG_FDDDATA);
 }
 
