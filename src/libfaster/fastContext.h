@@ -79,6 +79,8 @@ class fastContext{
 
 		unsigned long int createFDD(fddBase * ref, size_t typeCode);
 		unsigned long int createFDD(fddBase * ref, size_t typeCode, size_t size);
+		unsigned long int createIFDD(fddBase * ref, size_t typeCode);
+		unsigned long int createIFDD(fddBase * ref, size_t typeCode, size_t size);
 		unsigned long int readFDD(fddBase * ref, const char * fileName);
 		void getFDDInfo(size_t & size);
 		int numProcs(){ return comm->numProcs; }

@@ -228,71 +228,29 @@ void worker::readFDDFile(unsigned long int id, std::string &filename, size_t siz
 
 
 
-template <typename T>
-void worker::preapply(fastTask &task, workerFdd<T> * destFDD){
+void worker::preapply(fastTask &task, workerFddBase * destFDD){
 	workerFddBase * src = fddList[task.srcFDD];
 
-	T result;
+	void * result = new char[destFDD->itemSize()];
 	size_t rSize;
 	char r = 0;
 
-	src->apply(funcTable[task.functionId], task.operationType, destFDD, &result, rSize);
+	src->apply(funcTable[task.functionId], task.operationType, destFDD, result, rSize);
 	std::cerr << " S:RESULT ";
-	if ((task.operationType == Reduce)||
-			(task.operationType == BulkReduce))
-		comm->sendTaskResult(task.id, &result, src->itemSize(), 0);
+	if (task.operationType & (OP_GENERICREDUCE))
+		comm->sendTaskResult(task.id, result, src->baseSize(), 0);
 	else
 		comm->sendTaskResult(task.id, &r, sizeof(char), 0);
 }
 
 void worker::solve(fastTask &task){
 
-	if ( (task.operationType == Reduce) ||
-		(task.operationType == BulkReduce)){
-		workerFdd<char> * fdd;
-		preapply(task, (workerFdd<char> *) fdd);
+	if ( task.operationType & OP_GENERICREDUCE){
+		// Don't consider the output fdd pointer
+		preapply(task, NULL);
 
 	}else{
 		workerFddBase * fdd = fddList[task.destFDD];
-		switch (fdd->getType()){
-			case Null:
-				break;
-			case Char:
-				preapply(task, (workerFdd<char> *) fdd);
-				break;
-			case Int:
-				preapply(task, (workerFdd<int> *) fdd);
-				break;
-			case LongInt:
-				preapply(task, (workerFdd<long int> *) fdd);
-				break;
-			case Float:
-				preapply(task, (workerFdd<float> *) fdd);
-				break;
-			case Double:
-				preapply(task, (workerFdd<double> *) fdd);
-				break;
-			case CharP:
-				preapply(task, (workerFdd<char *> *) fdd);
-				break;
-			case IntP:
-				preapply(task, (workerFdd<int *> *) fdd);
-				break;
-			case LongIntP:
-				preapply(task, (workerFdd<long int *> *) fdd);
-				break;
-			case FloatP:
-				preapply(task, (workerFdd<float *> *) fdd);
-				break;
-			case DoubleP:
-				preapply(task, (workerFdd<double *> *) fdd);
-				break;
-			case Custom:
-				//preapply(task, (workerFdd<void *> *) fdd);
-				break;
-			case String:
-				preapply(task, (workerFdd<std::basic_string<char>> *) fdd);
-				break;
-		}
+		preapply(task, fdd);
 	}
 }

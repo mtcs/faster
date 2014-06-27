@@ -2,7 +2,7 @@
 
 #include "fastComm.h"
 
-char encodeFDDType(fddType type){
+/*char encodeFDDType(fddType type){
 	switch (type){
 		case Char:
 			return FDDTYPE_CHAR;
@@ -31,8 +31,8 @@ char encodeFDDType(fddType type){
 		case Null:
 			return FDDTYPE_NULL;
 	}
-}
-fddType decodeFDDType(char type){
+}// */
+/*fddType decodeFDDType(char type){
 	switch (type){
 		case FDDTYPE_CHAR:
 			return Char;
@@ -61,7 +61,7 @@ fddType decodeFDDType(char type){
 		case FDDTYPE_NULL:
 			return Null;
 	}
-}
+}// */
 
 template <> void fastCommBuffer::write<std::string>(std::string s){
 	write( s.length() );
@@ -152,11 +152,12 @@ void fastComm::recvTaskResult(unsigned long int &id, void * res, size_t & size, 
 }
 
 void fastComm::sendCreateFDD(unsigned long int id, fddType type, size_t size, int dest){
-	char typeC = encodeFDDType(type);
+	//char typeC = encodeFDDType(type);
 
 	buffer.reset();
 
-	buffer << id << typeC << size;
+	//buffer << id << typeC << size;
+	buffer << id << type << size;
 
 	//std::cerr << '(' << id << ' ' << (int) typeC << ":" << buffer.size() << ')';
 
@@ -164,14 +165,15 @@ void fastComm::sendCreateFDD(unsigned long int id, fddType type, size_t size, in
 }
 
 void fastComm::recvCreateFDD(unsigned long int &id, fddType &type, size_t &size){
-	char t;
+	//char t;
 
 	buffer.reset();
 
 	MPI_Recv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_CREATEFDD, MPI_COMM_WORLD, status);	
 
-	buffer >> id >> t >> size;
-	type = decodeFDDType(t);
+	//buffer >> id >> t >> size;
+	//type = decodeFDDType(t);
+	buffer >> id >> type >> size;
 
 	//std::cerr << '(' << id << ' ' << (int) t << ":" << buffer.size()  << ')';
 }

@@ -39,8 +39,7 @@ class worker{
 		//template <typename T, typename U>
 		//void apply(fastTask &task, workerFdd<U> * dest, workerFdd<T> * src);
 
-		template <typename T>
-		void preapply(fastTask &task, workerFdd<T> * destFDD);
+		void preapply(fastTask &task, workerFddBase * destFDD);
 		
 		void solve(fastTask & task);
 };

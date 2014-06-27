@@ -5,30 +5,40 @@
 #include <vector>
 #include <cstdlib>
 
-enum fddType{
-	Null,
-	Char,
-	Int,
-	LongInt,
-	Float,
-	Double,
-	Custom,
-	String,
-	CharP,
-	IntP,
-	LongIntP,
-	FloatP,
-	DoubleP,
-};
+typedef unsigned int fddType;
 
-enum fddOpType{
-	Map,
-	BulkMap,
-	FlatMap,
-	BulkFlatMap,
-	Reduce,
-	BulkReduce
-};
+#define Null		0x0000
+#define Char		0x0001
+#define Int		0x0002
+#define LongInt		0x0004
+#define Float		0x0008
+#define Double		0x0010
+#define String		0x0020
+#define POINTER		0x0100
+#define CharP		0x0101
+#define IntP		0x0102
+#define LongIntP	0x0104
+#define FloatP		0x0108
+#define DoubleP		0x0110
+#define Custom		0x0120
+#define VECTOR		0x1000
+#define CharV		0x1001
+#define IntV		0x1002
+#define LongIntV	0x1004
+#define FloatV		0x1008
+#define DoubleV		0x1010
+#define INDEXED		0x2000
+
+typedef unsigned int fddOpType;
+
+#define OP_GENERICMAP		0x0100
+#define OP_Map			0x0101
+#define OP_BulkMap		0x0102
+#define OP_FlatMap		0x0104
+#define OP_BulkFlatMap		0x0108
+#define OP_GENERICREDUCE	0x0200
+#define OP_Reduce		0x0201
+#define OP_BulkReduce		0x0202
 
 
 class fddBase{

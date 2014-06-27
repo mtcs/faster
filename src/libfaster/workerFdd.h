@@ -29,19 +29,9 @@ class workerFddBase{
 		virtual size_t getSize() = 0;
 
 		virtual size_t itemSize() = 0;
+		virtual size_t baseSize() = 0;
 
-		virtual void apply(void * func, fddOpType op, workerFdd<char> * dest, void * result, size_t & rSize) = 0;
-		virtual void apply(void * func, fddOpType op, workerFdd<int> * dest, void * result, size_t & rSize) = 0;
-		virtual void apply(void * func, fddOpType op, workerFdd<long int> * dest, void * result, size_t & rSize) = 0;
-		virtual void apply(void * func, fddOpType op, workerFdd<float> * dest, void * result, size_t & rSize) = 0;
-		virtual void apply(void * func, fddOpType op, workerFdd<double> * dest, void * result, size_t & rSize) = 0;
-		virtual void apply(void * func, fddOpType op, workerFdd<char *> * dest, void * result, size_t & rSize) = 0;
-		virtual void apply(void * func, fddOpType op, workerFdd<int *> * dest, void * result, size_t & rSize) = 0;
-		virtual void apply(void * func, fddOpType op, workerFdd<long int *> * dest, void * result, size_t & rSize) = 0;
-		virtual void apply(void * func, fddOpType op, workerFdd<float *> * dest, void * result, size_t & rSize) = 0;
-		virtual void apply(void * func, fddOpType op, workerFdd<double *> * dest, void * result, size_t & rSize) = 0;
-		virtual void apply(void * func, fddOpType op, workerFdd<void *> * dest, void * result, size_t & rSize) = 0;
-		virtual void apply(void * func, fddOpType op, workerFdd<std::basic_string<char>> * dest, void * result, size_t & rSize) = 0;
+		virtual void apply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize) = 0;
 				
 };
 
@@ -53,29 +43,29 @@ class workerFdd : public workerFddBase{
 
 		// Not Pointer -> Not Pointer
 		template <typename U>
-		void _apply(void * func, fddOpType op, workerFdd<U> * dest, void * result){
+		void _apply(void * func, fddOpType op, workerFdd<U> * dest, void * result, size_t rSize){
 			switch (op){
-				case Map:
+				case OP_Map:
 					map(*dest, (mapFunctionP<T,U>) func);
 					std::cerr << "Map ";
 					break;
-				case BulkMap:
+				case OP_BulkMap:
 					bulkMap(*dest, ( bulkMapFunctionP<T,U> ) func);
 					std::cerr << "BulkMap ";
 					break;
-				case FlatMap:
+				case OP_FlatMap:
 					flatMap(*dest, ( flatMapFunctionP<T,U> ) func);
 					std::cerr << "FlatMap ";
 					break;
-				case BulkFlatMap:
+				case OP_BulkFlatMap:
 					bulkFlatMap(*dest, ( bulkFlatMapFunctionP<T,U> ) func);
 					std::cerr << "BulkFlatMap ";
 					break;
-				case Reduce:
+				case OP_Reduce:
 					*((T*)result) = reduce( ( reduceFunctionP<T> ) func);
 					std::cerr << "Reduce ";
 					break;
-				case BulkReduce:
+				case OP_BulkReduce:
 					*((T*)result) = bulkReduce( ( bulkReduceFunctionP<T> ) func);
 					std::cerr << "BulkReduce ";
 					break;
@@ -84,21 +74,21 @@ class workerFdd : public workerFddBase{
 
 		// Not Pointer -> Pointer
 		template <typename U>
-		void _applyP(void * func, fddOpType op, workerFdd<U> * dest, void * result){
+		void _applyP(void * func, fddOpType op, workerFdd<U> * dest, void * result, size_t rSize){
 			switch (op){
-				case Map:
+				case OP_Map:
 					map(*dest, (PmapFunctionP<T,U>) func);
 					std::cerr << "Map ";
 					break;
-				case BulkMap:
+				case OP_BulkMap:
 					bulkMap(*dest, ( PbulkMapFunctionP<T,U> ) func);
 					std::cerr << "BulkMap ";
 					break;
-				case FlatMap:
+				case OP_FlatMap:
 					flatMap(*dest, ( PflatMapFunctionP<T,U> ) func);
 					std::cerr << "FlatMap ";
 					break;
-				case BulkFlatMap:
+				case OP_BulkFlatMap:
 					bulkFlatMap(*dest, ( PbulkFlatMapFunctionP<T,U> ) func);
 					std::cerr << "BulkFlatMap ";
 					break;
@@ -213,41 +203,9 @@ class workerFdd : public workerFddBase{
 		}
 
 		// REDUCE
-		T reduce (reduceFunctionP<T> reduceFunc){
-			T result;
-			size_t s = localData.getSize();
-			std::cerr << "START " << id << " " << s << " | ";
+		T reduce (reduceFunctionP<T> reduceFunc);
 
-			#pragma omp parallel 
-			{
-				int nT = omp_get_num_threads();
-				int tN = omp_get_thread_num();
-				T partResult = localData[tN];
-
-				#pragma omp master
-				std::cerr << tN << "(" << nT << ")";
-
-				#pragma omp for 
-				for (int i = nT; i < s; ++i){
-					partResult = reduceFunc(partResult, localData[i]);
-				}
-				#pragma omp master
-				result = partResult;
-				
-				#pragma omp barrier
-				
-				#pragma omp critical
-				if (omp_get_thread_num() != 0){
-					result = reduceFunc(result, partResult);
-				}
-			}
-			std::cerr << "END (RESULT:"<< result << ")";
-			return result;
-		}
-
-		T bulkReduce (bulkReduceFunctionP<T> bulkReduceFunc){
-			return bulkReduceFunc((T*) localData.getData(), localData.getSize());
-		}
+		T bulkReduce (bulkReduceFunctionP<T> bulkReduceFunc);
 
 
 	public:
@@ -269,8 +227,10 @@ class workerFdd : public workerFddBase{
 		void * getData() override{ return localData.getData(); }
 		size_t getSize() override{ return localData.getSize(); }
 		size_t itemSize() override{ return sizeof(T); }
+		size_t baseSize() override{ return sizeof(T); }
 
 		void insert(T & in){ localData.insert(in); }
+
 		template <typename U>
 		void insert(std::list<T> & in){ 
 			typename std::list<U>::iterator it;
@@ -281,47 +241,12 @@ class workerFdd : public workerFddBase{
 			for ( it = in.begin(); it != in.end(); it++)
 				localData.insert(*it); 
 		}
+
 		void shrink(){ localData.shrink(); }
 
 
 		// Apply task functions to FDDs
-		// Apparently this function cant be a template. The polymorphism doesn't work that way...
-		void apply(void * func, fddOpType op, workerFdd<char> * dest, void * result, size_t & rSize){ 
-			_apply(func, op, dest, result); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<int> * dest, void * result, size_t & rSize){ 
-			_apply(func, op, dest, result); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<long int> * dest, void * result, size_t & rSize){ 
-			_apply(func, op, dest, result); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<float> * dest, void * result, size_t & rSize){ 
-			_apply(func, op, dest, result); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<double> * dest, void * result, size_t & rSize){ 
-			_apply(func, op, dest, result); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<char*> * dest, void * result, size_t & rSize){ 
-			_applyP(func, op, dest, result); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<int*> * dest, void * result, size_t & rSize){ 
-			_applyP(func, op, dest, result); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<long int*> * dest, void * result, size_t & rSize){ 
-			_applyP(func, op, dest, result); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<float*> * dest, void * result, size_t & rSize){ 
-			_applyP(func, op, dest, result); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<double*> * dest, void * result, size_t & rSize){ 
-			_applyP(func, op, dest, result); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<void*> * dest, void * result, size_t & rSize){ 
-			_applyP(func, op, dest, result); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<std::basic_string<char>> * dest, void * result, size_t & rSize){ 
-			_apply(func, op, dest, result); 
-		}
+		void apply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize);
 
 };
 
@@ -335,19 +260,19 @@ class workerFdd<T *> : public workerFddBase{
 		template <typename U>
 		void _apply(void * func, fddOpType op, workerFdd<U> * dest, void * result, size_t & rSize){
 			switch (op){
-				case Map:
+				case OP_Map:
 					map(*dest, (mapPFunctionP<T,U>) func);
 					std::cerr << "Map";
 					break;
-				case BulkMap:
+				case OP_BulkMap:
 					bulkMap(*dest, ( bulkMapPFunctionP<T,U> ) func);
 					std::cerr << "BulkMap ";
 					break;
-				case FlatMap:
+				case OP_FlatMap:
 					flatMap(*dest, ( flatMapPFunctionP<T,U> ) func);
 					std::cerr << "FlatMap ";
 					break;
-				case BulkFlatMap:
+				case OP_BulkFlatMap:
 					bulkFlatMap(*dest, ( bulkFlatMapPFunctionP<T,U> ) func);
 					std::cerr << "BulkFlatMap ";
 					break;
@@ -358,27 +283,27 @@ class workerFdd<T *> : public workerFddBase{
 		template <typename U>
 		void _applyP(void * func, fddOpType op, workerFdd<U> * dest, void * result, size_t & rSize){
 			switch (op){
-				case Map:
+				case OP_Map:
 					map(*dest, (PmapPFunctionP<T,U>) func);
 					std::cerr << "Map";
 					break;
-				case BulkMap:
+				case OP_BulkMap:
 					bulkMap(*dest, ( PbulkMapPFunctionP<T,U> ) func);
 					std::cerr << "BulkMap ";
 					break;
-				case FlatMap:
+				case OP_FlatMap:
 					flatMap(*dest, ( PflatMapPFunctionP<T,U> ) func);
 					std::cerr << "FlatMap ";
 					break;
-				case BulkFlatMap:
+				case OP_BulkFlatMap:
 					bulkFlatMap(*dest, ( PbulkFlatMapPFunctionP<T,U> ) func);
 					std::cerr << "BulkFlatMap ";
 					break;
-				case Reduce:
+				case OP_Reduce:
 					result = reduce(rSize, ( PreducePFunctionP<T> ) func);
 					std::cerr << "Reduce " ;
 					break;
-				case BulkReduce:
+				case OP_BulkReduce:
 					result = bulkReduce(rSize, ( PbulkReducePFunctionP<T> ) func);
 					std::cerr << "BulkReduce ";
 					break;
@@ -492,62 +417,9 @@ class workerFdd<T *> : public workerFddBase{
 		}
 
 		// REDUCE
-		T * reduce (size_t & rSize, PreducePFunctionP<T> reduceFunc){
-			T * result;
-			size_t s = localData.getSize();
-			//std::cerr << "START " << id << " " << s << " | ";
+		T * reduce (size_t & rSize, PreducePFunctionP<T> reduceFunc);
 
-			#pragma omp parallel 
-			{
-				int nT = omp_get_num_threads();
-				int tN = omp_get_thread_num();
-				T * partResult = localData[tN];
-				T * a, * b;
-				size_t partRSize, aSize, bSize;
-
-				#pragma omp master
-				std::cerr << tN << "(" << nT << ")";
-
-				#pragma omp for 
-				for (int i = nT; i < s; ++i){
-					a = partResult;
-					b = localData[i];
-					aSize = partRSize;
-					bSize = localData.getLineSizes()[i];
-					
-					reduceFunc(partResult, partRSize, a, aSize, b, bSize);
-					
-					delete [] a;
-					delete [] b;
-				}
-				#pragma omp master
-				result = partResult;
-				
-				#pragma omp barrier
-				
-				#pragma omp critical
-				if (omp_get_thread_num() != 0){
-					a = result;
-					b = partResult;
-					aSize = rSize;
-					bSize = partRSize;
-					
-					reduceFunc(result, rSize, a, aSize, b, bSize);
-
-					delete [] a;
-					delete [] b;
-				}
-			}
-			//std::cerr << "END ";
-			return result;
-		}
-
-		T * bulkReduce (size_t & rSize, PbulkReducePFunctionP<T> bulkReduceFunc){
-			T * result;
-			bulkReduceFunc(result, rSize, (T**) localData.getData(), localData.getLineSizes(), localData.getSize());
-			return result;
-		}
-
+		T * bulkReduce (size_t & rSize, PbulkReducePFunctionP<T> bulkReduceFunc);
 		
 
 	public:
@@ -568,13 +440,15 @@ class workerFdd<T *> : public workerFddBase{
 		}
 		fddType getType() override { return type; }
 
-		T* & operator[](size_t address){ return localData[address]; }
+		T *& operator[](size_t address){ return localData[address]; }
 		void * getData() override{ return localData.getData(); }
 		size_t getSize() override{ return localData.getSize(); }
 		size_t * getLineSizes(){ return localData.getLineSizes(); }
 		size_t itemSize() override{ return sizeof(T); }
+		size_t baseSize() override{ return sizeof(T*); }
 
 		void insert(T* & in, size_t s){ localData.insert(in, s); }
+
 		template <typename U>
 		void insert(std::list< std::pair<T*, size_t> > & in){ 
 			typename std::list< std::pair<T*, size_t> >::iterator it;
@@ -585,48 +459,12 @@ class workerFdd<T *> : public workerFddBase{
 			for ( it = in.begin(); it != in.end(); it++)
 				localData.insert(it->first, it->second); 
 		}
+
 		void shrink(){ localData.shrink(); }
 
 
 		// Apply task functions to FDDs
-		// Apparently this function cant be a template. The polymorphism doesn't work that way...
-		void apply(void * func, fddOpType op, workerFdd<char> * dest, void * result, size_t & rSize){ 
-			_apply(func, op, dest, result, rSize); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<int> * dest, void * result, size_t & rSize){ 
-			_apply(func, op, dest, result, rSize); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<long int> * dest, void * result, size_t & rSize){ 
-			_apply(func, op, dest, result, rSize); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<float> * dest, void * result, size_t & rSize){ 
-			_apply(func, op, dest, result, rSize); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<double> * dest, void * result, size_t & rSize){ 
-			_apply(func, op, dest, result, rSize); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<char*> * dest, void * result, size_t & rSize){ 
-			_applyP(func, op, dest, result, rSize); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<int*> * dest, void * result, size_t & rSize){ 
-			_applyP(func, op, dest, result, rSize); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<long int*> * dest, void * result, size_t & rSize){ 
-			_applyP(func, op, dest, result, rSize); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<float*> * dest, void * result, size_t & rSize){ 
-			_applyP(func, op, dest, result, rSize); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<double*> * dest, void * result, size_t & rSize){ 
-			_applyP(func, op, dest, result, rSize); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<void*> * dest, void * result, size_t & rSize){ 
-			_applyP(func, op, dest, result, rSize); 
-		}
-		void apply(void * func, fddOpType op, workerFdd<std::basic_string<char>> * dest, void * result, size_t & rSize){ 
-			_apply(func, op, dest, result, rSize); 
-		}
-
+		void apply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize);
 };
 
 #endif

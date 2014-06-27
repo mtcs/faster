@@ -70,6 +70,12 @@ unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode, size_t 
 unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode){
 	return createFDD(ref, typeCode, 0);
 }
+unsigned long int fastContext::createIFDD(fddBase * ref, size_t typeCode, size_t size){
+	return createFDD(ref, typeCode + INDEXED, 0);
+}
+unsigned long int fastContext::createIFDD(fddBase * ref, size_t typeCode){
+	return createIFDD(ref, typeCode, 0);
+}
 
 // Propagate FDD destruction to other machines
 size_t findFileSize(const char* filename)
