@@ -129,41 +129,41 @@ using PbulkReducePFunctionP = void (*) (T *& output, size_t & outputDataSizes, T
 // Indexed FDDs
 // FDD function pointer types
 // TODO CHANGE THIS BELOW!
+template <typename K, typename T, typename L, typename U>
+using ImapIFunctionP = std::pair<L,U> (*) (K & inKey, T & input);
 template <typename K, typename T, typename U>
-using ImapIFunctionP = std::pair<K,U> (*) (K & key, T & input);
-template <typename K, typename T, typename U>
-using mapIFunctionP = U (*) (K & key, T & input);
-template <typename K, typename T, typename U>
-using IPmapIFunctionP = void (*) (U & output, size_t &outputSize, T & input);
+using mapIFunctionP = U (*) (K & inKey, T & input);
+template <typename K, typename T, typename L, typename U>
+using IPmapIFunctionP = void (*) (L & outKey, U & output, size_t &outputSize, T & input);
 template <typename K, typename T, typename U>
 using PmapIFunctionP = void (*) (U & output, size_t &outputSize, T & input);
 
+template <typename K, typename T, typename L, typename U>
+using IbulkMapIFunctionP = void (*) (L * outKey, U * output, K * inKey, T * input, size_t size);
 template <typename K, typename T, typename U>
-using IbulkMapIFunctionP = void (*) (U * output, K * key, T * input, size_t size);
+using bulkMapIFunctionP = void (*) (U * output, K * inKey, T * input, size_t size);
+template <typename K, typename T, typename L, typename U>
+using IPbulkMapIFunctionP = void (*) (L * outKey, U * output, size_t * outputDataSizes, K * inKey, T * input, size_t size);
 template <typename K, typename T, typename U>
-using bulkMapIFunctionP = void (*) (U * output, K * key, T * input, size_t size);
-template <typename K, typename T, typename U>
-using IPbulkMapIFunctionP = void (*) (U * output, size_t * outputDataSizes, K * key, T * input, size_t size);
-template <typename K, typename T, typename U>
-using PbulkMapIFunctionP = void (*) (U * output, size_t * outputDataSizes, K * key, T * input, size_t size);
+using PbulkMapIFunctionP = void (*) (U * output, size_t * outputDataSizes, K * inKey, T * input, size_t size);
 
+template <typename K, typename T, typename L, typename U>
+using IflatMapIFunctionP = std::list<std::pair<L,U>> (*) (K & inKey, T & input);
 template <typename K, typename T, typename U>
-using IflatMapIFunctionP = std::list<std::pair<K,U>> (*) (K & key, T & input);
+using flatMapIFunctionP = std::list<U> (*) (K & inKey, T & input);
+template <typename K, typename T, typename L, typename U>
+using IPflatMapIFunctionP = std::list<std::tuple<K, U,size_t>>  (*) (K & inKey, T & input);
 template <typename K, typename T, typename U>
-using flatMapIFunctionP = std::list<U> (*) (K & key, T & input);
-template <typename K, typename T, typename U>
-using IPflatMapIFunctionP = std::list<std::tuple<K, U,size_t>>  (*) (K & key, T & input);
-template <typename K, typename T, typename U>
-using PflatMapIFunctionP = std::list<std::pair<U, size_t>>  (*) (K & key, T & input);
+using PflatMapIFunctionP = std::list<std::pair<U, size_t>>  (*) (K & inKey, T & input);
 
+template <typename K, typename T, typename L, typename U>
+using IbulkFlatMapIFunctionP = void (*) (L *& outKey, U *& output, size_t & outputSize, K * inKey, T * input, size_t size);
 template <typename K, typename T, typename U>
-using IbulkFlatMapIFunctionP = void (*) (K *& outKey, U *& output, size_t & outputSize, K * key, T * input, size_t size);
+using bulkFlatMapIFunctionP = void (*) (U *& output, size_t & outputSize, K * inKey, T * input, size_t size);
+template <typename K, typename T, typename L, typename U>
+using IPbulkFlatMapIFunctionP = void (*) (L *& outKey, U *& output, size_t *& outputDataSizes, size_t & outputSize, K * inKey, T * input, size_t size);
 template <typename K, typename T, typename U>
-using bulkFlatMapIFunctionP = void (*) (U *& output, size_t & outputSize, K * key, T * input, size_t size);
-template <typename K, typename T, typename U>
-using IPbulkFlatMapIFunctionP = void (*) (K *& outKey,U *& output, size_t *& outputDataSizes, size_t & outputSize, K * key, T * input, size_t size);
-template <typename K, typename T, typename U>
-using PbulkFlatMapIFunctionP = void (*) (U *& output, size_t *& outputDataSizes, size_t & outputSize, K * key, T * input, size_t size);
+using PbulkFlatMapIFunctionP = void (*) (U *& output, size_t *& outputDataSizes, size_t & outputSize, K * inKey, T * input, size_t size);
 
 template <typename K, typename T>
 using IreduceIFunctionP = std::pair<K,T> (*) (K & keyA, T & a, K & keyB, T & b);
@@ -174,51 +174,51 @@ using IbulkReduceIFunctionP = std::pair<K,T> (*) (K * key, T * input, size_t siz
 // Pointer FDD function pointer types
 
 // Map
+template <typename K, typename T, typename L, typename U>
+using ImapIPFunctionP = std::pair<L,U> (*) (K & inKey, T * input, size_t size);
 template <typename K, typename T, typename U>
-using ImapPIFunctionP = std::pair<K,U> (*) (K & key, T * input, size_t size);
+using  mapIPFunctionP = U (*) (T * input, K & inKey, size_t size);
+template <typename K, typename T, typename L, typename U>
+using IPmapIPFunctionP = void (*) (L & outKey, U & output, size_t & outputSize, K & inKey, T * input, size_t size);
 template <typename K, typename T, typename U>
-using  mapPIFunctionP = U (*) (T * input, K & key, size_t size);
-template <typename K, typename T, typename U>
-using IPmapPIFunctionP = void (*) (U & output, size_t & outputSize, K & key, T * input, size_t size);
-template <typename K, typename T, typename U>
-using  PmapPIFunctionP = void (*) (U & output, size_t & outputSize, K * key, T * input, size_t size);
+using  PmapIPFunctionP = void (*) (U & output, size_t & outputSize, K * inKey, T * input, size_t size);
 
 
+template <typename K, typename T, typename L, typename U>
+using IbulkMapIPFunctionP = void (*) (L * outKey, U * output, K * inKey, T ** input, size_t * inputDataSizes, size_t size);
 template <typename K, typename T, typename U>
-using IbulkMapPIFunctionP = void (*) (U * output, K * key, T ** input, size_t * inputDataSizes, size_t size);
+using  bulkMapIPFunctionP = void (*) (U * output, K * inKey, T ** input, size_t * inputDataSizes, size_t size);
+template <typename K, typename T, typename L, typename U>
+using IPbulkMapIPFunctionP = void (*) (L * outKey, U * output, size_t * outputDataSizes, K * inKey, T ** input, size_t * inputDataSizes, size_t size);
 template <typename K, typename T, typename U>
-using  bulkMapPIFunctionP = void (*) (U * output, K * key, T ** input, size_t * inputDataSizes, size_t size);
-template <typename K, typename T, typename U>
-using IPbulkMapPIFunctionP = void (*) (U * output, size_t * outputDataSizes, K * key, T ** input, size_t * inputDataSizes, size_t size);
-template <typename K, typename T, typename U>
-using  PbulkMapPIFunctionP = void (*) (U * output, size_t * outputDataSizes, K * key, T ** input, size_t * inputDataSizes, size_t size);
+using  PbulkMapIPFunctionP = void (*) (U * output, size_t * outputDataSizes, K * inKey, T ** input, size_t * inputDataSizes, size_t size);
 
 
+template <typename K, typename T, typename L, typename U>
+using IflatMapIPFunctionP = std::list<std::pair<L,U>> (*) (T *& input, size_t size);
 template <typename K, typename T, typename U>
-using IflatMapPIFunctionP = std::list<std::pair<K,U>> (*) (T *& input, size_t size);
+using flatMapIPFunctionP = std::list<U> (*) (T *& input, size_t size);
+template <typename K, typename T, typename L, typename U>
+using IPflatMapIPFunctionP = std::list<std::tuple<L, U, size_t>> (*) (T *& input, size_t size);
 template <typename K, typename T, typename U>
-using flatMapPIFunctionP = std::list<std::pair<K,U>> (*) (T *& input, size_t size);
-template <typename K, typename T, typename U>
-using IPflatMapPIFunctionP = std::list<std::tuple<K, U, size_t>> (*) (T *& input, size_t size);
-template <typename K, typename T, typename U>
-using PflatMapPIFunctionP = std::list<std::pair<U, size_t>> (*) (T *& input, size_t size);
+using PflatMapIPFunctionP = std::list<std::pair<U, size_t>> (*) (T *& input, size_t size);
 
 
+template <typename K, typename T, typename L, typename U>
+using IbulkFlatMapIPFunctionP = void (*) (L *& outKey, U *& output, size_t & outputSize, K * inKey, T ** input, size_t * inputDataSizes, size_t size) ;
 template <typename K, typename T, typename U>
-using IbulkFlatMapPIFunctionP = void (*) (U *& output, size_t & outputSize, K * key, T ** input, size_t * inputDataSizes, size_t size) ;
+using bulkFlatMapIPFunctionP = void (*) (U *& output, size_t & outputSize, K * inKey, T ** input, size_t * inputDataSizes, size_t size) ;
+template <typename K, typename T, typename L, typename U>
+using IPbulkFlatMapIPFunctionP = void (*) (L *& outKey, U *& output, size_t * outputDataSizes, size_t & outputSize, K * inKey, T ** input, size_t * inputDataSizes, size_t size);
 template <typename K, typename T, typename U>
-using bulkFlatMapPIFunctionP = void (*) (U *& output, size_t & outputSize, K * key, T ** input, size_t * inputDataSizes, size_t size) ;
-template <typename K, typename T, typename U>
-using IPbulkFlatMapPIFunctionP = void (*) (U *& output, size_t * outputDataSizes, size_t & outputSize, K * key, T ** input, size_t * inputDataSizes, size_t size);
-template <typename K, typename T, typename U>
-using PbulkFlatMapPIFunctionP = void (*) (U *& output, size_t * outputDataSizes, size_t & outputSize, K * key, T ** input, size_t * inputDataSizes, size_t size);
+using PbulkFlatMapIPFunctionP = void (*) (U *& output, size_t * outputDataSizes, size_t & outputSize, K * inKey, T ** input, size_t * inputDataSizes, size_t size);
 
 
 // Reduce
 template <typename K, typename T>
-using PIreducePIFunctionP = std::tuple<K,T*,size_t> (*) (K & keyA, T * a, size_t sizeA, K & keyB, T * b, size_t sizeB);
+using IPreduceIPFunctionP = std::tuple<K,T*,size_t> (*) (K & keyA, T * a, size_t sizeA, K & keyB, T * b, size_t sizeB);
 
 template <typename K, typename T>
-using PIbulkReducePIFunctionP = std::tuple<K,T*,size_t> (*) (K * key, T ** input, size_t * inputDataSizes, size_t size);
+using IPbulkReduceIPFunctionP = std::tuple<K,T*,size_t> (*) (K * key, T ** input, size_t * inputDataSizes, size_t size);
 
 #endif
