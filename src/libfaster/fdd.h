@@ -9,6 +9,7 @@
 #include "fddBase.h"
 #include "fastContext.h"
 #include "fddStorage.h"
+#include "pairfdd.h"
 
 template <typename T> 
 class fddCore : public fddBase {
@@ -208,12 +209,12 @@ class fdd : public fddCore<T>{
 			return fddCore<T>::template map<U>((void*) funcP, Map);
 		}
 		template <typename L, typename U> 
-		fdd<U> * map( ImapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, Map);
+		indexedFdd<L,U> * map( ImapFunctionP<T,L,U> funcP ){
+			return fddCore<T>::template map<L,U>((void*) funcP, Map);
 		}
 		template <typename L, typename U> 
-		fdd<U> * map( IPmapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, Map);
+		indexedFdd<L,U> * map( IPmapFunctionP<T,L,U> funcP ){
+			return fddCore<T>::template map<L,U>((void*) funcP, Map);
 		}
 
 
@@ -226,12 +227,12 @@ class fdd : public fddCore<T>{
 			return fddCore<T>::template map<U>((void*) funcP, BulkMap);
 		}
 		template <typename L, typename U> 
-		fdd<U> * bulkMap( IbulkMapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, BulkMap);
+		indexedFdd<L,U> * bulkMap( IbulkMapFunctionP<T,L,U> funcP ){
+			return fddCore<T>::template map<L,U>((void*) funcP, BulkMap);
 		}
 		template <typename L, typename U> 
-		fdd<U> * bulkMap( IPbulkMapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, BulkMap);
+		indexedFdd<L,U> * bulkMap( IPbulkMapFunctionP<T,L,U> funcP ){
+			return fddCore<T>::template map<L,U>((void*) funcP, BulkMap);
 		}
 
 
@@ -244,12 +245,12 @@ class fdd : public fddCore<T>{
 			return fddCore<T>::template map<U>((void*) funcP, FlatMap);
 		}
 		template <typename L, typename U> 
-		fdd<U> * flatMap( IflatMapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, FlatMap);
+		indexedFdd<L,U> * flatMap( IflatMapFunctionP<T,L,U> funcP ){
+			return fddCore<T>::template map<L,U>((void*) funcP, FlatMap);
 		}
 		template <typename L, typename U> 
-		fdd<U> * flatMap( IPflatMapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, FlatMap);
+		indexedFdd<L,U> * flatMap( IPflatMapFunctionP<T,L,U> funcP ){
+			return fddCore<T>::template map<L,U>((void*) funcP, FlatMap);
 		}
 
 
@@ -262,12 +263,12 @@ class fdd : public fddCore<T>{
 			return fddCore<T>::template map<U>((void*) funcP, BulkFlatMap);
 		}
 		template <typename L, typename U> 
-		fdd<U> * bulkFlatMap( IbulkFlatMapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, BulkFlatMap);
+		indexedFdd<L,U> * bulkFlatMap( IbulkFlatMapFunctionP<T,L,U> funcP ){
+			return fddCore<T>::template map<L,U>((void*) funcP, BulkFlatMap);
 		}
 		template <typename L, typename U> 
-		fdd<U> * bulkFlatMap( IPbulkFlatMapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, BulkFlatMap);
+		indexedFdd<L,U> * bulkFlatMap( IPbulkFlatMapFunctionP<T,L,U> funcP ){
+			return fddCore<T>::template map<L,U>((void*) funcP, BulkFlatMap);
 		}
 
 		// TODO if it returns a pointer to U, specialize...
@@ -326,6 +327,14 @@ class fdd<T *> : public fddCore<T>{
 		fdd<U> * map( PmapPFunctionP<T,U> funcP ){
 			return fddCore<T>::template map<U>((void*) funcP, Map);
 		}
+		template <typename L, typename U> 
+		indexedFdd<L,U> * map( ImapPFunctionP<T,L,U> funcP ){
+			return fddCore<T>::template map<L,U>((void*) funcP, Map);
+		}
+		template <typename L, typename U> 
+		indexedFdd<L,U> * map( IPmapPFunctionP<T,L,U> funcP ){
+			return fddCore<T>::template map<L,U>((void*) funcP, Map);
+		}
 
 
 		template <typename U> 
@@ -335,6 +344,14 @@ class fdd<T *> : public fddCore<T>{
 		template <typename U> 
 		fdd<U> * bulkMap( PbulkMapPFunctionP<T,U> funcP ){
 			return fddCore<T>::template map<U>((void*) funcP, BulkMap);
+		}
+		template <typename L, typename U> 
+		indexedFdd<L,U> * bulkMap( IbulkMapPFunctionP<T,L,U> funcP ){
+			return fddCore<T>::template map<L,U>((void*) funcP, BulkMap);
+		}
+		template <typename L, typename U> 
+		indexedFdd<L,U> * bulkMap( IPbulkMapPFunctionP<T,L,U> funcP ){
+			return fddCore<T>::template map<L,U>((void*) funcP, BulkMap);
 		}
 
 
@@ -346,6 +363,14 @@ class fdd<T *> : public fddCore<T>{
 		fdd<U> * flatMap( PflatMapPFunctionP<T,U> funcP){
 			return fddCore<T>::template map<U>((void*) funcP, FlatMap);
 		}
+		template <typename L, typename U> 
+		indexedFdd<L,U> * flatMap( IflatMapPFunctionP<T,L,U> funcP){
+			return fddCore<T>::template map<L,U>((void*) funcP, FlatMap);
+		}
+		template <typename L, typename U> 
+		indexedFdd<L,U> * flatMap( IPflatMapPFunctionP<T,L,U> funcP){
+			return fddCore<T>::template map<L,U>((void*) funcP, FlatMap);
+		}
 
 
 		template <typename U> 
@@ -355,6 +380,14 @@ class fdd<T *> : public fddCore<T>{
 		template <typename U> 
 		fdd<U> * bulkFlatMap( PbulkFlatMapPFunctionP<T,U> funcP){
 			return fddCore<T>::template map<U>((void*) funcP, BulkFlatMap);
+		}
+		template <typename L, typename U> 
+		indexedFdd<L,U> * bulkFlatMap( IbulkFlatMapPFunctionP<T,L,U> funcP){
+			return fddCore<T>::template map<L,U>((void*) funcP, BulkFlatMap);
+		}
+		template <typename L, typename U> 
+		indexedFdd<L,U> * bulkFlatMap( IPbulkFlatMapPFunctionP<T,L,U> funcP){
+			return fddCore<T>::template map<L,U>((void*) funcP, BulkFlatMap);
 		}
 
 		// Run a Reduce
