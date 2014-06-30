@@ -14,18 +14,19 @@ enum commMode {
 
 #define MSG_TASK 		0x0001
 #define MSG_CREATEFDD 		0x0002
-#define MSG_DESTROYFDD 		0x0003
-#define MSG_FDDSETDATAID 	0x0004
-#define MSG_FDDSETDATA 		0x0005
-#define MSG_FDDSET2DDATAID 	0x0006
-#define MSG_FDDSET2DDATASIZES	0x0007
-#define MSG_FDDSET2DDATA 	0x0008
-#define MSG_READFDDFILE		0x0009
-#define MSG_COLLECT		0x0010
-#define MSG_FDDDATAID 		0x0011
-#define MSG_FDDDATA 		0x0012
-#define MSG_TASKRESULT		0x0013
-#define MSG_FDDINFO		0x0014
+#define MSG_CREATEIFDD 		0x0003
+#define MSG_DESTROYFDD 		0x0004
+#define MSG_FDDSETDATAID 	0x0005
+#define MSG_FDDSETDATA 		0x0006
+#define MSG_FDDSET2DDATAID 	0x0007
+#define MSG_FDDSET2DDATASIZES	0x0008
+#define MSG_FDDSET2DDATA 	0x0009
+#define MSG_READFDDFILE		0x0010
+#define MSG_COLLECT		0x0011
+#define MSG_FDDDATAID 		0x0012
+#define MSG_FDDDATA 		0x0013
+#define MSG_TASKRESULT		0x0014
+#define MSG_FDDINFO		0x0015
 #define MSG_FINISH 		0x8000
 
 #define FDDTYPE_NULL 		0x00
@@ -93,8 +94,10 @@ class fastComm{
 		void sendTaskResult(unsigned long int id, void * res, size_t size, double time);
 		void recvTaskResult(unsigned long int &id, void * res, size_t &size, double &time);
 
-		void sendCreateFDD(unsigned long int id, fddType type, size_t size, int dest);
+		void sendCreateFDD(unsigned long int id,  fddType type, size_t size, int dest);
 		void recvCreateFDD(unsigned long int &id, fddType &type, size_t & size);
+		void sendCreateIFDD(unsigned long int id,  fddType kType,  fddType tType,  size_t size, int dest);
+		void recvCreateIFDD(unsigned long int &id, fddType &kType, fddType &tType, size_t & size);
 
 		void sendDestroyFDD(unsigned long int id);
 		void recvDestroyFDD(unsigned long int &id);

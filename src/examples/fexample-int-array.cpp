@@ -6,23 +6,24 @@
 using namespace std;
 
 // Multiply every array element by 2
-void map1(int *& output, size_t & rSize, int * input, size_t size){
-	rSize = size;
-	output = new int[rSize];
+pair<int*,size_t> map1(int * input, size_t size){
+	int * output = new int[size];
 
 	//multiply the entire vector by 2
-	for ( int i = 0; i < size; ++i ){
+	for ( size_t i = 0; i < size; ++i ){
 		output[i] = input[i] / 2;
 	}
+
+	return pair<int*, size_t>(output, size);
 
 }
 
 // Sums the values in the respective positions of A and B
-void reduce1(int *& out, size_t & oSize, int *a, size_t sizeA, int * b, size_t sizeB){
-	oSize = max(sizeA, sizeB);
-	out = new int[oSize];
+ pair<int *,size_t> reduce1(int *a, size_t sizeA, int * b, size_t sizeB){
+	size_t oSize = max(sizeA, sizeB);
+	int * out = new int[oSize];
 
-	for ( int i = 0; i < oSize; ++i ){
+	for ( size_t i = 0; i < oSize; ++i ){
 		if ( i < sizeA){
 			if( i < sizeB){
 				out[i] = a[i] + b[i];
@@ -33,6 +34,7 @@ void reduce1(int *& out, size_t & oSize, int *a, size_t sizeA, int * b, size_t s
 			out[i] = b[i];
 		}
 	}
+	return pair<int *,size_t>(out, oSize);
 }
 
 
@@ -69,7 +71,7 @@ int main(int argc, char ** argv){
 	cout << "Process Data" << '\n';
 	vector<int> result = data.map<int *>(&map1)->reduce(&reduce1);
 
-	for ( int i = 0; i < result.size(); ++i){
+	for ( size_t i = 0; i < result.size(); ++i){
 		cout << result[i] << ' ';
 	}
 	cout << '\n';
@@ -78,7 +80,7 @@ int main(int argc, char ** argv){
 	cout << "DONE!" << '\n';
 	std::cout << result[0] << "\n";
 
-	for ( int i = 0; i < NUMITEMS; ++i){
+	for ( size_t i = 0; i < NUMITEMS; ++i){
 		delete [] rawdata[i];
 	}
 

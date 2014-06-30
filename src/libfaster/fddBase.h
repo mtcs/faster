@@ -27,7 +27,6 @@ typedef unsigned int fddType;
 #define LongIntV	0x1004
 #define FloatV		0x1008
 #define DoubleV		0x1010
-#define INDEXED		0x2000
 
 typedef unsigned int fddOpType;
 
@@ -52,7 +51,7 @@ class fddBase{
 		size_t getSize(){ return size; }
 		int getId(){return id;}
 
-		virtual void * _collect() = 0;
+		//virtual void * _collect() = 0;
 };
 
 
@@ -76,9 +75,9 @@ using mapFunctionP = U (*) (T & input);
 template <typename T, typename L, typename U>
 using ImapFunctionP = std::pair<L,U> (*) (T & input);
 template <typename T, typename U>
-using PmapFunctionP = void (*) (U & output, size_t &outputSize, T & input);
+using PmapFunctionP = std::pair<U,size_t> (*) (T & input);
 template <typename T, typename L, typename U>
-using IPmapFunctionP = void (*) (L & outKey, U & output, size_t &outputSize, T & input);
+using IPmapFunctionP = std::tuple<L,U,size_t> (*) (T & input);
 
 template <typename T, typename U>
 using bulkMapFunctionP = void (*) (U * output, T * input, size_t size);
@@ -121,9 +120,9 @@ using mapPFunctionP = U (*) (T * input, size_t size);
 template <typename T, typename L, typename U>
 using ImapPFunctionP = std::pair<L,U> (*) (T * input, size_t size);
 template <typename T, typename U>
-using PmapPFunctionP = void (*) (U & output, size_t & outputSize, T * input, size_t size);
+using PmapPFunctionP = std::pair<U,size_t> (*) (T * input, size_t size);
 template <typename T, typename L, typename U>
-using IPmapPFunctionP = void (*) (L & outKey, U & output, size_t & outputSize, T * input, size_t size);
+using IPmapPFunctionP = std::tuple<L,U,size_t> (*) (T * input, size_t size);
 
 
 template <typename T, typename U>
@@ -158,11 +157,11 @@ using IPbulkFlatMapPFunctionP = void (*) (L *& outKey, U *& output, size_t * out
 
 // Reduce
 template <typename T>
-using PreducePFunctionP = void (*) (T *& output, size_t & outputDataSizes, T * a, size_t sizeA, T * b, size_t sizeB);
+using PreducePFunctionP = std::pair<T *, size_t> (*) (T * a, size_t sizeA, T * b, size_t sizeB);
 
 
 template <typename T>
-using PbulkReducePFunctionP = void (*) (T *& output, size_t & outputDataSizes, T ** input, size_t * inputDataSizes, size_t size);
+using PbulkReducePFunctionP = std::pair<T *, size_t> (*) (T ** input, size_t * inputDataSizes, size_t size);
 
 // Indexed FDDs
 // FDD function pointer types
@@ -172,9 +171,10 @@ using ImapIFunctionP = std::pair<L,U> (*) (K & inKey, T & input);
 template <typename K, typename T, typename U>
 using mapIFunctionP = U (*) (K & inKey, T & input);
 template <typename K, typename T, typename L, typename U>
-using IPmapIFunctionP = void (*) (L & outKey, U & output, size_t &outputSize, T & input);
+//using IPmapIFunctionP = void (*) (L & outKey, U & output, size_t &outputSize, T & input);
+using IPmapIFunctionP = std::tuple<L,U,size_t> (*) (K & inKey, T & input);
 template <typename K, typename T, typename U>
-using PmapIFunctionP = void (*) (U & output, size_t &outputSize, T & input);
+using PmapIFunctionP = std::pair<U, size_t> (*) (K & inKey, T & input);
 
 template <typename K, typename T, typename L, typename U>
 using IbulkMapIFunctionP = void (*) (L * outKey, U * output, K * inKey, T * input, size_t size);
@@ -215,11 +215,11 @@ using IbulkReduceIFunctionP = std::pair<K,T> (*) (K * key, T * input, size_t siz
 template <typename K, typename T, typename L, typename U>
 using ImapIPFunctionP = std::pair<L,U> (*) (K & inKey, T * input, size_t size);
 template <typename K, typename T, typename U>
-using  mapIPFunctionP = U (*) (T * input, K & inKey, size_t size);
+using  mapIPFunctionP = U (*) (K & inKey, T * input, size_t size);
 template <typename K, typename T, typename L, typename U>
-using IPmapIPFunctionP = void (*) (L & outKey, U & output, size_t & outputSize, K & inKey, T * input, size_t size);
+using IPmapIPFunctionP = std::tuple<L,U,size_t> (*) (K inKey, T * input, size_t size);
 template <typename K, typename T, typename U>
-using  PmapIPFunctionP = void (*) (U & output, size_t & outputSize, K * inKey, T * input, size_t size);
+using  PmapIPFunctionP = std::pair<U, size_t> (*) (K inKey, T * input, size_t size);
 
 
 template <typename K, typename T, typename L, typename U>

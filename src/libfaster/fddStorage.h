@@ -3,121 +3,60 @@
 
 template <class T> class fddStorage;
 
-#include "misc.h"
+#include <cstdlib>
+#include "fddStorageBase.h"
 
-class fddStorageBase{
+template <class T> 
+class fddStorageCore : public fddStorageBase {
 	protected:
-		size_t size;
-		size_t allocSize;
-
+		T * localData;
 	public:
-		virtual void grow(size_t toSize){ }
-		size_t getSize(){ return size; }
-		void   setSize(size_t s){ grow(s); size = s; }
-};
+		fddStorageCore();
+		fddStorageCore(size_t s);
 
+		~fddStorageCore();
+
+		T * getData();
+
+		T & operator[](size_t ref);
+
+
+};
 
 // FDD storage place
 // Stores worker's FDD data locally
 template <class T> 
-class fddStorage : public fddStorageBase {
-	private:
-		T * localData;
+class fddStorage : public fddStorageCore<T> {
 	public:
 		fddStorage();
-		fddStorage(size_t s);
 		fddStorage(T * data, size_t s);
+		void setData( T * data, size_t s);
 
-		~fddStorage();
+		void insert(T & item);
 
-		void setData( void * data, size_t s);
-		void setData( void ** data, size_t * lineSizes, size_t s);
-
-		T * getData();
-		size_t * getLineSizes();
-
-		 T & operator[](size_t ref);
-
-		 void grow(size_t toSize);
-		 void shrink();
-		 void insert(T & item);
-
+		void grow(size_t toSize);
+		void shrink();
 };
 
 template <class T> 
-class fddStorage <T *> : public fddStorageBase {
+class fddStorage <T *> : public fddStorageCore<T *> {
 	private:
 		size_t * lineSizes;
-		T ** localData;
 
 	public:
 		fddStorage();
-		fddStorage(size_t s);
 		fddStorage(T ** data, size_t * lineSizes, size_t s);
 
 		~fddStorage();
 
-		void setData( void * data, size_t s);
-		void setData( void ** data, size_t * lineSizes, size_t s);
+		void setData( T ** data, size_t * lineSizes, size_t s);
 
-		T ** getData();
+		void insert(T *& item, size_t s);
+
 		size_t * getLineSizes();
 
-		 T * & operator[](size_t ref);
-
-		 void grow(size_t toSize);
-		 void shrink();
-		 void insert(T *& item, size_t s);
-};
-
-template <> 
-class fddStorage <std::string> : public fddStorageBase {
-	private:
-		std::string * localData;
-	public:
-		fddStorage();
-		fddStorage(size_t s);
-		fddStorage(std::string * data, size_t s);
-		~fddStorage();
-
-		void setData( void * data, size_t s);
-		void setData( void ** data, size_t * lineSizes, size_t s);
-
-		std::string * getData();
-		std::string & operator[](size_t ref);
-
-		 void grow(size_t toSize);
-		 void shrink();
-	
-		 void insert(std::string & item);
-	
-};
-
-template <> 
-class fddStorage <void *> : public fddStorageBase {
-	private:
-		size_t * lineSizes;
-
-		void ** localData;
-	public:
-		fddStorage();
-		fddStorage(size_t s);
-		fddStorage(void ** data, size_t * lineSizes, size_t s);
-		~fddStorage();
-
-		void setData( void * data, size_t s);
-		void setData( void ** data, size_t * lineSizes, size_t s);
-
-		void ** getData();
-		size_t * getLineSizes();
-
-		 void * & operator[](size_t ref);
-
-		 void grow(size_t toSize);
-		 void shrink();
-
-		 void insert(void *& item, size_t s);
-
+		void grow(size_t toSize);
+		void shrink();
 };
 
 

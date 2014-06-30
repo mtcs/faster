@@ -8,8 +8,7 @@
 
 #include "fddBase.h"
 #include "fastContext.h"
-#include "fddStorage.h"
-#include "pairfdd.h"
+#include "indexedFdd.h"
 
 template <typename T> 
 class fddCore : public fddBase {
@@ -20,24 +19,19 @@ class fddCore : public fddBase {
 
 		fddCore() {}
 
-		template <typename U>
-		fddCore(U &c) {
-			fddCore<T>::context = &c;
-			fddBase::id = c.createFDD(this, typeid(T).hash_code() );
-		}
+		fddCore(fastContext & c);
 
 		// Create a empty fdd with a pre allocated size
-		template <typename U>
-		fddCore(U &c, size_t s) {
-			fddCore<T>::context = &c;
-			fddBase::size = s;
-			fddBase::id = c.createFDD(this,  typeid(T).hash_code(), s);
-		}
+		fddCore(fastContext &c, size_t s);
 
 		// 1->1 function (map, bulkmap, flatmap...)
 		template <typename U> 
 		fdd<U> * map( void * funcP, fddOpType op){
-			fdd<U> * newFdd = new fdd<U>(*context, size);
+			fdd<U> * newFdd ;
+			if ( (op & 0xFF ) & (OP_FlatMap | OP_BulkFlatMap) )
+				newFdd = new fdd<U>(*context);
+			else
+				newFdd = new fdd<U>(*context, size);
 			unsigned long int newFddId = newFdd->getId();
 			char result;
 			size_t rSize;
@@ -59,105 +53,11 @@ class fddCore : public fddBase {
 
 		// TODO Function to return indexedFdd<L,U>
 
-		T finishReduces(T * partResult, int funcId, fddOpType op){
-			T result;
-			if (op == OP_Reduce){
-				reduceFunctionP<T> reduceFunc = (reduceFunctionP<T>) context->funcTable[funcId];
-				result = partResult[0];
-				for (int i = 1; i < (context->numProcs() - 1); ++i){
-					result = reduceFunc(result, partResult[i]);
-				}
-			}else{
-				bulkReduceFunctionP<T> bulkReduceFunc = (bulkReduceFunctionP<T>) context->funcTable[funcId];
-				result = bulkReduceFunc(partResult, context->numProcs() - 1);
-				// TODO do bulkreduce	
-			}
-			return result;
-		}
+		T finishReduces(T * partResult, int funcId, fddOpType op);
+		T reduce( void * funcP, fddOpType op);
 
-		std::vector<T> finishPReduces(T ** partResult, size_t * partrSize, int funcId, fddOpType op){
-			T * result; 
-			size_t rSize; 
-
-			if (op == OP_Reduce){
-				T * pResult;
-				size_t prSize;
-				
-				PreducePFunctionP<T> reduceFunc = ( PreducePFunctionP<T> ) context->funcTable[funcId];
-
-				result = partResult[0];
-				rSize = partrSize[0];
-
-				// Do the rest of the reduces
-				for (int i = 1; i < (context->numProcs() - 1); ++i){
-					// TODO
-					pResult = result;
-					prSize = rSize;
-					reduceFunc(result, rSize, pResult, prSize, partResult[i], partrSize[i]);
-					delete [] pResult;
-				}
-
-			}else{
-				PbulkReducePFunctionP<T> bulkReduceFunc = (PbulkReducePFunctionP<T>) context->funcTable[funcId];
-				bulkReduceFunc(result, rSize, partResult, partrSize, context->numProcs() - 1);
-			}
-			
-			std::vector<T> vResult(rSize);
-			vResult.assign(result,  result + rSize);
-
-			return vResult;
-		}
-
-
-		T reduce( void * funcP, fddOpType op){
-		//T fddCore<T>::template reduce( int funcId, fddOpType op){
-			T result;
-			int funcId = context->findFunc(funcP);
-			//std::cerr << " " << funcId << ".\n";
-			T * partResult = new T[context->numProcs() - 1];
-			size_t rSize;
-			unsigned long int id;
-
-			// Send task
-			unsigned long int reduceTaskId = context->enqueueTask(op, id, 0, funcId);
-
-			// Receive results
-			for (int i = 0; i < (context->numProcs() - 1); ++i){
-				context->recvTaskResult(id, &partResult[i], rSize);
-			}
-
-			// Finish applying reduces
-			finishReduces(partResult, funcId, op);
-
-
-			delete [] partResult;
-			return result;
-		}
-
-		std::vector <T> reduceP(void * funcP, fddOpType op){
-		//T fddCore<T>::template reduce( int funcId, fddOpType op){
-			// Decode function pointer
-			int funcId = context->findFunc(funcP);
-			T ** partResult = new T*[context->numProcs() -1];
-			size_t * partrSize = new size_t[context->numProcs() - 1];
-			unsigned long int id;
-			//std::cerr << " " << funcId << ".\n";
-
-			// Send task
-			unsigned long int reduceTaskId = context->enqueueTask(op, id, 0, funcId);
-			
-			// Receive results
-			for (int i = 0; i < (context->numProcs() - 1); ++i){
-				context->recvTaskResult(id, &partResult[i], partrSize[i]);
-			}
-
-			// Finish applying reduces
-			std::vector<T> vResult = finishPReduces(partResult, partrSize, funcId, op);
-
-			delete [] partResult;
-			delete [] partrSize;
-			return vResult;
-		}
+		std::vector <T> finishPReduces(T ** partResult, size_t * partrSize, int funcId, fddOpType op);
+		std::vector <T> reduceP(void * funcP, fddOpType op);
 
 };
 
@@ -169,32 +69,21 @@ class fdd : public fddCore<T>{
 		// -------------- Constructors --------------- //
 
 		// Create a empty fdd
-		template <typename U>
-		fdd(U &c) : fddCore<T>(c){ }
+		fdd(fastContext &c) : fddCore<T>(c){ }
 
 		// Create a empty fdd with a pre allocated size
-		template <typename U>
-		fdd(U &c, size_t s) : fddCore<T>(c, s){ }
+		fdd(fastContext &c, size_t s) : fddCore<T>(c, s){ }
 
 		// Create a fdd from a array in memory
-		template <typename U>
-		fdd(U &c, T * data, size_t size) : fdd(c, size){
+		fdd(fastContext &c, T data[], size_t size) : fdd(c, size){
 			c.parallelize(fddBase::id, data, size);
 		}
 
 		// Create a fdd from a vector in memory
-		template <typename U>
-		fdd(U &c, std::vector<T> &data) : fdd(c, data.data(), data.size()){ }
+		fdd(fastContext &c, std::vector<T> &data) : fdd(c, data.data(), data.size()){ }
 
 		// Create a fdd from a file
-		template <typename U>
-		fdd(U &c, const char * fileName) {
-			fddCore<T>::context = &c;
-			fddBase::id = c.readFDD(this, fileName);
-
-			// Recover FDD information (size, ? etc )
-			fddCore<T>::context->getFDDInfo(fddBase::size);
-		}
+		fdd(fastContext &c, const char * fileName) ;
 
 		~fdd(){
 		}
@@ -285,12 +174,12 @@ class fdd : public fddCore<T>{
 		
 		// --------------- FDD Builtin functions ------------- // 
 		// Collect a FDD
-		std::vector<T> * collect( ){
+		std::vector<T> collect( ){
 			return fddCore<T>::context->collectRDD(this);
 		}
-		void * _collect( ) override{
+		/*void * _collect( ) override{
 			return fddCore<T>::context->collectRDD(this);
-		}
+		}*/
 
 };
 
@@ -300,16 +189,13 @@ class fdd<T *> : public fddCore<T>{
 		// -------------- Constructors --------------- //
 
 		// Create a empty fdd
-		template <typename U>
-		fdd(U &c) : fddCore<T>(c){ }
+		fdd(fastContext &c) : fddCore<T>(c){ }
 
 		// Create a empty fdd with a pre allocated size
-		template <typename U>
-		fdd(U &c, size_t s) : fddCore<T>(c, s){ }
+		fdd(fastContext &c, size_t s) : fddCore<T>(c, s){ }
 
 		// Create a fdd from a array in memory
-		template <typename U>
-		fdd(U &c, T ** data, size_t * dataSizes, size_t size) : fdd(c, size){
+		fdd(fastContext &c, T * data[], size_t dataSizes[], size_t size) : fdd(c, size){
 			c.parallelize(fddBase::id, data, dataSizes, size);
 		}
 
@@ -402,12 +288,12 @@ class fdd<T *> : public fddCore<T>{
 		
 		// --------------- FDD Builtin functions ------------- // 
 		// Collect a FDD
-		std::vector<T> * collect( ) {
-			return fddCore<T>::context->collectRDD(this);
+		std::vector<T *> collect( ) {
+			return this->context->collectRDD(this);
 		}
-		void * _collect( ) override{
+		/*void * _collect( ) override{
 			return fddCore<T>::context->collectRDD(this);
-		}
+		}*/
 
 };
 

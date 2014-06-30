@@ -1,5 +1,5 @@
-#ifndef LIBFASTER_PAIDFDD_H
-#define LIBFASTER_PAIDFDD_H
+#ifndef LIBFASTER_INDEXEDFDD_H
+#define LIBFASTER_INDEXEDFDD_H
 
 #include <vector>
 #include <typeinfo>
@@ -8,7 +8,6 @@
 
 #include "fddBase.h"
 #include "fastContext.h"
-#include "fddStorage.h"
 
 template <class K, class T> 
 class indexedFdd ; 
@@ -23,18 +22,16 @@ class iFddCore : public fddBase{
 		iFddCore() {}
 		
 		// Create a empty fdd
-		template <typename U>
-		iFddCore(U &c) {
+		iFddCore(fastContext &c) {
 			context = &c;
-			id = c.createIFDD(this, typeid(T).hash_code() );
+			id = c.createIFDD(this, typeid(K).hash_code(), typeid(T).hash_code() );
 		}
 
 		// Create a empty fdd with a pre allocated size
-		template <typename U>
-		iFddCore(U &c, size_t s) {
+		iFddCore(fastContext &c, size_t s) {
 			context = &c;
 			size = s;
-			id = c.createIFDD(this,  typeid(T).hash_code(), size);
+			id = c.createIFDD(this, typeid(K).hash_code(), typeid(T).hash_code(), size);
 		}
 
 		~iFddCore(){}
@@ -72,28 +69,15 @@ class indexedFdd : public iFddCore<K,T>{
 		// -------------- Constructors --------------- //
 
 		// Create a empty fdd
-		template <typename U>
-		indexedFdd(U &c) : iFddCore<K,T>(c){ }
+		indexedFdd(fastContext &c) : iFddCore<K,T>(c){ }
 
 		// Create a empty fdd with a pre allocated size
-		template <typename U>
-		indexedFdd(U &c, size_t s) : iFddCore<K,T>(c, s){ }
+		indexedFdd(fastContext &c, size_t s) : iFddCore<K,T>(c, s){ }
 
 		// Create a fdd from a array in memory
-		template <typename U>
-		indexedFdd(U &c, K * keys, T * data, size_t size) : indexedFdd(c, size){
+		indexedFdd(fastContext &c, K keys[], T data[], size_t size) : indexedFdd(c, size){
 			c.parallelize(fddBase::id, data, size);
 		}
-
-		/* // Create a fdd from a file
-		template <typename L, typename U>
-		indexedFdd(U &c, const char * fileName) {
-			context = &c;
-			id = c.readFDD(this, fileName);
-
-			// Recover FDD information (size, ? etc )
-			context->getFDDInfo(size);
-		}// */
 
 		~indexedFdd(){
 		}
@@ -187,12 +171,12 @@ class indexedFdd : public iFddCore<K,T>{
 		
 		// --------------- FDD Builtin functions ------------- // 
 		// Collect a FDD
-		std::vector<T> * collect( ){
+		std::vector<T> collect( ){
 			return iFddCore<K,T>::context->collectRDD(this);
 		}
-		void * _collect( ) override{
+		/*void * _collect( ) override{
 			return iFddCore<K,T>::context->collectRDD(this);
-		}
+		}*/
 
 };
 
@@ -202,17 +186,14 @@ class indexedFdd<K,T *> : public fddBase{
 		// -------------- Constructors --------------- //
 		//
 		// Create a empty fdd
-		template <typename U>
-		indexedFdd(U &c) : iFddCore<K,T *>(c){ }
+		indexedFdd(fastContext &c) : iFddCore<K,T *>(c){ }
 
 		// Create a empty fdd with a pre allocated size
-		template <typename U>
-		indexedFdd(U &c, size_t s) : iFddCore<K,T *>(c, s){ }
+		indexedFdd(fastContext &c, size_t s) : iFddCore<K,T *>(c, s){ }
 
 		// Create a fdd from a array in memory
-		template <typename U>
-		indexedFdd(U &c, T ** data, size_t * dataSizes, size_t size) : indexedFdd(c, size){
-			c.parallelize(id, data, dataSizes, size);
+		indexedFdd(fastContext &c, K keys[], T * data[], size_t dataSizes[], size_t size) : indexedFdd(c, size){
+			c.parallelize(id, keys, data, dataSizes, size);
 		}
 
 		~indexedFdd(){
@@ -308,12 +289,12 @@ class indexedFdd<K,T *> : public fddBase{
 		
 		// --------------- FDD Builtin functions ------------- // 
 		// Collect a FDD
-		std::map<K,T*> * collect( ) {
+		std::map<K,T*> collect( ) {
 			return iFddCore<K,T>::context->collectRDD(this);
 		}
-		void * _collect( ) override{
+		/*void * _collect( ) override{
 			return iFddCore<K,T>::context->collectRDD(this);
-		}
+		}*/
 
 };
 

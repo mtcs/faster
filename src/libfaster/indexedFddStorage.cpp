@@ -1,405 +1,440 @@
-#include "fddStorage.h"
+#include <string>
 
-template <class T> 
-fddStorage<T>::fddStorage(){
+#include "indexedFddStorage.h"
+
+template <class K, class T> 
+indexedFddStorageCore<K,T>::indexedFddStorageCore(){
 	allocSize = 200;
 	localData = new T[allocSize];
 	size = 0;
 }
-template <class T> 
-fddStorage<T *>::fddStorage(){
-	allocSize = 200;
-	localData = new T*[allocSize];
-	size = 0;
-}
-fddStorage<std::string>::fddStorage(){
-	allocSize = 200;
-	localData = new std::string[allocSize];
-	size = 0;
-}
-fddStorage<void *>::fddStorage(){
-	allocSize = 200;
-	localData = new void*[allocSize];
-	size = 0;
-}
+template <class K, class T> 
+indexedFddStorage<K,T>::indexedFddStorage() : indexedFddStorageCore<K,T>(){}
+template <class K, class T> 
+indexedFddStorage<K,T*>::indexedFddStorage() : indexedFddStorageCore<K,T*>(){}
 
-
-
-
-
-
-template <class T> 
-fddStorage<T>::fddStorage(size_t s){
+template <class K, class T> 
+indexedFddStorageCore<K,T>::indexedFddStorageCore(size_t s){
 	allocSize = s;
 	localData = new T[s];
 	size = s;
 }
-template <class T> 
-fddStorage<T *>::fddStorage(size_t s){
-	allocSize = s;
-	localData = new T*[s];
-	lineSizes = new size_t[s];
-	size = s;
-}		
-fddStorage<std::string>::fddStorage(size_t s){
-	allocSize = s;
-	localData = new std::string[s];
-	size = s;
+
+
+
+
+template <class K, class T> 
+indexedFddStorage<K,T>::indexedFddStorage(K * keys, T * data, size_t s) : indexedFddStorageCore<K,T>(s){
+	setData(keys, data, s);
 }
-fddStorage<void *>::fddStorage(size_t s){
-	allocSize = s;
-	localData = new void*[s];
-	lineSizes = new size_t[s];
-	size = s;
+
+template <class K, class T> 
+indexedFddStorage<K,T*>::indexedFddStorage(K * keys, T ** data, size_t * lineSizes, size_t s) : indexedFddStorageCore<K,T *>(s){
+	setData(keys, data, lineSizes, s);
 }
 
 
 
 
-
-template <class T> 
-fddStorage<T>::fddStorage(T * data, size_t s) : fddStorage(s){
-	setData(data, s);
-}
-
-template <class T> 
-fddStorage<T *>::fddStorage(T ** data, size_t * lineSizes, size_t s) : fddStorage(s){
-	setData((void **) data, lineSizes, s);
-}
-fddStorage<std::string>::fddStorage(std::string * data, size_t s) : fddStorage(s){
-	setData(data, s);
-}
-fddStorage<void *>::fddStorage(void ** data, size_t * lineSizes, size_t s) : fddStorage(s){
-	setData(data, lineSizes, s);
-}
-
-
-
-
-
-template <class T> 
-fddStorage<T>::~fddStorage(){
+template <class K, class T> 
+indexedFddStorageCore<K,T>::~indexedFddStorageCore(){
 	if (localData != NULL){
 		delete [] localData;
 	}
 }
-template <class T> 
-fddStorage<T *>::~fddStorage(){
-	if (localData != NULL){
-		delete [] localData;
+template <class K, class T> 
+indexedFddStorage<K,T*>::~indexedFddStorage(){
+	if (lineSizes != NULL){
 		delete [] lineSizes;
 	}
 }		
-fddStorage<std::string>::~fddStorage(){
-	if (localData != NULL){
-		delete [] localData;
-	}
-}
-fddStorage<void *>::~fddStorage(){
-	if (localData != NULL){
-		delete [] localData;
-		delete [] lineSizes;
-	}
-}
 
 
 
 
-
-
-template <class T> 
-void fddStorage<T>::setData( void * data, size_t s){
+template <class K, class T> 
+void indexedFddStorage<K,T>::setData(K * keys, T * data, size_t s){
 	grow(s / sizeof(T));
-	memcpy(localData, data, s );
-	size = s / sizeof(T);
-}
-template <class T> 
-void fddStorage<T *>::setData( void * data, size_t s){
-	std::cerr << "ERROR: Something went wrong in the code\n";
-}
-void fddStorage<std::string>::setData( void * data, size_t s){
-	grow(s / sizeof(std::string));
+	//memcpy(localData, data, s );
 	for ( size_t i = 0; i < s; ++i){
-		localData[i] = ((std::string*) data)[s];
+		this->localData[i] = ((T*) data)[i];
+		this->localKeys[i] = keys[i];
 	}
-	size = s / sizeof(std::string);
-}
-void fddStorage<void *>::setData( void * data, size_t s){
-	std::cerr << "ERROR: Something went wrong in the code\n";
+	this->size = s / sizeof(T);
 }
 
-
-
-
-
-template <class T> 
-void fddStorage<T>::setData( void ** data, size_t * lineSizes, size_t s){
-	std::cerr << "ERROR: Something went wrong in the code\n";
-}
-
-template <class T> 
-void fddStorage<T *>::setData( void ** data, size_t * lineSizes, size_t s){
+template <class K, class T> 
+void indexedFddStorage<K,T*>::setData( K * keys, T ** data, size_t * lineSizes, size_t s){
 	grow(s);
 	for ( int i = 0; i < s; ++i){
-		localData[i] = (T *) new  T [lineSizes[i]];
-		memcpy(localData[i], data[i], lineSizes[i]*sizeof(T) );
+		this->localData[i] = (T *) new  T [lineSizes[i]];
+		//memcpy(localData[i], data[i], lineSizes[i] );
+		for ( int j = 0; j < lineSizes[i]; ++j){
+			this->localData[i][j] =  ((T *) data[i])[j];
+			this->localKeys[i] = keys[i];
+		}
 	}
-	size = s;
+	this->size = s;
 }
-void fddStorage<std::string>::setData( void ** data, size_t * lineSizes, size_t s){
-	std::cerr << "ERROR: Something went wrong in the code\n";
+
+
+template <class K, class T> 
+void indexedFddStorage<K,T>::insert(K key, T & item){
+	grow(this->size + 1);
+	this->localKeys[this->size] = key;
+	this->localData[this->size++] = item;	
 }
-void fddStorage<void *>::setData( void ** data, size_t * lineSizes, size_t s){
-	grow(s);
-	for ( size_t i = 0; i < s; ++i){
-		localData[i] = (void *) new  char [lineSizes[i]];
-		memcpy(localData[i], data[i], lineSizes[i] );
-	}
-	size = s;
+
+template <class K, class T> 
+void indexedFddStorage<K,T*>::insert(K key, T *& item, size_t s){
+	grow(this->size + 1);
+	lineSizes[this->size] = s;	
+	this->localKeys[this->size] = key;
+	this->localData[this->size++] = item;	
+
 }
 
 
 
 
-
-template <class T> 
-T * fddStorage<T>::getData(){ 
-	return localData; 
-}
-template <class T> 
-T ** fddStorage<T *>::getData(){ 
-	return localData; 
-}
-std::string * fddStorage<std::string>::getData(){ 
-	return localData; 
-}
-void ** fddStorage<void *>::getData(){ 
+template <class K, class T> 
+T * indexedFddStorageCore<K,T>::getData(){ 
 	return localData; 
 }
 
-
-
-
-template <class T> 
-size_t * fddStorage<T>::getLineSizes(){ 
-	return NULL; 
+template <class K, class T> 
+K * indexedFddStorageCore<K,T>::getKeys(){ 
+	return localKeys; 
 }
-template <class T> 
-size_t * fddStorage<T *>::getLineSizes(){ 
-	return lineSizes; 
-}
-size_t * fddStorage<void *>::getLineSizes(){ 
+
+
+
+template <class K, class T> 
+size_t * indexedFddStorage<K,T*>::getLineSizes(){ 
 	return lineSizes; 
 }
 
 
 
 
-
-
-template <class T> 
-T & fddStorage<T>::operator[](size_t ref){ 
-	return localData[ref]; 
-}
-template <class T> 
-T * & fddStorage<T *>::operator[](size_t ref){ 
-	return localData[ref]; 
-}
-std::string & fddStorage<std::string>::operator[](size_t ref){ 
-	return localData[ref]; 
-}
-void * & fddStorage<void *>::operator[](size_t ref){ 
+template <class K, class T> 
+T & indexedFddStorageCore<K,T>::operator[](size_t ref){ 
 	return localData[ref]; 
 }
 
 
 
-
-template <class T> 
-void fddStorage<T>::grow(size_t toSize){
-	if (allocSize < toSize){
-		if ((allocSize * 2) > toSize){
-			toSize = allocSize * 2;
+template <class K, class T> 
+void indexedFddStorage<K,T>::grow(size_t toSize){
+	if (this->allocSize < toSize){
+		if ((this->allocSize * 2) > toSize){
+			toSize = this->allocSize * 2;
 		}
 
 		T * newStorage = new T [toSize];
+		K * newKeys = new K [toSize];
 
-		if (size >0) 
-			memcpy(newStorage, localData, size * sizeof( T ) );
+		if (this->size >0) 
+			for ( size_t i = 0; i < this->size; ++i){
+				newStorage[i] = this->localData[i];
+				newKeys[i] = this->localKeys[i];
+			}
+			//memcpy(newStorage, localData, size * sizeof( T ) );
 
-		delete [] localData;
+		delete [] this->localData;
+		delete [] this->localKeys;
 
-		localData = newStorage;
-		allocSize = toSize;
+		this->localData = newStorage;
+		this->localKeys = newKeys;
+		this->allocSize = toSize;
 	}
 }
-template <class T> 
-void fddStorage<T *>::grow(size_t toSize){
-	if (allocSize < toSize){
-		if ((allocSize * 2) > toSize){
-			toSize = allocSize * 2;
+template <class K, class T> 
+void indexedFddStorage<K,T*>::grow(size_t toSize){
+	if (this->allocSize < toSize){
+		if ((this->allocSize * 2) > toSize){
+			toSize = this->allocSize * 2;
 		}
 
 		size_t * newLineSizes = new size_t [toSize];
 		T ** newStorage = new T* [toSize];
+		K * newKeys = new K [toSize];
 
-		if (size > 0){
-			memcpy(newStorage, localData, size * sizeof( T* ) );
-			memcpy(newLineSizes, lineSizes, size * sizeof( size_t ) );
+		if (this->size > 0){
+			//memcpy(newStorage, localData, this->size * sizeof( T* ) );
+			//memcpy(newLineSizes, lineSizes, this->size * sizeof( size_t ) );
+			for ( int i = 0; i < this->size; ++i){
+				newStorage[i] =  this->localData[i];
+				newLineSizes[i] = lineSizes[i];
+				newKeys[i] = this->localKeys[i];
+			}
 		}
 
-		delete [] localData;
+		delete [] this->localData;
+		delete [] this->localKeys;
 		delete [] lineSizes;
 
-		localData = newStorage;
+		this->localData = newStorage;
+		this->localKeys = newKeys;
 		lineSizes = newLineSizes;
-		allocSize = toSize;
+		this->allocSize = toSize;
 
 	}
 }
-void fddStorage<std::string>::grow(size_t toSize){
-	if (allocSize < toSize){
-		if ((allocSize * 2) > toSize){
-			toSize = allocSize * 2;
+
+
+
+
+
+
+template <class K, class T> 
+void indexedFddStorage<K,T>::shrink(){
+	if ( (this->size > 0) && (this->allocSize > this->size) ){
+		T * newStorage = new T [this->size];
+		K * newKeys = new K [this->size];
+
+		for ( size_t i = 0; i < this->size; ++i){
+			newStorage[i] = this->localData[i];
+			newKeys[i] = this->localKeys[i];
 		}
+		//memcpy(newStorage, localData, size * sizeof( T ) );
 
-		std::string * newStorage = new std::string [toSize];
+		delete [] this->localData;
+		delete [] this->localKeys;
 
-		if (size >0) 
-			for ( size_t i = 0; i < size; ++i)
-				newStorage[i] = localData[i];
-
-		delete [] localData;
-
-		localData = newStorage;
-		allocSize = toSize;
+		this->localData = newStorage;
+		this->localKeys = newKeys;
+		this->allocSize = this->size;
 	}
 }
-void fddStorage<void *>::grow(size_t toSize){
-	if (allocSize < toSize){
-		if ((allocSize * 2) > toSize){
-			toSize = allocSize * 2;
+template <class K, class T> 
+void indexedFddStorage<K,T*>::shrink(){
+	if ( (this->size > 0) && (this->allocSize > this->size) ){
+		T ** newStorage = new T* [this->size];
+		K * newKeys = new K [this->size];
+		size_t * newLineSizes = new size_t[this->size];
+
+		for ( size_t i = 0; i < this->size; ++i){
+			newStorage[i] = this->localData[i];
+			newLineSizes[i] = lineSizes[i];
+			newKeys[i] = this->localKeys[i];
 		}
+		//memcpy(newStorage, localData, size * sizeof( T ) );
 
-		size_t * newLineSizes = new size_t [toSize];
-		void ** newStorage = new void* [toSize];
-
-		if (size > 0){
-			memcpy(newStorage, localData, size * sizeof( void* ) );
-			memcpy(newLineSizes, lineSizes, size * sizeof( size_t ) );
-		}
-
-		delete [] localData;
+		delete [] this->localData;
+		delete [] this->localKeys;
 		delete [] lineSizes;
 
-		localData = newStorage;
+		this->localData = newStorage;
 		lineSizes = newLineSizes;
-		allocSize = toSize;
-
+		this->localKeys = newKeys;
+		this->allocSize = this->size;
 	}
 }
 
+template class indexedFddStorageCore<char, char>;
+template class indexedFddStorageCore<char, int>;
+template class indexedFddStorageCore<char, long int>;
+template class indexedFddStorageCore<char, float>;
+template class indexedFddStorageCore<char, double>;
+template class indexedFddStorageCore<char, char *>;
+template class indexedFddStorageCore<char, int *>;
+template class indexedFddStorageCore<char, long int *>;
+template class indexedFddStorageCore<char, float *>;
+template class indexedFddStorageCore<char, double *>;
+template class indexedFddStorageCore<char, std::string>;
+//template class indexedFddStorageCore<char, std::vector<char>>;
+//template class indexedFddStorageCore<char, std::vector<int>>;
+//template class indexedFddStorageCore<char, std::vector<long int>>;
+//template class indexedFddStorageCore<char, std::vector<float>>;
+//template class indexedFddStorageCore<char, std::vector<double>>;
+
+template class indexedFddStorageCore<int, char>;
+template class indexedFddStorageCore<int, int>;
+template class indexedFddStorageCore<int, long int>;
+template class indexedFddStorageCore<int, float>;
+template class indexedFddStorageCore<int, double>;
+template class indexedFddStorageCore<int, char *>;
+template class indexedFddStorageCore<int, int *>;
+template class indexedFddStorageCore<int, long int *>;
+template class indexedFddStorageCore<int, float *>;
+template class indexedFddStorageCore<int, double *>;
+template class indexedFddStorageCore<int, std::string>;
+//template class indexedFddStorageCore<int, std::vector<char>>;
+//template class indexedFddStorageCore<int, std::vector<int>>;
+//template class indexedFddStorageCore<int, std::vector<long int>>;
+//template class indexedFddStorageCore<int, std::vector<float>>;
+//template class indexedFddStorageCore<int, std::vector<double>>;
+
+template class indexedFddStorageCore<long int, char>;
+template class indexedFddStorageCore<long int, int>;
+template class indexedFddStorageCore<long int, long int>;
+template class indexedFddStorageCore<long int, float>;
+template class indexedFddStorageCore<long int, double>;
+template class indexedFddStorageCore<long int, char *>;
+template class indexedFddStorageCore<long int, int *>;
+template class indexedFddStorageCore<long int, long int *>;
+template class indexedFddStorageCore<long int, float *>;
+template class indexedFddStorageCore<long int, double *>;
+template class indexedFddStorageCore<long int, std::string>;
+//template class indexedFddStorageCore<long int, std::vector<char>>;
+//template class indexedFddStorageCore<long int, std::vector<int>>;
+//template class indexedFddStorageCore<long int, std::vector<long int>>;
+//template class indexedFddStorageCore<long int, std::vector<float>>;
+//template class indexedFddStorageCore<long int, std::vector<double>>;
+
+template class indexedFddStorageCore<float, char>;
+template class indexedFddStorageCore<float, int>;
+template class indexedFddStorageCore<float, long int>;
+template class indexedFddStorageCore<float, float>;
+template class indexedFddStorageCore<float, double>;
+template class indexedFddStorageCore<float, char *>;
+template class indexedFddStorageCore<float, int *>;
+template class indexedFddStorageCore<float, long int *>;
+template class indexedFddStorageCore<float, float *>;
+template class indexedFddStorageCore<float, double *>;
+template class indexedFddStorageCore<float, std::string>;
+//template class indexedFddStorageCore<float, std::vector<char>>;
+//template class indexedFddStorageCore<float, std::vector<int>>;
+//template class indexedFddStorageCore<float, std::vector<long int>>;
+//template class indexedFddStorageCore<float, std::vector<float>>;
+//template class indexedFddStorageCore<float, std::vector<double>>;
+
+template class indexedFddStorageCore<double, char>;
+template class indexedFddStorageCore<double, int>;
+template class indexedFddStorageCore<double, long int>;
+template class indexedFddStorageCore<double, float>;
+template class indexedFddStorageCore<double, double>;
+template class indexedFddStorageCore<double, char *>;
+template class indexedFddStorageCore<double, int *>;
+template class indexedFddStorageCore<double, long int *>;
+template class indexedFddStorageCore<double, float *>;
+template class indexedFddStorageCore<double, double *>;
+template class indexedFddStorageCore<double, std::string>;
+//template class indexedFddStorageCore<double, std::vector<char>>;
+//template class indexedFddStorageCore<double, std::vector<int>>;
+//template class indexedFddStorageCore<double, std::vector<long int>>;
+//template class indexedFddStorageCore<double, std::vector<float>>;
+//template class indexedFddStorageCore<double, std::vector<double>>;
+
+template class indexedFddStorageCore<std::string, char>;
+template class indexedFddStorageCore<std::string, int>;
+template class indexedFddStorageCore<std::string, long int>;
+template class indexedFddStorageCore<std::string, float>;
+template class indexedFddStorageCore<std::string, double>;
+template class indexedFddStorageCore<std::string, char *>;
+template class indexedFddStorageCore<std::string, int *>;
+template class indexedFddStorageCore<std::string, long int *>;
+template class indexedFddStorageCore<std::string, float *>;
+template class indexedFddStorageCore<std::string, double *>;
+template class indexedFddStorageCore<std::string, std::string>;
+//template class indexedFddStorageCore<std::string, std::vector<char>>;
+//template class indexedFddStorageCore<std::string, std::vector<int>>;
+//template class indexedFddStorageCore<std::string, std::vector<long int>>;
+//template class indexedFddStorageCore<std::string, std::vector<float>>;
+//template class indexedFddStorageCore<std::string, std::vector<double>>;
 
 
+template class indexedFddStorage<char, char>;
+template class indexedFddStorage<char, int>;
+template class indexedFddStorage<char, long int>;
+template class indexedFddStorage<char, float>;
+template class indexedFddStorage<char, double>;
+template class indexedFddStorage<char, char *>;
+template class indexedFddStorage<char, int *>;
+template class indexedFddStorage<char, long int *>;
+template class indexedFddStorage<char, float *>;
+template class indexedFddStorage<char, double *>;
+template class indexedFddStorage<char, std::string>;
+//template class indexedFddStorage<char, std::vector<char>>;
+//template class indexedFddStorage<char, std::vector<int>>;
+//template class indexedFddStorage<char, std::vector<long int>>;
+//template class indexedFddStorage<char, std::vector<float>>;
+//template class indexedFddStorage<char, std::vector<double>>;
+
+template class indexedFddStorage<int, char>;
+template class indexedFddStorage<int, int>;
+template class indexedFddStorage<int, long int>;
+template class indexedFddStorage<int, float>;
+template class indexedFddStorage<int, double>;
+template class indexedFddStorage<int, char *>;
+template class indexedFddStorage<int, int *>;
+template class indexedFddStorage<int, long int *>;
+template class indexedFddStorage<int, float *>;
+template class indexedFddStorage<int, double *>;
+template class indexedFddStorage<int, std::string>;
+//template class indexedFddStorage<int, std::vector<char>>;
+//template class indexedFddStorage<int, std::vector<int>>;
+//template class indexedFddStorage<int, std::vector<long int>>;
+//template class indexedFddStorage<int, std::vector<float>>;
+//template class indexedFddStorage<int, std::vector<double>>;
+
+template class indexedFddStorage<long int, char>;
+template class indexedFddStorage<long int, int>;
+template class indexedFddStorage<long int, long int>;
+template class indexedFddStorage<long int, float>;
+template class indexedFddStorage<long int, double>;
+template class indexedFddStorage<long int, char *>;
+template class indexedFddStorage<long int, int *>;
+template class indexedFddStorage<long int, long int *>;
+template class indexedFddStorage<long int, float *>;
+template class indexedFddStorage<long int, double *>;
+template class indexedFddStorage<long int, std::string>;
+//template class indexedFddStorage<long int, std::vector<char>>;
+//template class indexedFddStorage<long int, std::vector<int>>;
+//template class indexedFddStorage<long int, std::vector<long int>>;
+//template class indexedFddStorage<long int, std::vector<float>>;
+//template class indexedFddStorage<long int, std::vector<double>>;
+
+template class indexedFddStorage<float, char>;
+template class indexedFddStorage<float, int>;
+template class indexedFddStorage<float, long int>;
+template class indexedFddStorage<float, float>;
+template class indexedFddStorage<float, double>;
+template class indexedFddStorage<float, char *>;
+template class indexedFddStorage<float, int *>;
+template class indexedFddStorage<float, long int *>;
+template class indexedFddStorage<float, float *>;
+template class indexedFddStorage<float, double *>;
+template class indexedFddStorage<float, std::string>;
+//template class indexedFddStorage<float, std::vector<char>>;
+//template class indexedFddStorage<float, std::vector<int>>;
+//template class indexedFddStorage<float, std::vector<long int>>;
+//template class indexedFddStorage<float, std::vector<float>>;
+//template class indexedFddStorage<float, std::vector<double>>;
+
+template class indexedFddStorage<double, char>;
+template class indexedFddStorage<double, int>;
+template class indexedFddStorage<double, long int>;
+template class indexedFddStorage<double, float>;
+template class indexedFddStorage<double, double>;
+template class indexedFddStorage<double, char *>;
+template class indexedFddStorage<double, int *>;
+template class indexedFddStorage<double, long int *>;
+template class indexedFddStorage<double, float *>;
+template class indexedFddStorage<double, double *>;
+template class indexedFddStorage<double, std::string>;
+//template class indexedFddStorage<double, std::vector<char>>;
+//template class indexedFddStorage<double, std::vector<int>>;
+//template class indexedFddStorage<double, std::vector<long int>>;
+//template class indexedFddStorage<double, std::vector<float>>;
+//template class indexedFddStorage<double, std::vector<double>>;
+
+template class indexedFddStorage<std::string, char>;
+template class indexedFddStorage<std::string, int>;
+template class indexedFddStorage<std::string, long int>;
+template class indexedFddStorage<std::string, float>;
+template class indexedFddStorage<std::string, double>;
+template class indexedFddStorage<std::string, char *>;
+template class indexedFddStorage<std::string, int *>;
+template class indexedFddStorage<std::string, long int *>;
+template class indexedFddStorage<std::string, float *>;
+template class indexedFddStorage<std::string, double *>;
+template class indexedFddStorage<std::string, std::string>;
+//template class indexedFddStorage<std::string, std::vector<char>>;
+//template class indexedFddStorage<std::string, std::vector<int>>;
+//template class indexedFddStorage<std::string, std::vector<long int>>;
+//template class indexedFddStorage<std::string, std::vector<float>>;
+//template class indexedFddStorage<std::string, std::vector<double>>;
 
 
-template <class T> 
-void fddStorage<T>::shrink(){
-	if ( (size > 0) && (allocSize > size) ){
-		T * newStorage = new T [size];
-
-		memcpy(newStorage, localData, size * sizeof( T ) );
-
-		delete [] localData;
-
-		localData = newStorage;
-		allocSize = size;
-	}
-}
-template <class T> 
-void fddStorage<T *>::shrink(){
-	if ( (size > 0) && (allocSize > size) ){
-		T ** newStorage = new T* [size];
-
-		memcpy(newStorage, localData, size * sizeof( T* ) );
-
-		delete [] localData;
-
-		localData = newStorage;
-		allocSize = size;
-	}
-}
-void fddStorage<std::string>::shrink(){
-	if ( (size > 0) && (allocSize > size) ){
-		std::string * newStorage = new std::string [size];
-
-		for ( size_t i = 0; i < size; ++i)
-			newStorage[i] = localData[i];
-
-		delete [] localData;
-
-		localData = newStorage;
-		allocSize = size;
-	}
-}
-void fddStorage<void *>::shrink(){
-	if ( (size > 0) && (allocSize > size) ){
-		void ** newStorage = new void* [size];
-
-		memcpy(newStorage, localData, size * sizeof( void* ) );
-
-		delete [] localData;
-
-		localData = newStorage;
-		allocSize = size;
-	}
-}
-
-
-
-
-
-
-template <class T> 
-void fddStorage<T>::insert(T & item){
-	grow(size + 1);
-	localData[size++] = item;	
-}
-
-template <class T> 
-void fddStorage<T *>::insert(T *& item, size_t s){
-	grow(size + 1);
-	lineSizes[size] = s;
-	localData[size++] = item;	
-}
-
-void fddStorage<std::string>::insert(std::string & item){
-	grow(size + 1);
-	localData[size++] = item;	
-}
-void fddStorage<void *>::insert(void *& item, size_t s){
-	grow(size + 1);
-	lineSizes[size] = s;
-	localData[size++] = item;	
-}
-
-
-
-
-
-template class fddStorage<char>;
-template class fddStorage<int>;
-template class fddStorage<long int>;
-template class fddStorage<float>;
-template class fddStorage<double>;
-template class fddStorage<char *>;
-template class fddStorage<int *>;
-template class fddStorage<long int *>;
-template class fddStorage<float *>;
-template class fddStorage<double *>;
-template class fddStorage<std::string>;
-//template class fddStorage<std::vector<char>>;
-//template class fddStorage<std::vector<int>>;
-//template class fddStorage<std::vector<long int>>;
-//template class fddStorage<std::vector<float>>;
-//template class fddStorage<std::vector<double>>;

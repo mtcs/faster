@@ -43,3 +43,8 @@ target_link_libraries (fexample-int  ${EXTRA_LIBS})
 target_link_libraries (fexample-bulk-int  ${EXTRA_LIBS})
 target_link_libraries (fexample-int-file  ${EXTRA_LIBS})
 target_link_libraries (fexample-int-array  ${EXTRA_LIBS})
+
+install(TARGETS fexample-int DESTINATION bin)
+install(TARGETS fexample-bulk-int DESTINATION bin)
+install(TARGETS fexample-int-file DESTINATION bin)
+install(TARGETS fexample-int-array DESTINATION bin)
