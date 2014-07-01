@@ -6,6 +6,114 @@
 #include "indexedFddStorage.h"
 
 
+// --------- MAP
+template <typename K, typename T>
+template <typename L, typename U>
+void workerIFdd<K,T>::map (workerIFdd<L,U> & dest, ImapIFunctionP<K,T,L,U> mapFunc){
+	T * d = localData->getData();
+	size_t s = localData->getSize();
+	K * ik = localData->getKeys();
+	L * ok = dest.getKeys();
+
+	//std::cerr << "START " << id << " " << s << "  ";
+
+	#pragma omp parallel for 
+	for (int i = 0; i < s; ++i){
+		std::pair<L,U> r = mapFunc(ik[i], d[i]);
+		ok[i] = r.first;
+		dest[i] = r.second;
+	}
+	//std::cerr << "END ";
+}		
+
+template <typename K, typename T>
+template <typename L, typename U>
+void workerIFdd<K,T>::map (workerIFdd<L,U> & dest, IPmapIFunctionP<K,T,L,U> mapFunc){
+	T * d = localData->getData();
+	size_t s = localData->getSize();
+	K * ik = localData->getKeys();
+	size_t * ols = dest.getLineSizes() ;
+	L * ok = dest.getKeys();
+
+	//std::cerr << "START " << id << " " << s << "  ";
+
+	#pragma omp parallel for 
+	for (int i = 0; i < s; ++i){
+		U result;
+		size_t rSize;
+		//mapFunc(ok[i], dest[i], ols[i], d[i]);
+		std::tuple <L,U,size_t> r = mapFunc(ik[i],  d[i]);
+		ok[i] = std::get<0>(r);
+		dest[i] = std::get<1>(r);
+		ols[i] = std::get<2>(r);
+	}
+	//std::cerr << "END ";
+}		
+
+template <typename K, typename T>
+template < typename U>
+void workerIFdd<K,T>::map (workerFdd<U> & dest, mapIFunctionP<K,T,U> mapFunc){
+	T * d = localData->getData();
+	size_t s = localData->getSize();
+	K * ik = localData->getKeys();
+
+	//std::cerr << "START " << id << " " << s << "  ";
+
+	#pragma omp parallel for 
+	for (int i = 0; i < s; ++i){
+		dest[i] = mapFunc(ik[i], d[i]);
+	}
+	//std::cerr << "END ";
+}		
+
+template <typename K, typename T>
+template <typename U>
+void workerIFdd<K,T>::map (workerFdd<U> & dest, PmapIFunctionP<K,T,U> mapFunc){
+	T * d = localData->getData();
+	size_t s = localData->getSize();
+	K * ik = localData->getKeys();
+	size_t * ols = dest.getLineSizes() ;
+
+	//std::cerr << "START " << id << " " << s << "  ";
+
+	#pragma omp parallel for 
+	for (int i = 0; i < s; ++i){
+		U result;
+		size_t rSize;
+		//mapFunc(dest[i], ols[i], d[i]);
+		std::pair<U, size_t> r = mapFunc(ik[i], d[i]);
+		dest[i] = r.first;
+		ols[i] = r.second;
+	}
+	//std::cerr << "END ";
+}		
+
+
+
+// --------- BulkMAP
+template <typename K, typename T>
+template <typename L, typename U>
+void workerIFdd<K,T>::bulkMap (workerIFdd<L,U> & dest, IbulkMapIFunctionP<K,T,L,U> bulkMapFunc){
+	bulkMapFunc((L*) (dest.getKeys()), (U *) dest.getData(), (K*) localData->getKeys(), (T *)localData->getData(), localData->getSize());
+}
+template <typename K, typename T>
+template <typename L, typename U>
+void workerIFdd<K,T>::bulkMap (workerIFdd<L,U> & dest, IPbulkMapIFunctionP<K,T,L,U> bulkMapFunc){
+	bulkMapFunc((L*) (dest.getKeys()), (U*) dest.getData(), dest.getLineSizes(), (K*) localData->getKeys(), (T *) localData->getData(), localData->getSize());
+}
+template <typename K, typename T>
+template <typename U>
+void workerIFdd<K,T>::bulkMap (workerFdd<U> & dest, bulkMapIFunctionP<K,T,U> bulkMapFunc){
+	bulkMapFunc((U*) dest.getData(), (K*) localData->getKeys(), (T *)localData->getData(), localData->getSize());
+}
+template <typename K, typename T>
+template <typename U>
+void workerIFdd<K,T>::bulkMap (workerFdd<U> & dest, PbulkMapIFunctionP<K,T,U> bulkMapFunc){
+	bulkMapFunc((U*) dest.getData(), dest.getLineSizes(), (K*) localData->getKeys(), (T *) localData->getData(), localData->getSize());
+}
+
+
+// --------- FlatMAP
 
 template <typename K, typename T>
 template <typename L, typename U>
@@ -150,11 +258,20 @@ void workerIFdd<K,T>::bulkFlatMap(workerFdd<U> & dest,  PbulkFlatMapIFunctionP<K
 }
 
 
+
 // Not Pointer -> Not Pointer
 template <class K, class T>
 template <typename L, typename U>
-void workerIFdd<K,T>::_applyIFlatMap(void * func, fddOpType op, workerIFdd<L, U> * dest){
+void workerIFdd<K,T>::_applyI(void * func, fddOpType op, workerIFdd<L, U> * dest){
 	switch (op){
+		case OP_Map:
+			map(*dest, (ImapIFunctionP<K,T,L,U>) func);
+			std::cerr << "Map ";
+			break;
+		case OP_BulkMap:
+			bulkMap(*dest, ( IbulkMapIFunctionP<K,T,L,U> ) func);
+			std::cerr << "BulkMap ";
+			break;
 		case OP_FlatMap:
 			flatMap(*dest, ( IflatMapIFunctionP<K,T,L,U> ) func);
 			std::cerr << "FlatMap ";
@@ -169,8 +286,16 @@ void workerIFdd<K,T>::_applyIFlatMap(void * func, fddOpType op, workerIFdd<L, U>
 // Not Pointer -> Pointer
 template <class K, class T>
 template <typename L, typename U>
-void workerIFdd<K,T>::_applyIPFlatMap(void * func, fddOpType op, workerIFdd<L, U> * dest){
+void workerIFdd<K,T>::_applyIP(void * func, fddOpType op, workerIFdd<L, U> * dest){
 	switch (op){
+		case OP_Map:
+			map(*dest, (IPmapIFunctionP<K,T,L,U>) func);
+			std::cerr << "Map ";
+			break;
+		case OP_BulkMap:
+			bulkMap(*dest, ( IPbulkMapIFunctionP<K,T,L,U> ) func);
+			std::cerr << "BulkMap ";
+			break;
 		case OP_FlatMap:
 			flatMap(*dest, ( IPflatMapIFunctionP<K,T,L,U> ) func);
 			std::cerr << "FlatMap ";
@@ -184,8 +309,16 @@ void workerIFdd<K,T>::_applyIPFlatMap(void * func, fddOpType op, workerIFdd<L, U
 // Not Pointer -> Not Pointer
 template <class K, class T>
 template <typename U>
-void workerIFdd<K,T>::_applyFlatMap(void * func, fddOpType op, workerFdd<U> * dest){
+void workerIFdd<K,T>::_apply(void * func, fddOpType op, workerFdd<U> * dest){
 	switch (op){
+		case OP_Map:
+			map(*dest, (mapIFunctionP<K,T,U>) func);
+			std::cerr << "Map ";
+			break;
+		case OP_BulkMap:
+			bulkMap(*dest, ( bulkMapIFunctionP<K,T,U> ) func);
+			std::cerr << "BulkMap ";
+			break;
 		case OP_FlatMap:
 			flatMap(*dest, ( flatMapIFunctionP<K,T,U> ) func);
 			std::cerr << "FlatMap ";
@@ -200,8 +333,16 @@ void workerIFdd<K,T>::_applyFlatMap(void * func, fddOpType op, workerFdd<U> * de
 // Not Pointer -> Pointer
 template <class K, class T>
 template <typename U>
-void workerIFdd<K,T>::_applyPFlatMap(void * func, fddOpType op, workerFdd<U> * dest){
+void workerIFdd<K,T>::_applyP(void * func, fddOpType op, workerFdd<U> * dest){
 	switch (op){
+		case OP_Map:
+			map(*dest, (PmapIFunctionP<K,T,U>) func);
+			std::cerr << "Map ";
+			break;
+		case OP_BulkMap:
+			bulkMap(*dest, ( PbulkMapIFunctionP<K,T,U> ) func);
+			std::cerr << "BulkMap ";
+			break;
 		case OP_FlatMap:
 			flatMap(*dest, ( PflatMapIFunctionP<K,T,U> ) func);
 			std::cerr << "FlatMap ";
@@ -213,66 +354,67 @@ void workerIFdd<K,T>::_applyPFlatMap(void * func, fddOpType op, workerFdd<U> * d
 	}
 }
 
+
 template <class K, class T>
 template <typename L>
-void workerIFdd<K,T>::_preApplyIFlatMap(void * func, fddOpType op, workerFddBase * dest){
+void workerIFdd<K,T>::_preApplyI(void * func, fddOpType op, workerFddBase * dest){
 	switch (dest->getType()){
 		case Null: break;
-		case Char:     _applyIFlatMap(func, op,  (workerIFdd<L,char> *) dest); break;
-		case Int:      _applyIFlatMap(func, op,  (workerIFdd<L,int> *) dest); break;
-		case LongInt:  _applyIFlatMap(func, op,  (workerIFdd<L,long int> *) dest); break;
-		case Float:    _applyIFlatMap(func, op,  (workerIFdd<L,float> *) dest); break;
-		case Double:   _applyIFlatMap(func, op,  (workerIFdd<L,double> *) dest); break;
-		case CharP:    _applyIPFlatMap(func, op, (workerIFdd<L,char *> *) dest); break;
-		case IntP:     _applyIPFlatMap(func, op, (workerIFdd<L,int *> *) dest); break;
-		case LongIntP: _applyIPFlatMap(func, op, (workerIFdd<L,long int *> *) dest); break;
-		case FloatP:   _applyIPFlatMap(func, op, (workerIFdd<L,float *> *) dest); break;
-		case DoubleP:  _applyIPFlatMap(func, op, (workerIFdd<L,double *> *) dest); break;
-		case String:   _applyIFlatMap(func, op,  (workerIFdd<L,std::string> *) dest); break;
-		//case Custom:  _applyIFlatMap(func, op, (workerIFdd<L,void *> *) dest); break;
-		//case CharV:   _applyIFlatMap(func, op, (workerIFdd<L,std::vector<char>> *) dest); break;
-		//case IntV:    _applyIFlatMap(func, op, (workerIFdd<L,std::vector<int>> *) dest); break;
-		//case LongIntV:_applyIFlatMap(func, op, (workerIFdd<L,std::vector<long int>> *) dest); break;
-		//case FloatV:  _applyIFlatMap(func, op, (workerIFdd<L,std::vector<float>> *) dest); break;
-		//case DoubleV: _applyIFlatMap(func, op, (workerIFdd<L,std::vector<double>> *) dest); break;
+		case Char:     _applyI(func, op,  (workerIFdd<L,char> *) dest); break;
+		case Int:      _applyI(func, op,  (workerIFdd<L,int> *) dest); break;
+		case LongInt:  _applyI(func, op,  (workerIFdd<L,long int> *) dest); break;
+		case Float:    _applyI(func, op,  (workerIFdd<L,float> *) dest); break;
+		case Double:   _applyI(func, op,  (workerIFdd<L,double> *) dest); break;
+		case CharP:    _applyIP(func, op, (workerIFdd<L,char *> *) dest); break;
+		case IntP:     _applyIP(func, op, (workerIFdd<L,int *> *) dest); break;
+		case LongIntP: _applyIP(func, op, (workerIFdd<L,long int *> *) dest); break;
+		case FloatP:   _applyIP(func, op, (workerIFdd<L,float *> *) dest); break;
+		case DoubleP:  _applyIP(func, op, (workerIFdd<L,double *> *) dest); break;
+		case String:   _applyI(func, op,  (workerIFdd<L,std::string> *) dest); break;
+		//case Custom:  _applyI(func, op, (workerIFdd<L,void *> *) dest); break;
+		//case CharV:   _applyI(func, op, (workerIFdd<L,std::vector<char>> *) dest); break;
+		//case IntV:    _applyI(func, op, (workerIFdd<L,std::vector<int>> *) dest); break;
+		//case LongIntV:_applyI(func, op, (workerIFdd<L,std::vector<long int>> *) dest); break;
+		//case FloatV:  _applyI(func, op, (workerIFdd<L,std::vector<float>> *) dest); break;
+		//case DoubleV: _applyI(func, op, (workerIFdd<L,std::vector<double>> *) dest); break;
 	}
 
 }
 
 template <class K, class T>
-void workerIFdd<K,T>::_preApplyFlatMap(void * func, fddOpType op, workerFddBase * dest){
+void workerIFdd<K,T>::_preApply(void * func, fddOpType op, workerFddBase * dest){
 	switch (dest->getType()){
 		case Null: break;
-		case Char:     _applyFlatMap(func, op,  (workerFdd<char> *) dest); break;
-		case Int:      _applyFlatMap(func, op,  (workerFdd<int> *) dest); break;
-		case LongInt:  _applyFlatMap(func, op,  (workerFdd<long int> *) dest); break;
-		case Float:    _applyFlatMap(func, op,  (workerFdd<float> *) dest); break;
-		case Double:   _applyFlatMap(func, op,  (workerFdd<double> *) dest); break;
-		case CharP:    _applyPFlatMap(func, op, (workerFdd<char *> *) dest); break;
-		case IntP:     _applyPFlatMap(func, op, (workerFdd<int *> *) dest); break;
-		case LongIntP: _applyPFlatMap(func, op, (workerFdd<long int *> *) dest); break;
-		case FloatP:   _applyPFlatMap(func, op, (workerFdd<float *> *) dest); break;
-		case DoubleP:  _applyPFlatMap(func, op, (workerFdd<double *> *) dest); break;
-		case String:   _applyFlatMap(func, op,  (workerFdd<std::string> *) dest); break;
-		//case Custom:  _applyFlatMap(func, op,  (workerFdd<void *> *) dest); break;
-		//case CharV:   _applyFlatMap(func, op,  (workerFdd<std::vector<char>> *) dest); break;
-		//case IntV:    _applyFlatMap(func, op,  (workerFdd<std::vector<int>> *) dest); break;
-		//case LongIntV:_applyFlatMap(func, op,  (workerFdd<std::vector<long int>> *) dest); break;
-		//case FloatV:  _applyFlatMap(func, op,  (workerFdd<std::vector<float>> *) dest); break;
-		//case DoubleV: _applyFlatMap(func, op,  (workerFdd<std::vector<double>> *) dest); break;
+		case Char:     _apply(func, op,  (workerFdd<char> *) dest); break;
+		case Int:      _apply(func, op,  (workerFdd<int> *) dest); break;
+		case LongInt:  _apply(func, op,  (workerFdd<long int> *) dest); break;
+		case Float:    _apply(func, op,  (workerFdd<float> *) dest); break;
+		case Double:   _apply(func, op,  (workerFdd<double> *) dest); break;
+		case CharP:    _applyP(func, op, (workerFdd<char *> *) dest); break;
+		case IntP:     _applyP(func, op, (workerFdd<int *> *) dest); break;
+		case LongIntP: _applyP(func, op, (workerFdd<long int *> *) dest); break;
+		case FloatP:   _applyP(func, op, (workerFdd<float *> *) dest); break;
+		case DoubleP:  _applyP(func, op, (workerFdd<double *> *) dest); break;
+		case String:   _apply(func, op,  (workerFdd<std::string> *) dest); break;
+		//case Custom:  _apply(func, op,  (workerFdd<void *> *) dest); break;
+		//case CharV:   _apply(func, op,  (workerFdd<std::vector<char>> *) dest); break;
+		//case IntV:    _apply(func, op,  (workerFdd<std::vector<int>> *) dest); break;
+		//case LongIntV:_apply(func, op,  (workerFdd<std::vector<long int>> *) dest); break;
+		//case FloatV:  _apply(func, op,  (workerFdd<std::vector<float>> *) dest); break;
+		//case DoubleV: _apply(func, op,  (workerFdd<std::vector<double>> *) dest); break;
 	}
 
 }
 template <typename K, typename T>
-void workerIFdd<K,T>::applyFlatMap(void * func, fddOpType op, workerFddBase * dest){ 
+void workerIFdd<K,T>::applyDependent(void * func, fddOpType op, workerFddBase * dest){ 
 	switch (dest->getKeyType()){
-		case Null:     _preApplyFlatMap(func, op, dest);break;
-		case Char:     _preApplyIFlatMap<char>(func, op, dest); break;
-		case Int:      _preApplyIFlatMap<int>(func, op, dest); break;
-		case LongInt:  _preApplyIFlatMap<long int>(func, op, dest); break;
-		case Float:    _preApplyIFlatMap<float>(func, op, dest); break;
-		case Double:   _preApplyIFlatMap<double>(func, op, dest); break;
-		case String:   _preApplyIFlatMap<std::string>(func, op, dest); break;
+		case Null:     _preApply(func, op, dest);break;
+		case Char:     _preApplyI<char>(func, op, dest); break;
+		case Int:      _preApplyI<int>(func, op, dest); break;
+		case LongInt:  _preApplyI<long int>(func, op, dest); break;
+		case Float:    _preApplyI<float>(func, op, dest); break;
+		case Double:   _preApplyI<double>(func, op, dest); break;
+		case String:   _preApplyI<std::string>(func, op, dest); break;
 	}
 }
 

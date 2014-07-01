@@ -24,7 +24,7 @@ void worker::run(){
 		switch(tag){
 			case MSG_TASK:
 				comm->recvTask(task);
-				std::cerr << "    R:Task ID:" << task.id << " F:" << task.functionId << " ";
+				std::cerr << "    R:Task ID:" << task.id << " FDD:" << task.srcFDD  << " F:" << task.functionId << " ";
 				solve(task); // TODO Separate in a different thread ?
 				std::cerr << ".\n";
 				break;

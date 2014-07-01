@@ -316,7 +316,7 @@ T * workerFdd<T *>::bulkReduce (size_t & rSize, PbulkReducePFunctionP<T> bulkRed
 }
 template <typename T>
 template <typename U>
-void workerFdd<T *>::_apply(void * func, fddOpType op, workerFdd<U> * dest, void * result, size_t & rSize){
+void workerFdd<T *>::_apply(void * func, fddOpType op, workerFdd<U> * dest){
 	switch (op){
 		case OP_Map:
 			map(*dest, (mapPFunctionP<T,U>) func);
@@ -340,7 +340,7 @@ void workerFdd<T *>::_apply(void * func, fddOpType op, workerFdd<U> * dest, void
 // Pointer -> Pointer
 template <typename T>
 template <typename U>
-void workerFdd<T *>::_applyP(void * func, fddOpType op, workerFdd<U> * dest, void * result, size_t & rSize){
+void workerFdd<T *>::_applyP(void * func, fddOpType op, workerFdd<U> * dest){
 	switch (op){
 		case OP_Map:
 			map(*dest, (PmapPFunctionP<T,U>) func);
@@ -358,20 +358,12 @@ void workerFdd<T *>::_applyP(void * func, fddOpType op, workerFdd<U> * dest, voi
 			bulkFlatMap(*dest, ( PbulkFlatMapPFunctionP<T,U> ) func);
 			std::cerr << "BulkFlatMap ";
 			break;
-		case OP_Reduce:
-			result = reduce(rSize, ( PreducePFunctionP<T> ) func);
-			std::cerr << "Reduce " ;
-			break;
-		case OP_BulkReduce:
-			result = bulkReduce(rSize, ( PbulkReducePFunctionP<T> ) func);
-			std::cerr << "BulkReduce ";
-			break;
 	}
 }
 
 template <typename T>
 template <typename L, typename U>
-void workerFdd<T *>::_applyI(void * func, fddOpType op, workerIFdd<L,U> * dest, void * result, size_t & rSize){
+void workerFdd<T *>::_applyI(void * func, fddOpType op, workerIFdd<L,U> * dest){
 	switch (op){
 		case OP_Map:
 			map(*dest, (ImapPFunctionP<T,L,U>) func);
@@ -395,7 +387,7 @@ void workerFdd<T *>::_applyI(void * func, fddOpType op, workerIFdd<L,U> * dest, 
 // Pointer -> Pointer
 template <typename T>
 template <typename L, typename U>
-void workerFdd<T *>::_applyIP(void * func, fddOpType op, workerIFdd<L,U> * dest, void * result, size_t & rSize){
+void workerFdd<T *>::_applyIP(void * func, fddOpType op, workerIFdd<L,U> * dest){
 	switch (op){
 		case OP_Map:
 			map(*dest, (IPmapPFunctionP<T,L,U>) func);
@@ -417,64 +409,83 @@ void workerFdd<T *>::_applyIP(void * func, fddOpType op, workerIFdd<L,U> * dest,
 }
 
 template <typename T>
-void workerFdd<T *>::_preApply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize){ 
+void workerFdd<T *>::_applyReduce(void * func, fddOpType op, void * result, size_t & rSize){
+	switch (op){
+		case OP_Reduce:
+			result = reduce(rSize, ( PreducePFunctionP<T> ) func);
+			std::cerr << "Reduce " ;
+			break;
+		case OP_BulkReduce:
+			result = bulkReduce(rSize, ( PbulkReducePFunctionP<T> ) func);
+			std::cerr << "BulkReduce ";
+			break;
+	}
+}
+
+
+template <typename T>
+void workerFdd<T *>::_preApply(void * func, fddOpType op, workerFddBase * dest){ 
 	switch (dest->getType()){
 		case Null: break;
-		case Char:     _apply(func, op, (workerFdd<char> *) dest, result, rSize); break;
-		case Int:      _apply(func, op, (workerFdd<int> *) dest, result, rSize); break;
-		case LongInt:  _apply(func, op, (workerFdd<long int> *) dest, result, rSize); break;
-		case Float:    _apply(func, op, (workerFdd<float> *) dest, result, rSize); break;
-		case Double:   _apply(func, op, (workerFdd<double> *) dest, result, rSize); break;
-		case CharP:    _applyP(func, op, (workerFdd<char *> *) dest, result, rSize); break;
-		case IntP:     _applyP(func, op, (workerFdd<int *> *) dest, result, rSize); break;
-		case LongIntP: _applyP(func, op, (workerFdd<long int *> *) dest, result, rSize); break;
-		case FloatP:   _applyP(func, op, (workerFdd<float *> *) dest, result, rSize); break;
-		case DoubleP:  _applyP(func, op, (workerFdd<double *> *) dest, result, rSize); break;
-		case String:   _apply(func, op, (workerFdd<std::string> *) dest, result, rSize); break;
-		//case Custom:   _apply(func, op, (workerFdd<void *> *) dest, result, rSize); break;
-		//case CharV:     _apply(func, op, (workerFdd<std::vector<char>> *) dest, result, rSize); break;
-		//case IntV:      _apply(func, op, (workerFdd<std::vector<int>> *) dest, result, rSize); break;
-		//case LongIntV:  _apply(func, op, (workerFdd<std::vector<long int>> *) dest, result, rSize); break;
-		//case FloatV:    _apply(func, op, (workerFdd<std::vector<float>> *) dest, result, rSize); break;
-		//case DoubleV:   _apply(func, op, (workerFdd<std::vector<double>> *) dest, result, rSize); break;
+		case Char:     _apply(func, op, (workerFdd<char> *) dest); break;
+		case Int:      _apply(func, op, (workerFdd<int> *) dest); break;
+		case LongInt:  _apply(func, op, (workerFdd<long int> *) dest); break;
+		case Float:    _apply(func, op, (workerFdd<float> *) dest); break;
+		case Double:   _apply(func, op, (workerFdd<double> *) dest); break;
+		case CharP:    _applyP(func, op, (workerFdd<char *> *) dest); break;
+		case IntP:     _applyP(func, op, (workerFdd<int *> *) dest); break;
+		case LongIntP: _applyP(func, op, (workerFdd<long int *> *) dest); break;
+		case FloatP:   _applyP(func, op, (workerFdd<float *> *) dest); break;
+		case DoubleP:  _applyP(func, op, (workerFdd<double *> *) dest); break;
+		case String:   _apply(func, op, (workerFdd<std::string> *) dest); break;
+		//case Custom:   _apply(func, op, (workerFdd<void *> *) dest); break;
+		//case CharV:     _apply(func, op, (workerFdd<std::vector<char>> *) dest); break;
+		//case IntV:      _apply(func, op, (workerFdd<std::vector<int>> *) dest); break;
+		//case LongIntV:  _apply(func, op, (workerFdd<std::vector<long int>> *) dest); break;
+		//case FloatV:    _apply(func, op, (workerFdd<std::vector<float>> *) dest); break;
+		//case DoubleV:   _apply(func, op, (workerFdd<std::vector<double>> *) dest); break;
 	}
 }
 
 template <typename T>
 template <typename L>
-void workerFdd<T *>::_preApplyI(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize){ 
+void workerFdd<T *>::_preApplyI(void * func, fddOpType op, workerFddBase * dest){ 
 	switch (dest->getType()){
 		case Null: break;
-		case Char:     _applyI(func, op,  (workerIFdd<L, char> *) dest, result, rSize); break;
-		case Int:      _applyI(func, op,  (workerIFdd<L, int> *) dest, result, rSize); break;
-		case LongInt:  _applyI(func, op,  (workerIFdd<L, long int> *) dest, result, rSize); break;
-		case Float:    _applyI(func, op,  (workerIFdd<L, float> *) dest, result, rSize); break;
-		case Double:   _applyI(func, op,  (workerIFdd<L, double> *) dest, result, rSize); break;
-		case CharP:    _applyIP(func, op, (workerIFdd<L, char *> *) dest, result, rSize); break;
-		case IntP:     _applyIP(func, op, (workerIFdd<L, int *> *) dest, result, rSize); break;
-		case LongIntP: _applyIP(func, op, (workerIFdd<L, long int *> *) dest, result, rSize); break;
-		case FloatP:   _applyIP(func, op, (workerIFdd<L, float *> *) dest, result, rSize); break;
-		case DoubleP:  _applyIP(func, op, (workerIFdd<L, double *> *) dest, result, rSize); break;
-		case String:   _applyI(func, op,  (workerIFdd<L, std::string> *) dest, result, rSize); break;
-		//case Custom:   _applyI(func, op, (workerFdd<L, void *> *) dest, result, rSize); break;
-		//case CharV:     _applyI(func, op, (workerFdd<L, std::vector<char>> *) dest, result, rSize); break;
-		//case IntV:      _applyI(func, op, (workerFdd<L, std::vector<int>> *) dest, result, rSize); break;
-		//case LongIntV:  _applyI(func, op, (workerFdd<L, std::vector<long int>> *) dest, result, rSize); break;
-		//case FloatV:    _applyI(func, op, (workerFdd<L, std::vector<float>> *) dest, result, rSize); break;
-		//case DoubleV:   _applyI(func, op, (workerFdd<L, std::vector<double>> *) dest, result, rSize); break;
+		case Char:     _applyI(func, op,  (workerIFdd<L, char> *) dest); break;
+		case Int:      _applyI(func, op,  (workerIFdd<L, int> *) dest); break;
+		case LongInt:  _applyI(func, op,  (workerIFdd<L, long int> *) dest); break;
+		case Float:    _applyI(func, op,  (workerIFdd<L, float> *) dest); break;
+		case Double:   _applyI(func, op,  (workerIFdd<L, double> *) dest); break;
+		case CharP:    _applyIP(func, op, (workerIFdd<L, char *> *) dest); break;
+		case IntP:     _applyIP(func, op, (workerIFdd<L, int *> *) dest); break;
+		case LongIntP: _applyIP(func, op, (workerIFdd<L, long int *> *) dest); break;
+		case FloatP:   _applyIP(func, op, (workerIFdd<L, float *> *) dest); break;
+		case DoubleP:  _applyIP(func, op, (workerIFdd<L, double *> *) dest); break;
+		case String:   _applyI(func, op,  (workerIFdd<L, std::string> *) dest); break;
+		//case Custom:   _applyI(func, op, (workerFdd<L, void *> *) dest); break;
+		//case CharV:     _applyI(func, op, (workerFdd<L, std::vector<char>> *) dest); break;
+		//case IntV:      _applyI(func, op, (workerFdd<L, std::vector<int>> *) dest); break;
+		//case LongIntV:  _applyI(func, op, (workerFdd<L, std::vector<long int>> *) dest); break;
+		//case FloatV:    _applyI(func, op, (workerFdd<L, std::vector<float>> *) dest); break;
+		//case DoubleV:   _applyI(func, op, (workerFdd<L, std::vector<double>> *) dest); break;
 	}
 }
 
 template <typename T>
 void workerFdd<T *>::apply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize){ 
-	switch (dest->getKeyType()){
-		case Null:     _preApply(func, op, dest, result, rSize);break;
-		case Char:     _preApplyI<char>(func, op, dest, result, rSize); break;
-		case Int:      _preApplyI<int>(func, op, dest, result, rSize); break;
-		case LongInt:  _preApplyI<long int>(func, op, dest, result, rSize); break;
-		case Float:    _preApplyI<float>(func, op, dest, result, rSize); break;
-		case Double:   _preApplyI<double>(func, op, dest, result, rSize); break;
-		case String:   _preApplyI<std::string>(func, op, dest, result, rSize); break;
+	if (op & OP_GENERICREDUCE){
+		_applyReduce(func, op, result, rSize);
+	}else{
+		switch (dest->getKeyType()){
+			case Null:     _preApply(func, op, dest);break;
+			case Char:     _preApplyI<char>(func, op, dest); break;
+			case Int:      _preApplyI<int>(func, op, dest); break;
+			case LongInt:  _preApplyI<long int>(func, op, dest); break;
+			case Float:    _preApplyI<float>(func, op, dest); break;
+			case Double:   _preApplyI<double>(func, op, dest); break;
+			case String:   _preApplyI<std::string>(func, op, dest); break;
+		}
 	}
 }
 

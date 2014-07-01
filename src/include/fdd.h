@@ -28,10 +28,11 @@ class fddCore : public fddBase {
 		template <typename U> 
 		fdd<U> * map( void * funcP, fddOpType op){
 			fdd<U> * newFdd ;
-			if ( (op & 0xFF ) & (OP_FlatMap | OP_BulkFlatMap) )
+			if ( (op & 0xFF ) & (OP_FlatMap | OP_BulkFlatMap) ){
 				newFdd = new fdd<U>(*context);
-			else
+			}else{
 				newFdd = new fdd<U>(*context, size);
+			}
 			unsigned long int newFddId = newFdd->getId();
 			char result;
 			size_t rSize;
@@ -53,7 +54,7 @@ class fddCore : public fddBase {
 
 		// TODO Function to return indexedFdd<L,U>
 
-		T finishReduces(T * partResult, int funcId, fddOpType op);
+		T finishReduces(char ** partResult, size_t * pSize, int funcId, fddOpType op);
 		T reduce( void * funcP, fddOpType op);
 
 		std::vector <T> finishPReduces(T ** partResult, size_t * partrSize, int funcId, fddOpType op);

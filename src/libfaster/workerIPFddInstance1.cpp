@@ -1,15 +1,10 @@
-#include "workerIPFddFlatMap.cpp"
+#include "workerIPFdd.cpp"
+#include "workerIPFddDependent.cpp"
 
-template class workerIFdd<long int, char *>;
-template class workerIFdd<long int, int *>;
-template class workerIFdd<long int, long int *>;
-template class workerIFdd<long int, float *>;
-template class workerIFdd<long int, double *>;
 
-template class workerIFdd<float, char *>;
-template class workerIFdd<float, int *>;
-template class workerIFdd<float, long int *>;
-template class workerIFdd<float, float *>;
-template class workerIFdd<float, double *>;
-
+template class workerIFdd<int, char *>;
+template class workerIFdd<int, int *>;
+template class workerIFdd<int, long int *>;
+template class workerIFdd<int, float *>;
+template class workerIFdd<int, double *>;
 

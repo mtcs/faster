@@ -5,6 +5,8 @@
 #include <vector>
 #include <cstdlib>
 
+#include "fastCommBuffer.h"
+
 typedef unsigned int fddType;
 
 #define Null		0x0000

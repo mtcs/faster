@@ -1,30 +1,53 @@
+#include <omp.h>
 #include "fdd.h"
 
 template <typename T>
 fddCore<T>::fddCore(fastContext & c){
 	context = &c;
-	fddBase::id = c.createFDD(this, typeid(T).hash_code() );
+	this->id = c.createFDD(this, typeid(T).hash_code() );
 }
 
 template <typename T>
 fddCore<T>::fddCore(fastContext &c, size_t s){
 	context = &c;
-	fddBase::size = s;
-	fddBase::id = c.createFDD(this,  typeid(T).hash_code(), s);
+	this->size = s;
+	this->id = c.createFDD(this,  typeid(T).hash_code(), s);
 }
 
 template <typename T>
-T fddCore<T>::finishReduces(T * partResult, int funcId, fddOpType op){
+T fddCore<T>::finishReduces(char ** partResult, size_t * pSize, int funcId, fddOpType op){
 	T result;
 	if (op == OP_Reduce){
 		reduceFunctionP<T> reduceFunc = (reduceFunctionP<T>) context->funcTable[funcId];
-		result = partResult[0];
+
+		fastCommBuffer buffer(0);
+
+		// Get the real object behind the buffer
+		buffer.setBuffer(partResult[0], pSize[0]);
+		buffer >> result;
+
 		for (int i = 1; i < (context->numProcs() - 1); ++i){
-			result = reduceFunc(result, partResult[i]);
+			T pr;
+
+			buffer.setBuffer(partResult[i], pSize[i]);
+			buffer >> pr;
+
+			result = reduceFunc(result, pr);
 		}
 	}else{
 		bulkReduceFunctionP<T> bulkReduceFunc = (bulkReduceFunctionP<T>) context->funcTable[funcId];
-		result = bulkReduceFunc(partResult, context->numProcs() - 1);
+		fastCommBuffer buffer(0);
+		T * vals = new T[context->numProcs() - 1];
+
+		#pragma omp parallel for
+		for (int i = 1; i < (context->numProcs() - 1); ++i){
+			fastCommBuffer buffer(0);
+
+			buffer.setBuffer(partResult[i], pSize[i]);
+			buffer >> vals[i];
+		}
+
+		result = bulkReduceFunc(vals, context->numProcs() - 1);
 		// TODO do bulkreduce	
 	}
 	return result;
@@ -34,25 +57,25 @@ template <typename T>
 T fddCore<T>::reduce( void * funcP, fddOpType op){
 	//T fddCore<T>::template reduce( int funcId, fddOpType op){
 	T result;
-	size_t rSize;
-	unsigned long int id;
+	unsigned long int tId;
 	int funcId = context->findFunc(funcP);
 	//std::cerr << " " << funcId << ".\n";
-	T * partResult = new T[context->numProcs() - 1];
+	char ** partResult = new char*[context->numProcs() - 1];
+	size_t * rSize = new size_t[context->numProcs() - 1];
 
 	// Send task
-	unsigned long int reduceTaskId = context->enqueueTask(op, id, 0, funcId);
+	unsigned long int reduceTaskId = context->enqueueTask(op, this->id, 0, funcId);
 
 	// Receive results
 	for (int i = 0; i < (context->numProcs() - 1); ++i){
-		context->recvTaskResult(id, &partResult[i], rSize);
+		context->recvTaskResult(tId, (void *) partResult[i], rSize[i]);
 	}
 
 	// Finish applying reduces
-	finishReduces(partResult, funcId, op);
-
+	result = finishReduces(partResult, rSize, funcId, op);
 
 	delete [] partResult;
+
 	return result;
 }
 
@@ -101,7 +124,7 @@ std::vector <T> fddCore<T>::reduceP(void * funcP, fddOpType op){
 	int funcId = context->findFunc(funcP);
 	T ** partResult = new T*[context->numProcs() -1];
 	size_t * partrSize = new size_t[context->numProcs() - 1];
-	unsigned long int id;
+	unsigned long int tId;
 	//std::cerr << " " << funcId << ".\n";
 
 	// Send task
@@ -109,7 +132,7 @@ std::vector <T> fddCore<T>::reduceP(void * funcP, fddOpType op){
 
 	// Receive results
 	for (int i = 0; i < (context->numProcs() - 1); ++i){
-		context->recvTaskResult(id, &partResult[i], partrSize[i]);
+		context->recvTaskResult(tId, (void *) &partResult[i], partrSize[i]);
 	}
 
 	// Finish applying reduces
@@ -119,6 +142,7 @@ std::vector <T> fddCore<T>::reduceP(void * funcP, fddOpType op){
 	delete [] partrSize;
 	return vResult;
 }
+
 
 template class fddCore<char>;
 template class fddCore<int>;
@@ -131,12 +155,11 @@ template class fddCore<long int *>;
 template class fddCore<float *>;
 template class fddCore<double *>;
 template class fddCore<std::string>;
-//template class fddCore<std::vector<char>>;
-//template class fddCore<std::vector<int>>;
-//template class fddCore<std::vector<long int>>;
-//template class fddCore<std::vector<float>>;
-//template class fddCore<std::vector<double>>;
-//
+template class fddCore<std::vector<char>>;
+template class fddCore<std::vector<int>>;
+template class fddCore<std::vector<long int>>;
+template class fddCore<std::vector<float>>;
+template class fddCore<std::vector<double>>;
 
 
 
@@ -144,10 +167,10 @@ template class fddCore<std::string>;
 template <typename T>
 fdd<T>::fdd(fastContext &c, const char * fileName) {
 	fddCore<T>::context = &c;
-	fddBase::id = c.readFDD(this, fileName);
+	this->id = c.readFDD(this, fileName);
 
 	// Recover FDD information (size, ? etc )
-	fddCore<T>::context->getFDDInfo(fddBase::size);
+	fddCore<T>::context->getFDDInfo(this->size);
 }
 
 
@@ -163,8 +186,8 @@ template class fdd<long int *>;
 template class fdd<float *>;
 template class fdd<double *>;
 template class fdd<std::string>;
-//template class fdd<std::vector<char>>;
-//template class fdd<std::vector<int>>;
-//template class fdd<std::vector<long int>>;
-//template class fdd<std::vector<float>>;
-//template class fdd<std::vector<double>>;
+template class fdd<std::vector<char>>;
+template class fdd<std::vector<int>>;
+template class fdd<std::vector<long int>>;
+template class fdd<std::vector<float>>;
+template class fdd<std::vector<double>>;

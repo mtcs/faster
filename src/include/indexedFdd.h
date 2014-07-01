@@ -54,13 +54,144 @@ class iFddCore : public fddBase{
 
 			// Receive results
 			for (int i = 1; i < context->numProcs(); ++i){
-				context->recvTaskResult(id, &result, rSize);
+				context->recvTaskResult(id, (void*) &result, rSize);
 			}
 		}
 
-		std::map <K,T> reduce( void * funcP, fddOpType op){
+		std::pair <K,T>  finishReduces(char ** partResult, size_t * pSize, int funcId, fddOpType op){
+			std::pair <K,T> result;
+
+			if (op == OP_Reduce){
+				reduceFunctionP<T> reduceFunc = (reduceFunctionP<T>) context->funcTable[funcId];
+				fastCommBuffer buffer(0);
+
+				// Get the real object behind the buffer
+				buffer.setBuffer(partResult[0], pSize[0]);
+				buffer >> result;
+
+				for (int i = 1; i < (context->numProcs() - 1); ++i){
+					std::pair <K,T> pr;
+
+					buffer.setBuffer(partResult[i], pSize[i]);
+					buffer >> pr;
+					
+					result = reduceFunc(result.first, result.second, pr.first, pr.second);
+				}
+			}else{
+				bulkReduceFunctionP<T> bulkReduceFunc = (bulkReduceFunctionP<T>) context->funcTable[funcId];
+				T * vals = new T[context->numProcs() - 1];
+				K * keys = new K[context->numProcs() - 1];
+
+				#pragma omp parallel for
+				for (int i = 1; i < (context->numProcs() - 1); ++i){
+					fastCommBuffer buffer(0);
+					std::pair <K,T> pr;
+
+					buffer.setBuffer(partResult[i], pSize[i]);
+					buffer >> pr;
+
+					keys[i] = pr.first;
+					vals[i] = pr.second;
+				}
+
+				result = bulkReduceFunc(keys, vals, context->numProcs() - 1);
+				// TODO do bulkreduce	
+			}
+
+			return result;
 		}
-		std::map <K,T> reduceP( void * funcP, fddOpType op){
+
+		std::pair <K,T> reduce( void * funcP, fddOpType op){
+			std::pair <K,T> result;
+			unsigned long int tId;
+			int funcId = context->findFunc(funcP);
+			char ** partResult = new char*[context->numProcs() - 1];
+			size_t * rSize = new size_t[context->numProcs() - 1];
+
+			// Send task
+			unsigned long int reduceTaskId = context->enqueueTask(op, this->id, 0, funcId);
+
+			// Receive results
+			for (int i = 0; i < (context->numProcs() - 1); ++i){
+				context->recvTaskResult(tId, (void*) partResult[i], rSize[i]);
+			}
+
+			// Finish applying reduces
+			result = finishReduces(partResult, rSize, funcId, op);
+
+			delete [] partResult;
+			delete [] rSize;
+
+			return result;
+		}
+
+		std::tuple <K,T,size_t>  finishReducesP(char ** partResult, size_t * pSize, int funcId, fddOpType op){
+			std::tuple <K,T,size_t> result;
+
+			if (op == OP_Reduce){
+				reduceFunctionP<T> reduceFunc = (reduceFunctionP<T>) context->funcTable[funcId];
+				fastCommBuffer buffer(0);
+
+				buffer.setBuffer(partResult[0], pSize[0]);
+				buffer >> result;
+
+				#pragma omp parallel for
+				for (int i = 1; i < (context->numProcs() - 1); ++i){
+					std::tuple <K,T,size_t> pr;
+
+					buffer.setBuffer(partResult[i], pSize[i]);
+					buffer >> pr;
+					
+					result = reduceFunc(
+							std::get<0>(result), std::get<1>(result), std::get<2>(result), 
+							std::get<0>(pr), std::get<1>(pr), std::get<2>(pr));
+				}
+			}else{
+				bulkReduceFunctionP<T> bulkReduceFunc = (bulkReduceFunctionP<T>) context->funcTable[funcId];
+				T * vals = new T[context->numProcs() - 1];
+				K * keys = new K[context->numProcs() - 1];
+				size_t * sizes = new size_t[context->numProcs() - 1];
+
+				#pragma omp parallel for
+				for (int i = 1; i < (context->numProcs() - 1); ++i){
+					fastCommBuffer buffer(0);
+					std::tuple <K,T,size_t> pr;
+
+					buffer.setBuffer(partResult[i], pSize[i]);
+					buffer >> pr;
+
+					std::tie (keys[i], vals[i], sizes[i]) = pr;
+				}
+
+				result = bulkReduceFunc(keys, vals, sizes, context->numProcs() - 1);
+				// TODO do bulkreduce	
+			}
+
+			return result;
+		}
+
+		std::tuple <K,T,size_t> reduceP( void * funcP, fddOpType op){
+			std::tuple <K,T,size_t> result;
+			unsigned long int tId;
+			int funcId = context->findFunc(funcP);
+			char ** partResult = new char *[context->numProcs() - 1];
+			size_t * rSize = new size_t[context->numProcs() - 1];
+
+			// Send task
+			unsigned long int reduceTaskId = context->enqueueTask(op, this->id, 0, funcId);
+
+			// Receive results
+			for (int i = 0; i < (context->numProcs() - 1); ++i){
+				context->recvTaskResult(tId, (void*) partResult[i], rSize[i]);
+			}
+
+			// Finish applying reduces
+			result = finishReducesP(partResult, rSize, funcId, op);
+
+			delete [] partResult;
+			delete [] rSize;
+
+			return result;
 		}
 };
 

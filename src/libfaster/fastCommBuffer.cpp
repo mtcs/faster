@@ -5,10 +5,25 @@ fastCommBuffer::fastCommBuffer(){
 	_allocatedSize = BUFFER_INITIAL_SIZE;
 	_data = new char [_allocatedSize];
 }
+fastCommBuffer::fastCommBuffer(size_t s){
+	reset();
+	if (s > 0){
+		_allocatedSize = s;
+		_data = new char [_allocatedSize];
+	}else{
+		_allocatedSize = 0;
+		_data = NULL;
+	}
+}
 fastCommBuffer::~fastCommBuffer(){
 	delete [] _data;
 }
 
+void fastCommBuffer::setBuffer(void * buffer, size_t s){ 
+	reset();
+	_data = (char*) buffer;
+	_allocatedSize = s;
+}
 void fastCommBuffer::reset(){ 
 	_size = 0; 
 }

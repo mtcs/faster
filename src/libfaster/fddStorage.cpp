@@ -12,12 +12,9 @@ fddStorageCore<T>::fddStorageCore(){
 
 template <class T> 
 fddStorageCore<T>::fddStorageCore(size_t s){
-	std::cerr << "Allocating " << s << " ";
 	allocSize = s;
 	localData = new T[s];
 	size = s;
-
-	std::cerr << ".\n";
 }
 template <class T> 
 T * fddStorageCore<T>::getData(){ 

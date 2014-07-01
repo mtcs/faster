@@ -24,37 +24,22 @@ class workerIFdd : public workerFddBase{
 	private:
 		indexedFddStorage <K,T> * localData;
 
+		// Procedures that apply the FDD core functions
 		template <typename L, typename U>
-		void _applyIMap(void * func, fddOpType op, workerIFdd<L, U> * dest);
+		void _applyI(void * func, fddOpType op, workerIFdd<L, U> * dest);
 		template <typename L, typename U>
-		void _applyIPMap(void * func, fddOpType op, workerIFdd<L, U> * dest);
+		void _applyIP(void * func, fddOpType op, workerIFdd<L, U> * dest);
 		template <typename U>
-		void _applyMap(void * func, fddOpType op, workerFdd<U> * dest);
+		void _apply(void * func, fddOpType op, workerFdd<U> * dest);
 		template <typename U>
-		void _applyPMap(void * func, fddOpType op, workerFdd<U> * dest);
-		template <typename L, typename U>
-
-		void _applyIFlatMap(void * func, fddOpType op, workerIFdd<L, U> * dest);
-		template <typename L, typename U>
-		void _applyIPFlatMap(void * func, fddOpType op, workerIFdd<L, U> * dest);
-		template <typename U>
-		void _applyFlatMap(void * func, fddOpType op, workerFdd<U> * dest);
-		template <typename U>
-		void _applyPFlatMap(void * func, fddOpType op, workerFdd<U> * dest);
-		template <typename U>
-
-		void _applyReduce(void * func, fddOpType op, workerFdd<U> * dest);
+		void _applyP(void * func, fddOpType op, workerFdd<U> * dest);
 
 		template <typename L>
-		void _preApplyIMap(void * func, fddOpType op, workerFddBase * destze);
-		void _preApplyMap(void * func, fddOpType op, workerFddBase * destze);
-		template <typename L>
-		void _preApplyIFlatMap(void * func, fddOpType op, workerFddBase * destze);
-		void _preApplyFlatMap(void * func, fddOpType op, workerFddBase * destze);
+		void _preApplyI(void * func, fddOpType op, workerFddBase * destze);
+		void _preApply(void * func, fddOpType op, workerFddBase * destze);
 
-		void applyMap(void * func, fddOpType op, workerFddBase * destze);
-		void applyFlatMap(void * func, fddOpType op, workerFddBase * destze);
-		void applyReduce(void * func, fddOpType op, void * result, size_t & rSize);
+		void applyDependent(void * func, fddOpType op, workerFddBase * destze);
+		void applyIndependent(void * func, fddOpType op, void * result, size_t & rSize);
 
 		// --------- FUNCTIONS ----------
 
@@ -132,6 +117,7 @@ class workerIFdd : public workerFddBase{
 		size_t getSize() override{ return localData->getSize(); }
 		size_t itemSize() override{ return sizeof(T); }
 		size_t baseSize() override{ return sizeof(T); }
+		void deleteItem(void * item) override { delete (T*) item; }
 
 		void insert(K key, T & in);
 		void insert(std::list< std::pair<K, T> > & in);
@@ -151,34 +137,23 @@ class workerIFdd<K,T*> : public workerFddBase{
 	private:
 		indexedFddStorage <K,T*> * localData;
 
-		template <typename L, typename U>
-		void _applyIMap(void * func, fddOpType op, workerIFdd<L, U> * dest);
-		template <typename L, typename U>
-		void _applyIPMap(void * func, fddOpType op, workerIFdd<L, U> * dest);
-		template <typename U>
-		void _applyMap(void * func, fddOpType op, workerFdd<U> * dest);
-		template <typename U>
-		void _applyPMap(void * func, fddOpType op, workerFdd<U> * dest);
 
+		// Procedures that apply the FDD core functions
 		template <typename L, typename U>
-		void _applyIFlatMap(void * func, fddOpType op, workerIFdd<L, U> * dest);
+		void _applyI(void * func, fddOpType op, workerIFdd<L, U> * dest);
 		template <typename L, typename U>
-		void _applyIPFlatMap(void * func, fddOpType op, workerIFdd<L, U> * dest);
+		void _applyIP(void * func, fddOpType op, workerIFdd<L, U> * dest);
 		template <typename U>
-		void _applyFlatMap(void * func, fddOpType op, workerFdd<U> * dest);
+		void _apply(void * func, fddOpType op, workerFdd<U> * dest);
 		template <typename U>
-		void _applyPFlatMap(void * func, fddOpType op, workerFdd<U> * dest);
+		void _applyP(void * func, fddOpType op, workerFdd<U> * dest);
 
 		template <typename L>
-		void _preApplyIMap(void * func, fddOpType op, workerFddBase * dest);
-		void _preApplyMap(void * func, fddOpType op, workerFddBase * dest);
-		template <typename L>
-		void _preApplyIFlatMap(void * func, fddOpType op, workerFddBase * dest);
-		void _preApplyFlatMap(void * func, fddOpType op, workerFddBase * dest);
+		void _preApplyI(void * func, fddOpType op, workerFddBase * dest);
+		void _preApply(void * func, fddOpType op, workerFddBase * dest);
 
-		void applyMap(void * func, fddOpType op, workerFddBase * dest);
-		void applyFlatMap(void * func, fddOpType op, workerFddBase * dest);
-		void applyReduce(void * func, fddOpType op, void * result, size_t & rSize);
+		void applyDependent(void * func, fddOpType op, workerFddBase * dest);
+		void applyIndependent(void * func, fddOpType op, void * result, size_t & rSize);
 
 		// --------- FUNCTIONS ----------
 
@@ -223,9 +198,9 @@ class workerIFdd<K,T*> : public workerFddBase{
 
 
 		// REDUCE
-		std::tuple<K,T*,size_t> reduce (size_t & rSize, IPreduceIPFunctionP<K,T> reduceFunc);
+		std::tuple<K,T*,size_t> reduce (IPreduceIPFunctionP<K,T> reduceFunc);
 
-		std::tuple<K,T*,size_t> bulkReduce (size_t & rSize, IPbulkReduceIPFunctionP<K,T> bulkReduceFunc);
+		std::tuple<K,T*,size_t> bulkReduce (IPbulkReduceIPFunctionP<K,T> bulkReduceFunc);
 		
 
 	public:
@@ -259,6 +234,7 @@ class workerIFdd<K,T*> : public workerFddBase{
 		size_t * getLineSizes(){ return localData->getLineSizes(); }
 		size_t itemSize() override{ return sizeof(T); }
 		size_t baseSize() override{ return sizeof(T*); }
+		void deleteItem(void * item) override { delete (T*) item; }
 
 		void insert(K key, T* & in, size_t s);
 		void insert(std::list< std::tuple<K, T*, size_t> > & in);

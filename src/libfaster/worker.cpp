@@ -1,6 +1,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <time.h>
 
 #include "fastComm.h"
 #include "workerFdd.h"
@@ -51,21 +52,23 @@ void worker::getFDDData(unsigned long int id, void *& data, size_t &size){
 
 
 void worker::preapply(fastTask &task, workerFddBase * destFDD){
-	std::cerr << " TaskListLength:" << fddList.size() << " " << task.srcFDD;
 	workerFddBase * src = fddList[task.srcFDD];
-
-	void * result ;
-	if (destFDD)
-		result = new char[destFDD->itemSize()];
 	size_t rSize;
 	char r = 0;
+	void * result;
+	time_t start,end;
 
+	time (&start);
 	src->apply(funcTable[task.functionId], task.operationType, destFDD, result, rSize);
-	std::cerr << " S:RESULT ";
+	time(&end);
+
+	std::cerr << " S:RESULT S:" << rSize << " ET:" << difftime (end,start) << " ";
 	if (task.operationType & (OP_GENERICREDUCE))
-		comm->sendTaskResult(task.id, result, src->baseSize(), 0);
+		comm->sendTaskResult(task.id, result, rSize, difftime (end,start));
 	else
-		comm->sendTaskResult(task.id, &r, sizeof(char), 0);
+		comm->sendTaskResult(task.id, &r, sizeof(char), difftime (end,start));
+
+	src->deleteItem(result);
 }
 
 void worker::solve(fastTask &task){

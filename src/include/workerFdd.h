@@ -15,6 +15,7 @@ class workerIFdd;
 
 #include "workerFddBase.h"
 #include "fddStorage.h"
+#include "fastCommBuffer.h"
 
 // Worker side FDD
 template <class T>
@@ -24,17 +25,18 @@ class workerFdd : public workerFddBase{
 
 		// Not Pointer -> Not Pointer
 		template <typename U>
-		void _apply(void * func, fddOpType op, workerFdd<U> * dest, void * result, size_t rSize);
+		void _apply(void * func, fddOpType op, workerFdd<U> * dest);
 		template <typename U>
-		void _applyP(void * func, fddOpType op, workerFdd<U> * dest, void * result, size_t rSize);
+		void _applyP(void * func, fddOpType op, workerFdd<U> * dest);
 		template <typename L, typename U>
-		void _applyI(void * func, fddOpType op, workerIFdd<L,U> * dest, void * result, size_t rSize);
+		void _applyI(void * func, fddOpType op, workerIFdd<L,U> * dest);
 		template <typename L, typename U>
-		void _applyIP(void * func, fddOpType op, workerIFdd<L,U> * dest, void * result, size_t rSize);
+		void _applyIP(void * func, fddOpType op, workerIFdd<L,U> * dest);
+		void _applyReduce(void * func, fddOpType op, void * result, size_t & rSize);
 
 		template <typename L>
-		void _preApplyI(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize);
-		void _preApply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize);
+		void _preApplyI(void * func, fddOpType op, workerFddBase * dest);
+		void _preApply(void * func, fddOpType op, workerFddBase * dest);
 
 		// --------- FUNCTIONS ----------
 
@@ -83,6 +85,7 @@ class workerFdd : public workerFddBase{
 
 
 	public:
+
 		workerFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){} 
 
 		workerFdd(unsigned int ident, fddType t, size_t size) : workerFdd(ident, t){ 
@@ -111,6 +114,7 @@ class workerFdd : public workerFddBase{
 		size_t getSize() override{ return localData->getSize(); }
 		size_t itemSize() override{ return sizeof(T); }
 		size_t baseSize() override{ return sizeof(T); }
+		void deleteItem(void * item) override { delete (T*) item; }
 
 		void insert(T & in){ localData->insert(in); }
 
@@ -140,17 +144,18 @@ class workerFdd<T *> : public workerFddBase{
 
 		// Pointer -> Not Pointer
 		template <typename U>
-		void _apply(void * func, fddOpType op, workerFdd<U> * dest, void * result, size_t & rSize);
+		void _apply(void * func, fddOpType op, workerFdd<U> * dest);
 		template <typename U>
-		void _applyP(void * func, fddOpType op, workerFdd<U> * dest, void * result, size_t & rSize);
+		void _applyP(void * func, fddOpType op, workerFdd<U> * dest);
 		template <typename L, typename U>
-		void _applyI(void * func, fddOpType op, workerIFdd<L,U> * dest, void * result, size_t & rSize);
+		void _applyI(void * func, fddOpType op, workerIFdd<L,U> * dest);
 		template <typename L, typename U>
-		void _applyIP(void * func, fddOpType op, workerIFdd<L,U> * dest, void * result, size_t & rSize);
+		void _applyIP(void * func, fddOpType op, workerIFdd<L,U> * dest);
+		void _applyReduce(void * func, fddOpType op, void * result, size_t & rSize);
 
 		template <typename L>
-		void _preApplyI(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize);
-		void _preApply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize);
+		void _preApplyI(void * func, fddOpType op, workerFddBase * dest);
+		void _preApply(void * func, fddOpType op, workerFddBase * dest);
 		// --------- FUNCTIONS ----------
 
 		template <typename U>
@@ -227,6 +232,7 @@ class workerFdd<T *> : public workerFddBase{
 		size_t * getLineSizes(){ return localData->getLineSizes(); }
 		size_t itemSize() override{ return sizeof(T); }
 		size_t baseSize() override{ return sizeof(T*); }
+		void deleteItem(void * item) override { delete (T*) item; }
 
 		void insert(T* & in, size_t s){ localData->insert(in, s); }
 

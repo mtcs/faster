@@ -116,7 +116,7 @@ void fastComm::waitForReq(int numReqs){
 void fastComm::sendTask(fastTask &task){
 	buffer.reset();
 
-	buffer << task.id << task.operationType << task.destFDD << task.srcFDD << task.functionId;
+	buffer << task.id << task.operationType << task.srcFDD << task.destFDD << task.functionId;
 
 	for (int i = 1; i < numProcs; ++i){
 		MPI_Isend(buffer.data(), buffer.size(), MPI_BYTE, i, MSG_TASK, MPI_COMM_WORLD, &req[i-1]);
@@ -131,7 +131,7 @@ void fastComm::recvTask(fastTask & task){
 
 	MPI_Recv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_TASK, MPI_COMM_WORLD, &stat);	
 	
-	buffer >> task.id >> task.operationType >> task.destFDD >> task.srcFDD >> task.functionId;
+	buffer >> task.id >> task.operationType >> task.srcFDD >> task.destFDD >> task.functionId;
 }
 
 void fastComm::sendTaskResult(unsigned long int id, void * res, size_t size, double time){
@@ -443,7 +443,7 @@ void fastComm::sendReadFDDFile(unsigned long int id, std::string filename, size_
 	
 	buffer.reset();
 
-	buffer << id << size << offset << filename.size() << filename;
+	buffer << id << size << offset << filename;
 
 	MPI_Isend( buffer.data(), buffer.size(), MPI_BYTE, dest, MSG_READFDDFILE, MPI_COMM_WORLD, &req[dest]);
 }
