@@ -4,7 +4,10 @@
 #define FDD_TYPE_NULL 	0x00
 #define FDD_TYPE_INT 	0x01
 
-#include "fastContext.h"
+#include <typeinfo>
+#include <string>
+
+#include "fddBase.h"
 
 fddType decodeType(size_t typeCode);
 

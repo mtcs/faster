@@ -4,25 +4,16 @@
 
 #include "fastComm.h"
 #include "workerFdd.h"
-#include "workerIFdd.h"
 #include "worker.h"
 
 worker::worker(fastComm * c, void ** ft){
-	std::cerr << "  Starting Worker" << '\n';
+	std::cerr << "  Starting Worker " << c->getProcId() << '\n';
 	funcTable = ft;
 	comm = c;
 	finished = false;
 }
 
 worker::~worker(){
-}
-
-
-template <typename T> workerFdd<T> * decodeFDD(workerFddBase * fddBase){
-	if (fddBase->type == Float){
-		return (workerFdd<float> *) fddBase;
-	}
-	return (workerFdd<int> *) fddBase;
 }
 
 
@@ -56,57 +47,16 @@ void worker::getFDDData(unsigned long int id, void *& data, size_t &size){
 	size = fdd->getSize();
 }
 
-void worker::readFDDFile(unsigned long int id, std::string &filename, size_t size, size_t offset){
-	std::string line; 
-	char c;
-
-	workerFdd<std::string> * newFdd = new workerFdd<std::string>(id, String);
-
-	if (newFdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
-
-	fddList.insert(fddList.end(), newFdd);
-
-	// TODO Treat other kinds of input files
-	std::ifstream inFile(filename, std::ifstream::in);
-
-	if ( ! inFile.good() ){
-		std::cerr << "\nERROR: Could not read input File " << filename << "\n";
-		exit(202);
-	}
-
-
-	if( offset > 0){
-		inFile.seekg(offset-1, inFile.beg);
-		c = inFile.get();
-		// If the other process doesn't have this line, get it!
-		if ( c == '\n' ) {
-			std::getline( inFile, line ); 
-			newFdd->insert(line);
-		}
-	}
-	
-	// Start reading lines
-	while( size_t(inFile.tellg()) < (offset + size) ){
-		std::getline( inFile, line ); 
-
-		newFdd->insert(line);
-	}
-	inFile.close();
-
-	newFdd->shrink();
-
-	std::cerr << "    S:FDDInfo ";
-	comm->sendFDDInfo(newFdd->getSize());
-
-}
-
 
 
 
 void worker::preapply(fastTask &task, workerFddBase * destFDD){
+	std::cerr << " TaskListLength:" << fddList.size() << " " << task.srcFDD;
 	workerFddBase * src = fddList[task.srcFDD];
 
-	void * result = new char[destFDD->itemSize()];
+	void * result ;
+	if (destFDD)
+		result = new char[destFDD->itemSize()];
 	size_t rSize;
 	char r = 0;
 

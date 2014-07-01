@@ -83,6 +83,8 @@ class fastComm{
 		fastComm(const std::string master);
 		~fastComm();
 
+		int getProcId(){ return procId; }
+
 		bool isDriver();
 
 		void probeMsgs(int & tag);

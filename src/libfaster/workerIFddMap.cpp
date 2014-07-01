@@ -1,20 +1,24 @@
+#include <tuple>
 #include <iostream>
 #include "workerIFdd.h"
+#include "workerFdd.h"
+#include "indexedFddStorage.h"
 
 
 // --------- MAP
 template <typename K, typename T>
 template <typename L, typename U>
 void workerIFdd<K,T>::map (workerIFdd<L,U> & dest, ImapIFunctionP<K,T,L,U> mapFunc){
-	size_t s = localData.getSize();
-	K * ik = localData.getKeys();
+	T * d = localData->getData();
+	size_t s = localData->getSize();
+	K * ik = localData->getKeys();
 	L * ok = dest.getKeys();
 
 	//std::cerr << "START " << id << " " << s << "  ";
 
 	#pragma omp parallel for 
 	for (int i = 0; i < s; ++i){
-		std::pair<L,U> r = mapFunc(ik[i], localData[i]);
+		std::pair<L,U> r = mapFunc(ik[i], d[i]);
 		ok[i] = r.first;
 		dest[i] = r.second;
 	}
@@ -24,8 +28,9 @@ void workerIFdd<K,T>::map (workerIFdd<L,U> & dest, ImapIFunctionP<K,T,L,U> mapFu
 template <typename K, typename T>
 template <typename L, typename U>
 void workerIFdd<K,T>::map (workerIFdd<L,U> & dest, IPmapIFunctionP<K,T,L,U> mapFunc){
-	size_t s = localData.getSize();
-	K * ik = localData.getKeys();
+	T * d = localData->getData();
+	size_t s = localData->getSize();
+	K * ik = localData->getKeys();
 	size_t * ols = dest.getLineSizes() ;
 	L * ok = dest.getKeys();
 
@@ -35,8 +40,8 @@ void workerIFdd<K,T>::map (workerIFdd<L,U> & dest, IPmapIFunctionP<K,T,L,U> mapF
 	for (int i = 0; i < s; ++i){
 		U result;
 		size_t rSize;
-		//mapFunc(ok[i], dest[i], ols[i], localData[i]);
-		std::tuple <L,U,size_t> r = mapFunc(ik[i],  localData[i]);
+		//mapFunc(ok[i], dest[i], ols[i], d[i]);
+		std::tuple <L,U,size_t> r = mapFunc(ik[i],  d[i]);
 		ok[i] = std::get<0>(r);
 		dest[i] = std::get<1>(r);
 		ols[i] = std::get<2>(r);
@@ -47,14 +52,15 @@ void workerIFdd<K,T>::map (workerIFdd<L,U> & dest, IPmapIFunctionP<K,T,L,U> mapF
 template <typename K, typename T>
 template < typename U>
 void workerIFdd<K,T>::map (workerFdd<U> & dest, mapIFunctionP<K,T,U> mapFunc){
-	size_t s = localData.getSize();
-	K * ik = localData.getKeys();
+	T * d = localData->getData();
+	size_t s = localData->getSize();
+	K * ik = localData->getKeys();
 
 	//std::cerr << "START " << id << " " << s << "  ";
 
 	#pragma omp parallel for 
 	for (int i = 0; i < s; ++i){
-		dest[i] = mapFunc(ik[i], localData[i]);
+		dest[i] = mapFunc(ik[i], d[i]);
 	}
 	//std::cerr << "END ";
 }		
@@ -62,8 +68,9 @@ void workerIFdd<K,T>::map (workerFdd<U> & dest, mapIFunctionP<K,T,U> mapFunc){
 template <typename K, typename T>
 template <typename U>
 void workerIFdd<K,T>::map (workerFdd<U> & dest, PmapIFunctionP<K,T,U> mapFunc){
-	size_t s = localData.getSize();
-	K * ik = localData.getKeys();
+	T * d = localData->getData();
+	size_t s = localData->getSize();
+	K * ik = localData->getKeys();
 	size_t * ols = dest.getLineSizes() ;
 
 	//std::cerr << "START " << id << " " << s << "  ";
@@ -72,8 +79,8 @@ void workerIFdd<K,T>::map (workerFdd<U> & dest, PmapIFunctionP<K,T,U> mapFunc){
 	for (int i = 0; i < s; ++i){
 		U result;
 		size_t rSize;
-		//mapFunc(dest[i], ols[i], localData[i]);
-		std::pair<U, size_t> r = mapFunc(ik[i], localData[i]);
+		//mapFunc(dest[i], ols[i], d[i]);
+		std::pair<U, size_t> r = mapFunc(ik[i], d[i]);
 		dest[i] = r.first;
 		ols[i] = r.second;
 	}
@@ -86,22 +93,22 @@ void workerIFdd<K,T>::map (workerFdd<U> & dest, PmapIFunctionP<K,T,U> mapFunc){
 template <typename K, typename T>
 template <typename L, typename U>
 void workerIFdd<K,T>::bulkMap (workerIFdd<L,U> & dest, IbulkMapIFunctionP<K,T,L,U> bulkMapFunc){
-	bulkMapFunc((L*) (dest.getKeys()), (U *) dest.getData(), (K*) localData.getKeys(), (T *)localData.getData(), localData.getSize());
+	bulkMapFunc((L*) (dest.getKeys()), (U *) dest.getData(), (K*) localData->getKeys(), (T *)localData->getData(), localData->getSize());
 }
 template <typename K, typename T>
 template <typename L, typename U>
 void workerIFdd<K,T>::bulkMap (workerIFdd<L,U> & dest, IPbulkMapIFunctionP<K,T,L,U> bulkMapFunc){
-	bulkMapFunc((L*) (dest.getKeys()), (U*) dest.getData(), dest.getLineSizes(), (K*) localData.getKeys(), (T *) localData.getData(), localData.getSize());
+	bulkMapFunc((L*) (dest.getKeys()), (U*) dest.getData(), dest.getLineSizes(), (K*) localData->getKeys(), (T *) localData->getData(), localData->getSize());
 }
 template <typename K, typename T>
 template <typename U>
 void workerIFdd<K,T>::bulkMap (workerFdd<U> & dest, bulkMapIFunctionP<K,T,U> bulkMapFunc){
-	bulkMapFunc((U*) dest.getData(), (K*) localData.getKeys(), (T *)localData.getData(), localData.getSize());
+	bulkMapFunc((U*) dest.getData(), (K*) localData->getKeys(), (T *)localData->getData(), localData->getSize());
 }
 template <typename K, typename T>
 template <typename U>
 void workerIFdd<K,T>::bulkMap (workerFdd<U> & dest, PbulkMapIFunctionP<K,T,U> bulkMapFunc){
-	bulkMapFunc((U*) dest.getData(), dest.getLineSizes(), (K*) localData.getKeys(), (T *) localData.getData(), localData.getSize());
+	bulkMapFunc((U*) dest.getData(), dest.getLineSizes(), (K*) localData->getKeys(), (T *) localData->getData(), localData->getSize());
 }
 
 // Not Pointer -> Not Pointer

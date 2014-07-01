@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project (faster)
+project (faster-tester)
 
 set (faster_VERSION_MAJOR 0)
 set (faster_VERSION_MINOR 1)
@@ -8,8 +8,8 @@ set (faster_VERSION_MINOR 1)
 add_definitions(-O3)
 add_definitions(-ggdb)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg  -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg  -std=c++11")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 
 find_package(OpenMP)
@@ -29,12 +29,12 @@ link_directories(${MPI_CXX_LIBRARIES})
 #include_directories("/usr/include/openmpi/")
 set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
 
-include_directories ("${PROJECT_SOURCE_DIR}/include")
+include_directories ("${PROJECT_SOURCE_DIR}/../libfaster")
+set (EXTRA_LIBS ${EXTRA_LIBS} libfaster)
 
-add_subdirectory (test) 
-add_subdirectory (examples) 
+set (EXTRA_LIBS ${EXTRA_LIBS} efence)
 
-add_subdirectory (libfaster) 
+add_executable(ftest ftest.cpp)
 
-
+target_link_libraries (ftest  ${EXTRA_LIBS})
 

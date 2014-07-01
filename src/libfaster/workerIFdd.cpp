@@ -1,5 +1,8 @@
 #include <iostream>
+#include <tuple>
+#include "indexedFddStorage.h"
 #include "workerIFdd.h"
+#include "workerFdd.h"
 
 
 
@@ -25,18 +28,18 @@ void workerIFdd<K,T>::apply(void * func, fddOpType op, workerFddBase * dest, voi
 
 template <typename K, typename T>
 void insert(K key, T & in){ 
-	workerIFdd<K,T>::localData.insert(key, in); 
+	workerIFdd<K,T>::localData->insert(key, in); 
 }
 
 template <typename K, typename T>
 void workerIFdd<K,T>::insert(std::list< std::pair<K, T> > & in){ 
 	typename std::list< std::pair<K, T> >::iterator it;
 
-	if (localData.getSize() < in.size())
-		localData.grow(in.size());
+	if (localData->getSize() < in.size())
+		localData->grow(in.size());
 
 	for ( it = in.begin(); it != in.end(); it++)
-		localData.insert(it->first, it->second); 
+		localData->insert(it->first, it->second); 
 }
 
 

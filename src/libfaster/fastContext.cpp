@@ -68,7 +68,7 @@ unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode, size_t 
 			dataPerProc += 1;
 		comm->sendCreateFDD(numFDDs, type, dataPerProc, i);
 
-		std::cerr << "    S:CreateFdd " << numFDDs << " " << (int) type << '\n';
+		std::cerr << "    S:CreateFdd ID:" << numFDDs << " T:" << (int) type << " S:" << dataPerProc << '\n';
 	}
 	fddList.insert(fddList.begin(), ref);
 	
@@ -89,7 +89,7 @@ unsigned long int fastContext::createIFDD(fddBase * ref, size_t kTypeCode, size_
 			dataPerProc += 1;
 		comm->sendCreateIFDD(numFDDs, kType, tType, dataPerProc, i);
 
-		std::cerr << "    S:CreateIFdd " << numFDDs << " " << (int) kType << " " << (int) tType <<'\n';
+		std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << (int) kType << " T:" << (int) tType << " S:" << dataPerProc <<'\n';
 	}
 	fddList.insert(fddList.begin(), ref);
 	return numFDDs++;
@@ -158,7 +158,7 @@ void fastContext::recvTaskResult(unsigned long int &id, void * result, size_t & 
 	double time;
 
 	comm->recvTaskResult(id, result, size, time);
-	std::cerr << "    R:TaskResult " << id << "Result:"  << * (int*)result << '\n';
+	std::cerr << "    R:TaskResult ID:" << id << " Result:"  << * (int*)result << '\n';
 
 	taskList[id]->workersFinished++;
 }
@@ -170,11 +170,11 @@ void fastContext::parallelize(unsigned long int id, T * data, size_t size){
 	size_t offset = 0;
 
 	for (int i = 1; i < comm->numProcs; ++i){
-		int dataPerProc = size/ (comm->numProcs - 1);
+		int dataPerProc = size/(comm->numProcs - 1);
 		int rem = size % (comm->numProcs -1);
 		if (i <= rem)
 			dataPerProc += 1;
-		std::cerr << "    S:FDDSetData P" << i << " " << id << " " << dataPerProc * sizeof(T) << "B";
+		std::cerr << "    S:FDDSetData P" << i << " ID:" << id << " S:" << dataPerProc << "";
 
 		comm->sendFDDSetData(id, i, &data[offset], dataPerProc * sizeof(T));
 		offset += dataPerProc;
@@ -198,7 +198,7 @@ void fastContext::parallelize(unsigned long int id, T ** data, size_t * dataSize
 		int rem = size % (comm->numProcs -1);
 		if (i <= rem)
 			dataPerProc += 1;
-		std::cerr << "    S:FDDSetData P" << i << " " << id << " " << dataPerProc * sizeof(T) << "B";
+		std::cerr << "    S:FDDSetData P" << i << " " << id << " " << dataPerProc << "B";
 
 		comm->sendFDDSetData(id, i, (void **) &data[offset], &dataSizes[offset], dataPerProc, sizeof(T));
 		offset += dataPerProc;

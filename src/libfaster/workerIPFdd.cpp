@@ -1,5 +1,9 @@
+#include <tuple>
 #include <iostream>
+
 #include "workerIFdd.h"
+#include "workerFdd.h"
+#include "indexedFddStorage.h"
 
 // -------------------------- worker<K,T*> specialization -------------------------- //
 
@@ -23,18 +27,18 @@ void workerIFdd<K,T*>::apply(void * func, fddOpType op, workerFddBase * dest, vo
 
 template <typename K, typename T>
 void workerIFdd<K,T*>::insert(K key, T* & in, size_t s){ 
-	localData.insert(key, in, s); 
+	localData->insert(key, in, s); 
 }
 
 template <typename K, typename T>
 void workerIFdd<K,T*>::insert(std::list< std::tuple<K, T*, size_t> > & in){ 
 	typename std::list< std::tuple<K, T*, size_t> >::iterator it;
 
-	if (localData.getSize() < in.size())
-		localData.grow(in.size());
+	if (localData->getSize() < in.size())
+		localData->grow(in.size());
 
 	for ( it = in.begin(); it != in.end(); it++)
-		localData.insert(std::get<0>(*it), std::get<1>(*it), std::get<2>(*it)); 
+		localData->insert(std::get<0>(*it), std::get<1>(*it), std::get<2>(*it)); 
 }
 
 

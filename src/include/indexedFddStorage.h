@@ -19,6 +19,7 @@ class indexedFddStorageCore : public fddStorageBase {
 
 		T * getData();
 		K * getKeys();
+		void   setSize(size_t s) {};
 
 		T & operator[](size_t ref);
 
@@ -31,8 +32,10 @@ template <class K, class T>
 class indexedFddStorage : public indexedFddStorageCore<K, T> {
 	public:
 		indexedFddStorage();
+		indexedFddStorage(size_t s):indexedFddStorageCore<K,T>(s){}
 		indexedFddStorage(K * keys, T * data, size_t s);
 		void setData( K * keys, T * data, size_t s);
+		void   setSize(size_t s) override;
 
 		void insert(K key, T & item);
 
@@ -47,11 +50,13 @@ class indexedFddStorage <K, T *> : public indexedFddStorageCore<K, T *> {
 
 	public:
 		indexedFddStorage();
+		indexedFddStorage(size_t s):indexedFddStorageCore<K,T*>(s){}
 		indexedFddStorage(K * keys, T ** data, size_t * lineSizes, size_t s);
 
 		~indexedFddStorage();
 
 		void setData( K * keys, T ** data, size_t * lineSizes, size_t s);
+		void   setSize(size_t s) override;
 
 		void insert(K key, T *& item, size_t s);
 

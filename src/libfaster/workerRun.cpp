@@ -31,35 +31,35 @@ void worker::run(){
 
 			case MSG_CREATEFDD:
 				comm->recvCreateFDD(id, tType, size);
-				std::cerr << "    R:CreateFdd ID:" << id << " T:" << (int) tType << " S:" << size << "B";
+				std::cerr << "    R:CreateFdd ID:" << id << " T:" << (int) tType << " S:" << size << " ";
 				createFDD(id, tType, size);
 				std::cerr << ".\n";
 				break;
 
 			case MSG_CREATEIFDD:
 				comm->recvCreateIFDD(id, kType, tType, size);
-				std::cerr << "    R:CreateFdd ID:" << id << " K:" << (int) kType << " T:" << (int) tType << " S:" << size << "B";
+				std::cerr << "    R:CreateFdd ID:" << id << " K:" << (int) kType << " T:" << (int) tType << " S:" << size << " ";
 				createIFDD(id, kType, tType, size);
 				std::cerr << ".\n";
 				break;
 
 			case MSG_DESTROYFDD:
 				comm->recvDestroyFDD(id);
-				std::cerr << "    R:DestroyFdd " << id;
+				std::cerr << "    R:DestroyFdd ID:" << id << " ";
 				destroyFDD(id);
 				std::cerr << ".\n";
 				break;
 
 			case MSG_FDDSETDATAID:
 				comm->recvFDDSetData(id, data, size);
-				std::cerr << "    R:SetFddData " << id << ' ' << size;
+				std::cerr << "    R:SetFddData ID:" << id << " S:" << size << " ";
 				setFDDData(id, data, size);
 				std::cerr << ".\n";
 				break;
 
 			case MSG_FDDSET2DDATAID:
 				comm->recvFDDSetData(id, data2D, lineSizes, size);
-				std::cerr << "    R:SetFddData " << id << ' ' << size;
+				std::cerr << "    R:SetFddData ID:" << id << " S:" << size << " ";
 				setFDDData(id, data2D, lineSizes, size);
 				std::cerr << ".\n";
 				break;
@@ -73,7 +73,7 @@ void worker::run(){
 
 			case MSG_COLLECT:
 				comm->recvCollect(id);
-				std::cerr << "    R:Collect " << id;
+				std::cerr << "    R:Collect ID:" << id << " ";
 				getFDDData(id, data, size);
 				comm->sendFDDData(id, 0, data, size);
 				std::cerr << ".\n";

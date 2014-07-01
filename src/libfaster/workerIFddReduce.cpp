@@ -1,26 +1,28 @@
 #include <iostream>
 #include "workerIFdd.h"
+#include "indexedFddStorage.h"
 
 // REDUCE
 template <typename K, typename T>
 std::pair<K,T> workerIFdd<K,T>::reduce (IreduceIFunctionP<K,T> reduceFunc){
+	T * d = localData->getData();
 	std::pair<K,T> result;
-	size_t s = localData.getSize();
-	K * ik = localData.getKeys();
+	size_t s = localData->getSize();
+	K * ik = localData->getKeys();
 	std::cerr << "START " << id << " " << s << " | ";
 
 	#pragma omp parallel 
 	{
 		int nT = omp_get_num_threads();
 		int tN = omp_get_thread_num();
-		std::pair<K,T> partResult (ik[tN], localData[tN] );
+		std::pair<K,T> partResult (ik[tN], d[tN] );
 
 		#pragma omp master
 		std::cerr << tN << "(" << nT << ")";
 
 		#pragma omp for 
 		for (int i = nT; i < s; ++i){
-			partResult = reduceFunc(partResult.first, partResult.second, ik[i], localData[i]);
+			partResult = reduceFunc(partResult.first, partResult.second, ik[i], d[i]);
 		}
 		#pragma omp master
 		result = partResult;
@@ -38,8 +40,8 @@ std::pair<K,T> workerIFdd<K,T>::reduce (IreduceIFunctionP<K,T> reduceFunc){
 
 template <typename K, typename T>
 std::pair<K,T>  workerIFdd<K,T>::bulkReduce (IbulkReduceIFunctionP<K,T> bulkReduceFunc){
-	K * ik = localData.getKeys();
-	return bulkReduceFunc(ik, (T*) localData.getData(), localData.getSize());
+	K * ik = localData->getKeys();
+	return bulkReduceFunc(ik, (T*) localData->getData(), localData->getSize());
 }
 
 template <typename K, typename T>

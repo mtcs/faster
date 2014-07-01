@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 
 #include "fddStorage.h"
 
@@ -11,9 +12,12 @@ fddStorageCore<T>::fddStorageCore(){
 
 template <class T> 
 fddStorageCore<T>::fddStorageCore(size_t s){
+	std::cerr << "Allocating " << s << " ";
 	allocSize = s;
 	localData = new T[s];
 	size = s;
+
+	std::cerr << ".\n";
 }
 template <class T> 
 T * fddStorageCore<T>::getData(){ 
@@ -89,7 +93,7 @@ void fddStorage<T>::setData( T * data, size_t s){
 	grow(s / sizeof(T));
 	//memcpy(localData, data, s );
 	for ( size_t i = 0; i < s; ++i){
-		this->localData[i] = ((T*) data)[i];
+		this->localData[i] = data[i];
 	}
 	this->size = s / sizeof(T);
 }
@@ -107,6 +111,16 @@ void fddStorage<T *>::setData( T ** data, size_t * lineSizes, size_t s){
 	this->size = s;
 }
 
+template <class T> 
+void   fddStorage<T>::setSize(size_t s){ 
+	this->grow(s); 
+	this->size = s;  
+}
+template <class T> 
+void   fddStorage<T*>::setSize(size_t s){ 
+	this->grow(s); 
+	this->size = s;  
+}
 
 template <class T> 
 void fddStorage<T>::insert(T & item){

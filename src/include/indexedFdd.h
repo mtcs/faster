@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <list>
 
+class fastContext;
+
 #include "fddBase.h"
 #include "fastContext.h"
 

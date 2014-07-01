@@ -2,10 +2,12 @@
 #define LIBFASTER_WORKER_H
 
 #include <vector>
+#include <string>
 
 class worker;
+class fastContext;
+class fastComm;
 
-#include "fastContext.h"
 #include "workerFddBase.h"
 
 

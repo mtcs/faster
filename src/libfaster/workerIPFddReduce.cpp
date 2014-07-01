@@ -1,20 +1,24 @@
 #include <iostream>
+#include <tuple>
+
 #include "workerIFdd.h"
+#include "indexedFddStorage.h"
 
 // REDUCE
 template <typename K, typename T>
 std::tuple<K,T*,size_t> workerIFdd<K,T*>::reduce (size_t & rSize, IPreduceIPFunctionP<K,T> reduceFunc){
+	T ** d = localData->getData();
 	std::tuple<K,T*,size_t>  resultT;
-	size_t s = localData.getSize();
-	size_t * ils = localData.getLineSizes();
-	K * ik = localData.getKeys();
+	size_t s = localData->getSize();
+	size_t * ils = localData->getLineSizes();
+	K * ik = localData->getKeys();
 	//std::cerr << "START " << id << " " << s << " | ";
 
 	#pragma omp parallel 
 	{
 		int nT = omp_get_num_threads();
 		int tN = omp_get_thread_num();
-		std::tuple<K,T*,size_t>  partResult (ik[tN], localData[tN], ils[tN]);
+		std::tuple<K,T*,size_t>  partResult (ik[tN], d[tN], ils[tN]);
 		T * b, * a;
 		size_t aSize, bSize;
 		K aKey, bKey;
@@ -24,7 +28,7 @@ std::tuple<K,T*,size_t> workerIFdd<K,T*>::reduce (size_t & rSize, IPreduceIPFunc
 			aKey = std::get<0>(partResult);
 			a = std::get<1>(partResult);
 			aSize = std::get<2>(partResult);
-			b = localData[i];
+			b = d[i];
 			bKey = ik[i];
 			bSize = ils[i];
 
@@ -60,8 +64,8 @@ std::tuple<K,T*,size_t> workerIFdd<K,T*>::reduce (size_t & rSize, IPreduceIPFunc
 
 template <typename K, typename T>
 std::tuple<K,T*,size_t> workerIFdd<K,T*>::bulkReduce (size_t & rSize, IPbulkReduceIPFunctionP<K,T> bulkReduceFunc){
-	K * ik = localData.getKeys();
-	return bulkReduceFunc(ik, localData.getData(), localData.getLineSizes(), localData.getSize());
+	K * ik = localData->getKeys();
+	return bulkReduceFunc(ik, localData->getData(), localData->getLineSizes(), localData->getSize());
 }
 
 

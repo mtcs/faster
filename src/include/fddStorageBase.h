@@ -2,6 +2,7 @@
 #define LIBFASTER_FDDSTORAGEBASE_H
 
 #include <cstdlib>
+#include <iostream>
 
 class fddStorageBase{
 	protected:
@@ -9,9 +10,10 @@ class fddStorageBase{
 		size_t allocSize;
 
 	public:
-		virtual void grow(size_t toSize){ }
+		virtual void grow(size_t toSize) = 0;
 		size_t getSize(){ return size; }
-		void   setSize(size_t s){ grow(s); size = s; }
+		//void   setSize(size_t s){ this->grow(s); size = s;  }
+		virtual void setSize(size_t s) { std::cerr << "OPS! " << s; }
 };
 
 

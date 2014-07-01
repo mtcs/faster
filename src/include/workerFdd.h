@@ -5,18 +5,22 @@
 #include <omp.h>
 
 template <class T>
+class fddStorage;
+
+template <class T>
 class workerFdd;
 
-#include "fastContext.h"
-#include "fddStorage.h"
+template <class K, class T>
+class workerIFdd;
+
 #include "workerFddBase.h"
-#include "workerIFdd.h"
+#include "fddStorage.h"
 
 // Worker side FDD
 template <class T>
 class workerFdd : public workerFddBase{
 	private:
-		fddStorage <T> localData;
+		fddStorage <T> * localData;
 
 		// Not Pointer -> Not Pointer
 		template <typename U>
@@ -82,13 +86,18 @@ class workerFdd : public workerFddBase{
 		workerFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){} 
 
 		workerFdd(unsigned int ident, fddType t, size_t size) : workerFdd(ident, t){ 
-			localData.setSize(size);
+			localData = new fddStorage<T>(size);
 		}
 
-		~workerFdd(){}
+		~workerFdd(){
+			delete localData;
+		}
 
+		void setData(T * data, size_t size) {
+			localData->setData(data, size);
+		}
 		void setData(void * data, size_t size) override{
-			localData.setData((T*)data, size);
+			localData->setData((T*)data, size/sizeof(T));
 		}
 		void setData(void ** data, size_t *lineSizes, size_t size) override{ }
 		void setData(void * keys, void * data, size_t size) override{ }
@@ -97,25 +106,25 @@ class workerFdd : public workerFddBase{
 		fddType getType() override { return type; }
 		fddType getKeyType() override { return Null; }
 
-		T & operator[](size_t address){ return localData[address]; }
-		void * getData() override{ return localData.getData(); }
-		size_t getSize() override{ return localData.getSize(); }
+		T & operator[](size_t address){ return localData->getData()[address]; }
+		void * getData() override{ return localData->getData(); }
+		size_t getSize() override{ return localData->getSize(); }
 		size_t itemSize() override{ return sizeof(T); }
 		size_t baseSize() override{ return sizeof(T); }
 
-		void insert(T & in){ localData.insert(in); }
+		void insert(T & in){ localData->insert(in); }
 
 		void insert(std::list<T> & in){ 
 			typename std::list<T>::iterator it;
 
-			if (localData.getSize() < in.size())
-				localData.grow(in.size());
+			if (localData->getSize() < in.size())
+				localData->grow(in.size());
 
 			for ( it = in.begin(); it != in.end(); it++)
-				localData.insert(*it); 
+				localData->insert(*it); 
 		}
 
-		void shrink(){ localData.shrink(); }
+		void shrink(){ localData->shrink(); }
 
 
 		// Apply task functions to FDDs
@@ -127,7 +136,7 @@ class workerFdd : public workerFddBase{
 template <class T>
 class workerFdd<T *> : public workerFddBase{
 	private:
-		fddStorage <T *> localData;
+		fddStorage <T *> * localData;
 
 		// Pointer -> Not Pointer
 		template <typename U>
@@ -192,41 +201,46 @@ class workerFdd<T *> : public workerFddBase{
 		workerFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){} 
 
 		workerFdd(unsigned int ident, fddType t, size_t size) : workerFdd(ident, t){ 
-			localData.setSize(size);
+			localData = new fddStorage<T*>(size);
 		}
 
-		~workerFdd(){}
+		~workerFdd(){
+			delete localData;
+		}
 
 
+		void setData(T ** data, size_t *lineSizes, size_t size) {
+			localData->setData(data, lineSizes, size);
+		}
 		void setData(void * data, size_t size) override{ }
 		void setData(void ** data, size_t *lineSizes, size_t size) override{
-			localData.setData((T**) data, lineSizes, size);
+			localData->setData((T**) data, lineSizes, size);
 		}
 		void setData(void * keys, void * data, size_t size) override{ }
 		void setData(void * keys, void ** data, size_t *lineSizes, size_t size) override{ }
 		fddType getType() override { return type; }
 		fddType getKeyType() override { return Null; }
 
-		T *& operator[](size_t address){ return localData[address]; }
-		void * getData() override{ return localData.getData(); }
-		size_t getSize() override{ return localData.getSize(); }
-		size_t * getLineSizes(){ return localData.getLineSizes(); }
+		T *& operator[](size_t address){ return localData->getData()[address]; }
+		void * getData() override{ return localData->getData(); }
+		size_t getSize() override{ return localData->getSize(); }
+		size_t * getLineSizes(){ return localData->getLineSizes(); }
 		size_t itemSize() override{ return sizeof(T); }
 		size_t baseSize() override{ return sizeof(T*); }
 
-		void insert(T* & in, size_t s){ localData.insert(in, s); }
+		void insert(T* & in, size_t s){ localData->insert(in, s); }
 
 		void insert(std::list< std::pair<T*, size_t> > & in){ 
 			typename std::list< std::pair<T*, size_t> >::iterator it;
 
-			if (localData.getSize() < in.size())
-				localData.grow(in.size());
+			if (localData->getSize() < in.size())
+				localData->grow(in.size());
 
 			for ( it = in.begin(); it != in.end(); it++)
-				localData.insert(it->first, it->second); 
+				localData->insert(it->first, it->second); 
 		}
 
-		void shrink(){ localData.shrink(); }
+		void shrink(){ localData->shrink(); }
 
 
 		// Apply task functions to FDDs

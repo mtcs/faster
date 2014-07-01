@@ -77,6 +77,17 @@ void indexedFddStorage<K,T*>::setData( K * keys, T ** data, size_t * lineSizes, 
 	this->size = s;
 }
 
+template <class K, class T> 
+void   indexedFddStorage<K,T>::setSize(size_t s){ 
+	this->grow(s); 
+	this->size = s;  
+}
+template <class K, class T> 
+void   indexedFddStorage<K,T*>::setSize(size_t s){ 
+	this->grow(s); 
+	this->size = s;  
+}
+
 
 template <class K, class T> 
 void indexedFddStorage<K,T>::insert(K key, T & item){

@@ -80,7 +80,7 @@ class fdd : public fddCore<T>{
 		}
 
 		// Create a fdd from a vector in memory
-		fdd(fastContext &c, std::vector<T> &data) : fdd(c, data.data(), data.size()){ }
+		fdd(fastContext &c, std::vector<T> &dataV) : fdd(c, dataV.data(), dataV.size()){ }
 
 		// Create a fdd from a file
 		fdd(fastContext &c, const char * fileName) ;
