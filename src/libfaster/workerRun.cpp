@@ -12,9 +12,9 @@ void worker::run(){
 		fastTask task;
 		unsigned long int id;
 		fddType tType, kType;
-		void * data;
-		void ** data2D;
-		size_t * lineSizes;
+		void * data = NULL;
+		void ** data2D = NULL;
+		size_t * lineSizes = NULL;
 		size_t size, offset;
 		std::string name;
 
@@ -23,69 +23,79 @@ void worker::run(){
 
 		switch(tag){
 			case MSG_TASK:
+				std::cerr << "    R:Task ";
 				comm->recvTask(task);
-				std::cerr << "    R:Task ID:" << task.id << " FDD:" << task.srcFDD  << " F:" << task.functionId << " ";
+				std::cerr << "ID:" << task.id << " FDD:" << task.srcFDD  << " F:" << task.functionId << " ";
 				solve(task); // TODO Separate in a different thread ?
 				std::cerr << ".\n";
 				break;
 
 			case MSG_CREATEFDD:
+				std::cerr << "    R:CreateFdd";
 				comm->recvCreateFDD(id, tType, size);
-				std::cerr << "    R:CreateFdd ID:" << id << " T:" << (int) tType << " S:" << size << " ";
+				std::cerr << " ID:" << id << " T:" << (int) tType << " S:" << size << " ";
 				createFDD(id, tType, size);
 				std::cerr << ".\n";
 				break;
 
 			case MSG_CREATEIFDD:
+				std::cerr << "    R:CreateIFdd ";
 				comm->recvCreateIFDD(id, kType, tType, size);
-				std::cerr << "    R:CreateFdd ID:" << id << " K:" << (int) kType << " T:" << (int) tType << " S:" << size << " ";
+				std::cerr << "ID:" << id << " K:" << (int) kType << " T:" << (int) tType << " S:" << size << " ";
 				createIFDD(id, kType, tType, size);
 				std::cerr << ".\n";
 				break;
 
 			case MSG_DESTROYFDD:
+				std::cerr << "    R:DestroyFdd ";
 				comm->recvDestroyFDD(id);
-				std::cerr << "    R:DestroyFdd ID:" << id << " ";
+				std::cerr << "ID:" << id << " ";
 				destroyFDD(id);
 				std::cerr << ".\n";
 				break;
 
 			case MSG_FDDSETDATAID:
+				std::cerr << "    R:SetFddData ";
 				comm->recvFDDSetData(id, data, size);
-				std::cerr << "    R:SetFddData ID:" << id << " S:" << size << " ";
+				std::cerr << "ID:" << id << " S:" << size << " ";
 				setFDDData(id, data, size);
 				std::cerr << ".\n";
 				break;
 
 			case MSG_FDDSET2DDATAID:
+				std::cerr << "    R:SetFddData ";
 				comm->recvFDDSetData(id, data2D, lineSizes, size);
-				std::cerr << "    R:SetFddData ID:" << id << " S:" << size << " ";
+				std::cerr << "ID:" << id << " S:" << size << " ";
 				setFDDData(id, data2D, lineSizes, size);
+				delete [] data2D;
 				std::cerr << ".\n";
 				break;
 
 			case MSG_READFDDFILE:
+				std::cerr << "    R:ReadFddFile " ;
 				comm->recvReadFDDFile(id, name, size, offset);
-				std::cerr << "    R:ReadFddFile " << id <<" F:" << name<< "(offset:" << offset << ")" ;
+				std::cerr << "ID:" << id <<" F:" << name<< "(offset:" << offset << ")";
 				readFDDFile(id, name, size, offset);
 				std::cerr << ".\n";
 				break;
 
 			case MSG_COLLECT:
+				std::cerr << "    R:Collect ";
 				comm->recvCollect(id);
-				std::cerr << "    R:Collect ID:" << id << " ";
+				std::cerr << "ID:" << id << " ";
 				getFDDData(id, data, size);
 				comm->sendFDDData(id, 0, data, size);
 				std::cerr << ".\n";
 				break;
 
 			case MSG_FINISH:
-				comm->recvFinish();
 				std::cerr << "    R:FINISH ";
+				comm->recvFinish();
 				finished = true;
 				std::cerr << ".\n";
 				break;
 			default:
+				std::cerr << "    R:ERROR UNRECOGNIZED MESSAGE!!!!! ";
 				break;
 		}
 	}

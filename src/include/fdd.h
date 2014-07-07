@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <list>
 
+#include "definitions.h"
+#include "fastTask.h" 
 #include "fddBase.h"
 #include "fastContext.h"
 #include "indexedFdd.h"
@@ -34,7 +36,7 @@ class fddCore : public fddBase {
 				newFdd = new fdd<U>(*context, size);
 			}
 			unsigned long int newFddId = newFdd->getId();
-			char result;
+			size_t result;
 			size_t rSize;
 
 			// Decode function pointer
@@ -46,7 +48,7 @@ class fddCore : public fddBase {
 
 			// Receive results
 			for (int i = 1; i < context->numProcs(); ++i){
-				context->recvTaskResult(id, &result, rSize);
+				result = * (char*) context->recvTaskResult(id, rSize);
 			}
 
 			return newFdd;
@@ -54,11 +56,7 @@ class fddCore : public fddBase {
 
 		// TODO Function to return indexedFdd<L,U>
 
-		T finishReduces(char ** partResult, size_t * pSize, int funcId, fddOpType op);
-		T reduce( void * funcP, fddOpType op);
 
-		std::vector <T> finishPReduces(T ** partResult, size_t * partrSize, int funcId, fddOpType op);
-		std::vector <T> reduceP(void * funcP, fddOpType op);
 
 };
 
@@ -66,17 +64,24 @@ class fddCore : public fddBase {
 // It just sends commands to the workers.
 template <class T> 
 class fdd : public fddCore<T>{
+	private:
+		T finishReduces(char ** partResult, size_t * pSize, int funcId, fddOpType op);
+		T reduce( void * funcP, fddOpType op);
 	public:
 		// -------------- Constructors --------------- //
 
 		// Create a empty fdd
-		fdd(fastContext &c) : fddCore<T>(c){ }
+		fdd(fastContext &c) : fddCore<T>(c){ 
+			this->id = c.createFDD(this,  typeid(T).hash_code());
+		}
 
 		// Create a empty fdd with a pre allocated size
-		fdd(fastContext &c, size_t s) : fddCore<T>(c, s){ }
+		fdd(fastContext &c, size_t s) : fddCore<T>(c, s){ 
+			this->id = c.createFDD(this,  typeid(T).hash_code(), s);
+		}
 
 		// Create a fdd from a array in memory
-		fdd(fastContext &c, T data[], size_t size) : fdd(c, size){
+		fdd(fastContext &c, T * data, size_t size) : fdd(c, size){
 			c.parallelize(fddBase::id, data, size);
 		}
 
@@ -167,10 +172,10 @@ class fdd : public fddCore<T>{
 
 		// Run a Reduce
 		T reduce( reduceFunctionP<T> funcP ){
-			return fddCore<T>::reduce((void*) funcP, OP_Reduce);
+			return reduce((void*) funcP, OP_Reduce);
 		}
 		T bulkReduce( bulkReduceFunctionP<T> funcP ){
-			return fddCore<T>::reduce((void*) funcP, OP_BulkReduce);
+			return reduce((void*) funcP, OP_BulkReduce);
 		}
 		
 		// --------------- FDD Builtin functions ------------- // 
@@ -186,14 +191,21 @@ class fdd : public fddCore<T>{
 
 template <class T> 
 class fdd<T *> : public fddCore<T>{
+	private:
+		std::vector <T> finishPReduces(T ** partResult, size_t * partrSize, int funcId, fddOpType op);
+		std::vector <T> reduceP(void * funcP, fddOpType op);
 	public:
 		// -------------- Constructors --------------- //
 
 		// Create a empty fdd
-		fdd(fastContext &c) : fddCore<T>(c){ }
+		fdd(fastContext &c) : fddCore<T>(c){ 
+			this->id = c.createPFDD(this,  typeid(T).hash_code());
+		}
 
 		// Create a empty fdd with a pre allocated size
-		fdd(fastContext &c, size_t s) : fddCore<T>(c, s){ }
+		fdd(fastContext &c, size_t s) : fddCore<T>(c, s){ 
+			this->id = c.createPFDD(this,  typeid(T).hash_code(), s);
+		}
 
 		// Create a fdd from a array in memory
 		fdd(fastContext &c, T * data[], size_t dataSizes[], size_t size) : fdd(c, size){
@@ -281,10 +293,10 @@ class fdd<T *> : public fddCore<T>{
 
 		// Run a Reduce
 		inline std::vector<T> reduce(PreducePFunctionP<T> funcP  ){
-			return fddCore<T>::reduceP((void*) funcP, OP_Reduce);
+			return reduceP((void*) funcP, OP_Reduce);
 		}
 		inline std::vector<T> bulkReduce(PbulkReducePFunctionP<T> funcP  ){
-			return fddCore<T>::reduceP((void*) funcP, OP_BulkReduce);
+			return reduceP((void*) funcP, OP_BulkReduce);
 		}
 		
 		// --------------- FDD Builtin functions ------------- // 
@@ -297,5 +309,6 @@ class fdd<T *> : public fddCore<T>{
 		}*/
 
 };
+
 
 #endif

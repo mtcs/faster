@@ -73,7 +73,7 @@ std::tuple<K,T*,size_t> workerIFdd<K,T*>::bulkReduce (IPbulkReduceIPFunctionP<K,
 
 
 template <typename K, typename T>
-void workerIFdd<K,T*>::applyIndependent(void * func, fddOpType op, void * result, size_t & rSize){ 
+void workerIFdd<K,T*>::applyIndependent(void * func, fddOpType op, void *& result, size_t & rSize){ 
 	std::tuple<K,T*,size_t> r;
 
 	switch (op){
@@ -95,7 +95,7 @@ void workerIFdd<K,T*>::applyIndependent(void * func, fddOpType op, void * result
 
 
 template <typename K, typename T>
-void workerIFdd<K,T*>::apply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize){ 
+void workerIFdd<K,T*>::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){ 
 	switch (op){
 		case OP_Map:
 		case OP_BulkMap:

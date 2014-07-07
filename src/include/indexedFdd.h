@@ -8,6 +8,7 @@
 
 class fastContext;
 
+#include "definitions.h"
 #include "fddBase.h"
 #include "fastContext.h"
 
@@ -26,14 +27,12 @@ class iFddCore : public fddBase{
 		// Create a empty fdd
 		iFddCore(fastContext &c) {
 			context = &c;
-			id = c.createIFDD(this, typeid(K).hash_code(), typeid(T).hash_code() );
 		}
 
 		// Create a empty fdd with a pre allocated size
 		iFddCore(fastContext &c, size_t s) {
 			context = &c;
 			size = s;
-			id = c.createIFDD(this, typeid(K).hash_code(), typeid(T).hash_code(), size);
 		}
 
 		~iFddCore(){}
@@ -54,22 +53,27 @@ class iFddCore : public fddBase{
 
 			// Receive results
 			for (int i = 1; i < context->numProcs(); ++i){
-				context->recvTaskResult(id, (void*) &result, rSize);
+				result = * (char*) context->recvTaskResult(id, rSize);
 			}
 		}
 
+};
+
+template <class K, class T> 
+class indexedFdd : public iFddCore<K,T>{
+	private:
 		std::pair <K,T>  finishReduces(char ** partResult, size_t * pSize, int funcId, fddOpType op){
 			std::pair <K,T> result;
 
 			if (op == OP_Reduce){
-				reduceFunctionP<T> reduceFunc = (reduceFunctionP<T>) context->funcTable[funcId];
+				reduceFunctionP<T> reduceFunc = (reduceFunctionP<T>) this->context->funcTable[funcId];
 				fastCommBuffer buffer(0);
 
 				// Get the real object behind the buffer
 				buffer.setBuffer(partResult[0], pSize[0]);
 				buffer >> result;
 
-				for (int i = 1; i < (context->numProcs() - 1); ++i){
+				for (int i = 1; i < (this->context->numProcs() - 1); ++i){
 					std::pair <K,T> pr;
 
 					buffer.setBuffer(partResult[i], pSize[i]);
@@ -78,12 +82,12 @@ class iFddCore : public fddBase{
 					result = reduceFunc(result.first, result.second, pr.first, pr.second);
 				}
 			}else{
-				bulkReduceFunctionP<T> bulkReduceFunc = (bulkReduceFunctionP<T>) context->funcTable[funcId];
-				T * vals = new T[context->numProcs() - 1];
-				K * keys = new K[context->numProcs() - 1];
+				bulkReduceFunctionP<T> bulkReduceFunc = (bulkReduceFunctionP<T>) this->context->funcTable[funcId];
+				T * vals = new T[this->context->numProcs() - 1];
+				K * keys = new K[this->context->numProcs() - 1];
 
 				#pragma omp parallel for
-				for (int i = 1; i < (context->numProcs() - 1); ++i){
+				for (int i = 1; i < (this->context->numProcs() - 1); ++i){
 					fastCommBuffer buffer(0);
 					std::pair <K,T> pr;
 
@@ -94,7 +98,7 @@ class iFddCore : public fddBase{
 					vals[i] = pr.second;
 				}
 
-				result = bulkReduceFunc(keys, vals, context->numProcs() - 1);
+				result = bulkReduceFunc(keys, vals, this->context->numProcs() - 1);
 				// TODO do bulkreduce	
 			}
 
@@ -104,16 +108,18 @@ class iFddCore : public fddBase{
 		std::pair <K,T> reduce( void * funcP, fddOpType op){
 			std::pair <K,T> result;
 			unsigned long int tId;
-			int funcId = context->findFunc(funcP);
-			char ** partResult = new char*[context->numProcs() - 1];
-			size_t * rSize = new size_t[context->numProcs() - 1];
+			int funcId = this->context->findFunc(funcP);
+			char ** partResult = new char*[this->context->numProcs() - 1];
+			size_t * rSize = new size_t[this->context->numProcs() - 1];
 
 			// Send task
-			unsigned long int reduceTaskId = context->enqueueTask(op, this->id, 0, funcId);
+			unsigned long int reduceTaskId = this->context->enqueueTask(op, this->id, 0, funcId);
 
 			// Receive results
-			for (int i = 0; i < (context->numProcs() - 1); ++i){
-				context->recvTaskResult(tId, (void*) partResult[i], rSize[i]);
+			for (int i = 0; i < (this->context->numProcs() - 1); ++i){
+				char * pr = (char*) this->context->recvTaskResult(tId, rSize[i]);
+				partResult[i] = new char [rSize[i]];
+				memcpy(partResult[i], pr, rSize[i]);
 			}
 
 			// Finish applying reduces
@@ -125,87 +131,20 @@ class iFddCore : public fddBase{
 			return result;
 		}
 
-		std::tuple <K,T,size_t>  finishReducesP(char ** partResult, size_t * pSize, int funcId, fddOpType op){
-			std::tuple <K,T,size_t> result;
 
-			if (op == OP_Reduce){
-				reduceFunctionP<T> reduceFunc = (reduceFunctionP<T>) context->funcTable[funcId];
-				fastCommBuffer buffer(0);
-
-				buffer.setBuffer(partResult[0], pSize[0]);
-				buffer >> result;
-
-				#pragma omp parallel for
-				for (int i = 1; i < (context->numProcs() - 1); ++i){
-					std::tuple <K,T,size_t> pr;
-
-					buffer.setBuffer(partResult[i], pSize[i]);
-					buffer >> pr;
-					
-					result = reduceFunc(
-							std::get<0>(result), std::get<1>(result), std::get<2>(result), 
-							std::get<0>(pr), std::get<1>(pr), std::get<2>(pr));
-				}
-			}else{
-				bulkReduceFunctionP<T> bulkReduceFunc = (bulkReduceFunctionP<T>) context->funcTable[funcId];
-				T * vals = new T[context->numProcs() - 1];
-				K * keys = new K[context->numProcs() - 1];
-				size_t * sizes = new size_t[context->numProcs() - 1];
-
-				#pragma omp parallel for
-				for (int i = 1; i < (context->numProcs() - 1); ++i){
-					fastCommBuffer buffer(0);
-					std::tuple <K,T,size_t> pr;
-
-					buffer.setBuffer(partResult[i], pSize[i]);
-					buffer >> pr;
-
-					std::tie (keys[i], vals[i], sizes[i]) = pr;
-				}
-
-				result = bulkReduceFunc(keys, vals, sizes, context->numProcs() - 1);
-				// TODO do bulkreduce	
-			}
-
-			return result;
-		}
-
-		std::tuple <K,T,size_t> reduceP( void * funcP, fddOpType op){
-			std::tuple <K,T,size_t> result;
-			unsigned long int tId;
-			int funcId = context->findFunc(funcP);
-			char ** partResult = new char *[context->numProcs() - 1];
-			size_t * rSize = new size_t[context->numProcs() - 1];
-
-			// Send task
-			unsigned long int reduceTaskId = context->enqueueTask(op, this->id, 0, funcId);
-
-			// Receive results
-			for (int i = 0; i < (context->numProcs() - 1); ++i){
-				context->recvTaskResult(tId, (void*) partResult[i], rSize[i]);
-			}
-
-			// Finish applying reduces
-			result = finishReducesP(partResult, rSize, funcId, op);
-
-			delete [] partResult;
-			delete [] rSize;
-
-			return result;
-		}
-};
-
-template <class K, class T> 
-class indexedFdd : public iFddCore<K,T>{
 
 	public:
 		// -------------- Constructors --------------- //
 
 		// Create a empty fdd
-		indexedFdd(fastContext &c) : iFddCore<K,T>(c){ }
+		indexedFdd(fastContext &c) : iFddCore<K,T>(c){ 
+			this->id = c.createIFDD(this, typeid(K).hash_code(), typeid(T).hash_code());
+		}
 
 		// Create a empty fdd with a pre allocated size
-		indexedFdd(fastContext &c, size_t s) : iFddCore<K,T>(c, s){ }
+		indexedFdd(fastContext &c, size_t s) : iFddCore<K,T>(c, s){ 
+			this->id = c.createIFDD(this, typeid(K).hash_code(), typeid(T).hash_code(), s);
+		}
 
 		// Create a fdd from a array in memory
 		indexedFdd(fastContext &c, K keys[], T data[], size_t size) : indexedFdd(c, size){
@@ -296,10 +235,10 @@ class indexedFdd : public iFddCore<K,T>{
 
 		// Run a Reduce
 		std::pair<K,T> reduce( IreduceIFunctionP<K,T> funcP ){
-			return iFddCore<K,T>::reduce((void*) funcP, OP_Reduce);
+			return reduce((void*) funcP, OP_Reduce);
 		}
 		std::pair<K,T> bulkReduce( IbulkReduceIFunctionP<K,T> funcP ){
-			return iFddCore<K,T>::reduce((void*) funcP, OP_BulkReduce);
+			return reduce((void*) funcP, OP_BulkReduce);
 		}
 		
 		// --------------- FDD Builtin functions ------------- // 
@@ -315,14 +254,92 @@ class indexedFdd : public iFddCore<K,T>{
 
 template <class K, class T> 
 class indexedFdd<K,T *> : public fddBase{
-	public:
+	private:
+		std::tuple <K,T,size_t>  finishReducesP(char ** partResult, size_t * pSize, int funcId, fddOpType op){
+			std::tuple <K,T,size_t> result;
+
+			if (op == OP_Reduce){
+				reduceFunctionP<T> reduceFunc = (reduceFunctionP<T>) this->context->funcTable[funcId];
+				fastCommBuffer buffer(0);
+
+				buffer.setBuffer(partResult[0], pSize[0]);
+				buffer >> result;
+
+				#pragma omp parallel for
+				for (int i = 1; i < (this->context->numProcs() - 1); ++i){
+					std::tuple <K,T,size_t> pr;
+
+					buffer.setBuffer(partResult[i], pSize[i]);
+					buffer >> pr;
+					
+					result = reduceFunc(
+							std::get<0>(result), 
+							std::get<1>(result), 
+							std::get<2>(result), 
+							std::get<0>(pr), 
+							std::get<1>(pr), 
+							std::get<2>(pr));
+				}
+			}else{
+				bulkReduceFunctionP<T> bulkReduceFunc = (bulkReduceFunctionP<T>) this->context->funcTable[funcId];
+				T * vals = new T[this->context->numProcs() - 1];
+				K * keys = new K[this->context->numProcs() - 1];
+				size_t * sizes = new size_t[this->context->numProcs() - 1];
+
+				#pragma omp parallel for
+				for (int i = 1; i < (this->context->numProcs() - 1); ++i){
+					fastCommBuffer buffer(0);
+					std::tuple <K,T,size_t> pr;
+
+					buffer.setBuffer(partResult[i], pSize[i]);
+					buffer >> pr;
+
+					std::tie (keys[i], vals[i], sizes[i]) = pr;
+				}
+
+				result = bulkReduceFunc(keys, vals, sizes, this->context->numProcs() - 1);
+				// TODO do bulkreduce	
+			}
+
+			return result;
+		}
+
+		std::tuple <K,T,size_t> reduceP( void * funcP, fddOpType op){
+			std::tuple <K,T,size_t> result;
+			unsigned long int tId;
+			int funcId = this->context->findFunc(funcP);
+			char ** partResult = new char *[this->context->numProcs() - 1];
+			size_t * rSize = new size_t[this->context->numProcs() - 1];
+
+			// Send task
+			unsigned long int reduceTaskId = this->context->enqueueTask(op, this->id, 0, funcId);
+
+			// Receive results
+			for (int i = 0; i < (this->context->numProcs() - 1); ++i){
+				char * pr = (char*) this->context->recvTaskResult(tId, rSize[i]);
+				partResult[i] = new char [rSize[i]];
+				memcpy(partResult[i], pr, rSize[i]);
+			}
+
+			// Finish applying reduces
+			result = finishReducesP(partResult, rSize, funcId, op);
+
+			delete [] partResult;
+			delete [] rSize;
+
+			return result;
+		}	public:
 		// -------------- Constructors --------------- //
 		//
 		// Create a empty fdd
-		indexedFdd(fastContext &c) : iFddCore<K,T *>(c){ }
+		indexedFdd(fastContext &c) : iFddCore<K,T *>(c){ 
+			this->id = c.createIPFDD(this, typeid(K).hash_code(), typeid(T).hash_code());
+		}
 
 		// Create a empty fdd with a pre allocated size
-		indexedFdd(fastContext &c, size_t s) : iFddCore<K,T *>(c, s){ }
+		indexedFdd(fastContext &c, size_t s) : iFddCore<K,T *>(c, s){ 
+			this->id = c.createIPFDD(this, typeid(K).hash_code(), typeid(T).hash_code(), s);
+		}
 
 		// Create a fdd from a array in memory
 		indexedFdd(fastContext &c, K keys[], T * data[], size_t dataSizes[], size_t size) : indexedFdd(c, size){
@@ -414,10 +431,10 @@ class indexedFdd<K,T *> : public fddBase{
 
 		// Run a Reduce
 		inline std::vector<T> reduce(PreducePFunctionP<T> funcP  ){
-			return iFddCore<K,T>::reduce((void*) funcP, OP_Reduce);
+			return reduce((void*) funcP, OP_Reduce);
 		}
 		inline std::vector<T> bulkReduce(PbulkReducePFunctionP<T> funcP  ){
-			return iFddCore<K,T>::reduce((void*) funcP, OP_BulkReduce);
+			return reduce((void*) funcP, OP_BulkReduce);
 		}
 		
 		// --------------- FDD Builtin functions ------------- // 

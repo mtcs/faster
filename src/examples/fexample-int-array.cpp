@@ -31,7 +31,9 @@ pair<int*,size_t> map1(int * input, size_t size){
 				out[i] = a[i];
 			}
 		}else{
-			out[i] = b[i];
+			if( i < sizeB){
+				out[i] = b[i];
+			}
 		}
 	}
 	return pair<int *,size_t>(out, oSize);
@@ -56,7 +58,7 @@ int main(int argc, char ** argv){
 	for ( size_t i = 0; i < NUMITEMS; ++i ){
 		
 		// Random number of items
-		dataSizes[i] = rand() % 10;
+		dataSizes[i] = (rand() % 10) + 1;
 
 		rawdata[i] = new int[dataSizes[i]];
 
@@ -71,14 +73,13 @@ int main(int argc, char ** argv){
 	cout << "Process Data" << '\n';
 	vector<int> result = data.map<int *>(&map1)->reduce(&reduce1);
 
+	cout << "DONE!" << '\n';
+
 	for ( size_t i = 0; i < result.size(); ++i){
 		cout << result[i] << ' ';
 	}
 	cout << '\n';
 
-
-	cout << "DONE!" << '\n';
-	std::cout << result[0] << "\n";
 
 	for ( size_t i = 0; i < NUMITEMS; ++i){
 		delete [] rawdata[i];

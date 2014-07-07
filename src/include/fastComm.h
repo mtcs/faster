@@ -7,6 +7,10 @@
 
 class fastComm;
 
+#include "definitions.h"
+#include "fastTask.h" 
+#include "fastCommBuffer.h" 
+
 enum commMode {
 	Local,
 	Mesos
@@ -43,10 +47,6 @@ enum commMode {
 #define FDDTYPE_DOUBLEP		0x0C
 #define FDDTYPE_OBJECT 		0x06
 
-#include "fddBase.h" 
-#include "fastCommBuffer.h" 
-
-char encodeFDDType(fddType type);
 
 
 
@@ -59,8 +59,8 @@ class fastComm{
 		MPI_Status * status;
 		MPI_Request * req;
 		MPI_Request * req2;
-		fastCommBuffer buffer;
-		fastCommBuffer buffer2;
+		fastCommBuffer * buffer;
+		fastCommBuffer * buffer2;
 
 		commMode mode;
 		int numProcs;
@@ -69,15 +69,14 @@ class fastComm{
 
 		// 1D array
 		void sendDataGeneric(unsigned long int id, int dest, void * data, size_t size, int tagID, int tagData);
-		void recvDataGeneric(unsigned long int &id, void *& data, size_t &size, int tagID, int tagData);
 		// 2D array
-		void sendDataGeneric(unsigned long int id, int dest, void ** data, size_t * lineSize, size_t size, size_t itemSize, int tagID, int tagDataSize, int tagData);
-		void recvDataGeneric(unsigned long int &id, void **& data, size_t * lineSize, size_t &size, int tagID, int tagDataSize, int tagData);
+		void sendDataGeneric(unsigned long int id, int dest, void ** data, size_t * lineSizes, size_t size, size_t itemSize, int tagID, int tagDataSize, int tagData);
 		// For String and Vector
 		template <typename T>
-		void sendDataGeneric(unsigned long int id, int dest, T * data, size_t size, int tagID, int tagDataSize, int tagData);
-		template <typename T>
-		void recvDataGeneric(unsigned long int &id, T *& data, size_t &size, int tagID, int tagDataSize, int tagData);
+		void sendDataGenericC(unsigned long int id, int dest, T * data, size_t size, int tagID, int tagData);
+
+		void recvDataGeneric(unsigned long int &id, int src, void *& data, size_t &size, int tagID, int tagData);
+		void recvDataGeneric(unsigned long int &id, int src, void **& data, size_t *& lineSizes, size_t &size, int tagID, int tagDataSize, int tagData);
 
 	public:
 		fastComm(const std::string master);
@@ -94,7 +93,7 @@ class fastComm{
 		void recvTask(fastTask & task);
 
 		void sendTaskResult(unsigned long int id, void * res, size_t size, double time);
-		void recvTaskResult(unsigned long int &id, void * res, size_t &size, double &time);
+		void * recvTaskResult(unsigned long int &id, int &proc, size_t &size, double &time);
 
 		void sendCreateFDD(unsigned long int id,  fddType type, size_t size, int dest);
 		void recvCreateFDD(unsigned long int &id, fddType &type, size_t & size);
@@ -108,8 +107,8 @@ class fastComm{
 		void sendFDDSetData(unsigned long int id, int dest, void * data, size_t size);
 		void recvFDDSetData(unsigned long int &id, void *& data, size_t &size);
 
-		void sendFDDSetData(unsigned long int id, int dest, void ** data, size_t * dataSizes, size_t size, size_t itemSize);
-		void recvFDDSetData(unsigned long int &id, void **& data, size_t * dataSizes, size_t &size);
+		void sendFDDSetData(unsigned long int id, int dest, void ** data, size_t * lineSizes, size_t size, size_t itemSize);
+		void recvFDDSetData(unsigned long int &id, void **& data, size_t *& lineSizes, size_t &size);
 
 		void sendFDDSetData(unsigned long int id, int dest, std::string * data, size_t size);
 		void recvFDDSetData(unsigned long int &id, std::string *& data, size_t &size);

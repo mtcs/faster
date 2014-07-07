@@ -13,7 +13,7 @@ std::pair<K,T> workerIFdd<K,T>::reduce (IreduceIFunctionP<K,T> reduceFunc){
 	std::pair<K,T> result;
 	size_t s = localData->getSize();
 	K * ik = localData->getKeys();
-	std::cerr << "START " << id << " " << s << " | ";
+	//std::cerr << "START " << id << " " << s << " | ";
 
 	#pragma omp parallel 
 	{
@@ -21,8 +21,8 @@ std::pair<K,T> workerIFdd<K,T>::reduce (IreduceIFunctionP<K,T> reduceFunc){
 		int tN = omp_get_thread_num();
 		std::pair<K,T> partResult (ik[tN], d[tN] );
 
-		#pragma omp master
-		std::cerr << tN << "(" << nT << ")";
+		//#pragma omp master
+		//std::cerr << tN << "(" << nT << ")";
 
 		#pragma omp for 
 		for (int i = nT; i < s; ++i){
@@ -38,7 +38,7 @@ std::pair<K,T> workerIFdd<K,T>::reduce (IreduceIFunctionP<K,T> reduceFunc){
 			result = reduceFunc(result.first, result.second, partResult.first, partResult.second);
 		}
 	}
-	std::cerr << "END (RESULT: [" << result.first << "] " << result.second << ")";
+	//std::cerr << "END (RESULT: [" << result.first << "] " << result.second << ")";
 	return result;
 }
 
@@ -52,7 +52,7 @@ std::pair<K,T>  workerIFdd<K,T>::bulkReduce (IbulkReduceIFunctionP<K,T> bulkRedu
 
 
 template <typename K, typename T>
-void workerIFdd<K,T>::applyIndependent(void * func, fddOpType op, void * result, size_t & rSize){ 
+void workerIFdd<K,T>::applyIndependent(void * func, fddOpType op, void *& result, size_t & rSize){ 
 	std::pair<K,T> r;
 
 	switch (op){
@@ -74,7 +74,7 @@ void workerIFdd<K,T>::applyIndependent(void * func, fddOpType op, void * result,
 
 
 template <typename K, typename T>
-void workerIFdd<K,T>::apply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize){ 
+void workerIFdd<K,T>::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){ 
 	switch (op){
 		case OP_Map:
 		case OP_BulkMap:

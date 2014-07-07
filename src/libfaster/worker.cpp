@@ -1,11 +1,14 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-#include <time.h>
+#include <chrono>
 
 #include "fastComm.h"
 #include "workerFdd.h"
 #include "worker.h"
+
+typedef std::chrono::milliseconds milli;
+typedef std::chrono::system_clock sysClock;
 
 worker::worker(fastComm * c, void ** ft){
 	std::cerr << "  Starting Worker " << c->getProcId() << '\n';
@@ -52,23 +55,29 @@ void worker::getFDDData(unsigned long int id, void *& data, size_t &size){
 
 
 void worker::preapply(fastTask &task, workerFddBase * destFDD){
+	using std::chrono::system_clock;
+	using std::chrono::duration_cast;
+	using std::chrono::milliseconds;
+
 	workerFddBase * src = fddList[task.srcFDD];
 	size_t rSize;
 	char r = 0;
 	void * result;
-	time_t start,end;
 
-	time (&start);
+	auto start = system_clock::now();
 	src->apply(funcTable[task.functionId], task.operationType, destFDD, result, rSize);
-	time(&end);
+	auto end = system_clock::now();
 
-	std::cerr << " S:RESULT S:" << rSize << " ET:" << difftime (end,start) << " ";
-	if (task.operationType & (OP_GENERICREDUCE))
-		comm->sendTaskResult(task.id, result, rSize, difftime (end,start));
-	else
-		comm->sendTaskResult(task.id, &r, sizeof(char), difftime (end,start));
+	auto duration = duration_cast<milliseconds>(end - start);
 
-	src->deleteItem(result);
+
+	std::cerr << " ET:" << duration.count() << " ";
+	if (task.operationType & (OP_GENERICREDUCE)){
+		comm->sendTaskResult(task.id, result, rSize, duration.count());
+	}else{
+		comm->sendTaskResult(task.id, &r, sizeof(char), duration.count());
+	}
+
 }
 
 void worker::solve(fastTask &task){

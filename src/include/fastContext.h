@@ -8,6 +8,7 @@
 #include <math.h>
 
 
+#include "definitions.h"
 #include "fddBase.h"
 #include "fastComm.h"
 
@@ -73,10 +74,16 @@ class fastContext{
 
 		int findFunc(void * funcP);
 
+		unsigned long int _createFDD(fddBase * ref, fddType type, size_t size);
+		unsigned long int _createIFDD(fddBase * ref, fddType kTypeCode, fddType tTypeCode, size_t size);
 		unsigned long int createFDD(fddBase * ref, size_t typeCode);
 		unsigned long int createFDD(fddBase * ref, size_t typeCode, size_t size);
+		unsigned long int createPFDD(fddBase * ref, size_t typeCode);
+		unsigned long int createPFDD(fddBase * ref, size_t typeCode, size_t size);
 		unsigned long int createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode);
 		unsigned long int createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size);
+		unsigned long int createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode);
+		unsigned long int createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size);
 		unsigned long int readFDD(fddBase * ref, const char * fileName);
 		void getFDDInfo(size_t & size);
 		int numProcs(){ return comm->numProcs; }
@@ -84,7 +91,7 @@ class fastContext{
 
 		unsigned long int enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId);
 
-		void recvTaskResult(unsigned long int &id, void * result, size_t & size);
+		void * recvTaskResult(unsigned long int &id, size_t & size);
 				
 
 		template <class T> 

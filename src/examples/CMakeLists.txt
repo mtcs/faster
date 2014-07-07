@@ -38,11 +38,13 @@ add_executable(fexample-int fexample-int.cpp)
 add_executable(fexample-bulk-int fexample-bulk-int.cpp)
 add_executable(fexample-int-file fexample-int-file.cpp)
 add_executable(fexample-int-array fexample-int-array.cpp)
+add_executable(fexample-int-vector fexample-int-vector.cpp)
 
 target_link_libraries (fexample-int  ${EXTRA_LIBS})
 target_link_libraries (fexample-bulk-int  ${EXTRA_LIBS})
 target_link_libraries (fexample-int-file  ${EXTRA_LIBS})
 target_link_libraries (fexample-int-array  ${EXTRA_LIBS})
+target_link_libraries (fexample-int-vector  ${EXTRA_LIBS})
 
 
 #install(TARGETS fexample-int DESTINATION bin)

@@ -7,7 +7,7 @@
 #include <typeinfo>
 #include <string>
 
-#include "fddBase.h"
+#include "definitions.h"
 
 fddType decodeType(size_t typeCode);
 

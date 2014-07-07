@@ -32,7 +32,7 @@ class workerFdd : public workerFddBase{
 		void _applyI(void * func, fddOpType op, workerIFdd<L,U> * dest);
 		template <typename L, typename U>
 		void _applyIP(void * func, fddOpType op, workerIFdd<L,U> * dest);
-		void _applyReduce(void * func, fddOpType op, void * result, size_t & rSize);
+		void _applyReduce(void * func, fddOpType op, void *& result, size_t & rSize);
 
 		template <typename L>
 		void _preApplyI(void * func, fddOpType op, workerFddBase * dest);
@@ -86,25 +86,30 @@ class workerFdd : public workerFddBase{
 
 	public:
 
-		workerFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){} 
+		workerFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){
+			localData = new fddStorage<T>();
+		} 
 
-		workerFdd(unsigned int ident, fddType t, size_t size) : workerFdd(ident, t){ 
+		workerFdd(unsigned int ident, fddType t, size_t size) : workerFddBase(ident, t){ 
 			localData = new fddStorage<T>(size);
 		}
 
 		~workerFdd(){
+			delete resultBuffer;
 			delete localData;
 		}
 
+		// For known primitive types
 		void setData(T * data, size_t size) {
 			localData->setData(data, size);
 		}
+		// For anonymous primitive types
 		void setData(void * data, size_t size) override{
-			localData->setData((T*)data, size/sizeof(T));
+			localData->setData(data, size);
 		}
-		void setData(void ** data, size_t *lineSizes, size_t size) override{ }
-		void setData(void * keys, void * data, size_t size) override{ }
-		void setData(void * keys, void ** data, size_t *lineSizes, size_t size) override{ }
+		void setData(void ** data UNUSED, size_t * listSizes UNUSED, size_t size UNUSED ) override{}
+		void setData(void * keys UNUSED, void * data UNUSED, size_t size UNUSED) override{ }
+		void setData(void * keys UNUSED, void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override{ }
 
 		fddType getType() override { return type; }
 		fddType getKeyType() override { return Null; }
@@ -132,7 +137,7 @@ class workerFdd : public workerFddBase{
 
 
 		// Apply task functions to FDDs
-		void apply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize);
+		void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize);
 
 };
 
@@ -151,7 +156,7 @@ class workerFdd<T *> : public workerFddBase{
 		void _applyI(void * func, fddOpType op, workerIFdd<L,U> * dest);
 		template <typename L, typename U>
 		void _applyIP(void * func, fddOpType op, workerIFdd<L,U> * dest);
-		void _applyReduce(void * func, fddOpType op, void * result, size_t & rSize);
+		void _applyReduce(void * func, fddOpType op, void *& result, size_t & rSize);
 
 		template <typename L>
 		void _preApplyI(void * func, fddOpType op, workerFddBase * dest);
@@ -198,34 +203,37 @@ class workerFdd<T *> : public workerFddBase{
 
 
 		// REDUCE
-		T * reduce (size_t & rSize, PreducePFunctionP<T> reduceFunc);
-		T * bulkReduce (size_t & rSize, PbulkReducePFunctionP<T> bulkReduceFunc);
+		std::pair<T*,size_t> reduce (PreducePFunctionP<T> reduceFunc);
+		std::pair<T*,size_t> bulkReduce (PbulkReducePFunctionP<T> bulkReduceFunc);
 		
 
 	public:
-		workerFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){} 
+		workerFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){
+			localData = new fddStorage<T*>();
+		} 
 
-		workerFdd(unsigned int ident, fddType t, size_t size) : workerFdd(ident, t){ 
+		workerFdd(unsigned int ident, fddType t, size_t size) : workerFddBase(ident, t){ 
 			localData = new fddStorage<T*>(size);
 		}
 
 		~workerFdd(){
 			delete localData;
+			delete resultBuffer;
 		}
 
 
 		void setData(T ** data, size_t *lineSizes, size_t size) {
 			localData->setData(data, lineSizes, size);
 		}
-		void setData(void * data, size_t size) override{ }
+		void setData(void * data UNUSED, size_t size UNUSED) override{ }
 		void setData(void ** data, size_t *lineSizes, size_t size) override{
 			localData->setData((T**) data, lineSizes, size);
 		}
-		void setData(void * keys, void * data, size_t size) override{ }
-		void setData(void * keys, void ** data, size_t *lineSizes, size_t size) override{ }
+		void setData(void * keys UNUSED, void * data UNUSED, size_t size UNUSED) override{ }
+		void setData(void * keys UNUSED, void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override{ }
+
 		fddType getType() override { return type; }
 		fddType getKeyType() override { return Null; }
-
 		T *& operator[](size_t address){ return localData->getData()[address]; }
 		void * getData() override{ return localData->getData(); }
 		size_t getSize() override{ return localData->getSize(); }
@@ -250,7 +258,7 @@ class workerFdd<T *> : public workerFddBase{
 
 
 		// Apply task functions to FDDs
-		void apply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize);
+		void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize);
 };
 
 #endif

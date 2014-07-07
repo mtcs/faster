@@ -31,7 +31,7 @@ void workerFdd<T *>::map (workerFdd<U> & dest, PmapPFunctionP<T,U> mapFunc){
 	//std::cerr << "START " << id << " " << s << "  ";
 
 	#pragma omp parallel for 
-	for (int i = 0; i < localData->getSize(); ++i){
+	for (int i = 0; i < s; ++i){
 		std::pair<U,size_t> r = mapFunc(d[i], ls[i]);
 		dest[i] = r.first; 
 		dls[i] = r.second;
@@ -70,7 +70,7 @@ void workerFdd<T *>::map (workerIFdd<L,U> & dest, IPmapPFunctionP<T,L,U> mapFunc
 	//std::cerr << "START " << id << " " << s << "  ";
 
 	#pragma omp parallel for 
-	for (int i = 0; i < localData->getSize(); ++i){
+	for (int i = 0; i < s; ++i){
 		std::tuple<L,U,size_t> r = mapFunc(d[i], ls[i]);
 		ok[i] = std::get<0>(r);
 		dest[i] = std::get<1>(r);
@@ -222,7 +222,7 @@ template <typename T>
 template <typename U>
 void workerFdd<T *>::bulkFlatMap(workerFdd<U> & dest,  PbulkFlatMapPFunctionP<T,U> bulkFlatMapFunc ){
 	U * result;
-	size_t * rDataSizes;
+	size_t * rDataSizes = NULL;
 	size_t rSize;
 
 	bulkFlatMapFunc( result, rDataSizes, rSize, (T**) localData->getData(), localData->getLineSizes(), localData->getSize());
@@ -243,7 +243,7 @@ template <typename L, typename U>
 void workerFdd<T *>::bulkFlatMap(workerIFdd<L,U> & dest,  IPbulkFlatMapPFunctionP<T,L,U> bulkFlatMapFunc ){
 	L * keys;
 	U * result;
-	size_t * rDataSizes;
+	size_t * rDataSizes = NULL;
 	size_t rSize;
 
 	bulkFlatMapFunc( keys, result, rDataSizes, rSize, (T**) localData->getData(), localData->getLineSizes(), localData->getSize());
@@ -253,9 +253,9 @@ void workerFdd<T *>::bulkFlatMap(workerIFdd<L,U> & dest,  IPbulkFlatMapPFunction
 
 // REDUCE
 template <typename T>
-T * workerFdd<T *>::reduce (size_t & rSize, PreducePFunctionP<T> reduceFunc){
+std::pair<T*,size_t>  workerFdd<T *>::reduce (PreducePFunctionP<T> reduceFunc){
 	T ** d = localData->getData();
-	T * result;
+	std::pair<T*,size_t> result;
 	size_t s = localData->getSize();
 	size_t * ls = localData->getLineSizes();
 	//std::cerr << "START " << id << " " << s << " | ";
@@ -285,20 +285,19 @@ T * workerFdd<T *>::reduce (size_t & rSize, PreducePFunctionP<T> reduceFunc){
 		}
 		#pragma omp master
 		{
-			result = partResult.first;
-			rSize = partResult.second;
+			result = partResult;
 		}
 
 		#pragma omp barrier
 
 		#pragma omp critical
 		if (omp_get_thread_num() != 0){
-			a = result;
+			a = result.first;
 			b = partResult.first;
-			aSize = rSize;
+			aSize = result.second;
 			bSize = partResult.second;
 
-			std::pair<T *, size_t> r = reduceFunc(a, aSize, b, bSize);
+			result = reduceFunc(a, aSize, b, bSize);
 
 			delete [] a;
 			delete [] b;
@@ -309,10 +308,9 @@ T * workerFdd<T *>::reduce (size_t & rSize, PreducePFunctionP<T> reduceFunc){
 }
 
 template <typename T>
-T * workerFdd<T *>::bulkReduce (size_t & rSize, PbulkReducePFunctionP<T> bulkReduceFunc){
+std::pair<T*,size_t> workerFdd<T *>::bulkReduce (PbulkReducePFunctionP<T> bulkReduceFunc){
 	std::pair<T *, size_t> r = bulkReduceFunc((T**) localData->getData(), localData->getLineSizes(), localData->getSize());
-	rSize = r.second;
-	return r.first;
+	return r;
 }
 template <typename T>
 template <typename U>
@@ -409,17 +407,24 @@ void workerFdd<T *>::_applyIP(void * func, fddOpType op, workerIFdd<L,U> * dest)
 }
 
 template <typename T>
-void workerFdd<T *>::_applyReduce(void * func, fddOpType op, void * result, size_t & rSize){
+void workerFdd<T *>::_applyReduce(void * func, fddOpType op, void *& result, size_t & rSize){
+	std::pair<T*,size_t> r;
 	switch (op){
 		case OP_Reduce:
-			result = reduce(rSize, ( PreducePFunctionP<T> ) func);
+			r = reduce(( PreducePFunctionP<T> ) func);
 			std::cerr << "Reduce " ;
 			break;
 		case OP_BulkReduce:
-			result = bulkReduce(rSize, ( PbulkReducePFunctionP<T> ) func);
+			r = bulkReduce(( PbulkReducePFunctionP<T> ) func);
 			std::cerr << "BulkReduce ";
 			break;
 	}
+	result = r.first;
+	rSize = r.second*sizeof(T);
+	//for (int j = 0; j < rSize; ++j)
+		//std::cerr << (T*) result << " ";
+	//std::cerr << "\n ";
+
 }
 
 
@@ -439,11 +444,11 @@ void workerFdd<T *>::_preApply(void * func, fddOpType op, workerFddBase * dest){
 		case DoubleP:  _applyP(func, op, (workerFdd<double *> *) dest); break;
 		case String:   _apply(func, op, (workerFdd<std::string> *) dest); break;
 		//case Custom:   _apply(func, op, (workerFdd<void *> *) dest); break;
-		//case CharV:     _apply(func, op, (workerFdd<std::vector<char>> *) dest); break;
-		//case IntV:      _apply(func, op, (workerFdd<std::vector<int>> *) dest); break;
-		//case LongIntV:  _apply(func, op, (workerFdd<std::vector<long int>> *) dest); break;
-		//case FloatV:    _apply(func, op, (workerFdd<std::vector<float>> *) dest); break;
-		//case DoubleV:   _apply(func, op, (workerFdd<std::vector<double>> *) dest); break;
+		case CharV:     _apply(func, op, (workerFdd<std::vector<char>> *) dest); break;
+		case IntV:      _apply(func, op, (workerFdd<std::vector<int>> *) dest); break;
+		case LongIntV:  _apply(func, op, (workerFdd<std::vector<long int>> *) dest); break;
+		case FloatV:    _apply(func, op, (workerFdd<std::vector<float>> *) dest); break;
+		case DoubleV:   _apply(func, op, (workerFdd<std::vector<double>> *) dest); break;
 	}
 }
 
@@ -464,16 +469,16 @@ void workerFdd<T *>::_preApplyI(void * func, fddOpType op, workerFddBase * dest)
 		case DoubleP:  _applyIP(func, op, (workerIFdd<L, double *> *) dest); break;
 		case String:   _applyI(func, op,  (workerIFdd<L, std::string> *) dest); break;
 		//case Custom:   _applyI(func, op, (workerFdd<L, void *> *) dest); break;
-		//case CharV:     _applyI(func, op, (workerFdd<L, std::vector<char>> *) dest); break;
-		//case IntV:      _applyI(func, op, (workerFdd<L, std::vector<int>> *) dest); break;
-		//case LongIntV:  _applyI(func, op, (workerFdd<L, std::vector<long int>> *) dest); break;
-		//case FloatV:    _applyI(func, op, (workerFdd<L, std::vector<float>> *) dest); break;
-		//case DoubleV:   _applyI(func, op, (workerFdd<L, std::vector<double>> *) dest); break;
+		case CharV:     _applyI(func, op, (workerIFdd<L, std::vector<char>> *) dest); break;
+		case IntV:      _applyI(func, op, (workerIFdd<L, std::vector<int>> *) dest); break;
+		case LongIntV:  _applyI(func, op, (workerIFdd<L, std::vector<long int>> *) dest); break;
+		case FloatV:    _applyI(func, op, (workerIFdd<L, std::vector<float>> *) dest); break;
+		case DoubleV:   _applyI(func, op, (workerIFdd<L, std::vector<double>> *) dest); break;
 	}
 }
 
 template <typename T>
-void workerFdd<T *>::apply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize){ 
+void workerFdd<T *>::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){ 
 	if (op & OP_GENERICREDUCE){
 		_applyReduce(func, op, result, rSize);
 	}else{
@@ -494,4 +499,5 @@ template class workerFdd<int *>;
 template class workerFdd<long int *>;
 template class workerFdd<float *>;
 template class workerFdd<double *>;
+//template class workerFdd<void *>;
 

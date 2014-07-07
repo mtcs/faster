@@ -16,6 +16,7 @@ class indexedFddStorage;
 
 #include "workerFddBase.h"
 #include "indexedFddStorage.h"
+#include "fastCommBuffer.h"
 
 
 // Worker side FDD
@@ -39,7 +40,7 @@ class workerIFdd : public workerFddBase{
 		void _preApply(void * func, fddOpType op, workerFddBase * destze);
 
 		void applyDependent(void * func, fddOpType op, workerFddBase * destze);
-		void applyIndependent(void * func, fddOpType op, void * result, size_t & rSize);
+		void applyIndependent(void * func, fddOpType op, void *& result, size_t & rSize);
 
 		// --------- FUNCTIONS ----------
 
@@ -89,25 +90,28 @@ class workerIFdd : public workerFddBase{
 
 
 	public:
-		workerIFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){} 
+		workerIFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){
+			localData = new indexedFddStorage<K,T>();
+		} 
 
-		workerIFdd(unsigned int ident, fddType t, size_t size) : workerIFdd(ident, t){ 
+		workerIFdd(unsigned int ident, fddType t, size_t size) : workerFddBase(ident, t){ 
 			localData = new indexedFddStorage<K,T>(size);
 		}
 
 		~workerIFdd(){
 			delete localData;
+			delete resultBuffer;
 		}
 
 		void setData(K * keys, T * data, size_t size) {
 			localData->setData( keys, data, size);
 		}
-		void setData(void * data, size_t size) override{}
-		void setData(void ** data, size_t *lineSizes, size_t size) override{ }
+		void setData(void * data UNUSED, size_t size UNUSED) override{}
+		void setData(void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override{ }
 		void setData(void * keys, void * data, size_t size) override{
 			localData->setData((K*) keys, (T*) data, size);
 		}
-		void setData(void * keys, void ** data, size_t *lineSizes, size_t size) override{ }
+		void setData(void * keys UNUSED, void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override{ }
 		fddType getType() override { return type; }
 		fddType getKeyType() override { return keyType; }
 
@@ -127,7 +131,7 @@ class workerIFdd : public workerFddBase{
 
 
 		// Apply task functions to FDDs
-		void apply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize);
+		void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize);
 
 };
 
@@ -153,7 +157,7 @@ class workerIFdd<K,T*> : public workerFddBase{
 		void _preApply(void * func, fddOpType op, workerFddBase * dest);
 
 		void applyDependent(void * func, fddOpType op, workerFddBase * dest);
-		void applyIndependent(void * func, fddOpType op, void * result, size_t & rSize);
+		void applyIndependent(void * func, fddOpType op, void *& result, size_t & rSize);
 
 		// --------- FUNCTIONS ----------
 
@@ -204,7 +208,9 @@ class workerIFdd<K,T*> : public workerFddBase{
 		
 
 	public:
-		workerIFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){} 
+		workerIFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){
+			localData = new indexedFddStorage<K,T*>();
+		} 
 
 		workerIFdd(unsigned int ident, fddType t, size_t size) : workerIFdd(ident, t){ 
 			localData = new indexedFddStorage<K,T*>(size);
@@ -212,15 +218,16 @@ class workerIFdd<K,T*> : public workerFddBase{
 
 		~workerIFdd(){
 			delete localData;
+			delete resultBuffer;
 		}
 
 
 		void setData(K * keys, T ** data, size_t *lineSizes, size_t size){
 			localData->setData(keys, data, lineSizes, size);
 		}
-		void setData(void * data, size_t size) override{ }
-		void setData(void ** data, size_t *lineSizes, size_t size) override{}
-		void setData(void * keys, void * data, size_t size) override{ }
+		void setData(void * data UNUSED, size_t size UNUSED) override{ }
+		void setData(void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override{}
+		void setData(void * keys UNUSED, void * data UNUSED, size_t size UNUSED) override{ }
 		void setData(void * keys, void ** data, size_t *lineSizes, size_t size) override{
 			localData->setData((K*) keys, (T**) data, lineSizes, size);
 		}
@@ -243,7 +250,7 @@ class workerIFdd<K,T*> : public workerFddBase{
 
 
 		// Apply task functions to FDDs
-		void apply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize);
+		void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize);
 };
 
 

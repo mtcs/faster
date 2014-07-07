@@ -19,13 +19,13 @@ void worker::createFDD (unsigned long int id, fddType type, size_t size){
 		case LongIntP: newFdd = new workerFdd<long int *>(id, type, size); break;
 		case FloatP: newFdd = new workerFdd<float *>(id, type, size); break;
 		case DoubleP: newFdd = new workerFdd<double *>(id, type, size); break;
-		//case Custom: //newFdd = new workerFdd<void *>(id, type, size); break;
+		//case Custom: newFdd = new workerFdd<void *>(id, type, size); break;
 		case String: newFdd = new workerFdd<std::string>(id, type, size); break;
-		//case CharV: newFdd = new workerIFdd<std::vector<char>>(id, type, size); break;
-		//case IntV: newFdd = new workerIFdd<std::vector<int>>(id, type, size); break;
-		//case LongIntV: newFdd = new workerIFdd<std::vector<long int>(id, type, size); break;
-		//case FloatV: newFdd = new workerIFdd<std::vector<float>>(id, type, size); break;
-		//case DoubleV: newFdd = new workerIFdd<std::vector<double>>(id, type, size); break;
+		case CharV: newFdd = new workerFdd<std::vector<char>>(id, type, size); break;
+		case IntV: newFdd = new workerFdd<std::vector<int>>(id, type, size); break;
+		case LongIntV: newFdd = new workerFdd<std::vector<long int>>(id, type, size); break;
+		case FloatV: newFdd = new workerFdd<std::vector<float>>(id, type, size); break;
+		case DoubleV: newFdd = new workerFdd<std::vector<double>>(id, type, size); break;
 	}
 	fddList.insert(fddList.end(), newFdd);
 }

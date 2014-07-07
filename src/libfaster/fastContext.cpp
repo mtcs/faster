@@ -55,12 +55,11 @@ int fastContext::findFunc(void * funcP){
 		if (funcTable[i] == funcP)
 			return i;
 	}
+	return -1;
 }
 
-unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode, size_t size){
+unsigned long int fastContext::_createFDD(fddBase * ref, fddType type, size_t size){
 	
-	fddType type = decodeType(typeCode);
-
 	for (int i = 1; i < comm->numProcs; ++i){
 		size_t dataPerProc = size / (comm->numProcs - 1);
 		int rem = size % (comm->numProcs -1);
@@ -74,19 +73,8 @@ unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode, size_t 
 	
 	return numFDDs++;
 }
-unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode){
-	
-	fddType type = decodeType(typeCode);
 
-	for (int i = 1; i < comm->numProcs; ++i){
-		comm->sendCreateFDD(numFDDs, type, 0, i);
-	}
-	fddList.insert(fddList.begin(), ref);
-
-	return numFDDs++;
-}
-
-unsigned long int fastContext::createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size){
+unsigned long int fastContext::_createIFDD(fddBase * ref, fddType kTypeCode, fddType tTypeCode, size_t size){
 	fddType kType = decodeType(kTypeCode);
 	fddType tType = decodeType(tTypeCode);
 
@@ -102,8 +90,30 @@ unsigned long int fastContext::createIFDD(fddBase * ref, size_t kTypeCode, size_
 	fddList.insert(fddList.begin(), ref);
 	return numFDDs++;
 }
+
+unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode, size_t size){
+	return _createFDD(ref, decodeType(typeCode), size);
+}
+unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode){
+	return _createFDD(ref, decodeType(typeCode), 0);
+}
+unsigned long int fastContext::createPFDD(fddBase * ref, size_t typeCode, size_t size){
+	return _createFDD(ref, POINTER | decodeType(typeCode), size);
+}
+unsigned long int fastContext::createPFDD(fddBase * ref, size_t typeCode){
+	return _createFDD(ref, POINTER | decodeType(typeCode), 0);
+}
+unsigned long int fastContext::createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size){
+	return _createIFDD(ref, decodeType(kTypeCode), decodeType(tTypeCode), size);
+}
 unsigned long int fastContext::createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode){
-	return createIFDD(ref, kTypeCode, tTypeCode, 0);
+	return _createIFDD(ref, decodeType(kTypeCode), decodeType(tTypeCode), 0);
+}
+unsigned long int fastContext::createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size){
+	return _createIFDD(ref, decodeType(kTypeCode), POINTER | decodeType(tTypeCode), size);
+}
+unsigned long int fastContext::createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode){
+	return _createIFDD(ref, decodeType(kTypeCode), POINTER | decodeType(tTypeCode), 0);
 }
 
 // Propagate FDD destruction to other machines
@@ -124,7 +134,7 @@ unsigned long int fastContext::readFDD(fddBase * ref, const char * fileName){
 		int rem = fileSize % (comm->numProcs -1);
 		if (i <= rem)
 			dataPerProc += 1;
-		comm->sendReadFDDFile(numFDDs, std::string(fileName), dataPerProc, offset, i);
+		comm->sendReadFDDFile(ref->getId(), std::string(fileName), dataPerProc, offset, i);
 		offset += dataPerProc;
 	}
 
@@ -162,13 +172,16 @@ unsigned long int fastContext::enqueueTask(fddOpType opT, unsigned long int idSr
 	return newTask->id;
 }
 
-void fastContext::recvTaskResult(unsigned long int &id, void * result, size_t & size){
+void * fastContext::recvTaskResult(unsigned long int &id, size_t & size){
 	double time;
+	int proc;
 
-	comm->recvTaskResult(id, result, size, time);
-	std::cerr << "    R:TaskResult ID:" << id << " Result:"  << * (int*)result << '\n';
+	void * result = comm->recvTaskResult(id, proc, size, time);
+	std::cerr << "    R:TaskResult P:" << proc << " ID:" << id << " Result:"  << * (int*) result << '\n';
 
 	taskList[id]->workersFinished++;
+
+	return result;
 }
 
 template <typename T>
@@ -206,11 +219,11 @@ void fastContext::parallelize(unsigned long int id, T ** data, size_t * dataSize
 		int rem = size % (comm->numProcs -1);
 		if (i <= rem)
 			dataPerProc += 1;
-		std::cerr << "    S:FDDSetData P" << i << " " << id << " " << dataPerProc << "B";
+		std::cerr << "    S:FDDSetPData P" << i << " " << id << " " << dataPerProc << "B ";
 
 		comm->sendFDDSetData(id, i, (void **) &data[offset], &dataSizes[offset], dataPerProc, sizeof(T));
 		offset += dataPerProc;
-		std::cerr << ".\n";
+		std::cerr << "!\n";
 	}
 }
 template void fastContext::parallelize(unsigned long int id, char *    * data, size_t * dataSizes, size_t size);
@@ -229,12 +242,13 @@ void fastContext::parallelize(unsigned long int id, std::vector<T> * data, size_
 		int rem = size % (comm->numProcs -1);
 		if (i <= rem)
 			dataPerProc += 1;
-		std::cerr << "    S:FDDSetData P" << i << " " << id << " " << dataPerProc << "B";
+		std::cerr << "    S:FDDSetVData P" << i << " " << id << " " << dataPerProc << "B";
 
 		comm->sendFDDSetData(id, i, &data[offset], dataPerProc);
 		offset += dataPerProc;
 		std::cerr << ".\n";
 	}
+	//comm->waitForReq(comm->numProcs - 1);
 }
 template void fastContext::parallelize(unsigned long int id, std::vector<char    > * data, size_t size);
 template void fastContext::parallelize(unsigned long int id, std::vector<int     > * data, size_t size);
@@ -251,12 +265,13 @@ void fastContext::parallelize(unsigned long int id, std::string * data, size_t s
 		int rem = size % (comm->numProcs -1);
 		if (i <= rem)
 			dataPerProc += 1;
-		std::cerr << "    S:FDDSetData P" << i << " " << id << " " << dataPerProc << "B";
+		std::cerr << "    S:FDDSetSData P" << i << " " << id << " " << dataPerProc << "B";
 
 		comm->sendFDDSetData(id, i, &data[offset], dataPerProc);
 		offset += dataPerProc;
 		std::cerr << ".\n";
 	}
+	comm->waitForReq(comm->numProcs - 1);
 }
 
 void fastContext::destroyFDD(unsigned long int id){

@@ -14,6 +14,7 @@ class fastCommBuffer{
 		char * _data;
 		size_t _size;
 		size_t _allocatedSize;
+		bool _ownData;
 	public:
 		fastCommBuffer();
 		fastCommBuffer(size_t s);
@@ -60,7 +61,7 @@ class fastCommBuffer{
 		template <typename T>
 		void write(std::vector<T> v){
 			write( v.size() );
-			write( v.data(), v.size() );
+			write( v.data(), v.size()*sizeof(T) );
 		}
 		template <typename K, typename T>
 		void write(std::pair<K,T> p){
@@ -91,7 +92,7 @@ class fastCommBuffer{
 		}
 		template <typename T>
 		void readVec(std::vector<T> & v, size_t s){
-			v.assign((T*) &_data[_size], ((T*) &_data[_size]) + s );
+			v.assign((T*) &_data[_size], (T*) &_data[_size + s] );
 			_size += s;
 		}
 		void readString(std::string & v, size_t s){
@@ -102,7 +103,7 @@ class fastCommBuffer{
 		void read(std::vector<T> & v){
 			size_t size;
 			read(size);
-			readVec(v, size);
+			readVec(v, size*sizeof(T));
 		}
 		void read(std::string & s){
 			size_t size;

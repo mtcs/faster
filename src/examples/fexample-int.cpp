@@ -1,16 +1,18 @@
 #include <iostream>
 #include "libfaster.h"
 
-#define NUMITEMS 100*1000
+#define NUMITEMS 10*1000
 
 using namespace std;
 
 int map1(int & input){
-	return input * 2;
+	//cerr << input << " ";
+	return input / 2;
 }
 
 
 int reduce1(int &a, int &b){
+	//cerr << a+b << " ";
 	return a + b;
 }
 
@@ -29,7 +31,7 @@ int main(int argc, char ** argv){
 	int rawdata[NUMITEMS];
 
 	for ( int i = 0; i < NUMITEMS; ++i )
-		rawdata[i] = 1;
+		rawdata[i] = 2;
 
 	cout << "Import Data" << '\n';
 	fdd <int> data(fc, rawdata, NUMITEMS);

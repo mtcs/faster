@@ -20,11 +20,11 @@ void worker::_createIFDD (unsigned long int id, fddType type, size_t size){
 		case DoubleP: newFdd = new workerIFdd<K, double *>(id, type, size); break;
 		// case Custom: //newFdd = new workerIFdd<K, void *>(id, type, size); break;
 		case String: newFdd = new workerIFdd<K, std::string>(id, type, size); break;
-		//case CharV: newFdd = new workerIFdd<K, std::vector<char>>(id, type, size); break;
-		//case IntV: newFdd = new workerIFdd<K, std::vector<int>>(id, type, size); break;
-		//case LongIntV: newFdd = new workerIFdd<K, std::vector<long int>(id, type, size); break;
-		//case FloatV: newFdd = new workerIFdd<K, std::vector<float>>(id, type, size); break;
-		//case DoubleV: newFdd = new workerIFdd<K, std::vector<double>>(id, type, size); break;
+		case CharV: newFdd = new workerIFdd<K, std::vector<char>>(id, type, size); break;
+		case IntV: newFdd = new workerIFdd<K, std::vector<int>>(id, type, size); break;
+		case LongIntV: newFdd = new workerIFdd<K, std::vector<long int>>(id, type, size); break;
+		case FloatV: newFdd = new workerIFdd<K, std::vector<float>>(id, type, size); break;
+		case DoubleV: newFdd = new workerIFdd<K, std::vector<double>>(id, type, size); break;
 	}
 	fddList.insert(fddList.end(), newFdd);
 }

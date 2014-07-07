@@ -1,26 +1,32 @@
 #include "fastCommBuffer.h"
 
 fastCommBuffer::fastCommBuffer(){
-	reset();
+	_size = 0; 
 	_allocatedSize = BUFFER_INITIAL_SIZE;
-	_data = new char [_allocatedSize];
+	_data = new char [BUFFER_INITIAL_SIZE];
+	_ownData = true;
 }
 fastCommBuffer::fastCommBuffer(size_t s){
-	reset();
+	_size = 0; 
 	if (s > 0){
 		_allocatedSize = s;
 		_data = new char [_allocatedSize];
+		_ownData = true;
 	}else{
 		_allocatedSize = 0;
 		_data = NULL;
+		_ownData = false;
 	}
 }
 fastCommBuffer::~fastCommBuffer(){
-	delete [] _data;
+	if ((_data) && (_ownData))
+		delete [] _data;
 }
 
 void fastCommBuffer::setBuffer(void * buffer, size_t s){ 
-	reset();
+	//if (_data)
+	//	delete [] _data;
+	_size = 0; 
 	_data = (char*) buffer;
 	_allocatedSize = s;
 }

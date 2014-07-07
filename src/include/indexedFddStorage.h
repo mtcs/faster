@@ -4,6 +4,8 @@
 template <class K, class T> class indexedFddStorage;
 
 #include <cstdlib>
+
+#include "definitions.h"
 #include "fddStorageBase.h"
 
 template <class K, class T> 
@@ -19,7 +21,7 @@ class indexedFddStorageCore : public fddStorageBase {
 
 		T * getData();
 		K * getKeys();
-		void   setSize(size_t s) {};
+		void   setSize(size_t s UNUSED) {};
 
 		T & operator[](size_t ref);
 

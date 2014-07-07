@@ -4,84 +4,11 @@
 #include "workerIFdd.h"
 #include "workerFdd.h"
 
-/*char encodeFDDType(fddType type){
-	switch (type){
-		case Char:
-			return FDDTYPE_CHAR;
-		case Int:
-			return FDDTYPE_INT;
-		case LongInt:
-			return FDDTYPE_LONGINT;
-		case Float:
-			return FDDTYPE_FLOAT;
-		case Double:
-			return FDDTYPE_DOUBLE;
-		case String:
-			return FDDTYPE_STRING;
-		case CharP:
-			return FDDTYPE_CHARP;
-		case IntP:
-			return FDDTYPE_INTP;
-		case LongIntP:
-			return FDDTYPE_LONGINTP;
-		case FloatP:
-			return FDDTYPE_FLOATP;
-		case DoubleP:
-			return FDDTYPE_DOUBLEP;
-		case Custom:
-			return FDDTYPE_OBJECT;
-		case Null:
-			return FDDTYPE_NULL;
-	}
-}// */
-/*fddType decodeFDDType(char type){
-	switch (type){
-		case FDDTYPE_CHAR:
-			return Char;
-		case FDDTYPE_INT:
-			return Int;
-		case FDDTYPE_LONGINT:
-			return LongInt;
-		case FDDTYPE_FLOAT:
-			return Float;
-		case FDDTYPE_DOUBLE:
-			return Double;
-		case FDDTYPE_STRING:
-			return String;
-		case FDDTYPE_CHARP:
-			return CharP;
-		case FDDTYPE_INTP:
-			return IntP;
-		case FDDTYPE_LONGINTP:
-			return LongIntP;
-		case FDDTYPE_FLOATP:
-			return FloatP;
-		case FDDTYPE_DOUBLEP:
-			return DoubleP;
-		case FDDTYPE_OBJECT:
-			return Custom;
-		case FDDTYPE_NULL:
-			return Null;
-	}
-}// */
-
-template <> void fastCommBuffer::write<std::string>(std::string s){
-	write( s.length() );
-	write( s.c_str(), s.length()+1 );
-}
-
-template <> void fastCommBuffer::read<std::string>(std::string & s){
-	size_t sSize;
-	read(sSize);
-	std::string tmpStr(_data[_size], sSize);
-}
-
-
 bool fastComm::isDriver(){
 	return (procId == 0);
 }
 
-fastComm::fastComm(const std::string master){
+fastComm::fastComm(const std::string UNUSED master){
 	//MPI_Init (&argc, &argv);
 	MPI_Init (0, NULL);
 	MPI_Comm_size (MPI_COMM_WORLD, &numProcs);
@@ -92,6 +19,8 @@ fastComm::fastComm(const std::string master){
 	status = new MPI_Status [numProcs];
 	req = new MPI_Request [numProcs];
 	req2 = new MPI_Request [numProcs];
+	buffer = new fastCommBuffer [numProcs];
+	buffer2 = new fastCommBuffer [numProcs];
 }
 
 fastComm::~fastComm(){
@@ -109,17 +38,17 @@ void fastComm::probeMsgs(int & tag){
 }
 
 void fastComm::waitForReq(int numReqs){
-	MPI_Waitall(numReqs, &req[1], MPI_STATUSES_IGNORE);
+	MPI_Waitall(numReqs, req, MPI_STATUSES_IGNORE);
 }
 
 
 void fastComm::sendTask(fastTask &task){
-	buffer.reset();
+	buffer[0].reset();
 
-	buffer << task.id << task.operationType << task.srcFDD << task.destFDD << task.functionId;
+	buffer[0] << task.id << task.operationType << task.srcFDD << task.destFDD << task.functionId;
 
 	for (int i = 1; i < numProcs; ++i){
-		MPI_Isend(buffer.data(), buffer.size(), MPI_BYTE, i, MSG_TASK, MPI_COMM_WORLD, &req[i-1]);
+		MPI_Isend(buffer[0].data(), buffer[0].size(), MPI_BYTE, i, MSG_TASK, MPI_COMM_WORLD, &req[i-1]);
 	}
 	MPI_Waitall( numProcs - 1, req, status);
 }
@@ -127,84 +56,89 @@ void fastComm::sendTask(fastTask &task){
 void fastComm::recvTask(fastTask & task){
 	MPI_Status stat;
 
-	buffer.reset();
+	buffer[0].reset();
 
-	MPI_Recv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_TASK, MPI_COMM_WORLD, &stat);	
+	MPI_Recv(buffer[0].data(), buffer[0].free(), MPI_BYTE, 0, MSG_TASK, MPI_COMM_WORLD, &stat);	
 	
-	buffer >> task.id >> task.operationType >> task.srcFDD >> task.destFDD >> task.functionId;
+	buffer[0] >> task.id >> task.operationType >> task.srcFDD >> task.destFDD >> task.functionId;
 }
 
 void fastComm::sendTaskResult(unsigned long int id, void * res, size_t size, double time){
 
-	buffer.reset();
+	buffer[0].reset();
 
-	buffer << id << time << size;
-	buffer.write(res, size);
+	buffer[0] << id << time << size;
+	buffer[0].write(res, size);
 
-	MPI_Send(buffer.data(), buffer.size() , MPI_BYTE, 0, MSG_TASKRESULT, MPI_COMM_WORLD);
+	MPI_Isend(buffer[0].data(), buffer[0].size() , MPI_BYTE, 0, MSG_TASKRESULT, MPI_COMM_WORLD, req);
 }
 
-void fastComm::recvTaskResult(unsigned long int &id, void * res, size_t & size, double & time){
-	buffer.reset();
+void * fastComm::recvTaskResult(unsigned long int & id, int & proc, size_t & size, double & time){
 
-	MPI_Recv(buffer.data(), buffer.free(), MPI_BYTE, MPI_ANY_SOURCE, MSG_TASKRESULT, MPI_COMM_WORLD, status);	
+	buffer[0].reset();
 
-	buffer >> id >> time >> size;
-	buffer.read(res, size);
+	MPI_Recv(buffer[0].data(), buffer[0].free(), MPI_BYTE, MPI_ANY_SOURCE, MSG_TASKRESULT, MPI_COMM_WORLD, status);	
+	buffer[0] >> id >> time >> size;
+	proc = status->MPI_SOURCE;
+	void * res = buffer[0].pos();
+	//char * res = new char[size];
+	//buffer[0].read(res, size);
+
+	return res;
 }
 
 void fastComm::sendCreateFDD(unsigned long int id, fddType type, size_t size, int dest){
 	//char typeC = encodeFDDType(type);
 
-	buffer.reset();
+	buffer[dest].reset();
 
-	//buffer << id << typeC << size;
-	buffer << id << type << size;
+	//buffer[dest] << id << typeC << size;
+	buffer[dest] << id << type << size;
 
-	//std::cerr << '(' << id << ' ' << (int) typeC << ":" << buffer.size() << ')';
+	//std::cerr << '(' << id << ' ' << (int) typeC << ":" << buffer[dest].size() << ')';
 
-	MPI_Isend(buffer.data(), buffer.size(), MPI_BYTE, dest, MSG_CREATEFDD, MPI_COMM_WORLD, &req[dest-1]);
+	MPI_Isend(buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, MSG_CREATEFDD, MPI_COMM_WORLD, &req[dest-1]);
 }
 
 void fastComm::recvCreateFDD(unsigned long int &id, fddType &type, size_t &size){
 	//char t;
 
-	buffer.reset();
+	buffer[0].reset();
 
-	MPI_Recv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_CREATEFDD, MPI_COMM_WORLD, status);	
+	MPI_Recv(buffer[0].data(), buffer[0].free(), MPI_BYTE, 0, MSG_CREATEFDD, MPI_COMM_WORLD, status);	
 
-	//buffer >> id >> t >> size;
+	//buffer[0] >> id >> t >> size;
 	//type = decodeFDDType(t);
-	buffer >> id >> type >> size;
+	buffer[0] >> id >> type >> size;
 
-	//std::cerr << '(' << id << ' ' << (int) t << ":" << buffer.size()  << ')';
+	//std::cerr << '(' << id << ' ' << (int) t << ":" << buffer[dest].size()  << ')';
 }
 
 void fastComm::sendCreateIFDD(unsigned long int id, fddType kType,  fddType tType,  size_t size, int dest){
 	//char typeC = encodeFDDType(type);
 
-	buffer.reset();
+	buffer[dest].reset();
 
-	//buffer << id << typeC << size;
-	buffer << id << kType << tType << size;
+	//buffer[dest] << id << typeC << size;
+	buffer[dest] << id << kType << tType << size;
 
-	//std::cerr << '(' << id << ' ' << (int) typeC << ":" << buffer.size() << ')';
+	//std::cerr << '(' << id << ' ' << (int) typeC << ":" << buffer[dest].size() << ')';
 
-	MPI_Isend(buffer.data(), buffer.size(), MPI_BYTE, dest, MSG_CREATEIFDD, MPI_COMM_WORLD, &req[dest-1]);
+	MPI_Isend(buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, MSG_CREATEIFDD, MPI_COMM_WORLD, &req[dest-1]);
 }
 
 void fastComm::recvCreateIFDD(unsigned long int &id, fddType &kType, fddType &tType,  size_t &size){
 	//char t;
 
-	buffer.reset();
+	buffer[0].reset();
 
-	MPI_Recv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_CREATEIFDD, MPI_COMM_WORLD, status);	
+	MPI_Recv(buffer[0].data(), buffer[0].free(), MPI_BYTE, 0, MSG_CREATEIFDD, MPI_COMM_WORLD, status);	
 
-	//buffer >> id >> t >> size;
+	//buffer[0] >> id >> t >> size;
 	//type = decodeFDDType(t);
-	buffer >> id >> kType >> tType >> size;
+	buffer[0] >> id >> kType >> tType >> size;
 
-	//std::cerr << '(' << id << ' ' << (int) t << ":" << buffer.size()  << ')';
+	//std::cerr << '(' << id << ' ' << (int) t << ":" << buffer[dest].size()  << ')';
 }
 
 void fastComm::sendDestroyFDD(unsigned long int id){
@@ -212,7 +146,7 @@ void fastComm::sendDestroyFDD(unsigned long int id){
 		MPI_Isend( &id, sizeof(long unsigned int), MPI_BYTE, i, MSG_DESTROYFDD, MPI_COMM_WORLD, &req[i-1]);
 	}
 
-	MPI_Waitall( numProcs - 1, req, status);
+	//MPI_Waitall( numProcs - 1, req, status);
 }
 void fastComm::recvDestroyFDD(unsigned long int &id){
 	MPI_Recv(&id, sizeof(long unsigned int), MPI_BYTE, 0, MSG_DESTROYFDD, MPI_COMM_WORLD, status);	
@@ -225,215 +159,182 @@ void fastComm::recvDestroyFDD(unsigned long int &id){
 // Generic Data communication functions
 // Send 1D Data
 void fastComm::sendDataGeneric(unsigned long int id, int dest, void * data, size_t size, int tagID, int tagData){
-	buffer.reset();
+	buffer[dest].reset();
 
-	buffer << id << size;
+	buffer[dest] << id << size;
 
-	MPI_Isend( buffer.data(), buffer.size(), MPI_BYTE, dest, tagID , MPI_COMM_WORLD, &req2[dest]);
-	MPI_Isend( data, size, MPI_BYTE, dest, tagData, MPI_COMM_WORLD, &req[dest]);
+	MPI_Isend( buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, tagID , MPI_COMM_WORLD, &req2[dest-1]);
+	MPI_Isend( data, size, MPI_BYTE, dest, tagData, MPI_COMM_WORLD, &req[dest-1]);
 }
 
-void fastComm::recvDataGeneric(unsigned long int &id, void *& data, size_t &size, int tagID, int tagData){
-	buffer.reset();
+// Send Container (String and Vector) Data
+template <typename T>
+void fastComm::sendDataGenericC(unsigned long int id, int dest, T * data, size_t size, int tagID, int tagData){
+	buffer[dest].reset();
 
-	// Receive the FDD ID
-	MPI_Recv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_FDDSETDATAID, MPI_COMM_WORLD, status);	
-	buffer >> id >> size;
+	// Send data information
+	buffer[dest] << id << size;
+	MPI_Isend( buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, tagID , MPI_COMM_WORLD, &req2[dest-1]);
 
-	buffer.grow(size);
-	buffer.reset();
-
-	MPI_Recv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_FDDSETDATA, MPI_COMM_WORLD, status);	
-	data = buffer.data();
+	buffer[dest].reset();
+	// Send subarrays
+	for ( size_t i = 0; i < size; ++i){
+		buffer[dest] << data[i];
+	}
+	MPI_Isend( buffer[dest].data(), buffer[dest].size(),  MPI_BYTE, dest, tagData, MPI_COMM_WORLD, &req[dest-1]);
+	//MPI_Send( buffer[dest].data(), buffer[dest].size(),  MPI_BYTE, dest, tagData, MPI_COMM_WORLD);
 }
 
 // Send 2D Data
 void fastComm::sendDataGeneric(unsigned long int id, int dest, void ** data, size_t * lineSizes, size_t size, size_t itemSize, int tagID, int tagDataSize, int tagData){
 	MPI_Request * localReq = new MPI_Request[size];
-	MPI_Status stat;
-
-	buffer.reset();
+	MPI_Status * stat = new MPI_Status[size];
 
 	// Send data information
-	buffer << id << size << itemSize;
-	MPI_Send( buffer.data(), buffer.size(), MPI_BYTE, dest, tagID , MPI_COMM_WORLD);
+	buffer[dest].reset();
+	buffer[dest] << id << size << itemSize;
+	MPI_Send( buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, tagID , MPI_COMM_WORLD);
 
 	// Send subarrays sizes
 	MPI_Send( lineSizes, size*sizeof(size_t), MPI_BYTE, dest, tagDataSize, MPI_COMM_WORLD);
+
+	//size_t ds;
+	//ds = 0;
+	//for ( size_t i = 0; i < size; ++i){
+		//ds += lineSizes[i];
+	//}
+	//std::cerr << "Total data:"<< ds << "\n";
 
 	// Send subarrays
 	for ( size_t i = 0; i < size; ++i){
 		MPI_Isend( data[i], lineSizes[i]*itemSize, MPI_BYTE, dest, tagData, MPI_COMM_WORLD, &localReq[i]);
 	}
 		
-	MPI_Waitall( size, localReq, &stat);
+	MPI_Waitall( size, localReq, stat);
 
 	delete localReq;
+	delete stat;
 }
 
-void fastComm::recvDataGeneric(unsigned long int &id, void **& data, size_t * lineSizes, size_t &size, int tagID, int tagDataSize, int tagData){
-	buffer.reset();
+
+// Receive 1D data
+void fastComm::recvDataGeneric(unsigned long int &id, int src, void *& data, size_t &size, int tagID, int tagData){
+	MPI_Status stat;
+	int recvDataSize;
+
+	buffer[src].reset();
+
+	// Receive the FDD ID
+	MPI_Recv(buffer[src].data(), buffer[src].free(), MPI_BYTE, src, tagID, MPI_COMM_WORLD, &stat);	
+	buffer[src] >> id >> size;
+
+	MPI_Probe(src, tagData, MPI_COMM_WORLD, &stat);
+	MPI_Get_count(&stat, MPI_BYTE, &recvDataSize);
+
+	buffer[src].reset();
+	buffer[src].grow(recvDataSize);
+
+	MPI_Recv(buffer[src].data(), buffer[src].free(), MPI_BYTE, src, tagData, MPI_COMM_WORLD, &stat);	
+
+	for ( int i = 0; i < recvDataSize/4; ++i )
+		std::cerr << ((int*) buffer[src].data())[i] << " ";
+	
+	data = buffer[src].data();
+}
+
+
+// Receive 2D data
+void fastComm::recvDataGeneric(unsigned long int &id, int src, void **& data, size_t *& lineSizes, size_t &size, int tagID, int tagDataSize, int tagData){
+	buffer[src].reset();
 	size_t ds, itemSize;
-	MPI_Status stat;
+	int recvDataSize;
+	MPI_Status * stat;
+	MPI_Request * localReq;
 
 	// Receive the FDD ID, size and item size
-	MPI_Recv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_FDDSETDATAID, MPI_COMM_WORLD, status);	
-	buffer >> id >> size >> itemSize;
+	MPI_Recv(buffer[src].data(), buffer[src].free(), MPI_BYTE, src, tagID, MPI_COMM_WORLD, status);	
+	buffer[src] >> id >> size >> itemSize;
 
-	MPI_Request * localReq = new MPI_Request[size];
 
-	buffer2.grow(size*itemSize);
-	buffer2.reset();
+	localReq = new MPI_Request[size];
+	stat = new MPI_Status[size];
+
+	MPI_Probe(src, tagDataSize, MPI_COMM_WORLD, status);
+	MPI_Get_count(status, MPI_BYTE, &recvDataSize);
+	buffer2[src].grow(recvDataSize);
+	buffer2[src].reset();
 
 	// Receive the size of every line to be received
-	MPI_Recv(buffer2.data(), buffer2.free(), MPI_BYTE, 0, MSG_FDDSETDATA, MPI_COMM_WORLD, status);	
-	memcpy (lineSizes,  buffer2.data(), size * sizeof(size_t *) );
+	MPI_Recv(buffer2[src].data(), buffer2[src].free(), MPI_BYTE, src, tagDataSize, MPI_COMM_WORLD, status);	
+	lineSizes = (size_t *) buffer2[src].data();
 
+	ds = 0;
 	// Figure out the size the busffer needs to be
 	for ( size_t i = 0; i < size; ++i){
-		ds += lineSizes[i]*itemSize;
+		ds += lineSizes[i];
 	}
 
-	buffer.grow(ds);
-	buffer.reset();
+	buffer[src].grow(ds*itemSize);
+	buffer[src].reset();
 
+	data = new void*[size];
 	// Receive a array of arrays
 	for ( size_t i = 0; i < size; ++i){
-		MPI_Irecv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_FDDSETDATA, MPI_COMM_WORLD, &localReq[i]);	
-		data[i] = buffer.pos();
-		buffer.advance(lineSizes[i]*itemSize);
+		MPI_Irecv(buffer[src].pos(), buffer[src].free(), MPI_BYTE, src, tagData, MPI_COMM_WORLD, &localReq[i]);	
+		data[i] = buffer[src].pos();
+		buffer[src].advance(lineSizes[i]*itemSize);
 	}
-	MPI_Waitall( size, localReq, &stat);
-
+	MPI_Waitall( size, localReq, stat);
+	
 	delete localReq;
 }
 
-// Send String and Vector Data
-template <typename T>
-void fastComm::sendDataGeneric(unsigned long int id, int dest, T * data, size_t size, int tagID, int tagDataSize, int tagData){
-	MPI_Request * localReq = new MPI_Request[size];
-	MPI_Status stat;
-	size_t * lineSizes = new size_t[size];
-	size_t itemSize = sizeof(typename T::value_type);
 
-	for ( size_t i = 0; i < size; ++i){
-		lineSizes[i] = data[i].size();
-	}
-
-	buffer.reset();
-
-	// Send data information
-	buffer << id << size;
-	MPI_Send( buffer.data(), buffer.size(), MPI_BYTE, dest, tagID , MPI_COMM_WORLD);
-
-	// Send subarrays sizes
-	MPI_Send( lineSizes, size*sizeof(size_t), MPI_BYTE, dest, tagDataSize, MPI_COMM_WORLD);
-
-	// Send subarrays
-	for ( size_t i = 0; i < size; ++i){
-		MPI_Isend( (void*) data[i].data(), lineSizes[i] * itemSize, MPI_BYTE, dest, tagData, MPI_COMM_WORLD, &localReq[i]);
-	}
-		
-	MPI_Waitall( size, localReq, &stat);
-
-	delete [] localReq;
-	delete [] lineSizes;
-}
-
-template <typename T>
-void fastComm::recvDataGeneric(unsigned long int &id, T *& data, size_t &size, int tagID, int tagDataSize, int tagData){
-	buffer.reset();
-	size_t ds;
-	size_t * lineSizes;
-	MPI_Status stat;
-	size_t itemSize = sizeof(typename T::value_type);
-
-	// Receive the FDD ID, size and item size
-	MPI_Recv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_FDDSETDATAID, MPI_COMM_WORLD, status);	
-	buffer >> id >> size;
-
-	MPI_Request * localReq = new MPI_Request[size];
-	lineSizes = new size_t[size];
-
-	buffer2.grow(size);
-	buffer2.reset();
-
-	// Receive the size of every line to be received
-	MPI_Recv(buffer2.data(), buffer2.free(), MPI_BYTE, 0, MSG_FDDSETDATA, MPI_COMM_WORLD, status);	
-	memcpy (lineSizes,  buffer2.data(), size * sizeof(size_t *) );
-
-	// Figure out the size the busffer needs to be
-	for ( size_t i = 0; i < size; ++i){
-		ds += lineSizes[i] * sizeof(typename T::value_type);
-	}
-
-	buffer.grow(ds);
-	buffer.reset();
-
-	// Receive a array of arrays
-	for ( size_t i = 0; i < size; ++i){
-		MPI_Irecv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_FDDSETDATA, MPI_COMM_WORLD, &localReq[i]);	
-		data[i] = T(buffer.pos(), buffer.pos() + itemSize*lineSizes[i]); // TODO VERIFY THIS!
-		buffer.advance(lineSizes[i] * itemSize);
-	}
-	MPI_Waitall( size, localReq, &stat);
-
-	delete [] localReq;
-}
-
+// 1D Primitive types
 void fastComm::sendFDDSetData(unsigned long int id, int dest, void * data, size_t size){
 	sendDataGeneric(id, dest, data, size, MSG_FDDSETDATAID, MSG_FDDSETDATA);
 }
 
 void fastComm::recvFDDSetData(unsigned long int &id, void *& data, size_t &size){
-	recvDataGeneric(id, data, size, MSG_FDDSETDATAID, MSG_FDDSETDATA);
+	recvDataGeneric(id, 0, data, size, MSG_FDDSETDATAID, MSG_FDDSETDATA);
 }
 
+// 2D Primitive types
 void fastComm::sendFDDSetData(unsigned long int id, int dest, void ** data, size_t *lineSize, size_t size, size_t itemSize){
 	sendDataGeneric(id, dest, data, lineSize, size, itemSize, MSG_FDDSET2DDATAID, MSG_FDDSET2DDATASIZES, MSG_FDDSET2DDATA);
 }
 
-void fastComm::recvFDDSetData(unsigned long int &id, void **& data, size_t *lineSize, size_t &size){
-	recvDataGeneric(id, data, lineSize, size, MSG_FDDSET2DDATAID, MSG_FDDSET2DDATASIZES, MSG_FDDSET2DDATA);
+void fastComm::recvFDDSetData(unsigned long int &id, void **& data, size_t *& lineSizes, size_t &size){
+	recvDataGeneric(id, 0, data, lineSizes, size, MSG_FDDSET2DDATAID, MSG_FDDSET2DDATASIZES, MSG_FDDSET2DDATA);
 }
 
+// Containers
 void fastComm::sendFDDSetData(unsigned long int id, int dest, std::string * data, size_t size){
-	sendDataGeneric(id, dest, data, size, MSG_FDDSET2DDATAID, MSG_FDDSET2DDATASIZES, MSG_FDDSET2DDATA);
-}
-void fastComm::recvFDDSetData(unsigned long int &id, std::string *& data, size_t &size){
-	recvDataGeneric(id, data, size, MSG_FDDSET2DDATAID, MSG_FDDSET2DDATASIZES, MSG_FDDSET2DDATA);
+	sendDataGenericC(id, dest, data, size, MSG_FDDSETDATAID, MSG_FDDSETDATA);
 }
 
 template <typename T>
 void fastComm::sendFDDSetData(unsigned long int id, int dest, std::vector<T> * data, size_t size){
-	sendDataGeneric(id, dest, data, size, MSG_FDDSET2DDATAID, MSG_FDDSET2DDATASIZES, MSG_FDDSET2DDATA);
+	sendDataGenericC(id, dest, data, size, MSG_FDDSETDATAID, MSG_FDDSETDATA);
 }
+
 template void fastComm::sendFDDSetData(unsigned long int id, int dest, std::vector<char    > * data, size_t size);
 template void fastComm::sendFDDSetData(unsigned long int id, int dest, std::vector<int     > * data, size_t size);
 template void fastComm::sendFDDSetData(unsigned long int id, int dest, std::vector<long int> * data, size_t size);
 template void fastComm::sendFDDSetData(unsigned long int id, int dest, std::vector<float   > * data, size_t size);
 template void fastComm::sendFDDSetData(unsigned long int id, int dest, std::vector<double  > * data, size_t size);
 
-template <typename T>
-void fastComm::recvFDDSetData(unsigned long int &id, std::vector<T> *& data, size_t &size){
-	recvDataGeneric(id, data, size, MSG_FDDSET2DDATAID, MSG_FDDSET2DDATASIZES, MSG_FDDSET2DDATA);
-}
-template void fastComm::recvFDDSetData(unsigned long int &id, std::vector<char    > *& data, size_t &size);
-template void fastComm::recvFDDSetData(unsigned long int &id, std::vector<int     > *& data, size_t &size);
-template void fastComm::recvFDDSetData(unsigned long int &id, std::vector<long int> *& data, size_t &size);
-template void fastComm::recvFDDSetData(unsigned long int &id, std::vector<float   > *& data, size_t &size);
-template void fastComm::recvFDDSetData(unsigned long int &id, std::vector<double  > *& data, size_t &size);
 
 
 
 
-// Parallelization data communication
+// Parallel data communication
 void fastComm::sendFDDData(unsigned long int id, int dest, void * data, size_t size){
 	sendDataGeneric(id, dest, data, size, MSG_FDDDATAID, MSG_FDDDATA);
 }
 
 void fastComm::recvFDDData(unsigned long int &id, void * data, size_t &size){
-	recvDataGeneric(id, data, size, MSG_FDDDATAID, MSG_FDDDATA);
+	recvDataGeneric(id, 0, data, size, MSG_FDDDATAID, MSG_FDDDATA);
 }
 
 
@@ -441,21 +342,21 @@ void fastComm::recvFDDData(unsigned long int &id, void * data, size_t &size){
 
 void fastComm::sendReadFDDFile(unsigned long int id, std::string filename, size_t size, size_t offset, int dest){
 	
-	buffer.reset();
+	buffer[dest].reset();
 
-	buffer << id << size << offset << filename;
+	buffer[dest] << id << size << offset << filename;
 
-	MPI_Isend( buffer.data(), buffer.size(), MPI_BYTE, dest, MSG_READFDDFILE, MPI_COMM_WORLD, &req[dest]);
+	MPI_Isend( buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, MSG_READFDDFILE, MPI_COMM_WORLD, &req[dest]);
 }
 
 void fastComm::recvReadFDDFile(unsigned long int &id, std::string & filename, size_t &size, size_t & offset){
 	size_t filenameSize;
 
-	buffer.reset();
+	buffer[0].reset();
 
-	MPI_Recv(buffer.data(), buffer.free(), MPI_BYTE, 0, MSG_READFDDFILE, MPI_COMM_WORLD, status);	
-	buffer >> id >> size >> offset >> filenameSize;
-	buffer.read(filename, filenameSize);
+	MPI_Recv(buffer[0].data(), buffer[0].free(), MPI_BYTE, 0, MSG_READFDDFILE, MPI_COMM_WORLD, status);	
+	buffer[0] >> id >> size >> offset >> filenameSize;
+	buffer[0].read(filename, filenameSize);
 }
 
 
@@ -464,7 +365,7 @@ void fastComm::sendFDDInfo(size_t size){
 }
 
 void fastComm::recvFDDInfo(size_t &size){
-	MPI_Recv(&size, sizeof(long unsigned int), MPI_BYTE, MPI_ANY_SOURCE, MSG_FDDINFO, MPI_COMM_WORLD, status);
+	MPI_Recv(&size, sizeof(size_t), MPI_BYTE, MPI_ANY_SOURCE, MSG_FDDINFO, MPI_COMM_WORLD, status);
 }
 
 
@@ -473,7 +374,7 @@ void fastComm::sendCollect(unsigned long int id){
 		MPI_Isend( &id, sizeof(long unsigned int), MPI_BYTE, i, MSG_COLLECT, MPI_COMM_WORLD, &req[i-1]);
 	}
 
-	MPI_Waitall( numProcs - 1, req, status);
+	//MPI_Waitall( numProcs - 1, req, status);
 }
 
 void fastComm::recvCollect(unsigned long int &id){
@@ -482,12 +383,12 @@ void fastComm::recvCollect(unsigned long int &id){
 
 void fastComm::sendFinish(){
 	for (int i = 1; i < numProcs; ++i){
-		MPI_Isend( buffer.data(), 1, MPI_BYTE, i, MSG_FINISH, MPI_COMM_WORLD, &req[i-1]);
+		MPI_Isend( buffer[0].data(), 1, MPI_BYTE, i, MSG_FINISH, MPI_COMM_WORLD, &req[i-1]);
 	}
 
 	MPI_Waitall( numProcs - 1, req, status);
 }
 void fastComm::recvFinish(){
-	MPI_Recv(buffer.data(), 1, MPI_BYTE, 0, MSG_FINISH, MPI_COMM_WORLD, status);	
+	MPI_Recv(buffer[0].data(), 1, MPI_BYTE, 0, MSG_FINISH, MPI_COMM_WORLD, status);	
 }
 

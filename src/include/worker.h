@@ -9,6 +9,7 @@ class fastContext;
 class fastComm;
 
 #include "workerFddBase.h"
+#include "fastTask.h"
 
 
 // Worker class

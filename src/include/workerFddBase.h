@@ -5,7 +5,7 @@ class fastCommBuffer;
 
 #include <cstdlib>
 
-#include "fddBase.h"
+#include "definitions.h"
 
 class workerFddBase{
 	protected:
@@ -17,7 +17,7 @@ class workerFddBase{
 	public:
 		workerFddBase() ;
 		workerFddBase(unsigned int ident, fddType t);
-		~workerFddBase() ;
+		virtual ~workerFddBase() ;
 
 		virtual fddType getType() = 0;
 		virtual fddType getKeyType() = 0;
@@ -35,7 +35,7 @@ class workerFddBase{
 
 		virtual void deleteItem(void * item) = 0;
 
-		virtual void apply(void * func, fddOpType op, workerFddBase * dest, void * result, size_t & rSize) = 0;
+		virtual void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize) = 0;
 				
 };
 

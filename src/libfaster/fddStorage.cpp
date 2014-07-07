@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 
+#include "fastCommBuffer.h"
 #include "fddStorage.h"
 
 template <class T> 
@@ -47,11 +48,11 @@ template class fddStorageCore<long int *>;
 template class fddStorageCore<float *>;
 template class fddStorageCore<double *>;
 template class fddStorageCore<std::string>;
-//template class fddStorageCore<std::vector<char>>;
-//template class fddStorageCore<std::vector<int>>;
-//template class fddStorageCore<std::vector<long int>>;
-//template class fddStorageCore<std::vector<float>>;
-//template class fddStorageCore<std::vector<double>>;
+template class fddStorageCore<std::vector<char>>;
+template class fddStorageCore<std::vector<int>>;
+template class fddStorageCore<std::vector<long int>>;
+template class fddStorageCore<std::vector<float>>;
+template class fddStorageCore<std::vector<double>>;
 
 
 
@@ -59,8 +60,13 @@ template class fddStorageCore<std::string>;
 template <class T> 
 fddStorage<T>::fddStorage() : fddStorageCore<T>(){}
 template <class T> 
-fddStorage<T*>::fddStorage() : fddStorageCore<T*>(){}
+fddStorage<T*>::fddStorage() : fddStorageCore<T*>(){
+}
 
+template <class T> 
+fddStorage<T *>::fddStorage(size_t s):fddStorageCore<T *>(s){
+	lineSizes = new size_t[s];
+}
 
 template <class T> 
 fddStorage<T>::fddStorage(T * data, size_t s) : fddStorageCore<T>(s){
@@ -68,7 +74,7 @@ fddStorage<T>::fddStorage(T * data, size_t s) : fddStorageCore<T>(s){
 }
 
 template <class T> 
-fddStorage<T *>::fddStorage(T ** data, size_t * lineSizes, size_t s) : fddStorageCore<T *>(s){
+fddStorage<T *>::fddStorage(T ** data, size_t * lineSizes, size_t s) : fddStorage(s){
 	setData( data, lineSizes, s);
 }
 
@@ -87,20 +93,40 @@ fddStorage<T *>::~fddStorage(){
 
 template <class T> 
 void fddStorage<T>::setData( T * data, size_t s){
-	grow(s / sizeof(T));
-	//memcpy(localData, data, s );
+	grow(s);
+	this->size = s;
+
 	for ( size_t i = 0; i < s; ++i){
 		this->localData[i] = data[i];
 	}
-	this->size = s / sizeof(T);
+}
+// Works for primitive and Containers
+template <class T> 
+void fddStorage<T>::setData(void * data, size_t s){
+	fastCommBuffer buffer(0);
+
+	//grow(s);
+	//this->size = s;
+	buffer.setBuffer(data, s);
+
+	std::cerr << "\nfddStorage setData ";
+	for ( size_t i = 0; i < this->size; ++i){
+		std::cerr << ((int *) data)[i] << " ";
+		buffer >> this->localData[i];
+	}
+	std::cerr << "\n";
 }
 
 template <class T> 
-void fddStorage<T *>::setData( T ** data, size_t * lineSizes, size_t s){
+void fddStorage<T *>::setData( T ** data, size_t * ls, size_t s){
 	grow(s);
+	#pragma omp parallel for
 	for ( int i = 0; i < s; ++i){
-		this->localData[i] = (T *) new  T [lineSizes[i]];
+		lineSizes[i] = ls[i];
+		
+		this->localData[i] = new  T [lineSizes[i]];
 		//memcpy(localData[i], data[i], lineSizes[i] );
+		
 		for ( int j = 0; j < lineSizes[i]; ++j){
 			this->localData[i][j] =  ((T *) data[i])[j];
 		}
@@ -251,8 +277,8 @@ template class fddStorage<long int *>;
 template class fddStorage<float *>;
 template class fddStorage<double *>;
 template class fddStorage<std::string>;
-//template class fddStorage<std::vector<char>>;
-//template class fddStorage<std::vector<int>>;
-//template class fddStorage<std::vector<long int>>;
-//template class fddStorage<std::vector<float>>;
-//template class fddStorage<std::vector<double>>;
+template class fddStorage<std::vector<char>>;
+template class fddStorage<std::vector<int>>;
+template class fddStorage<std::vector<long int>>;
+template class fddStorage<std::vector<float>>;
+template class fddStorage<std::vector<double>>;
