@@ -41,14 +41,15 @@ class iFddCore : public fddBase{
 		template <typename L, typename U> 
 		indexedFdd<L,U> * map( void * funcP, fddOpType op){
 			indexedFdd<L,U> * newFdd;
+			char result;
+			size_t rSize;
+
 			if ( (op & 0xFF ) & (OP_FlatMap | OP_BulkFlatMap) ){
 				newFdd = new indexedFdd<L,U>(*context);
 			}else{
 				newFdd = new indexedFdd<L,U>(*context, size);
 			}
 			unsigned long int newFddId = newFdd->getId();
-			char result;
-			size_t rSize;
 
 			// Decode function pointer
 			int funcId = context->findFunc(funcP);
@@ -60,6 +61,7 @@ class iFddCore : public fddBase{
 			for (int i = 1; i < context->numProcs(); ++i){
 				result = * (char*) context->recvTaskResult(id, rSize);
 			}
+
 			return newFdd;
 		}
 

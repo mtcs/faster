@@ -30,14 +30,15 @@ class fddCore : public fddBase {
 		template <typename U> 
 		fdd<U> * map( void * funcP, fddOpType op){
 			fdd<U> * newFdd ;
+			size_t result;
+			size_t rSize;
+
 			if ( (op & 0xFF ) & (OP_FlatMap | OP_BulkFlatMap) ){
 				newFdd = new fdd<U>(*context);
 			}else{
 				newFdd = new fdd<U>(*context, size);
 			}
 			unsigned long int newFddId = newFdd->getId();
-			size_t result;
-			size_t rSize;
 
 			// Decode function pointer
 			int funcId = context->findFunc(funcP);
