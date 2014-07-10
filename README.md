@@ -2,6 +2,8 @@
 ======
 ####Super Fast Distributed Computing
 
+http://mtcs.github.io/faster
+
 Faster is a distributed computing framework designed to be fast, efficient and flexible. It is designed to work well in small and large heterogeneous clusters. Although, we are still in heavy development.
 
 
