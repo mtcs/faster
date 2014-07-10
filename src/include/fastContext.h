@@ -49,6 +49,8 @@ class fastContext{
 
 	template <class T> friend class fdd;
 	template <class T> friend class fddCore;
+	template <class K, class T> friend class iFddCore;
+	template <class K, class T> friend class indexedFdd;
 	friend class worker;
 
 	public:
@@ -112,15 +114,129 @@ class fastContext{
 
 
 		// Propagate FDD data to other machines
+		// Primitive types
+		template <typename T>
+		void parallelize(unsigned long int id, T * data, size_t size){
+			//int numBlocks = ceil ( size / settings->blockSize );
+			//int blocksPerProc = numBlocks / (comm->numProcs - 1); // TODO DYNAMICALLY VARIATE BLOCK PER PROC LATER
+			size_t offset = 0;
 
+			for (int i = 1; i < comm->numProcs; ++i){
+				int dataPerProc = size/(comm->numProcs - 1);
+				int rem = size % (comm->numProcs -1);
+				if (i <= rem)
+					dataPerProc += 1;
+				std::cerr << "    S:FDDSetData P" << i << " ID:" << id << " S:" << dataPerProc << "";
 
+				comm->sendFDDSetData(id, i, &data[offset], dataPerProc * sizeof(T));
+				offset += dataPerProc;
+				std::cerr << ".\n";
+			}
+			comm->waitForReq(comm->numProcs - 1);
+		}
+		template <typename K, typename T>
+		void parallelizeI(unsigned long int id, K * keys, T * data, size_t size){
+			//int numBlocks = ceil ( size / settings->blockSize );
+			//int blocksPerProc = numBlocks / (comm->numProcs - 1); // TODO DYNAMICALLY VARIATE BLOCK PER PROC LATER
+			size_t offset = 0;
+
+			for (int i = 1; i < comm->numProcs; ++i){
+				int dataPerProc = size/(comm->numProcs - 1);
+				int rem = size % (comm->numProcs -1);
+				if (i <= rem)
+					dataPerProc += 1;
+				std::cerr << "    S:FDDSetDataI P" << i << " ID:" << id << " S:" << dataPerProc << "";
+
+				comm->sendFDDSetIData(id, i, &keys[offset], &data[offset], dataPerProc * sizeof(T));
+				offset += dataPerProc;
+				std::cerr << ".\n";
+			}
+			comm->waitForReq(comm->numProcs - 1);
+		}
+
+		//Pointers
 		template <typename T>
-		void parallelize(unsigned long int id, T * data, size_t size);
+		void parallelize(unsigned long int id, T ** data, size_t * dataSizes, size_t size){
+			size_t offset = 0;
+
+			for (int i = 1; i < comm->numProcs; ++i){
+				int dataPerProc = size/ (comm->numProcs - 1);
+				int rem = size % (comm->numProcs -1);
+				if (i <= rem)
+					dataPerProc += 1;
+				std::cerr << "    S:FDDSetPData P" << i << " " << id << " " << dataPerProc << "B ";
+
+				comm->sendFDDSetData(id, i, (void **) &data[offset], &dataSizes[offset], dataPerProc, sizeof(T));
+				offset += dataPerProc;
+				std::cerr << "!\n";
+			}
+		}
+		template <typename K, typename T>
+		void parallelizeI(unsigned long int id, K * keys, T ** data, size_t * dataSizes, size_t size){
+			size_t offset = 0;
+
+			for (int i = 1; i < comm->numProcs; ++i){
+				int dataPerProc = size/ (comm->numProcs - 1);
+				int rem = size % (comm->numProcs -1);
+				if (i <= rem)
+					dataPerProc += 1;
+				std::cerr << "    S:FDDSetPDataI P" << i << " " << id << " " << dataPerProc << "B ";
+
+				comm->sendFDDSetIData(id, i, &keys[offset],(void **) &data[offset], &dataSizes[offset], dataPerProc, sizeof(T));
+				offset += dataPerProc;
+				std::cerr << "!\n";
+			}
+		}
+		//Containers
 		template <typename T>
-		void parallelize(unsigned long int id, T ** data, size_t * dataSizes, size_t size);
+		void parallelizeC(unsigned long int id, T * data, size_t size ){
+			size_t offset = 0;
+
+			for (int i = 1; i < comm->numProcs; ++i){
+				int dataPerProc = size/ (comm->numProcs - 1);
+				int rem = size % (comm->numProcs -1);
+				if (i <= rem)
+					dataPerProc += 1;
+				std::cerr << "    S:FDDSetVData P" << i << " " << id << " " << dataPerProc << "B";
+
+				comm->sendFDDSetData(id, i, &data[offset], dataPerProc);
+				offset += dataPerProc;
+				std::cerr << ".\n";
+			}
+			//comm->waitForReq(comm->numProcs - 1);
+		}
+		template <typename K, typename T>
+		void parallelizeIC(unsigned long int id, K * keys, T * data, size_t size ){
+			size_t offset = 0;
+
+			for (int i = 1; i < comm->numProcs; ++i){
+				int dataPerProc = size/ (comm->numProcs - 1);
+				int rem = size % (comm->numProcs -1);
+				if (i <= rem)
+					dataPerProc += 1;
+				std::cerr << "    S:FDDSetVData P" << i << " " << id << " " << dataPerProc << "B";
+
+				comm->sendFDDSetIData(id, i, &keys[offset], &data[offset], dataPerProc);
+				offset += dataPerProc;
+				std::cerr << ".\n";
+			}
+			//comm->waitForReq(comm->numProcs - 1);
+		}
 		template <typename T>
-		void parallelize(unsigned long int id, std::vector<T> * data, size_t size);
-		void parallelize(unsigned long int id, std::string * data, size_t size);
+		void parallelize(unsigned long int id, std::vector<T> * data, size_t size ){
+			parallelizeC(id, data, size);
+		}
+		void parallelize(unsigned long int id, std::string * data, size_t size){
+			parallelizeC(id, data, size);
+		}
+		template <typename K, typename T>
+		void parallelizeI(unsigned long int id, K * keys, std::vector<T> * data, size_t size ){
+			parallelizeIC(id, keys, data, size);
+		}
+		template <typename K>
+		void parallelizeI(unsigned long int id, K * keys, std::string * data, size_t size){
+			parallelizeIC(id, keys, data, size);
+		}
 
 		void destroyFDD(unsigned long int id);
 

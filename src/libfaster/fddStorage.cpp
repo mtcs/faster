@@ -18,6 +18,13 @@ fddStorageCore<T>::fddStorageCore(size_t s){
 	size = s;
 }
 template <class T> 
+fddStorageCore<T>::~fddStorageCore(){
+	if (localData != NULL){
+		delete [] localData;
+	}
+}
+
+template <class T> 
 T * fddStorageCore<T>::getData(){ 
 	return localData; 
 }
@@ -27,13 +34,6 @@ T & fddStorageCore<T>::operator[](size_t ref){
 	return localData[ref]; 
 }
 
-
-template <class T> 
-fddStorageCore<T>::~fddStorageCore(){
-	if (localData != NULL){
-		delete [] localData;
-	}
-}
 
 
 
@@ -109,12 +109,12 @@ void fddStorage<T>::setData(void * data, size_t s){
 	//this->size = s;
 	buffer.setBuffer(data, s);
 
-	std::cerr << "\nfddStorage setData ";
+	//std::cerr << "\nfddStorage setData ";
 	for ( size_t i = 0; i < this->size; ++i){
-		std::cerr << ((int *) data)[i] << " ";
+		//std::cerr << ((int *) data)[i] << " ";
 		buffer >> this->localData[i];
 	}
-	std::cerr << "\n";
+	//std::cerr << "\n";
 }
 
 template <class T> 
@@ -125,8 +125,6 @@ void fddStorage<T *>::setData( T ** data, size_t * ls, size_t s){
 		lineSizes[i] = ls[i];
 		
 		this->localData[i] = new  T [lineSizes[i]];
-		//memcpy(localData[i], data[i], lineSizes[i] );
-		
 		for ( int j = 0; j < lineSizes[i]; ++j){
 			this->localData[i][j] =  ((T *) data[i])[j];
 		}
@@ -234,7 +232,6 @@ void fddStorage<T>::shrink(){
 
 		for ( size_t i = 0; i < this->size; ++i)
 			newStorage[i] = this->localData[i];
-		//memcpy(newStorage, localData, size * sizeof( T ) );
 
 		delete [] this->localData;
 

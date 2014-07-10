@@ -1,3 +1,4 @@
+#include <iostream>
 #include "misc.h"
 
 fddType decodeType(size_t code){

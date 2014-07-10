@@ -141,14 +141,14 @@ using PbulkReducePFunctionP = std::pair<T *, size_t> (*) (T ** input, size_t * i
 // FDD function pointer types
 // TODO CHANGE THIS BELOW!
 template <typename K, typename T, typename L, typename U>
-using ImapIFunctionP = std::pair<L,U> (*) (K & inKey, T & input);
+using ImapIFunctionP = std::pair<L,U> (*) (K inKey, T & input);
 template <typename K, typename T, typename U>
-using mapIFunctionP = U (*) (K & inKey, T & input);
+using mapIFunctionP = U (*) (K inKey, T & input);
 template <typename K, typename T, typename L, typename U>
 //using IPmapIFunctionP = void (*) (L & outKey, U & output, size_t &outputSize, T & input);
-using IPmapIFunctionP = std::tuple<L,U,size_t> (*) (K & inKey, T & input);
+using IPmapIFunctionP = std::tuple<L,U,size_t> (*) (K inKey, T & input);
 template <typename K, typename T, typename U>
-using PmapIFunctionP = std::pair<U, size_t> (*) (K & inKey, T & input);
+using PmapIFunctionP = std::pair<U, size_t> (*) (K inKey, T & input);
 
 template <typename K, typename T, typename L, typename U>
 using IbulkMapIFunctionP = void (*) (L * outKey, U * output, K * inKey, T * input, size_t size);
@@ -160,13 +160,13 @@ template <typename K, typename T, typename U>
 using PbulkMapIFunctionP = void (*) (U * output, size_t * outputDataSizes, K * inKey, T * input, size_t size);
 
 template <typename K, typename T, typename L, typename U>
-using IflatMapIFunctionP = std::list<std::pair<L,U>> (*) (K & inKey, T & input);
+using IflatMapIFunctionP = std::list<std::pair<L,U>> (*) (K inKey, T & input);
 template <typename K, typename T, typename U>
-using flatMapIFunctionP = std::list<U> (*) (K & inKey, T & input);
+using flatMapIFunctionP = std::list<U> (*) (K inKey, T & input);
 template <typename K, typename T, typename L, typename U>
-using IPflatMapIFunctionP = std::list<std::tuple<L, U,size_t>>  (*) (K & inKey, T & input);
+using IPflatMapIFunctionP = std::list<std::tuple<L, U,size_t>>  (*) (K inKey, T & input);
 template <typename K, typename T, typename U>
-using PflatMapIFunctionP = std::list<std::pair<U, size_t>>  (*) (K & inKey, T & input);
+using PflatMapIFunctionP = std::list<std::pair<U, size_t>>  (*) (K inKey, T & input);
 
 template <typename K, typename T, typename L, typename U>
 using IbulkFlatMapIFunctionP = void (*) (L *& outKey, U *& output, size_t & outputSize, K * inKey, T * input, size_t size);
@@ -178,7 +178,7 @@ template <typename K, typename T, typename U>
 using PbulkFlatMapIFunctionP = void (*) (U *& output, size_t *& outputDataSizes, size_t & outputSize, K * inKey, T * input, size_t size);
 
 template <typename K, typename T>
-using IreduceIFunctionP = std::pair<K,T> (*) (K & keyA, T & a, K & keyB, T & b);
+using IreduceIFunctionP = std::pair<K,T> (*) (K keyA, T & a, K keyB, T & b);
 
 template <typename K, typename T>
 using IbulkReduceIFunctionP = std::pair<K,T> (*) (K * key, T * input, size_t size);
@@ -187,9 +187,9 @@ using IbulkReduceIFunctionP = std::pair<K,T> (*) (K * key, T * input, size_t siz
 
 // Map
 template <typename K, typename T, typename L, typename U>
-using ImapIPFunctionP = std::pair<L,U> (*) (K & inKey, T * input, size_t size);
+using ImapIPFunctionP = std::pair<L,U> (*) (K inKey, T * input, size_t size);
 template <typename K, typename T, typename U>
-using  mapIPFunctionP = U (*) (K & inKey, T * input, size_t size);
+using  mapIPFunctionP = U (*) (K inKey, T * input, size_t size);
 template <typename K, typename T, typename L, typename U>
 using IPmapIPFunctionP = std::tuple<L,U,size_t> (*) (K inKey, T * input, size_t size);
 template <typename K, typename T, typename U>
@@ -228,7 +228,7 @@ using PbulkFlatMapIPFunctionP = void (*) (U *& output, size_t * outputDataSizes,
 
 // Reduce
 template <typename K, typename T>
-using IPreduceIPFunctionP = std::tuple<K,T*,size_t> (*) (K & keyA, T * a, size_t sizeA, K & keyB, T * b, size_t sizeB);
+using IPreduceIPFunctionP = std::tuple<K,T*,size_t> (*) (K keyA, T * a, size_t sizeA, K keyB, T * b, size_t sizeB);
 
 template <typename K, typename T>
 using IPbulkReduceIPFunctionP = std::tuple<K,T*,size_t> (*) (K * key, T ** input, size_t * inputDataSizes, size_t size);

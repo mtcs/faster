@@ -19,7 +19,7 @@ class indexedFdd ;
 // It just sends commands to the workers.
 template <class K, class T> 
 class iFddCore : public fddBase{
-	private:
+	protected:
 		fastContext * context;
 
 		iFddCore() {}
@@ -40,7 +40,12 @@ class iFddCore : public fddBase{
 		// -------------- Core FDD Functions --------------- //
 		template <typename L, typename U> 
 		indexedFdd<L,U> * map( void * funcP, fddOpType op){
-			indexedFdd<L,U> * newFdd = new indexedFdd<L,U>(*context, size);
+			indexedFdd<L,U> * newFdd;
+			if ( (op & 0xFF ) & (OP_FlatMap | OP_BulkFlatMap) ){
+				newFdd = new indexedFdd<L,U>(*context);
+			}else{
+				newFdd = new indexedFdd<L,U>(*context, size);
+			}
 			unsigned long int newFddId = newFdd->getId();
 			char result;
 			size_t rSize;
@@ -55,6 +60,7 @@ class iFddCore : public fddBase{
 			for (int i = 1; i < context->numProcs(); ++i){
 				result = * (char*) context->recvTaskResult(id, rSize);
 			}
+			return newFdd;
 		}
 
 };
@@ -66,7 +72,7 @@ class indexedFdd : public iFddCore<K,T>{
 			std::pair <K,T> result;
 
 			if (op == OP_Reduce){
-				reduceFunctionP<T> reduceFunc = (reduceFunctionP<T>) this->context->funcTable[funcId];
+				IreduceIFunctionP<K, T> reduceFunc = (IreduceIFunctionP<K, T>) this->context->funcTable[funcId];
 				fastCommBuffer buffer(0);
 
 				// Get the real object behind the buffer
@@ -82,7 +88,7 @@ class indexedFdd : public iFddCore<K,T>{
 					result = reduceFunc(result.first, result.second, pr.first, pr.second);
 				}
 			}else{
-				bulkReduceFunctionP<T> bulkReduceFunc = (bulkReduceFunctionP<T>) this->context->funcTable[funcId];
+				IbulkReduceIFunctionP<K, T> bulkReduceFunc = (IbulkReduceIFunctionP<K, T>) this->context->funcTable[funcId];
 				T * vals = new T[this->context->numProcs() - 1];
 				K * keys = new K[this->context->numProcs() - 1];
 
@@ -147,8 +153,8 @@ class indexedFdd : public iFddCore<K,T>{
 		}
 
 		// Create a fdd from a array in memory
-		indexedFdd(fastContext &c, K keys[], T data[], size_t size) : indexedFdd(c, size){
-			c.parallelize(fddBase::id, data, size);
+		indexedFdd(fastContext &c, K * keys, T * data, size_t size) : indexedFdd(c, size){
+			c.parallelizeI(this->id, keys, data, size);
 		}
 
 		~indexedFdd(){
@@ -259,7 +265,7 @@ class indexedFdd<K,T *> : public fddBase{
 			std::tuple <K,T,size_t> result;
 
 			if (op == OP_Reduce){
-				reduceFunctionP<T> reduceFunc = (reduceFunctionP<T>) this->context->funcTable[funcId];
+				IPreduceIPFunctionP<K,T> reduceFunc = (IreduceIFunctionP<K,T>) this->context->funcTable[funcId];
 				fastCommBuffer buffer(0);
 
 				buffer.setBuffer(partResult[0], pSize[0]);
@@ -281,7 +287,7 @@ class indexedFdd<K,T *> : public fddBase{
 							std::get<2>(pr));
 				}
 			}else{
-				bulkReduceFunctionP<T> bulkReduceFunc = (bulkReduceFunctionP<T>) this->context->funcTable[funcId];
+				IPbulkReduceIPFunctionP<K,T> bulkReduceFunc = (IPbulkReduceIPFunctionP<K,T>) this->context->funcTable[funcId];
 				T * vals = new T[this->context->numProcs() - 1];
 				K * keys = new K[this->context->numProcs() - 1];
 				size_t * sizes = new size_t[this->context->numProcs() - 1];
@@ -342,8 +348,8 @@ class indexedFdd<K,T *> : public fddBase{
 		}
 
 		// Create a fdd from a array in memory
-		indexedFdd(fastContext &c, K keys[], T * data[], size_t dataSizes[], size_t size) : indexedFdd(c, size){
-			c.parallelize(id, keys, data, dataSizes, size);
+		indexedFdd(fastContext &c, K * keys, T ** data, size_t * dataSizes, size_t size) : indexedFdd(c, size){
+			c.parallelizeI(this->id, keys, data, dataSizes, size);
 		}
 
 		~indexedFdd(){

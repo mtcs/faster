@@ -25,13 +25,22 @@ enum commMode {
 #define MSG_FDDSET2DDATAID 	0x0007
 #define MSG_FDDSET2DDATASIZES	0x0008
 #define MSG_FDDSET2DDATA 	0x0009
-#define MSG_READFDDFILE		0x0010
-#define MSG_COLLECT		0x0011
-#define MSG_FDDDATAID 		0x0012
-#define MSG_FDDDATA 		0x0013
-#define MSG_TASKRESULT		0x0014
-#define MSG_FDDINFO		0x0015
+#define MSG_READFDDFILE		0x000A
+#define MSG_COLLECT		0x000B
+#define MSG_FDDDATAID 		0x000C
+#define MSG_FDDDATA 		0x000D
+#define MSG_TASKRESULT		0x000E
+#define MSG_FDDINFO		0x000F
+#define MSG_FDDSETIDATAID 	0x0010
+#define MSG_FDDSETIDATA		0x0011
+#define MSG_FDDSETIKEYS		0x0012
+#define MSG_FDDSET2DIDATAID 	0x0013
+#define MSG_FDDSET2DIDATASIZES	0x0014
+#define MSG_FDDSET2DIDATA 	0x0015
+#define MSG_FDDSET2DIKEYS 	0x0016
+// . . .
 #define MSG_FINISH 		0x8000
+
 
 #define FDDTYPE_NULL 		0x00
 #define FDDTYPE_CHAR 		0x01
@@ -60,7 +69,8 @@ class fastComm{
 		MPI_Request * req;
 		MPI_Request * req2;
 		fastCommBuffer * buffer;
-		fastCommBuffer * buffer2;
+		fastCommBuffer buffer2;
+		fastCommBuffer buffer3;
 
 		commMode mode;
 		int numProcs;
@@ -69,14 +79,20 @@ class fastComm{
 
 		// 1D array
 		void sendDataGeneric(unsigned long int id, int dest, void * data, size_t size, int tagID, int tagData);
+		void sendIDataGeneric(unsigned long int id, int dest, void * keys, void * data, size_t size, int tagID, int tagKeys, int tagData);
 		// 2D array
 		void sendDataGeneric(unsigned long int id, int dest, void ** data, size_t * lineSizes, size_t size, size_t itemSize, int tagID, int tagDataSize, int tagData);
+		void sendIDataGeneric(unsigned long int id, int dest, void * keys, void ** data, size_t * lineSizes, size_t size, size_t itemSize, int tagID, int tagDataSize, int tagKeys, int tagData);
 		// For String and Vector
 		template <typename T>
 		void sendDataGenericC(unsigned long int id, int dest, T * data, size_t size, int tagID, int tagData);
+		template <typename T>
+		void sendIDataGenericC(unsigned long int id, int dest, void * keys, T * data, size_t size, int tagID, int tagKeys, int tagData);
 
 		void recvDataGeneric(unsigned long int &id, int src, void *& data, size_t &size, int tagID, int tagData);
+		void recvIDataGeneric(unsigned long int &id, int src, void *& keys, void *& data, size_t &size, int tagID, int tagKeys, int tagData);
 		void recvDataGeneric(unsigned long int &id, int src, void **& data, size_t *& lineSizes, size_t &size, int tagID, int tagDataSize, int tagData);
+		void recvIDataGeneric(unsigned long int &id, int src, void *& keys, void **& data, size_t *& lineSizes, size_t &size, int tagID, int tagDataSize, int tagKeys, int tagData);
 
 	public:
 		fastComm(const std::string master);
@@ -105,18 +121,22 @@ class fastComm{
 
 		// Set Data
 		void sendFDDSetData(unsigned long int id, int dest, void * data, size_t size);
-		void recvFDDSetData(unsigned long int &id, void *& data, size_t &size);
-
 		void sendFDDSetData(unsigned long int id, int dest, void ** data, size_t * lineSizes, size_t size, size_t itemSize);
-		void recvFDDSetData(unsigned long int &id, void **& data, size_t *& lineSizes, size_t &size);
-
 		void sendFDDSetData(unsigned long int id, int dest, std::string * data, size_t size);
-		void recvFDDSetData(unsigned long int &id, std::string *& data, size_t &size);
-
 		template <typename T>
 		void sendFDDSetData(unsigned long int id, int dest, std::vector<T> * data, size_t size);
+
+		void sendFDDSetIData(unsigned long int id, int dest, void * keys, void * data, size_t size);
+		void sendFDDSetIData(unsigned long int id, int dest, void * keys, void ** data, size_t * lineSizes, size_t size, size_t itemSize);
+		void sendFDDSetIData(unsigned long int id, int dest, void * keys, std::string * data, size_t size);
 		template <typename T>
-		void recvFDDSetData(unsigned long int &id, std::vector<T> *& data, size_t &size);
+		void sendFDDSetIData(unsigned long int id, int dest, void * keys, std::vector<T> * data, size_t size);
+
+		void recvFDDSetData(unsigned long int &id, void *& data, size_t &size);
+		void recvFDDSetData(unsigned long int &id, void **& data, size_t *& lineSizes, size_t &size);
+
+		void recvFDDSetIData(unsigned long int &id, void *& keys, void *& data, size_t &size);
+		void recvFDDSetIData(unsigned long int &id, void *& keys, void **& data, size_t *& lineSizes, size_t &size);
 
 
 		// Data

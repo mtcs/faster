@@ -86,54 +86,35 @@ class workerFdd : public workerFddBase{
 
 	public:
 
-		workerFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){
-			localData = new fddStorage<T>();
-		} 
+		workerFdd(unsigned int ident, fddType t);
+		workerFdd(unsigned int ident, fddType t, size_t size);
+		~workerFdd();
 
-		workerFdd(unsigned int ident, fddType t, size_t size) : workerFddBase(ident, t){ 
-			localData = new fddStorage<T>(size);
-		}
+		// For known types
+		void setData(T * data, size_t size) ;
 
-		~workerFdd(){
-			delete resultBuffer;
-			delete localData;
-		}
+		// For anonymous types
+		void setData(void * data, size_t size) override;;
+		void setData(void ** data UNUSED, size_t * listSizes UNUSED, size_t size UNUSED ) override;
+		void setData(void * keys UNUSED, void * data UNUSED, size_t size UNUSED) override;
+		void setData(void * keys UNUSED, void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override;
 
-		// For known primitive types
-		void setData(T * data, size_t size) {
-			localData->setData(data, size);
-		}
-		// For anonymous primitive types
-		void setData(void * data, size_t size) override{
-			localData->setData(data, size);
-		}
-		void setData(void ** data UNUSED, size_t * listSizes UNUSED, size_t size UNUSED ) override{}
-		void setData(void * keys UNUSED, void * data UNUSED, size_t size UNUSED) override{ }
-		void setData(void * keys UNUSED, void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override{ }
 
-		fddType getType() override { return type; }
-		fddType getKeyType() override { return Null; }
+		fddType getType() override ;
+		fddType getKeyType() override ;
 
-		T & operator[](size_t address){ return localData->getData()[address]; }
-		void * getData() override{ return localData->getData(); }
-		size_t getSize() override{ return localData->getSize(); }
-		size_t itemSize() override{ return sizeof(T); }
-		size_t baseSize() override{ return sizeof(T); }
-		void deleteItem(void * item) override { delete (T*) item; }
+		T & operator[](size_t address);
+		void * getData() override;
+		size_t getSize() override;
+		size_t itemSize() override;
+		size_t baseSize() override;
+		void deleteItem(void * item) override ;
 
-		void insert(T & in){ localData->insert(in); }
+		void insert(T & in);
 
-		void insert(std::list<T> & in){ 
-			typename std::list<T>::iterator it;
+		void insert(std::list<T> & in);
 
-			if (localData->getSize() < in.size())
-				localData->grow(in.size());
-
-			for ( it = in.begin(); it != in.end(); it++)
-				localData->insert(*it); 
-		}
-
-		void shrink(){ localData->shrink(); }
+		void shrink();
 
 
 		// Apply task functions to FDDs
@@ -208,54 +189,33 @@ class workerFdd<T *> : public workerFddBase{
 		
 
 	public:
-		workerFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){
-			localData = new fddStorage<T*>();
-		} 
-
-		workerFdd(unsigned int ident, fddType t, size_t size) : workerFddBase(ident, t){ 
-			localData = new fddStorage<T*>(size);
-		}
-
-		~workerFdd(){
-			delete localData;
-			delete resultBuffer;
-		}
+		workerFdd(unsigned int ident, fddType);
+		workerFdd(unsigned int ident, fddType t, size_t size);
+		~workerFdd();
 
 
-		void setData(T ** data, size_t *lineSizes, size_t size) {
-			localData->setData(data, lineSizes, size);
-		}
-		void setData(void * data UNUSED, size_t size UNUSED) override{ }
-		void setData(void ** data, size_t *lineSizes, size_t size) override{
-			localData->setData((T**) data, lineSizes, size);
-		}
-		void setData(void * keys UNUSED, void * data UNUSED, size_t size UNUSED) override{ }
-		void setData(void * keys UNUSED, void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override{ }
+		// For known types
+		void setData(T ** data, size_t *lineSizes, size_t size) ;
 
-		fddType getType() override { return type; }
-		fddType getKeyType() override { return Null; }
-		T *& operator[](size_t address){ return localData->getData()[address]; }
-		void * getData() override{ return localData->getData(); }
-		size_t getSize() override{ return localData->getSize(); }
-		size_t * getLineSizes(){ return localData->getLineSizes(); }
-		size_t itemSize() override{ return sizeof(T); }
-		size_t baseSize() override{ return sizeof(T*); }
-		void deleteItem(void * item) override { delete (T*) item; }
+		// For anonymous types
+		void setData(void * data UNUSED, size_t size UNUSED) override;
+		void setData(void ** data, size_t *lineSizes, size_t size) override;
+		void setData(void * keys UNUSED, void * data UNUSED, size_t size UNUSED) override;
+		void setData(void * keys UNUSED, void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override;
 
-		void insert(T* & in, size_t s){ localData->insert(in, s); }
+		fddType getType() override ;
+		fddType getKeyType() override ;
+		T *& operator[](size_t address);
+		void * getData() override;
+		size_t getSize() override;
+		size_t * getLineSizes();
+		size_t itemSize() override;
+		size_t baseSize() override;
+		void deleteItem(void * item) override ;
 
-		void insert(std::list< std::pair<T*, size_t> > & in){ 
-			typename std::list< std::pair<T*, size_t> >::iterator it;
-
-			if (localData->getSize() < in.size())
-				localData->grow(in.size());
-
-			for ( it = in.begin(); it != in.end(); it++)
-				localData->insert(it->first, it->second); 
-		}
-
-		void shrink(){ localData->shrink(); }
-
+		void insert(T* & in, size_t s);
+		void insert(std::list< std::pair<T*, size_t> > & in);
+		void shrink();
 
 		// Apply task functions to FDDs
 		void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize);

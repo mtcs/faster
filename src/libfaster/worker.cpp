@@ -33,6 +33,13 @@ void worker::setFDDData(unsigned long int id, void * data, size_t size){
 
 	fdd->setData( data, size );
 }
+void worker::setFDDIData(unsigned long int id, void * keys, void * data, size_t size){
+	workerFddBase * fdd = fddList[id];
+
+	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
+
+	fdd->setData( keys, data, size );
+}
 
 void worker::setFDDData(unsigned long int id, void ** data, size_t * lineSizes, size_t size){
 	workerFddBase * fdd = fddList[id];
@@ -40,6 +47,14 @@ void worker::setFDDData(unsigned long int id, void ** data, size_t * lineSizes, 
 	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
 
 	fdd->setData( data, lineSizes, size );
+}
+
+void worker::setFDDIData(unsigned long int id, void * keys, void ** data, size_t * lineSizes, size_t size){
+	workerFddBase * fdd = fddList[id];
+
+	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
+
+	fdd->setData( keys, data, lineSizes, size );
 }
 
 void worker::getFDDData(unsigned long int id, void *& data, size_t &size){

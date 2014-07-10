@@ -94,22 +94,78 @@ void workerIFdd<K,T*>::applyIndependent(void * func, fddOpType op, void *& resul
 }
 
 
+// -------------------------- Public Functions ------------------------ //
+
+
 template <typename K, typename T>
-void workerIFdd<K,T*>::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){ 
-	switch (op){
-		case OP_Map:
-		case OP_BulkMap:
-		case OP_FlatMap:
-		case OP_BulkFlatMap:
-			applyDependent(func, op, dest);
-		case OP_Reduce:
-		case OP_BulkReduce:
-			applyIndependent(func, op, result, rSize);
-	}
+workerIFdd<K,T*>::workerIFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){
+	localData = new indexedFddStorage<K,T*>();
+} 
+
+
+template <typename K, typename T>
+workerIFdd<K,T*>::workerIFdd(unsigned int ident, fddType t, size_t size) : workerIFdd(ident, t){ 
+	localData = new indexedFddStorage<K,T*>(size);
 }
 
 
-// -------------------------- Public Functions ------------------------ //
+template <typename K, typename T>
+workerIFdd<K,T*>::~workerIFdd(){
+	delete localData;
+	delete resultBuffer;
+}
+
+
+
+template <typename K, typename T>
+void workerIFdd<K,T*>::setData(K * keys, T ** data, size_t *lineSizes, size_t size){
+	localData->setData(keys, data, lineSizes, size);
+}
+
+template <typename K, typename T>
+void workerIFdd<K,T*>::setData(void * data UNUSED, size_t size UNUSED) { }
+
+template <typename K, typename T>
+void workerIFdd<K,T*>::setData(void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) {}
+
+template <typename K, typename T>
+void workerIFdd<K,T*>::setData(void * keys UNUSED, void * data UNUSED, size_t size UNUSED) { }
+
+template <typename K, typename T>
+void workerIFdd<K,T*>::setData(void * keys, void ** data, size_t *lineSizes, size_t size) {
+	localData->setData((K*) keys, (T**) data, lineSizes, size);
+}
+
+template <typename K, typename T>
+fddType workerIFdd<K,T*>::getType()  { return type; }
+
+template <typename K, typename T>
+fddType workerIFdd<K,T*>::getKeyType()  { return keyType; }
+
+
+template <typename K, typename T>
+T *& workerIFdd<K,T*>::operator[](size_t address){ return localData->getData()[address]; }
+
+template <typename K, typename T>
+void * workerIFdd<K,T*>::getData() { return localData->getData(); }
+
+template <typename K, typename T>
+K * workerIFdd<K,T*>::getKeys() { return localData->getKeys(); }
+
+template <typename K, typename T>
+size_t workerIFdd<K,T*>::getSize() { return localData->getSize(); }
+
+template <typename K, typename T>
+size_t * workerIFdd<K,T*>::getLineSizes(){ return localData->getLineSizes(); }
+
+template <typename K, typename T>
+size_t workerIFdd<K,T*>::itemSize() { return sizeof(T); }
+
+template <typename K, typename T>
+size_t workerIFdd<K,T*>::baseSize() { return sizeof(T*); }
+
+template <typename K, typename T>
+void workerIFdd<K,T*>::deleteItem(void * item)  { delete (T*) item; }
 
 template <typename K, typename T>
 void workerIFdd<K,T*>::insert(K key, T* & in, size_t s){ 
@@ -126,4 +182,26 @@ void workerIFdd<K,T*>::insert(std::list< std::tuple<K, T*, size_t> > & in){
 	for ( it = in.begin(); it != in.end(); it++)
 		localData->insert(std::get<0>(*it), std::get<1>(*it), std::get<2>(*it)); 
 }
+
+
+template <typename K, typename T>
+void workerIFdd<K,T*>::shrink(){ 
+	localData->shrink(); 
+}
+
+template <typename K, typename T>
+void workerIFdd<K,T*>::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){ 
+	switch (op){
+		case OP_Map:
+		case OP_BulkMap:
+		case OP_FlatMap:
+		case OP_BulkFlatMap:
+			applyDependent(func, op, dest);
+		case OP_Reduce:
+		case OP_BulkReduce:
+			applyIndependent(func, op, result, rSize);
+	}
+}
+
+
 

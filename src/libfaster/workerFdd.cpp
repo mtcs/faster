@@ -445,6 +445,80 @@ void workerFdd<T>::_preApplyI(void * func, fddOpType op, workerFddBase * dest){
 	}
 }
 
+
+// -------------------------- Public Functions ------------------------ //
+
+
+template <typename T>
+workerFdd<T>::workerFdd(unsigned int ident, fddType t) : workerFddBase(ident, t){
+	localData = new fddStorage<T>();
+} 
+
+template <typename T>
+workerFdd<T>::workerFdd(unsigned int ident, fddType t, size_t size) : workerFddBase(ident, t){ 
+	localData = new fddStorage<T>(size);
+}
+
+template <typename T>
+workerFdd<T>::~workerFdd(){
+	delete resultBuffer;
+	delete localData;
+}
+
+// For known primitive types
+template <typename T>
+void workerFdd<T>::setData(T * data, size_t size) {
+	localData->setData(data, size);
+}
+// For anonymous primitive types
+template <typename T>
+void workerFdd<T>::setData(void * data, size_t size) {
+	localData->setData(data, size);
+}
+template <typename T>
+void workerFdd<T>::setData(void ** data UNUSED, size_t * listSizes UNUSED, size_t size UNUSED ) {}
+template <typename T>
+void workerFdd<T>::setData(void * keys UNUSED, void * data UNUSED, size_t size UNUSED) { }
+template <typename T>
+void workerFdd<T>::setData(void * keys UNUSED, void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) { }
+
+template <typename T>
+fddType workerFdd<T>::getType()  { return type; }
+template <typename T>
+fddType workerFdd<T>::getKeyType()  { return Null; }
+
+template <typename T>
+T & workerFdd<T>::operator[](size_t address){ return localData->getData()[address]; }
+template <typename T>
+void * workerFdd<T>::getData() { return localData->getData(); }
+template <typename T>
+size_t workerFdd<T>::getSize() { return localData->getSize(); }
+template <typename T>
+size_t workerFdd<T>::itemSize() { return sizeof(T); }
+template <typename T>
+size_t workerFdd<T>::baseSize() { return sizeof(T); }
+template <typename T>
+void workerFdd<T>::deleteItem(void * item)  { delete (T*) item; }
+
+template <typename T>
+void workerFdd<T>::insert(T & in){ localData->insert(in); }
+
+template <typename T>
+void workerFdd<T>::insert(std::list<T> & in){ 
+	typename std::list<T>::iterator it;
+
+	if (localData->getSize() < in.size())
+		localData->grow(in.size());
+
+	for ( it = in.begin(); it != in.end(); it++)
+		localData->insert(*it); 
+}
+
+template <typename T>
+void workerFdd<T>::shrink(){ localData->shrink(); }
+
+
+
 template <typename T>
 void workerFdd<T>::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){ 
 	if (op & OP_GENERICREDUCE){

@@ -1,26 +1,62 @@
 #include <string>
 
+#include "fastCommBuffer.h"
 #include "indexedFddStorage.h"
 
 template <class K, class T> 
 indexedFddStorageCore<K,T>::indexedFddStorageCore(){
 	allocSize = 200;
 	localData = new T[allocSize];
+	localKeys = new K[allocSize];
 	size = 0;
 }
+
+template <class K, class T> 
+indexedFddStorageCore<K,T>::indexedFddStorageCore(size_t s){
+	allocSize = s;
+	localData = new T[s];
+	localKeys = new K[s];
+	size = s;
+}
+template <class K, class T> 
+indexedFddStorageCore<K,T>::~indexedFddStorageCore(){
+	if (localData != NULL){
+		delete [] localData;
+		delete [] localKeys;
+	}
+}
+
+template <class K, class T> 
+T * indexedFddStorageCore<K,T>::getData(){ 
+	return localData; 
+}
+
+template <class K, class T> 
+K * indexedFddStorageCore<K,T>::getKeys(){ 
+	return localKeys; 
+}
+template <class K, class T> 
+T & indexedFddStorageCore<K,T>::operator[](size_t ref){ 
+	return localData[ref]; 
+}
+
+
+
+
+
 template <class K, class T> 
 indexedFddStorage<K,T>::indexedFddStorage() : indexedFddStorageCore<K,T>(){}
 template <class K, class T> 
 indexedFddStorage<K,T*>::indexedFddStorage() : indexedFddStorageCore<K,T*>(){}
 
 template <class K, class T> 
-indexedFddStorageCore<K,T>::indexedFddStorageCore(size_t s){
-	allocSize = s;
-	localData = new T[s];
-	size = s;
+indexedFddStorage<K,T>::indexedFddStorage(size_t s) : indexedFddStorageCore<K,T>(s){
 }
 
-
+template <class K, class T> 
+indexedFddStorage<K,T*>::indexedFddStorage(size_t s) : indexedFddStorage<K,T*>(s){
+	lineSizes = new size_t[s];
+}
 
 
 template <class K, class T> 
@@ -29,19 +65,13 @@ indexedFddStorage<K,T>::indexedFddStorage(K * keys, T * data, size_t s) : indexe
 }
 
 template <class K, class T> 
-indexedFddStorage<K,T*>::indexedFddStorage(K * keys, T ** data, size_t * lineSizes, size_t s) : indexedFddStorageCore<K,T *>(s){
+indexedFddStorage<K,T*>::indexedFddStorage(K * keys, T ** data, size_t * lineSizes, size_t s) : indexedFddStorage<K,T *>(s){
 	setData(keys, data, lineSizes, s);
 }
 
 
 
 
-template <class K, class T> 
-indexedFddStorageCore<K,T>::~indexedFddStorageCore(){
-	if (localData != NULL){
-		delete [] localData;
-	}
-}
 template <class K, class T> 
 indexedFddStorage<K,T*>::~indexedFddStorage(){
 	if (lineSizes != NULL){
@@ -54,21 +84,37 @@ indexedFddStorage<K,T*>::~indexedFddStorage(){
 
 template <class K, class T> 
 void indexedFddStorage<K,T>::setData(K * keys, T * data, size_t s){
-	grow(s / sizeof(T));
-	//memcpy(localData, data, s );
+	grow(s);
+	this->size = s;
+
 	for ( size_t i = 0; i < s; ++i){
-		this->localData[i] = ((T*) data)[i];
+		this->localData[i] = data[i];
 		this->localKeys[i] = keys[i];
 	}
-	this->size = s / sizeof(T);
+}
+template <class K, class T> 
+void indexedFddStorage<K,T>::setData(void * keys, void * data, size_t s){
+	fastCommBuffer buffer(0);
+
+	//grow(s);
+	//this->size = s;
+	buffer.setBuffer(data, s);
+
+	//std::cerr << "\nindexedFddStorage setData ";
+	for ( size_t i = 0; i < s; ++i){
+		buffer >> this->localData[i];
+		this->localKeys[i] = ((K*) keys)[i];
+	}
 }
 
 template <class K, class T> 
-void indexedFddStorage<K,T*>::setData( K * keys, T ** data, size_t * lineSizes, size_t s){
+void indexedFddStorage<K,T*>::setData( K * keys, T ** data, size_t * ls, size_t s){
 	grow(s);
+	#pragma omp parallel for
 	for ( int i = 0; i < s; ++i){
-		this->localData[i] = (T *) new  T [lineSizes[i]];
-		//memcpy(localData[i], data[i], lineSizes[i] );
+		lineSizes[i] = ls[i];
+
+		this->localData[i] = new  T [lineSizes[i]];
 		for ( int j = 0; j < lineSizes[i]; ++j){
 			this->localData[i][j] =  ((T *) data[i])[j];
 			this->localKeys[i] = keys[i];
@@ -108,15 +154,7 @@ void indexedFddStorage<K,T*>::insert(K key, T *& item, size_t s){
 
 
 
-template <class K, class T> 
-T * indexedFddStorageCore<K,T>::getData(){ 
-	return localData; 
-}
 
-template <class K, class T> 
-K * indexedFddStorageCore<K,T>::getKeys(){ 
-	return localKeys; 
-}
 
 
 
@@ -125,13 +163,6 @@ size_t * indexedFddStorage<K,T*>::getLineSizes(){
 	return lineSizes; 
 }
 
-
-
-
-template <class K, class T> 
-T & indexedFddStorageCore<K,T>::operator[](size_t ref){ 
-	return localData[ref]; 
-}
 
 
 
@@ -145,12 +176,13 @@ void indexedFddStorage<K,T>::grow(size_t toSize){
 		T * newStorage = new T [toSize];
 		K * newKeys = new K [toSize];
 
-		if (this->size >0) 
+		if (this->size >0) {
 			for ( size_t i = 0; i < this->size; ++i){
 				newStorage[i] = this->localData[i];
 				newKeys[i] = this->localKeys[i];
 			}
 			//memcpy(newStorage, localData, size * sizeof( T ) );
+		}
 
 		delete [] this->localData;
 		delete [] this->localKeys;
@@ -208,7 +240,6 @@ void indexedFddStorage<K,T>::shrink(){
 			newStorage[i] = this->localData[i];
 			newKeys[i] = this->localKeys[i];
 		}
-		//memcpy(newStorage, localData, size * sizeof( T ) );
 
 		delete [] this->localData;
 		delete [] this->localKeys;
