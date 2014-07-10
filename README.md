@@ -1,4 +1,4 @@
-Faster
+![Faster](res/Logo.png)
 ======
 ####Super Fast Distributed Computing
 
