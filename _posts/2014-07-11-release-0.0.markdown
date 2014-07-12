@@ -1,0 +1,12 @@
+---
+layout: release
+title:  "Release 0.0 Alpha"
+date:   2014-07-11 21:25:20
+categories: release
+---
+
+[0.0] is a Alpha release to show that there are thins already working.
+
+Enjoy!
+
+[0.0]: https://github.com/mtcs/faster/releases/tag/0.0-alpha

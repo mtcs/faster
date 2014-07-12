@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>{{ page.title }}</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+    </head>
+    <body>
+    	<div class="logoBar">
+    		<div class="logo">
+			<div  class="logoImg"> 
+				<a href="/"><img style="width:15em;" src="https://github.com/mtcs/faster/wiki/img/Logo.png"/></a>
+			</div>
+			<div  class="logoBadge"> 
+				<img src="http://www.flobi.com/images/icons/under_construction.png">
+			</div>
+			<div  class="logoTitle"> 
+        			<h2>{{ site.subtitle }}</h2>
+			</div>
+		</div>
+	</div>
+
+	<div class="headerBar">
+	    	  {% include header.html %}
+	</div>
+
+	<div class="contentBar">
+		<div class="site">
+		        {{ content }}
+		</div>
+	</div>
+
+	<div class="footerBar">
+		<div class="site">
+		        {% include footer.html %}
+		</div>
+	</div>
+
+    </body>
+</html>
