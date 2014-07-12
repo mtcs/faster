@@ -12,8 +12,7 @@ title: Faster - Frequently Asked Questions
 			</ul>
 			<br/>
 				{% for post in site.categories.faq reversed %}
-				<p>
-					<label for={{post.title}}></label>
+				<p id="{{post.title}}">
 					<h3>Q: {{ post.question }}</h3>
 					A: {{ post.content |  remove: '<p>' | remove: '</p>'  }}
 				</p>
