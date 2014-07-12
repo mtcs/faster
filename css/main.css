@@ -265,6 +265,9 @@ a:visited { color: #a84; }
   float: right;
 }
 
+.footer img {
+	width: 10em;
+}
 .footer .rss img {
   border: 0;
 }
