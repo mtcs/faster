@@ -89,12 +89,12 @@ a:visited { color: #a84; }
 .featureDesc{
 	display: table-cell;
 	float: left;
-	width: 70%;
+	/*width: 70%;*/
 	padding: 1em;
 }
 .featureImg{
 	display: table-cell;
-	width: 30%;
+	/*width: 30%;*/
 	padding: 1em;
 }
 .featureImg img{
@@ -102,7 +102,6 @@ a:visited { color: #a84; }
 }
 
 .posts {
-	width: 30%;
 	display: table-cell;
 	/*border-left: 2pt solid #eee;*/
 	padding: 1em;
@@ -120,6 +119,21 @@ a:visited { color: #a84; }
   color: #555;
   font-family: Monaco, "Courier New", monospace;
   font-size: 80%;
+}
+.downloadButton{
+	padding: 1em;
+	text-align: center;
+	color: #fff;
+	background-color: #e84;
+	border-radius: 1em;
+	margin-bottom: 2em;
+}
+.downloadButton p{
+	font-size: 80%;
+	margin: 0;
+}
+.downloadButton h1{
+	margin: 0;
 }
 
 /*****************************************************************************/
@@ -228,9 +242,14 @@ a:visited { color: #a84; }
   color: #666;
   /*border-top: 4px solid #eee;*/
   margin-top: 2em;
+  margin-bottom: 3em;
   overflow: hidden;
 }
 
+.footer .contactR {
+  float: right;
+  margin-right: 2em;
+}
 .footer .contact {
   float: left;
   margin-right: 3em;
@@ -280,7 +299,7 @@ ul > li {
 .comment {
 	font-style: italic;
 	color: #777;
-	margin:0;
+	margin: 0 0 0 1em;
 }
 
 /* standard */

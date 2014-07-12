@@ -6,14 +6,29 @@ title: Faster - Frequently Asked Questions
 <div class="downloadPage">
 	<h1>Downloads</h1>
 
-	<h2>Releases</h2>
+	<h2>Last Release</h2>
+	{% for post in site.categories.release | last %}
+	<p>
+	<a href="https://github.com/mtcs/faster/releases/tag/{{ post.tag }}">{{ post.title }}</a>  
+	<a href="/faster{{ post.url }}">Notes</a> 
+	<a href={{doclink}}>Doc</a> 
+	<br>
+	<div class="comment" >{{ post.comment }}</div>
+	<a href="https://github.com/mtcs/faster/archive/{{post.tag}}.zip">[ .zip File ]</a> 
+	<a href="https://github.com/mtcs/faster/archive/{{post.tag}}.tar.gz">[ .tar.gz File ]</a></li>
+	</p>
+	{% endfor %}
+
+	{% capture numReleases %} {{ site.categories.release | size | minus:2 }} {% endcapture %}
+	{% unless numReleases contains '-' %}
+		<h2>Releases</h2>
+	{% endunless %}
 	<ul>
-		{% for post in site.categories.release %}
-		<li><a href="https://github.com/mtcs/faster/releases/tag/{{ post.tag }}">{{ post.title }}</a>  
+		{% for post in site.categories.release offset:1 %}
+		<li>
+		<a href="https://github.com/mtcs/faster/releases/tag/{{ post.tag }}">{{ post.title }}</a>  
 		<a href="/faster{{ post.url }}">Notes</a> 
 		<a href={{doclink}}>Doc</a> 
-		<br>
-		<div class="comment" >{{ post.comment }}</div>
 		<a href="https://github.com/mtcs/faster/archive/{{post.tag}}.zip">[ .zip File ]</a> 
 		<a href="https://github.com/mtcs/faster/archive/{{post.tag}}.tar.gz">[ .tar.gz File ]</a></li>
 		{% endfor %}

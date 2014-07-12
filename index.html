@@ -12,8 +12,8 @@ title: Faster - Super Fast Distributed Computing
 				</p>
 			</div>
 			<div class="lastRelease">
-				<h1>Last Release</h1>
-				{% for release in site.categories.release | last %}
+				<h1>Last Releases</h1>
+				{% for release in site.categories.release limit: 3 %}
 				<p><a href="/faster{{ release.url }}">{{ release.title }}</a> <span>{{ release.date | date_to_string }}</span> </p>
 				{% endfor %}
 			</div>
@@ -33,6 +33,14 @@ title: Faster - Super Fast Distributed Computing
 			</div>
 		</div>
 		<div class="posts">
+			<a href="/faster/downloads.html">
+			<div class="downloadButton">
+				<h1>Download Faster</h1>
+				{% for release in site.categories.release | last %}
+				<p>{{ release.title }}</p>
+				{% endfor %}
+			</div>
+			</a>
 			<h1>News</h1>
 			<ul>
 				{% for post in site.categories.news limit: 10 %}
