@@ -3,7 +3,7 @@ layout: default
 title: Faster - Super Fast Distributed Computing
 ---
 
-<div class="home">
+<div class="homePage">
 	<div class="homeRow">
 		<div class="homeMain">
 			<div class="hero">
@@ -14,7 +14,7 @@ title: Faster - Super Fast Distributed Computing
 			<div class="lastRelease">
 				<h1>Last Release</h1>
 				{% for release in site.categories.release | last %}
-				<p><a href="{{ release.url }}">{{ release.title }}</a> <span>{{ release.date | date_to_string }}</span> </p>
+				<p><a href="/faster{{ release.url }}">{{ release.title }}</a> <span>{{ release.date | date_to_string }}</span> </p>
 				{% endfor %}
 			</div>
 
@@ -35,8 +35,8 @@ title: Faster - Super Fast Distributed Computing
 		<div class="posts">
 			<h1>News</h1>
 			<ul>
-				{% for post in site.categories.news %}
-				<li><span>{{ post.date | date_to_string }}</span> | <a href="{{ post.url }}">{{ post.title }}</a></li>
+				{% for post in site.categories.news limit: 10 %}
+				<li><span>{{ post.date | date_to_string }}</span> | <a href="/faster{{ post.url }}">{{ post.title }}</a></li>
 				{% endfor %}
 			</ul>
 		</div>

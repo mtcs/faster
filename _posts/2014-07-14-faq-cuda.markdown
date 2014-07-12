@@ -1,0 +1,9 @@
+---
+layout: faq
+title:  "suport-cuda"
+question:  "Will Faster support CUDA or OpenCL?"
+categories: faq
+---
+
+We plan to do so, although it is not a priority and it is not clear how it would go.
+

@@ -1,0 +1,8 @@
+---
+layout: faq
+title: "stable"
+question:  "When will Faster be stable?"
+categories: faq
+---
+
+Wright now, there is only one developer involved in the project, so we cant predict it.

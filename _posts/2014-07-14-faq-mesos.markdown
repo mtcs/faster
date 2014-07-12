@@ -1,0 +1,9 @@
+---
+layout: faq
+title:  "suport-mesos"
+question:  "Will Faster support Apache Mesos or Hadoop Yarn?"
+categories: faq
+---
+
+Eventually yes, although we can not promise that it will. In order to support them a great part of the framework would have to be rewritten. Because of that, it would have to come later on.
+

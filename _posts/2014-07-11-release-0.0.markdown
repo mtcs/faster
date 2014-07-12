@@ -2,11 +2,21 @@
 layout: release
 title:  "Release 0.0 Alpha"
 date:   2014-07-11 21:25:20
-categories: release
+docLink: "https://github.com/mtcs/faster/wiki"
+tag: "0.0-alpha"
+comment: "Just a Alpha pre release with minor dataset and function options"
+categories: [release, news]
 ---
 
 [0.0] is a Alpha release to show that there are thins already working.
 
+It is possible to create a FDD Dataset from the memmory and from file using the fdd class constructor.
+
+We have __char__, __int__, __long int__, __float__, __double__ and __string__ Datasets working with Map, BulkMap, FlatMap, BulkFlatMap, reduce and Bulk Reduce.
+
+[Documantation Here] or at least it will be
+
 Enjoy!
 
 [0.0]: https://github.com/mtcs/faster/releases/tag/0.0-alpha
+[Documantation here]: {{ page.docLink }}

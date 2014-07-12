@@ -1,0 +1,21 @@
+---
+layout: default
+title: Faster - Frequently Asked Questions
+---
+
+<div class="faqPage">
+			<h1>Frequently Asked Questions</h1>
+			<ul>
+				{% for post in site.categories.faq reversed %}
+				<li><a href="/faster/faq.html#{{ post.title }}">{{ post.question }}</a></li>
+				{% endfor %}
+			</ul>
+			<br/>
+				{% for post in site.categories.faq reversed %}
+				<p>
+					<label for={{post.title}}></label>
+					<h3>Q: {{ post.question }}</h3>
+					A: {{ post.content |  remove: '<p>' | remove: '</p>'  }}
+				</p>
+				{% endfor %}
+</div>

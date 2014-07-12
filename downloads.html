@@ -1,0 +1,20 @@
+---
+layout: default
+title: Faster - Frequently Asked Questions
+---
+
+<div class="downloadPage">
+	<h1>Releases</h1>
+	<ul>
+		{% for post in site.categories.release %}
+		<li><a href="https://github.com/mtcs/faster/releases/tag/{{ post.tag }}">{{ post.title }}</a>  
+		<a href="/faster{{ post.url }}">Notes</a> 
+		<a href={{doclink}}>Doc</a> 
+		<br>
+		<div class="comment" >{{ post.comment }}</div>
+		<a href="https://github.com/mtcs/faster/archive/{{post.tag}}.zip">[ .zip File ]</a> 
+		<a href="https://github.com/mtcs/faster/archive/{{post.tag}}.tar.gz">[ .tar.gz File ]</a></li>
+		{% endfor %}
+	</ul>
+	<br/>
+</div>
