@@ -6,11 +6,17 @@
 #include <stdio.h>
 #include <list>
 
+class fastTask;
+
+template <class K, class T> 
+class indexedFdd ; 
+
+
 #include "definitions.h"
-#include "fastTask.h" 
+//#include "fastTask.h" 
 #include "fddBase.h"
 #include "fastContext.h"
-#include "indexedFdd.h"
+//#include "indexedFdd.h"
 
 template <typename T> 
 class fddCore : public fddBase {
@@ -28,36 +34,7 @@ class fddCore : public fddBase {
 
 		// 1->1 function (map, bulkmap, flatmap...)
 		template <typename U> 
-		fdd<U> * map( void * funcP, fddOpType op){
-			fdd<U> * newFdd ;
-			size_t result;
-			size_t rSize;
-
-			if ( (op & 0xFF ) & (OP_FlatMap | OP_BulkFlatMap) ){
-				newFdd = new fdd<U>(*context);
-			}else{
-				newFdd = new fdd<U>(*context, size);
-			}
-			unsigned long int newFddId = newFdd->getId();
-
-			// Decode function pointer
-			int funcId = context->findFunc(funcP);
-			//std::cerr << " " << funcId << ".\n";
-
-			// Send task
-			context->enqueueTask(op, id, newFddId, funcId);
-
-			// Receive results
-			for (int i = 1; i < context->numProcs(); ++i){
-				result = * (char*) context->recvTaskResult(id, rSize);
-			}
-
-			return newFdd;
-		}
-
-		// TODO Function to return indexedFdd<L,U>
-
-
+		fdd<U> * map( void * funcP, fddOpType op);
 
 };
 
@@ -169,7 +146,6 @@ class fdd : public fddCore<T>{
 			return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkFlatMap);
 		}
 
-		// TODO if it returns a pointer to U, specialize...
 
 		// Run a Reduce
 		T reduce( reduceFunctionP<T> funcP ){
@@ -182,10 +158,12 @@ class fdd : public fddCore<T>{
 		// --------------- FDD Builtin functions ------------- // 
 		// Collect a FDD
 		std::vector<T> collect( ){
-			return fddCore<T>::context->collectRDD(this);
+			std::vector<T> data(this->size);
+			this->context->collectFDD(data, this);
+			return data;
 		}
 		/*void * _collect( ) override{
-			return fddCore<T>::context->collectRDD(this);
+			return fddCore<T>::context->collectFDD(this);
 		}*/
 
 };
@@ -302,14 +280,44 @@ class fdd<T *> : public fddCore<T>{
 		
 		// --------------- FDD Builtin functions ------------- // 
 		// Collect a FDD
-		std::vector<T *> collect( ) {
-			return this->context->collectRDD(this);
+		std::vector<std::pair<T*, size_t>> collect( ) {
+			std::vector<std::pair<T*, size_t>> data(this->size);
+			this->context->collectFDD(data, this);
+			return data;
 		}
 		/*void * _collect( ) override{
-			return fddCore<T>::context->collectRDD(this);
+			return fddCore<T>::context->collectFDD(this);
 		}*/
 
 };
 
+template <typename T> 
+template <typename U> 
+fdd<U> * fddCore<T>::map( void * funcP, fddOpType op){
+	fdd<U> * newFdd ;
+	size_t result;
+	size_t rSize;
+
+	if ( (op & 0xFF ) & (OP_FlatMap | OP_BulkFlatMap) ){
+		newFdd = new fdd<U>(*context);
+	}else{
+		newFdd = new fdd<U>(*context, size);
+	}
+	unsigned long int newFddId = newFdd->getId();
+
+	// Decode function pointer
+	int funcId = context->findFunc(funcP);
+	//std::cerr << " " << funcId << ".\n";
+
+	// Send task
+	context->enqueueTask(op, id, newFddId, funcId);
+
+	// Receive results
+	for (int i = 1; i < context->numProcs(); ++i){
+		result = * (char*) context->recvTaskResult(id, rSize);
+	}
+
+	return newFdd;
+}
 
 #endif

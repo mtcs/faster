@@ -101,8 +101,9 @@ void worker::run(){
 				std::cerr << "    R:Collect ";
 				comm->recvCollect(id);
 				std::cerr << "ID:" << id << " ";
-				getFDDData(id, data, size);
-				comm->sendFDDData(id, 0, data, size);
+				//getFDDData(id, data, size);
+				//comm->sendFDDData(id, 0, data, size);
+				collect(id);
 				std::cerr << ".\n";
 				break;
 

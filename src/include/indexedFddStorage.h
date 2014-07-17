@@ -37,7 +37,7 @@ class indexedFddStorage : public indexedFddStorageCore<K, T> {
 		indexedFddStorage(size_t s);
 		indexedFddStorage(K * keys, T * data, size_t s);
 		void setData( K * keys, T * data, size_t s);
-		void setData( void * keys, void * data, size_t s);
+		void setDataRaw( void * keys, void * data, size_t s);
 
 		void setSize(size_t s) override;
 
@@ -60,6 +60,7 @@ class indexedFddStorage <K, T *> : public indexedFddStorageCore<K, T *> {
 		~indexedFddStorage();
 
 		void setData( K * keys, T ** data, size_t * lineSizes, size_t s);
+		void setDataRaw( void * keys, void ** data, size_t * lineSizes, size_t s);
 		void setSize(size_t s) override;
 
 		void insert(K key, T *& item, size_t s);

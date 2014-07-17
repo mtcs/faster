@@ -54,7 +54,7 @@ indexedFddStorage<K,T>::indexedFddStorage(size_t s) : indexedFddStorageCore<K,T>
 }
 
 template <class K, class T> 
-indexedFddStorage<K,T*>::indexedFddStorage(size_t s) : indexedFddStorage<K,T*>(s){
+indexedFddStorage<K,T*>::indexedFddStorage(size_t s) : indexedFddStorageCore<K,T*>(s){
 	lineSizes = new size_t[s];
 }
 
@@ -93,7 +93,7 @@ void indexedFddStorage<K,T>::setData(K * keys, T * data, size_t s){
 	}
 }
 template <class K, class T> 
-void indexedFddStorage<K,T>::setData(void * keys, void * data, size_t s){
+void indexedFddStorage<K,T>::setDataRaw(void * keys, void * data, size_t s){
 	fastCommBuffer buffer(0);
 
 	//grow(s);
@@ -121,6 +121,10 @@ void indexedFddStorage<K,T*>::setData( K * keys, T ** data, size_t * ls, size_t 
 		}
 	}
 	this->size = s;
+}
+template <class K, class T> 
+void indexedFddStorage<K,T*>::setDataRaw( void * keys, void ** data, size_t * ls, size_t s){
+	setData( (K*) keys, (T**) data, ls, s);
 }
 
 template <class K, class T> 

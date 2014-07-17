@@ -17,7 +17,7 @@ fastContext::fastContext(const fastSettings & s){
 
 fastContext::~fastContext(){ 
 	// Tell workers to go home!
-	std::cerr << "    S:CreateFdd ";
+	std::cerr << "    S:FINISH! ";
 	comm->sendFinish();
 
 	// Clean process
@@ -89,6 +89,7 @@ unsigned long int fastContext::_createIFDD(fddBase * ref, fddType kType, fddType
 	return numFDDs++;
 }
 
+// TODO CHANGE THIS!
 unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode, size_t size){
 	return _createFDD(ref, decodeType(typeCode), size);
 }
@@ -113,6 +114,28 @@ unsigned long int fastContext::createIPFDD(fddBase * ref, size_t kTypeCode, size
 unsigned long int fastContext::createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode){
 	return _createIFDD(ref, decodeType(kTypeCode), POINTER | decodeType(tTypeCode), 0);
 }
+
+unsigned long int fastContext::createFddGroup(fddBase * ref, std::vector<fddBase*> & fddV){
+	std::vector<unsigned long int> idV(fddV.size());
+	std::vector<fddType> kV(fddV.size());
+	std::vector<fddType> tV(fddV.size());
+
+	for( size_t i = 0; i < fddV.size(); ++i){
+		idV[i] = fddV[i]->getId();
+		tV[i] = fddV[i]->tType();
+		kV[i] = fddV[i]->kType();
+	}
+
+	//comm->sendCreateFDDGroup( numFDDs,  idV, kV, tV);
+	// >>>>>>>>>>>>>>>>>>>>>>>>>> RESUME HERE <<<<<<<<<<<<<<<<<<<<<<<<<< //
+
+	std::cerr << "    S:CreateFddGroup ID:" << numFDDs << '\n';
+
+	fddList.insert(fddList.begin(), ref);
+	return numFDDs++;
+}
+
+
 
 // Propagate FDD destruction to other machines
 size_t findFileSize(const char* filename)
@@ -152,6 +175,8 @@ void fastContext::getFDDInfo(size_t & s){
 	}
 }
 
+
+
 unsigned long int fastContext::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId){
 	fastTask * newTask = new fastTask();
 	newTask->id = numTasks++;
@@ -163,11 +188,14 @@ unsigned long int fastContext::enqueueTask(fddOpType opT, unsigned long int idSr
 
 	// TODO do this later on a shceduler?
 	comm->sendTask(*newTask);
-	std::cerr << "    S:Task ID:" << newTask->id << " FDD:" << idSrc << " F:" << funcId<< '\n';
+	std::cerr << "    S:Task ID:" << newTask->id << " FDD:" << idSrc << " F:" << funcId << '\n';
 
 	taskList.insert(taskList.end(), newTask);
 
 	return newTask->id;
+}
+unsigned long int fastContext::enqueueTask(fddOpType opT, unsigned long int id){
+	return enqueueTask(opT, id, 0, -1);
 }
 
 void * fastContext::recvTaskResult(unsigned long int &id, size_t & size){

@@ -102,7 +102,7 @@ void fddStorage<T>::setData( T * data, size_t s){
 }
 // Works for primitive and Containers
 template <class T> 
-void fddStorage<T>::setData(void * data, size_t s){
+void fddStorage<T>::setDataRaw(void * data, size_t s){
 	fastCommBuffer buffer(0);
 
 	//grow(s);
@@ -126,10 +126,14 @@ void fddStorage<T *>::setData( T ** data, size_t * ls, size_t s){
 		
 		this->localData[i] = new  T [lineSizes[i]];
 		for ( int j = 0; j < lineSizes[i]; ++j){
-			this->localData[i][j] =  ((T *) data[i])[j];
+			this->localData[i][j] =  data[i][j];
 		}
 	}
 	this->size = s;
+}
+template <class T> 
+void fddStorage<T *>::setDataRaw( void ** data, size_t * ls, size_t s){
+	setData( (T**) data, ls, s );
 }
 
 template <class T> 

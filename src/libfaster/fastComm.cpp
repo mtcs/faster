@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "fastComm.h"
+#include "fastTask.h" 
 #include "workerIFdd.h"
 #include "workerFdd.h"
 
@@ -173,15 +174,17 @@ void fastComm::sendDataGeneric(unsigned long int id, int dest, void * data, size
 void fastComm::sendIDataGeneric(unsigned long int id, int dest, void * keys, void * data, size_t size, int tagID, int tagKeys, int tagData){
 	buffer[dest].reset();
 
+	MPI_Request infoReq;
+
 	// Encode information into the buffer
 	buffer[dest] << id << size;
 
 	// Send data information
-	MPI_Isend( buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, tagID , MPI_COMM_WORLD, &req2[dest-1]);
+	MPI_Isend( buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, tagID , MPI_COMM_WORLD, &infoReq);
 	// Send Keys
 	MPI_Isend( keys, size, MPI_BYTE, dest, tagKeys, MPI_COMM_WORLD, &req[dest-1]);
 	// Send Data
-	MPI_Isend( data, size, MPI_BYTE, dest, tagData, MPI_COMM_WORLD, &req[dest-1]);
+	MPI_Isend( data, size, MPI_BYTE, dest, tagData, MPI_COMM_WORLD, &req2[dest-1]);
 }
 
 // Send Container (String and Vector) Data
@@ -246,8 +249,8 @@ void fastComm::sendDataGeneric(unsigned long int id, int dest, void ** data, siz
 		
 	//MPI_Waitall( size, localReq, stat);
 
-	delete localReq;
-	delete stat;
+	delete [] localReq;
+	delete [] stat;
 }
 void fastComm::sendIDataGeneric(unsigned long int id, int dest, void * keys, void ** data, size_t * lineSizes, size_t size, size_t itemSize, int tagID, int tagDataSize, int tagKeys, int tagData){
 	MPI_Request * localReq = new MPI_Request[size];
@@ -272,8 +275,8 @@ void fastComm::sendIDataGeneric(unsigned long int id, int dest, void * keys, voi
 		
 	//MPI_Waitall( size, localReq, stat);
 
-	delete localReq;
-	delete stat;
+	delete [] localReq;
+	delete [] stat;
 }
 
 
@@ -300,6 +303,11 @@ void fastComm::recvDataGeneric(unsigned long int &id, int src, void *& data, siz
 	
 	data = buffer[src].data();
 }
+
+// TODO
+// TODO FIX INDEXED DATA TRANSFER. It will not work when keys are not primitive types
+// TODO
+
 void fastComm::recvIDataGeneric(unsigned long int &id, int src, void *& keys, void *& data, size_t &size, int tagID, int tagKeys, int tagData){
 	MPI_Status stat;
 	int recvDataSize;
@@ -375,7 +383,8 @@ void fastComm::recvDataGeneric(unsigned long int &id, int src, void **& data, si
 	}
 	MPI_Waitall( size, localReq, stat);
 	
-	delete localReq;
+	delete [] localReq;
+	delete [] stat;
 }
 void fastComm::recvIDataGeneric(unsigned long int &id, int src, void *& keys, void **& data, size_t *& lineSizes, size_t &size, int tagID, int tagDataSize, int tagKeys, int tagData){
 	buffer[src].reset();
@@ -406,6 +415,7 @@ void fastComm::recvIDataGeneric(unsigned long int &id, int src, void *& keys, vo
 
 	// Receive the size of every line to be received
 	MPI_Recv(buffer2.data(), buffer2.free(), MPI_BYTE, src, tagDataSize, MPI_COMM_WORLD, status);	
+	lineSizes = (size_t *) buffer2.data();
 
 	ds = 0;
 	// Figure out the size the busffer needs to be
@@ -426,9 +436,9 @@ void fastComm::recvIDataGeneric(unsigned long int &id, int src, void *& keys, vo
 	MPI_Waitall( size, localReq, stat);
 	
 	keys = buffer3.data();
-	lineSizes = (size_t *) buffer2.data();
 
-	delete localReq;
+	delete [] localReq;
+	delete [] stat;
 }
 
 
@@ -487,7 +497,7 @@ void fastComm::recvFDDSetData(unsigned long int &id, void **& data, size_t *& li
 	recvDataGeneric(id, 0, data, lineSizes, size, MSG_FDDSET2DDATAID, MSG_FDDSET2DDATASIZES, MSG_FDDSET2DDATA);
 }
 void fastComm::recvFDDSetIData(unsigned long int &id, void *& keys, void **& data, size_t *& lineSizes, size_t &size){
-	recvIDataGeneric(id, 0, keys, data, lineSizes, size, MSG_FDDSET2DDATAID, MSG_FDDSET2DIDATASIZES, MSG_FDDSET2DIKEYS, MSG_FDDSET2DIDATA);
+	recvIDataGeneric(id, 0, keys, data, lineSizes, size, MSG_FDDSET2DIDATAID, MSG_FDDSET2DIDATASIZES, MSG_FDDSET2DIKEYS, MSG_FDDSET2DIDATA);
 }
 
 
@@ -500,6 +510,13 @@ void fastComm::sendFDDData(unsigned long int id, int dest, void * data, size_t s
 
 void fastComm::recvFDDData(unsigned long int &id, void * data, size_t &size){
 	recvDataGeneric(id, 0, data, size, MSG_FDDDATAID, MSG_FDDDATA);
+}
+void fastComm::sendIFDDData(unsigned long int id, int dest, void * keys, void * data, size_t size){
+	sendIDataGeneric(id, dest, keys, data, size, MSG_IFDDDATAID, MSG_IFDDDATAKEYS, MSG_IFDDDATA);
+}
+
+void fastComm::recvIFDDData(unsigned long int &id, void * keys, void * data, size_t &size){
+	recvIDataGeneric(id, 0, keys, data, size, MSG_IFDDDATAID, MSG_IFDDDATAKEYS, MSG_IFDDDATA);
 }
 
 

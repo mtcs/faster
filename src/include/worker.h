@@ -45,15 +45,17 @@ class worker{
 		void setFDDData(unsigned long int id, void ** data, size_t * lineSizes, size_t size);
 		void setFDDIData(unsigned long int id, void * kays, void ** data, size_t * lineSizes, size_t size);
 
-		void getFDDData(unsigned long int id, void *& data, size_t &size);
+		//void getFDDData(unsigned long int id, void *& data, size_t &size);
 		
 		void setFDDOwnership(unsigned long int id, size_t low, size_t up);
 		
 		void readFDDFile(unsigned long int id, std::string &filename, size_t size, size_t offset);
 
 		void preapply(fastTask &task, workerFddBase * destFDD);
-		
+
 		void solve(fastTask & task);
+
+		void collect(unsigned long int id);
 };
 
 #endif

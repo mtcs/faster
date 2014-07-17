@@ -36,19 +36,21 @@ class fastCommBuffer{
 		// WRITE Data
 		template <typename T>
 		void write(T &v, size_t s){
+			grow(_size + s);
 			memcpy( &_data[_size], &v, s );
 			_size += s;
 		}
 
 		template <typename T>
 		void write(T * v, size_t s){
+			grow(_size + s);
 			memcpy( &_data[_size], v, s );
 			_size += s;
 		}
-		void write(void * v, size_t s){
+		/*void write(void * v, size_t s){
 			memcpy( &_data[_size], v, s );
 			_size += s;
-		}
+		}// */
 
 		template <typename T>
 		void write(T v){

@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "fastComm.h"
-#include "workerFdd.h"
+#include "workerFddExtern.cpp"
 #include "worker.h"
 
 void worker::createFDD (unsigned long int id, fddType type, size_t size){

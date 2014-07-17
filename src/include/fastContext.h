@@ -8,14 +8,19 @@
 #include <math.h>
 
 
+template <typename T> 
+class fdd;
+
+template <typename K, typename T> 
+class indexedFdd;
+
+class fastTask;
+class fastContext;
+
 #include "definitions.h"
 #include "fddBase.h"
 #include "fastComm.h"
 
-template <class T> 
-class fdd;
-
-class fastContext;
 
 class fastSettings{
 	friend class fastContext;
@@ -86,30 +91,30 @@ class fastContext{
 		unsigned long int createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size);
 		unsigned long int createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode);
 		unsigned long int createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size);
+		unsigned long int createFddGroup(fddBase * ref, std::vector<fddBase*> & fdds);
+
 		unsigned long int readFDD(fddBase * ref, const char * fileName);
 		void getFDDInfo(size_t & size);
+
 		int numProcs(){ return comm->numProcs; }
 		
 
 		unsigned long int enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId);
+		unsigned long int enqueueTask(fddOpType opT, unsigned long int id);
 
 		void * recvTaskResult(unsigned long int &id, size_t & size);
 				
 
-		template <class T> 
-		std::vector<T> collectRDD(fdd<T> * fddP){
-			size_t s = fddP->getSize();
-			size_t recvData = 0, rsize;
-			unsigned long int rid;
-			std::vector<T> result(s);
+		template <typename Z, typename FDD> 
+		void collectFDD(Z & ret, FDD * fddP){
+			std::cerr << "    S:SendCollect " ;
+			
+			comm->sendCollect(fddP->getId());
+			std::cerr << "ID:" << fddP->getId() << " ";
 
-			comm->sendCollect(id);
-
-			while (recvData < s){// TODO put a timeout here
-				comm->recvFDDData(rid, &(result.data())[recvData], rsize);
-				recvData += rsize;
-			}
-			return result;
+			comm->recvFDDDataCollect(ret);
+			
+			std::cerr << ".\n";
 		}
 
 
@@ -147,7 +152,7 @@ class fastContext{
 					dataPerProc += 1;
 				std::cerr << "    S:FDDSetDataI P" << i << " ID:" << id << " S:" << dataPerProc << "";
 
-				comm->sendFDDSetIData(id, i, &keys[offset], &data[offset], dataPerProc * sizeof(T));
+				comm->sendFDDSetIData(id, i, &keys[offset], &data[offset], dataPerProc);
 				offset += dataPerProc;
 				std::cerr << ".\n";
 			}
@@ -164,11 +169,11 @@ class fastContext{
 				int rem = size % (comm->numProcs -1);
 				if (i <= rem)
 					dataPerProc += 1;
-				std::cerr << "    S:FDDSetPData P" << i << " " << id << " " << dataPerProc << "B ";
+				std::cerr << "    S:FDDSetPData P" << i << " ID:" << id << " S:" << dataPerProc << "";
 
 				comm->sendFDDSetData(id, i, (void **) &data[offset], &dataSizes[offset], dataPerProc, sizeof(T));
 				offset += dataPerProc;
-				std::cerr << "!\n";
+				std::cerr << ".\n";
 			}
 		}
 		template <typename K, typename T>
@@ -180,11 +185,11 @@ class fastContext{
 				int rem = size % (comm->numProcs -1);
 				if (i <= rem)
 					dataPerProc += 1;
-				std::cerr << "    S:FDDSetPDataI P" << i << " " << id << " " << dataPerProc << "B ";
+				std::cerr << "    S:FDDSetPDataI P" << i << " ID:" << id << " S:" << dataPerProc << "";
 
 				comm->sendFDDSetIData(id, i, &keys[offset],(void **) &data[offset], &dataSizes[offset], dataPerProc, sizeof(T));
 				offset += dataPerProc;
-				std::cerr << "!\n";
+				std::cerr << ".\n";
 			}
 		}
 		//Containers
@@ -197,7 +202,7 @@ class fastContext{
 				int rem = size % (comm->numProcs -1);
 				if (i <= rem)
 					dataPerProc += 1;
-				std::cerr << "    S:FDDSetVData P" << i << " " << id << " " << dataPerProc << "B";
+				std::cerr << "    S:FDDSetVData P" << i << " " << id << " " << dataPerProc << "";
 
 				comm->sendFDDSetData(id, i, &data[offset], dataPerProc);
 				offset += dataPerProc;
@@ -214,7 +219,7 @@ class fastContext{
 				int rem = size % (comm->numProcs -1);
 				if (i <= rem)
 					dataPerProc += 1;
-				std::cerr << "    S:FDDSetVData P" << i << " " << id << " " << dataPerProc << "B";
+				std::cerr << "    S:FDDSetVData P" << i << " " << id << " " << dataPerProc << "";
 
 				comm->sendFDDSetIData(id, i, &keys[offset], &data[offset], dataPerProc);
 				offset += dataPerProc;
@@ -236,6 +241,15 @@ class fastContext{
 		template <typename K>
 		void parallelizeI(unsigned long int id, K * keys, std::string * data, size_t size){
 			parallelizeIC(id, keys, data, size);
+		}
+
+		template <typename K>
+		CountKeyMapT<K> recvCountByKey(size_t size){
+			CountKeyMapT<K> count(size);
+			for ( int i = 0; i < (comm->numProcs - 1); ++i){
+				comm->recvCountByKey(count);
+			}
+			return count;
 		}
 
 		void destroyFDD(unsigned long int id);

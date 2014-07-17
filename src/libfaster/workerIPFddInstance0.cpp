@@ -1,4 +1,3 @@
-#include "workerIPFdd.cpp"
 #include "workerIPFddDependent.cpp"
 
 template class workerIFdd<char, char *>;

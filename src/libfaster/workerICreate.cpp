@@ -1,5 +1,4 @@
-#include "workerIFdd.h"
-#include "indexedFddStorage.h"
+#include "workerIFddExtern.cpp"
 #include "worker.h"
 
 

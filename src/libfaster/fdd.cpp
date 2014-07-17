@@ -1,5 +1,8 @@
 #include <omp.h>
+
 #include "fdd.h"
+#include "fastComm.h"
+#include "fastCommBuffer.h"
 
 template <typename T>
 fddCore<T>::fddCore(fastContext & c){

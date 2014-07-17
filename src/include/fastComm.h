@@ -6,9 +6,9 @@
 #include <sstream>
 
 class fastComm;
+class fastTask;
 
 #include "definitions.h"
-#include "fastTask.h" 
 #include "fastCommBuffer.h" 
 
 enum commMode {
@@ -38,6 +38,13 @@ enum commMode {
 #define MSG_FDDSET2DIDATASIZES	0x0014
 #define MSG_FDDSET2DIDATA 	0x0015
 #define MSG_FDDSET2DIKEYS 	0x0016
+#define MSG_KEYOWNERSHIPSUGEST	0x0017
+#define MSG_MYKEYOWNERSHIP	0x0018
+#define MSG_MYKEYCOUNT		0x0019
+#define MSG_IFDDDATAID 		0x001a
+#define MSG_IFDDDATAKEYS	0x001b
+#define MSG_IFDDDATA 		0x001c
+#define MSG_COLLECTDATA		0x001d
 // . . .
 #define MSG_FINISH 		0x8000
 
@@ -68,9 +75,6 @@ class fastComm{
 		MPI_Status * status;
 		MPI_Request * req;
 		MPI_Request * req2;
-		fastCommBuffer * buffer;
-		fastCommBuffer buffer2;
-		fastCommBuffer buffer3;
 
 		commMode mode;
 		int numProcs;
@@ -95,26 +99,36 @@ class fastComm{
 		void recvIDataGeneric(unsigned long int &id, int src, void *& keys, void **& data, size_t *& lineSizes, size_t &size, int tagID, int tagDataSize, int tagKeys, int tagData);
 
 	public:
+		fastCommBuffer * buffer;
+		fastCommBuffer buffer2;
+		fastCommBuffer buffer3;
+
 		fastComm(const std::string master);
 		~fastComm();
 
 		int getProcId(){ return procId; }
+		int getNumProcs(){ return numProcs; }
 
 		bool isDriver();
 
 		void probeMsgs(int & tag);
 		void waitForReq(int numReqs);
 		
+		// Task
 		void sendTask(fastTask & task);
 		void recvTask(fastTask & task);
 
 		void sendTaskResult(unsigned long int id, void * res, size_t size, double time);
 		void * recvTaskResult(unsigned long int &id, int &proc, size_t &size, double &time);
 
+		// FDD Creation / Destruction
 		void sendCreateFDD(unsigned long int id,  fddType type, size_t size, int dest);
 		void recvCreateFDD(unsigned long int &id, fddType &type, size_t & size);
 		void sendCreateIFDD(unsigned long int id,  fddType kType,  fddType tType,  size_t size, int dest);
 		void recvCreateIFDD(unsigned long int &id, fddType &kType, fddType &tType, size_t & size);
+
+		void sendCreateFDDGroup(unsigned long int id, std::vector<unsigned long int> &idV, std::vector<fddType> &kV, std::vector<fddType> tV);
+		void recvCreateFDDGroup(unsigned long int &id, std::vector<unsigned long int> &idV, std::vector<fddType> &kV, std::vector<fddType> tV);
 
 		void sendDestroyFDD(unsigned long int id);
 		void recvDestroyFDD(unsigned long int &id);
@@ -142,6 +156,115 @@ class fastComm{
 		// Data
 		void sendFDDData(unsigned long int id, int dest, void * data, size_t size);
 		void recvFDDData(unsigned long int &id, void * data, size_t &size);
+		void sendIFDDData(unsigned long int id, int dest, void * keys, void * data, size_t size);
+		void recvIFDDData(unsigned long int &id, void * keys, void * data, size_t &size);
+		
+		
+
+		template <typename T>
+		void sendFDDDataCollect(unsigned long int id, T * data, size_t size){
+			buffer[0].reset();
+			buffer[0] << id << size;
+			for( int i = 0; i < size; ++i ){
+				buffer[0] << data[i];
+			}
+			MPI_Isend( buffer[0].data(), buffer[0].size(), MPI_BYTE, 0, MSG_COLLECTDATA , MPI_COMM_WORLD, req);
+		}
+		template <typename T>
+		void sendFDDDataCollect(unsigned long int id, T ** data, size_t * dataSizes, size_t size){
+			buffer[0].reset();
+			buffer[0] << id << size;
+			for( int i = 0; i < size; ++i ){
+				buffer[0] << dataSizes[i];
+				buffer[0].write(data[i], dataSizes[i]*sizeof(T));
+			}
+			MPI_Isend( buffer[0].data(), buffer[0].size(), MPI_BYTE, 0, MSG_COLLECTDATA , MPI_COMM_WORLD, req);
+		}
+		template <typename K, typename T>
+		void sendFDDDataCollect(unsigned long int id, K * keys, T * data, size_t size){
+			buffer[0].reset();
+			buffer[0] << id << size;
+			for( int i = 0; i < size; ++i ){
+				buffer[0] << keys[i] << data[i];
+			}
+			MPI_Isend( buffer[0].data(), buffer[0].size(), MPI_BYTE, 0, MSG_COLLECTDATA , MPI_COMM_WORLD, req);
+			std::cerr << "Sent";
+		}
+		template <typename K, typename T>
+		void sendFDDDataCollect(unsigned long int id, K * keys, T ** data, size_t * dataSizes, size_t size){
+			buffer[0].reset();
+			buffer[0] << id << size;
+			for( int i = 0; i < size; ++i ){
+				buffer[0] << keys[i] << dataSizes[i];
+				buffer[0].write(data[i], dataSizes[i]*sizeof(T));
+			}
+			MPI_Isend( buffer[0].data(), buffer[0].size(), MPI_BYTE, 0, MSG_COLLECTDATA , MPI_COMM_WORLD, req);
+		}
+
+		template <typename T>
+		void recvFDDDataCollect(std::vector<T> & ret){
+			size_t count = 0, size;
+			unsigned long int id;
+			for (int i = 1; i < (numProcs); ++i){
+				buffer2.reset();
+				MPI_Recv(buffer2.data(), buffer2.free(), MPI_BYTE, i, MSG_COLLECTDATA, MPI_COMM_WORLD, status);	
+				buffer2 >> id >> size;
+				std::cerr << "[" << id << ":" << size<< "] " ;
+				for (int j = 0; j < size; ++j){
+					buffer2 >> ret[count++];
+				}
+			}
+		}
+		template <typename T>
+		void recvFDDDataCollect(std::vector<std::pair<T*,size_t>> & ret){
+			size_t count = 0, size;
+			unsigned long int id;
+			for (int i = 1; i < (numProcs); ++i){
+				buffer2.reset();
+				MPI_Recv(buffer2.data(), buffer2.free(), MPI_BYTE, i, MSG_COLLECTDATA, MPI_COMM_WORLD, status);	
+				buffer2 >> id >> size;
+				std::cerr << "[" << id << ":" << size<< "] " ;
+				for (int j = 0; j < size; ++j){
+					buffer2 >> ret[count].second;
+					ret[count].first = new T[ret[count].second];
+					buffer2.read(ret[count].first, ret[count].second * sizeof(T) );
+					count ++;
+				}
+			}
+		}
+		template <typename K, typename T>
+		void recvFDDDataCollect(std::vector<std::pair<K, T>> & ret){
+			size_t count = 0, size;
+			unsigned long int id;
+			for (int i = 1; i < (numProcs); ++i){
+				buffer2.reset();
+				MPI_Recv(buffer2.data(), buffer2.free(), MPI_BYTE, i, MSG_COLLECTDATA, MPI_COMM_WORLD, status);	
+				buffer2 >> id >> size;
+				std::cerr << "[" << id << ":" << size<< "] " ;
+				for (int j = 0; j < size; ++j){
+					buffer2 >> ret[count].first >> ret[count].second;
+					count ++;
+				}
+			}
+		}
+		template <typename K, typename T>
+		void recvFDDDataCollect(std::vector<std::tuple<K, T*, size_t>> & ret){
+			size_t count = 0, size;
+			unsigned long int id;
+			for (int i = 1; i < (numProcs); ++i){
+				buffer2.reset();
+				MPI_Recv(buffer2.data(), buffer2.free(), MPI_BYTE, i, MSG_COLLECTDATA, MPI_COMM_WORLD, status);	
+				buffer2 >> id >> size;
+				std::cerr << "[" << id << ":" << size<< "] " ;
+				for (int j = 0; j < size; ++j){
+					buffer2  >> std::get<0>(ret[count]) >> std::get<2>(ret[count]);
+					std::get<1>(ret[count]) = new T[std::get<2>(ret[count])];
+					buffer2.read(std::get<1>(ret[count]), std::get<2>(ret[count]) * sizeof(T) );
+					count ++;
+				}
+			}
+		}
+
 
 
 		// Read File
@@ -158,8 +281,89 @@ class fastComm{
 		void recvFinish();
 
 
+		// GroupByKey
+		// Distribute Key Ownership
+		template <typename K>
+		void sendKeyOwnershipSugest(int dest, K key){
+			buffer[dest].reset();
+			buffer[dest] << key;
+			MPI_Isend(buffer[dest].data(), buffer[dest].free(), MPI_BYTE, dest, MSG_KEYOWNERSHIPSUGEST, MPI_COMM_WORLD, &req[dest-1]);
+		}
+		template <typename K>
+		void sendMyKeyOwnership(K key){
+			for ( int i = 1; i < (numProcs); ++i){
+				if (i != procId){
+					buffer[i].reset();
+					buffer[i] << key;
+					MPI_Isend(buffer[i].data(), buffer[i].free(), MPI_BYTE, i, MSG_MYKEYOWNERSHIP, MPI_COMM_WORLD, &req[i-1]);
+				}
+			}
+		}
 
+		template <typename K>
+		void recvKeyOwnershipGeneric(K * keys, int tag){
+			buffer2.reset();
+			for ( int i = 0; i < (numProcs - 2); ++i){
+				MPI_Recv(buffer2.data(), buffer2.free(), MPI_BYTE, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, status);	
+				buffer2 >> keys[status[0].MPI_SOURCE];
+			}
+		}
+		template <typename K>
+		void recvKeyOwnershipSugest(K * keys){
+			recvKeyOwnershipGeneric(keys, MSG_KEYOWNERSHIPSUGEST);
+		}
+		template <typename K>
+		void recvAllKeyOwnership(K * keys){
+			recvKeyOwnershipGeneric(keys, MSG_MYKEYOWNERSHIP);
+		}
 
+		// Distribute Key Count
+		void sendMyKeyCount(int dest, size_t numKeys){
+			memcpy(buffer[dest].data(), &numKeys, sizeof(size_t));
+			MPI_Isend(buffer[dest].data(), buffer[dest].free(), MPI_BYTE, dest, MSG_MYKEYCOUNT, MPI_COMM_WORLD, &req[dest-1]);
+		}
+
+		template <typename K>
+		typename std::list<std::pair<K,size_t>>  recvMyKeyCount(int & src){
+			size_t numKeys = 0;
+			std::list<std::pair<K,size_t>> countList;
+
+			MPI_Recv(buffer2.data(), buffer2.free(), MPI_BYTE, MPI_ANY_SOURCE, MSG_KEYOWNERSHIPSUGEST, MPI_COMM_WORLD, status);	
+			src = status->MPI_SOURCE;
+			buffer2 >> numKeys;
+			for ( int i = 0; i < numKeys; ++i ){
+				K k;
+				size_t c;
+				buffer2 >> k >> c;
+				countList.push_back(std::pair<K,size_t>(k,c));
+			}
+			return countList;
+		}
+
+		template <typename K>
+		void sendCountByKey(CountKeyMapT<K> & count){
+			
+			buffer[0].reset();
+			buffer[0] << count.size();
+
+			for ( auto it = count.begin(); it != count.end(); it++ ){
+				buffer[0] << it->first << it->second;
+				MPI_Isend(buffer[0].data(), buffer[0].free(), MPI_BYTE, 0, MSG_MYKEYCOUNT, MPI_COMM_WORLD, &req[0]);
+			}
+		}
+		template <typename K>
+		void recvCountByKey(CountKeyMapT<K> & count){
+			buffer2.reset();
+			size_t size;
+			buffer[0] >> size;
+
+			for ( size_t i = 0; i < size; ++i){
+				K key;
+				size_t c;
+				buffer[0] >> key >> c;
+				count[key] = c;
+			}
+		}
 };
 
 #endif

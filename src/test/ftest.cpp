@@ -1,31 +1,100 @@
 #include <vector>
 #include <algorithm>
+#include <sstream>
 
 #include "libfaster.h"
 
 #define VECSIZE 100
 
+using namespace std;
+
 // --------- Test FDD creation
-void testCreation(fastContext & fc){
-	std::vector<int> d (VECSIZE);
+//Test Simple > Collect
+//Test String > Collect
+//Test Vector > Collect
+template <typename T>
+bool testCreation(fdd<T> * testFDD, fastContext & fc, vector<T> & data){
 
-	std::cerr << "Test Simple > Collect ";
-	fdd <int> intFDD (fc, d);
-	std::vector < int > tv = intFDD.collect();
-	if ( d != tv ) 
-		std::cerr << "\033[38;5;196mNOT PASSED\033[38;5;196m\n";
-	else
-		std::cerr << "\033[38;5;29mPASSED\n";
+	testFDD =  new fdd <T> (fc, data);
+	vector <T> tv = testFDD->collect();
 
-	//Test Pointer > Collect
-	//Test String > Collect
-	//Test Vector > Collect
-	//Test Indexed Simple > Collect
-	//Test Indexed Pointer > Collect
-	//Test Indexed String > Collect
-	//Test Indexed Vector > Collect
-	//Test ReadFile > Collect
+	if ( data != tv ) {
+		return false;
+	}
+
+	return true;
 }
+//Test Pointer > Collect
+template <typename T>
+bool testCreation(fdd<T*> * testFDD, fastContext & fc, vector<T*> & data, vector<size_t> & dataSizes){
+
+	testFDD =  new fdd <T*> (fc, data.data(), dataSizes.data(), data.size());
+	vector <pair<T*,size_t>> tv = testFDD->collect();
+
+	for (int i = 0; i < VECSIZE; ++i){
+		for (int j = 0; j < dataSizes[i]; ++j){
+			T * p = tv[i].first;
+			if ( data[i][j] != tv[i].first[j] ) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+//Test Indexed Simple > Collect
+//Test Indexed String > Collect
+//Test Indexed Vector > Collect
+template <typename K, typename T>
+bool testCreation(indexedFdd<K,T> * testFDD, fastContext & fc, vector<K> & keys, vector<T> & data){
+
+	testFDD =  new indexedFdd <K,T> (fc, keys.data(), data.data(), data.size());
+	vector <pair<K,T>> tv = testFDD->collect();
+	for (int i = 0; i < VECSIZE; ++i){
+		cerr << keys[i] << " " << tv[i].first << " ";
+		cerr << data[i] << " " << tv[i].second << "\n";
+		if ( (data[i] != tv[i].second) || (keys[i] != tv[i].first)) {
+		//if ( data[i] != tv[i].second ) {
+			return false;
+		}
+	}
+
+	return true;
+}
+template <typename K, typename T>
+bool testCreation(indexedFdd<K,vector<T>> * testFDD, fastContext & fc, vector<K> & keys, vector<vector<T>> & data){
+	testFDD =  new indexedFdd <K,vector<T>> (fc, keys.data(), data.data(), data.size());
+	vector <pair<K, vector<T> >> tv = testFDD->collect();
+	for (int i = 0; i < VECSIZE; ++i){
+		//cerr << keys[i] << " " << tv[i].first << " ";
+		//cerr << data[i][0] << " " << tv[i].second[0] << "\n";
+		if ( (data[i] != tv[i].second) || (keys[i] != tv[i].first)) {
+		//if ( data[i] != tv[i].second ) {
+			return false;
+		}
+	}
+	return true;
+}
+//Test Indexed Pointer > Collect
+template <typename K, typename T>
+bool testCreation(indexedFdd<K,T*> * testFDD, fastContext & fc, vector<K> & keys, vector<T*> & data, vector<size_t> & dataSizes){
+
+	testFDD =  new indexedFdd <K,T*> (fc, keys.data(), data.data(), dataSizes.data(), data.size());
+	vector <tuple<K,T*, size_t>> tv = testFDD->collect();
+	for (int i = 0; i < VECSIZE; ++i){
+		//if(keys[i] != get<0>(tv[i])) {
+		//	return false;
+		//}
+		for (int j = 0; j < dataSizes[i]; ++j){
+			if (data[i][j] != get<1>(tv[i])[j]) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+//Test ReadFile > Collect
 
 
 // --------- Test Simple Non indexed transformations
@@ -112,9 +181,113 @@ void testCreation(fastContext & fc){
 //Test Indexed Vector Map> Vector
 
 
+
+template <typename T>
+vector<T> createData(const T & v){
+	vector<T> d (VECSIZE, v);
+	return d;
+}
+
+vector<string> createData(const string & v){
+	ostringstream ss;
+	vector<string> d (VECSIZE);
+
+	for ( int i = 0; i < VECSIZE; ++i){
+		ss.str("");
+		ss << v << i;
+		d[i] = ss.str();
+	}
+	return d;
+}
+
+template <typename T>
+vector<T> createData(){
+	vector<T> d (VECSIZE);
+	for ( int i = 0; i < VECSIZE; ++i)
+		//d[i] = rand() % 10;
+		d[i] = i;
+	return d;
+}
+
+bool assertRecv(int & numOk, int & tot, bool recv){
+	if (recv){
+		numOk ++;
+		cerr << " \033[38;5;29m PASSED\033[0m\n"; 
+	}else{
+		cerr << " \033[38;5;196m NOT PASSED\033[0m\n";
+	}
+	tot++;
+
+	return recv;
+}
+void printResult(int ok, int numOk, int tot){
+	if(numOk < tot){ 
+		cerr << "\n   \033[38;5;196m NOT PASSED\033[0m";
+		cerr << numOk << "/" << tot << "\n"; 
+	}else{ 
+		cerr << "\n   \033[38;5;29m PASSED\033[0m"; 
+		cerr << numOk << "/" << tot << "\n"; 
+	}
+}
+
+void test(fastContext & fc){
+	vector<int> v(2, 1);
+	string sv = "Teste";
+
+	vector<size_t> dataSizes(VECSIZE, 2);
+
+	auto keys = createData<int>();
+	
+	auto dataSimple = createData<int>();
+	auto dataPointer = createData(v.data());
+	auto dataString = createData(sv);
+	auto dataVector = createData(v);
+
+	cerr << "Create Data (Size: " << dataSimple.size() << ")\n"; 
+	
+	int numOk = 0;
+	int tot = 0;
+	bool ok = true;
+
+	fdd<int> * testFddS;
+	fdd<int*> * testFddP;
+	fdd<string> * testFddSt;
+	fdd<vector<int>> * testFddV;
+
+	indexedFdd<int,int> * testIFddS;
+	indexedFdd<int,int*> * testIFddP;
+	indexedFdd<int,string> * testIFddSt;
+	indexedFdd<int,vector<int>> * testIFddV;
+
+	cerr << "Simple"; 
+	ok &= assertRecv(numOk, tot, testCreation(testFddS,  fc, dataSimple));
+	cerr << "Pointer"; 
+	ok &= assertRecv(numOk, tot, testCreation(testFddP,  fc, dataPointer, dataSizes));
+	cerr << "String"; 
+	ok &= assertRecv(numOk, tot, testCreation(testFddSt, fc, dataString));
+	cerr << "Vector"; 
+	ok &= assertRecv(numOk, tot, testCreation(testFddV,  fc, dataVector));
+
+	cerr << "Indexed"; 
+	ok &= assertRecv(numOk, tot, testCreation(testIFddS,  fc, keys, dataSimple));
+	cerr << "Indexed Pointer"; 
+	ok &= assertRecv(numOk, tot, testCreation(testIFddP,  fc, keys, dataPointer, dataSizes));
+	cerr << "Indexed String"; 
+	ok &= assertRecv(numOk, tot, testCreation(testIFddSt, fc, keys, dataString));
+	cerr << "Indexed Vector"; 
+	ok &= assertRecv(numOk, tot, testCreation(testIFddV,  fc, keys, dataVector));
+
+	printResult(ok, numOk, tot);
+	if (! ok) return;
+}
+
 int main(int argc, char ** argv){
+
 	fastContext fc("local");
+	
 	fc.startWorkers();
 
-	testCreation(fc);
+
+	test(fc);
+
 }

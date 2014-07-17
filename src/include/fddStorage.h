@@ -33,7 +33,7 @@ class fddStorage : public fddStorageCore<T> {
 		fddStorage(size_t s):fddStorageCore<T>(s){}
 		fddStorage(T * data, size_t s);
 		void setData( T * data, size_t s);
-		void setData( void * data, size_t s);
+		void setDataRaw( void * data, size_t s);
 		
 		void setSize(size_t s) override;
 
@@ -56,6 +56,7 @@ class fddStorage <T *> : public fddStorageCore<T *> {
 		~fddStorage();
 
 		void setData( T ** data, size_t * lineSizes, size_t s);
+		void setDataRaw( void ** data, size_t * lineSizes, size_t s);
 		void setSize(size_t s) override;
 
 		void insert(T *& item, size_t s);

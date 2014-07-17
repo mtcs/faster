@@ -3,6 +3,8 @@
 
 #include <list>
 #include <vector>
+#include <map>
+#include <unordered_map>
 #include <cstdlib>
 
 #define UNUSED __attribute__((unused))
@@ -40,6 +42,8 @@ typedef unsigned int fddOpType;
 #define OP_GENERICREDUCE	0x0200
 #define OP_Reduce		0x0201
 #define OP_BulkReduce		0x0202
+#define OP_CountByKey		0x0001
+#define OP_GroupByKey		0x0002
 
 // Not Indexed FFDs
 // FDD function pointer types
@@ -232,6 +236,17 @@ using IPreduceIPFunctionP = std::tuple<K,T*,size_t> (*) (K keyA, T * a, size_t s
 
 template <typename K, typename T>
 using IPbulkReduceIPFunctionP = std::tuple<K,T*,size_t> (*) (K * key, T ** input, size_t * inputDataSizes, size_t size);
+
+
+
+
+// DATA TYPES
+template <typename K>
+using CountKeyMapT = std::unordered_map<K, size_t> ;
+
+template <typename K>
+using PPCountKeyMapT = std::unordered_map<K, std::pair<size_t, std::list<int>> > ;
+
 
 
 #endif

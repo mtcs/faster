@@ -21,6 +21,11 @@ pair<int,int> reduce1(int keyA, int &a, int keyB, int &b){
 	return result;
 }
 
+void printHistogram(const CountKeyMapT<int> & hist ){
+	for( auto it = hist.begin(); it != hist.end(); it++){
+		cout << it->first << " " << it->second << "\n";
+	}
+}
 
 int main(int argc, char ** argv){
 	// Init Faster Framework
@@ -36,11 +41,16 @@ int main(int argc, char ** argv){
 	int rawdata[NUMITEMS];
 	int rawKeys[NUMITEMS];
 
-	for ( int i = 0; i < NUMITEMS; ++i )
+	for ( int i = 0; i < NUMITEMS; ++i ){
+		rawKeys[i] = rand() % 100;
 		rawdata[i] = rand() % 20;
+	}
 
 	cout << "Import Data" << '\n';
 	indexedFdd <int,int> data(fc, rawKeys, rawdata, NUMITEMS);
+
+	cout << "Key Histogram\n";
+	printHistogram(data.countByKey());
 
 	cout << "Process Data" << '\n';
 	pair<int,int> result = data.map<int,int>(&map1)->reduce(&reduce1);

@@ -4,6 +4,7 @@
 #include <chrono>
 
 #include "fastComm.h"
+#include "fastCommBuffer.h"
 #include "workerFdd.h"
 #include "worker.h"
 
@@ -31,14 +32,14 @@ void worker::setFDDData(unsigned long int id, void * data, size_t size){
 
 	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
 
-	fdd->setData( data, size );
+	fdd->setDataRaw( data, size );
 }
 void worker::setFDDIData(unsigned long int id, void * keys, void * data, size_t size){
 	workerFddBase * fdd = fddList[id];
 
 	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
 
-	fdd->setData( keys, data, size );
+	fdd->setDataRaw( keys, data, size );
 }
 
 void worker::setFDDData(unsigned long int id, void ** data, size_t * lineSizes, size_t size){
@@ -46,7 +47,7 @@ void worker::setFDDData(unsigned long int id, void ** data, size_t * lineSizes, 
 
 	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
 
-	fdd->setData( data, lineSizes, size );
+	fdd->setDataRaw( data, lineSizes, size );
 }
 
 void worker::setFDDIData(unsigned long int id, void * keys, void ** data, size_t * lineSizes, size_t size){
@@ -54,17 +55,17 @@ void worker::setFDDIData(unsigned long int id, void * keys, void ** data, size_t
 
 	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
 
-	fdd->setData( keys, data, lineSizes, size );
+	fdd->setDataRaw( keys, data, lineSizes, size );
 }
 
-void worker::getFDDData(unsigned long int id, void *& data, size_t &size){
+/*void worker::getFDDData(unsigned long int id, void *& data, size_t &size){
 	workerFddBase * fdd = fddList[id];
 
 	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
 
 	data = fdd->getData();
 	size = fdd->getSize();
-}
+}*/
 
 
 
@@ -95,14 +96,35 @@ void worker::preapply(fastTask &task, workerFddBase * destFDD){
 
 }
 
+
 void worker::solve(fastTask &task){
 
 	if ( task.operationType & OP_GENERICREDUCE){
 		// Don't consider the output fdd pointer
 		preapply(task, NULL);
-
-	}else{
+		return;
+	}
+	if ( task.operationType & OP_GENERICMAP){
 		workerFddBase * fdd = fddList[task.destFDD];
 		preapply(task, fdd);
+		return;
 	}
+	if ( task.operationType == OP_GroupByKey){
+		workerFddBase * fdd = fddList[task.srcFDD];
+		fdd->groupByKey(comm);
+		return;
+	}
+	if ( task.operationType == OP_CountByKey){
+		workerFddBase * fdd = fddList[task.srcFDD];
+		fdd->countByKey(comm);
+		return;
+	}
+}
+
+void worker::collect(unsigned long int id){
+	workerFddBase * fdd = fddList[id];
+
+	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
+
+	fdd->collect(comm);
 }

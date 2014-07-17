@@ -4,6 +4,7 @@
 #include <list>
 #include <tuple>
 #include <omp.h>
+#include <set>
 
 template <class T>
 class workerFdd ;
@@ -15,16 +16,50 @@ template <class K, class T>
 class indexedFddStorage;
 
 #include "workerFddBase.h"
-#include "indexedFddStorage.h"
-#include "fastCommBuffer.h"
 
+template<typename K, typename T>
+class workerIFddCore : public workerFddBase{
+	protected:
+		indexedFddStorage <K,T> * localData;
+		bool groupedByKey;
+
+		// ByKey Functions
+		K * distributeOwnership(fastComm * comm, K * uKeys, size_t cSize);
+		void sendPartKeyCount(fastComm *comm);
+		CountKeyMapT<K> recvPartKeyMaxCount(fastComm *comm, PPCountKeyMapT<K> & keyPPMaxCount);
+		CountKeyMapT<K> recvPartKeyCount(fastComm *comm);
+		CountKeyMapT<K> distributedMaxKeyCount(fastComm *comm, PPCountKeyMapT<K> & keyPPMaxCount);
+
+	public:
+		workerIFddCore(unsigned int ident, fddType t);
+		workerIFddCore(unsigned int ident, fddType t, size_t size);
+		~workerIFddCore();
+		
+		// ByKey Functions
+		void groupByKey(fastComm *comm) override;
+		void countByKey(fastComm *comm) override;
+
+		fddType getType() override ;
+		fddType getKeyType() override ;
+
+		void setDataRaw(void * data UNUSED, size_t size UNUSED) override {}
+		void setDataRaw(void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override {}
+
+		T & operator[](size_t address);
+		void * getData() override;
+		K * getKeys();
+		size_t getSize() override;
+		size_t itemSize() override;
+		size_t baseSize() override;
+		void deleteItem(void * item) override ;
+		void shrink();
+
+};
 
 // Worker side FDD
 template <class K, class T>
-class workerIFdd : public workerFddBase{
+class workerIFdd : public workerIFddCore<K,T>{
 	private:
-		indexedFddStorage <K,T> * localData;
-
 		// Procedures that apply the FDD core functions
 		template <typename L, typename U>
 		void _applyI(void * func, fddOpType op, workerIFdd<L, U> * dest);
@@ -88,49 +123,36 @@ class workerIFdd : public workerFddBase{
 		std::pair<K,T> reduce (IreduceIFunctionP<K,T> reduceFunc);
 		std::pair<K,T> bulkReduce (IbulkReduceIFunctionP<K,T> bulkReduceFunc);
 
+		// ByKey Functions
+
 
 	public:
-		workerIFdd(unsigned int ident, fddType t);
-		workerIFdd(unsigned int ident, fddType t, size_t size);
-		~workerIFdd();
+		workerIFdd(unsigned int ident, fddType t) : workerIFddCore<K,T>(ident, t) {}
+		workerIFdd(unsigned int ident, fddType t, size_t size) : workerIFddCore<K,T>(ident, t, size) {}
+		~workerIFdd(){}
 
 		// For known types
 		void setData(K * keys, T * data, size_t size) ;
 		
 		// For anonymous types
-		void setData(void * data UNUSED, size_t size UNUSED) override;
-		void setData(void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override;
-		void setData(void * keys, void * data, size_t size) override;
-		void setData(void * keys UNUSED, void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override;
-		fddType getType() override ;
-		fddType getKeyType() override ;
-
-		T & operator[](size_t address);
-		void * getData() override;
-		K * getKeys();
-		size_t getSize() override;
-		size_t itemSize() override;
-		size_t baseSize() override;
-		void deleteItem(void * item) override ;
+		void setDataRaw(void * keys, void * data, size_t size) override;
+		void setDataRaw(void * keys UNUSED, void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override{}
 
 		void insert(K key, T & in);
 		void insert(std::list< std::pair<K, T> > & in);
-
-		void shrink();
 
 
 		// Apply task functions to FDDs
 		void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize);
 
+		void collect(fastComm * comm) override;
+
 };
 
 // Pointer specialization
 template <class K, class T>
-class workerIFdd<K,T*> : public workerFddBase{
+class workerIFdd<K,T*> : public workerIFddCore<K,T*>{
 	private:
-		indexedFddStorage <K,T*> * localData;
-
-
 		// Procedures that apply the FDD core functions
 		template <typename L, typename U>
 		void _applyI(void * func, fddOpType op, workerIFdd<L, U> * dest);
@@ -197,40 +219,29 @@ class workerIFdd<K,T*> : public workerFddBase{
 		
 
 	public:
-		workerIFdd(unsigned int ident, fddType t);
-		workerIFdd(unsigned int ident, fddType t, size_t size);
-		~workerIFdd();
+		workerIFdd(unsigned int ident, fddType t) : workerIFddCore<K,T*>(ident, t) {}
+		workerIFdd(unsigned int ident, fddType t, size_t size) : workerIFddCore<K,T*>(ident, t, size) {}
+		~workerIFdd(){}
 
 
 		// For known types
 		void setData(K * keys, T ** data, size_t *lineSizes, size_t size);
 		
 		// For anonymous types
-		void setData(void * data UNUSED, size_t size UNUSED) override;
-		void setData(void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override;
-		void setData(void * keys UNUSED, void * data UNUSED, size_t size UNUSED) override;
-		void setData(void * keys, void ** data, size_t *lineSizes, size_t size) override;
+		void setDataRaw(void * keys UNUSED, void * data UNUSED, size_t size UNUSED) override{}
+		void setDataRaw(void * keys, void ** data, size_t *lineSizes, size_t size) override;
 
-		fddType getType() override ;
-		fddType getKeyType() override ;
-
-		T *& operator[](size_t address);
-		void * getData() override;
-		K * getKeys() ;
-		size_t getSize() override;
 		size_t * getLineSizes();
-		size_t itemSize() override;
-		size_t baseSize() override;
-		void deleteItem(void * item) override ;
 
 		void insert(K key, T* & in, size_t s);
 		void insert(std::list< std::tuple<K, T*, size_t> > & in);
 
-		void shrink();
-
 
 		// Apply task functions to FDDs
 		void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize);
+
+		void collect(fastComm * comm) override;
+
 };
 
 
