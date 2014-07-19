@@ -14,7 +14,7 @@ void worker::run(){
 		fddType tType, kType;
 		void * data = NULL;
 		void * keys = NULL;
-		void ** data2D = NULL;
+		//void ** data2D = NULL;
 		size_t * lineSizes = NULL;
 		size_t size, offset;
 		std::string name;
@@ -65,10 +65,11 @@ void worker::run(){
 
 			case MSG_FDDSET2DDATAID:
 				std::cerr << "    R:SetFdd2DData ";
-				comm->recvFDDSetData(id, data2D, lineSizes, size);
+				//comm->recvFDDSetData(id, data2D, lineSizes, size);
+				comm->recvFDDSetData(id, data, lineSizes, size);
 				std::cerr << "ID:" << id << " S:" << size << " ";
-				setFDDData(id, data2D, lineSizes, size);
-				delete [] data2D;
+				setFDDData(id, data, lineSizes, size);
+				//delete [] data2D;
 				std::cerr << ".\n";
 				break;
 
@@ -82,10 +83,10 @@ void worker::run(){
 
 			case MSG_FDDSET2DIDATAID:
 				std::cerr << "    R:SetFdd2DIData ";
-				comm->recvFDDSetIData(id, keys, data2D, lineSizes, size);
+				comm->recvFDDSetIData(id, keys, data, lineSizes, size);
 				std::cerr << "ID:" << id << " S:" << size << " ";
-				setFDDIData(id, keys, data2D, lineSizes, size);
-				delete [] data2D;
+				setFDDIData(id, keys, data, lineSizes, size);
+				//delete [] data2D;
 				std::cerr << ".\n";
 				break;
 

@@ -60,7 +60,7 @@ indexedFddStorage<K,T*>::indexedFddStorage(size_t s) : indexedFddStorageCore<K,T
 
 
 template <class K, class T> 
-indexedFddStorage<K,T>::indexedFddStorage(K * keys, T * data, size_t s) : indexedFddStorageCore<K,T>(s){
+indexedFddStorage<K,T>::indexedFddStorage(K * keys, T * data, size_t s) : indexedFddStorage<K,T>(s){
 	setData(keys, data, s);
 }
 
@@ -92,20 +92,6 @@ void indexedFddStorage<K,T>::setData(K * keys, T * data, size_t s){
 		this->localKeys[i] = keys[i];
 	}
 }
-template <class K, class T> 
-void indexedFddStorage<K,T>::setDataRaw(void * keys, void * data, size_t s){
-	fastCommBuffer buffer(0);
-
-	//grow(s);
-	//this->size = s;
-	buffer.setBuffer(data, s);
-
-	//std::cerr << "\nindexedFddStorage setData ";
-	for ( size_t i = 0; i < s; ++i){
-		buffer >> this->localData[i];
-		this->localKeys[i] = ((K*) keys)[i];
-	}
-}
 
 template <class K, class T> 
 void indexedFddStorage<K,T*>::setData( K * keys, T ** data, size_t * ls, size_t s){
@@ -117,14 +103,43 @@ void indexedFddStorage<K,T*>::setData( K * keys, T ** data, size_t * ls, size_t 
 		this->localData[i] = new  T [lineSizes[i]];
 		for ( int j = 0; j < lineSizes[i]; ++j){
 			this->localData[i][j] =  ((T *) data[i])[j];
-			this->localKeys[i] = keys[i];
 		}
+		this->localKeys[i] = keys[i];
 	}
 	this->size = s;
 }
 template <class K, class T> 
-void indexedFddStorage<K,T*>::setDataRaw( void * keys, void ** data, size_t * ls, size_t s){
-	setData( (K*) keys, (T**) data, ls, s);
+void indexedFddStorage<K,T>::setDataRaw(void * keys, void * data, size_t s){
+	fastCommBuffer buffer(0);
+	fastCommBuffer buffer2(0);
+
+	//grow(s);
+	//this->size = s;
+	buffer.setBuffer(data, s);
+	buffer2.setBuffer(keys, s);
+
+	//std::cerr << "\nindexedFddStorage setData ";
+	for ( size_t i = 0; i < s; ++i){
+		buffer >> this->localData[i];
+		buffer2 >> this->localKeys[i];
+	}
+}
+template <class K, class T> 
+void indexedFddStorage<K,T*>::setDataRaw( void * keys, void * data, size_t * ls, size_t s){
+	fastCommBuffer buffer(0);
+	fastCommBuffer buffer2(0);
+	
+	buffer.setBuffer(data, s);
+	buffer2.setBuffer(keys, s);
+
+	for ( int i = 0; i < s; ++i){
+		lineSizes[i] = ls[i];
+
+		this->localData[i] = new  T [lineSizes[i]];
+
+		buffer2 >> this->localKeys[i];
+		buffer.read(this->localData[i], ls[i]*sizeof(T));
+	}
 }
 
 template <class K, class T> 

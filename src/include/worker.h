@@ -42,8 +42,8 @@ class worker{
 		void setFDDData(unsigned long int id, void * data, size_t size);
 		void setFDDIData(unsigned long int id, void * kays, void * data, size_t size);
 		// 2D Data
-		void setFDDData(unsigned long int id, void ** data, size_t * lineSizes, size_t size);
-		void setFDDIData(unsigned long int id, void * kays, void ** data, size_t * lineSizes, size_t size);
+		void setFDDData(unsigned long int id, void * data, size_t * lineSizes, size_t size);
+		void setFDDIData(unsigned long int id, void * kays, void * data, size_t * lineSizes, size_t size);
 
 		//void getFDDData(unsigned long int id, void *& data, size_t &size);
 		

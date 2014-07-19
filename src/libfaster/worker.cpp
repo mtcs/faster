@@ -42,7 +42,7 @@ void worker::setFDDIData(unsigned long int id, void * keys, void * data, size_t 
 	fdd->setDataRaw( keys, data, size );
 }
 
-void worker::setFDDData(unsigned long int id, void ** data, size_t * lineSizes, size_t size){
+void worker::setFDDData(unsigned long int id, void * data, size_t * lineSizes, size_t size){
 	workerFddBase * fdd = fddList[id];
 
 	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
@@ -50,7 +50,7 @@ void worker::setFDDData(unsigned long int id, void ** data, size_t * lineSizes, 
 	fdd->setDataRaw( data, lineSizes, size );
 }
 
-void worker::setFDDIData(unsigned long int id, void * keys, void ** data, size_t * lineSizes, size_t size){
+void worker::setFDDIData(unsigned long int id, void * keys, void * data, size_t * lineSizes, size_t size){
 	workerFddBase * fdd = fddList[id];
 
 	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }

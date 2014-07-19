@@ -9,7 +9,7 @@ add_definitions(-O3)
 add_definitions(-ggdb)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg  -std=c++11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg  -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg -Wall -Wextra -std=c++11")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 
 find_package(OpenMP)

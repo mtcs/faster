@@ -105,7 +105,7 @@ void workerIFdd<K,T*>::setData(K * keys, T ** data, size_t *lineSizes, size_t si
 
 
 template <typename K, typename T>
-void workerIFdd<K,T*>::setDataRaw(void * keys, void ** data, size_t *lineSizes, size_t size) {
+void workerIFdd<K,T*>::setDataRaw(void * keys, void * data, size_t *lineSizes, size_t size) {
 	this->localData->setDataRaw(keys, data, lineSizes, size);
 }
 

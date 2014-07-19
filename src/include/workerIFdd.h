@@ -43,7 +43,7 @@ class workerIFddCore : public workerFddBase{
 		fddType getKeyType() override ;
 
 		void setDataRaw(void * data UNUSED, size_t size UNUSED) override {}
-		void setDataRaw(void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override {}
+		void setDataRaw(void * data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override {}
 
 		T & operator[](size_t address);
 		void * getData() override;
@@ -136,7 +136,7 @@ class workerIFdd : public workerIFddCore<K,T>{
 		
 		// For anonymous types
 		void setDataRaw(void * keys, void * data, size_t size) override;
-		void setDataRaw(void * keys UNUSED, void ** data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override{}
+		void setDataRaw(void * keys UNUSED, void * data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override{}
 
 		void insert(K key, T & in);
 		void insert(std::list< std::pair<K, T> > & in);
@@ -229,7 +229,7 @@ class workerIFdd<K,T*> : public workerIFddCore<K,T*>{
 		
 		// For anonymous types
 		void setDataRaw(void * keys UNUSED, void * data UNUSED, size_t size UNUSED) override{}
-		void setDataRaw(void * keys, void ** data, size_t *lineSizes, size_t size) override;
+		void setDataRaw(void * keys, void * data, size_t *lineSizes, size_t size) override;
 
 		size_t * getLineSizes();
 

@@ -503,7 +503,7 @@ void workerFdd<T*>::setData(T ** data, size_t *lineSizes, size_t size) {
 }
 
 template <typename T>
-void workerFdd<T*>::setDataRaw(void ** data, size_t *lineSizes, size_t size) {
+void workerFdd<T*>::setDataRaw(void * data, size_t *lineSizes, size_t size) {
 	this->localData->setDataRaw( data, lineSizes, size);
 }
 

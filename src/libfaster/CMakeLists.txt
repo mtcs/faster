@@ -4,6 +4,7 @@ project(libfaster)
 
 add_definitions(-O0)
 add_definitions(-ggdb)
+add_definitions(-g3)
 
 set (libfaster_VERSION_MAJOR 0)
 set (libfaster_VERSION_MINOR 1)

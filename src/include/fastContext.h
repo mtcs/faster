@@ -171,7 +171,7 @@ class fastContext{
 					dataPerProc += 1;
 				std::cerr << "    S:FDDSetPData P" << i << " ID:" << id << " S:" << dataPerProc << "";
 
-				comm->sendFDDSetData(id, i, (void **) &data[offset], &dataSizes[offset], dataPerProc, sizeof(T));
+				comm->sendFDDSetData(id, i, &data[offset], &dataSizes[offset], dataPerProc);
 				offset += dataPerProc;
 				std::cerr << ".\n";
 			}
@@ -187,7 +187,7 @@ class fastContext{
 					dataPerProc += 1;
 				std::cerr << "    S:FDDSetPDataI P" << i << " ID:" << id << " S:" << dataPerProc << "";
 
-				comm->sendFDDSetIData(id, i, &keys[offset],(void **) &data[offset], &dataSizes[offset], dataPerProc, sizeof(T));
+				comm->sendFDDSetIData(id, i, &keys[offset],  &data[offset], &dataSizes[offset], dataPerProc);
 				offset += dataPerProc;
 				std::cerr << ".\n";
 			}

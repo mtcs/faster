@@ -4,7 +4,7 @@
 
 #include "libfaster.h"
 
-#define VECSIZE 100
+#define VECSIZE 1000
 
 using namespace std;
 
@@ -32,9 +32,10 @@ bool testCreation(fdd<T*> * testFDD, fastContext & fc, vector<T*> & data, vector
 	vector <pair<T*,size_t>> tv = testFDD->collect();
 
 	for (int i = 0; i < VECSIZE; ++i){
+		//cout << data[i][0] << " " << tv[i].first[0] << "\n";
 		for (int j = 0; j < dataSizes[i]; ++j){
 			T * p = tv[i].first;
-			if ( data[i][j] != tv[i].first[j] ) {
+			if ( data[i][j] != p[j] ) {
 				return false;
 			}
 		}
@@ -51,30 +52,29 @@ bool testCreation(indexedFdd<K,T> * testFDD, fastContext & fc, vector<K> & keys,
 	testFDD =  new indexedFdd <K,T> (fc, keys.data(), data.data(), data.size());
 	vector <pair<K,T>> tv = testFDD->collect();
 	for (int i = 0; i < VECSIZE; ++i){
-		cerr << keys[i] << " " << tv[i].first << " ";
-		cerr << data[i] << " " << tv[i].second << "\n";
+		//cout << keys[i] << " " << tv[i].first << " ";
+		//cout << data[i] << " " << tv[i].second << "\n";
 		if ( (data[i] != tv[i].second) || (keys[i] != tv[i].first)) {
-		//if ( data[i] != tv[i].second ) {
 			return false;
 		}
 	}
 
 	return true;
 }
-template <typename K, typename T>
+/*template <typename K, typename T>
 bool testCreation(indexedFdd<K,vector<T>> * testFDD, fastContext & fc, vector<K> & keys, vector<vector<T>> & data){
 	testFDD =  new indexedFdd <K,vector<T>> (fc, keys.data(), data.data(), data.size());
 	vector <pair<K, vector<T> >> tv = testFDD->collect();
 	for (int i = 0; i < VECSIZE; ++i){
-		//cerr << keys[i] << " " << tv[i].first << " ";
-		//cerr << data[i][0] << " " << tv[i].second[0] << "\n";
+		//cout << keys[i] << " " << tv[i].first << " ";
+		//cout << data[i][0] << " " << tv[i].second[0] << "\n";
 		if ( (data[i] != tv[i].second) || (keys[i] != tv[i].first)) {
 		//if ( data[i] != tv[i].second ) {
 			return false;
 		}
 	}
 	return true;
-}
+}*/
 //Test Indexed Pointer > Collect
 template <typename K, typename T>
 bool testCreation(indexedFdd<K,T*> * testFDD, fastContext & fc, vector<K> & keys, vector<T*> & data, vector<size_t> & dataSizes){
@@ -82,11 +82,15 @@ bool testCreation(indexedFdd<K,T*> * testFDD, fastContext & fc, vector<K> & keys
 	testFDD =  new indexedFdd <K,T*> (fc, keys.data(), data.data(), dataSizes.data(), data.size());
 	vector <tuple<K,T*, size_t>> tv = testFDD->collect();
 	for (int i = 0; i < VECSIZE; ++i){
-		//if(keys[i] != get<0>(tv[i])) {
-		//	return false;
-		//}
+		T * p = get<1>(tv[i]);
+		//cout << keys[i] << " " << get<0>(tv[i]) << " ";
+		//cout << data[i][0] << " " << p[0] << "\n";
+		if(keys[i] != get<0>(tv[i])) {
+			return false;
+		}
+
 		for (int j = 0; j < dataSizes[i]; ++j){
-			if (data[i][j] != get<1>(tv[i])[j]) {
+			if (data[i][j] != p[j]) {
 				return false;
 			}
 		}
@@ -212,76 +216,81 @@ vector<T> createData(){
 bool assertRecv(int & numOk, int & tot, bool recv){
 	if (recv){
 		numOk ++;
-		cerr << " \033[38;5;29m PASSED\033[0m\n"; 
+		cout << " \033[38;5;29m PASSED\033[0m\n"; 
 	}else{
-		cerr << " \033[38;5;196m NOT PASSED\033[0m\n";
+		cout << " \033[38;5;196m NOT PASSED\033[0m\n";
 	}
 	tot++;
 
 	return recv;
 }
-void printResult(int ok, int numOk, int tot){
+void printResult(int numOk, int tot){
 	if(numOk < tot){ 
-		cerr << "\n   \033[38;5;196m NOT PASSED\033[0m";
-		cerr << numOk << "/" << tot << "\n"; 
+		cout << "\n   \033[38;5;196m NOT PASSED\033[0m ";
+		cout << numOk << "/" << tot << "\n"; 
 	}else{ 
-		cerr << "\n   \033[38;5;29m PASSED\033[0m"; 
-		cerr << numOk << "/" << tot << "\n"; 
+		cout << "\n   \033[38;5;29m PASSED\033[0m "; 
+		cout << numOk << "/" << tot << "\n"; 
 	}
 }
 
 void test(fastContext & fc){
 	vector<int> v(2, 1);
 	string sv = "Teste";
+	string svK = "Key";
 
 	vector<size_t> dataSizes(VECSIZE, 2);
 
 	auto keys = createData<int>();
+	auto stringKeys = createData(svK);
 	
 	auto dataSimple = createData<int>();
 	auto dataPointer = createData(v.data());
 	auto dataString = createData(sv);
 	auto dataVector = createData(v);
 
-	cerr << "Create Data (Size: " << dataSimple.size() << ")\n"; 
+	cout << "Create Data (Size: " << dataSimple.size() << ")\n"; 
 	
 	int numOk = 0;
 	int tot = 0;
 	bool ok = true;
 
-	fdd<int> * testFddS;
-	fdd<int*> * testFddP;
-	fdd<string> * testFddSt;
-	fdd<vector<int>> * testFddV;
+	fdd<int> * testFddS = NULL;
+	fdd<int*> * testFddP = NULL;
+	fdd<string> * testFddSt = NULL;
+	fdd<vector<int>> * testFddV = NULL;
 
-	indexedFdd<int,int> * testIFddS;
-	indexedFdd<int,int*> * testIFddP;
-	indexedFdd<int,string> * testIFddSt;
-	indexedFdd<int,vector<int>> * testIFddV;
+	indexedFdd<int, int> * testIFddS = NULL;
+	indexedFdd<int, int*> * testIFddP = NULL;
+	indexedFdd<int, vector<int>> * testIFddV = NULL;
+	indexedFdd<int, string> * testIFddSt = NULL;
+	indexedFdd<string, string> * testIFddStSt = NULL;
 
-	cerr << "Simple"; 
+	cout << "Simple"; 
 	ok &= assertRecv(numOk, tot, testCreation(testFddS,  fc, dataSimple));
-	cerr << "Pointer"; 
+	cout << "Pointer"; 
 	ok &= assertRecv(numOk, tot, testCreation(testFddP,  fc, dataPointer, dataSizes));
-	cerr << "String"; 
-	ok &= assertRecv(numOk, tot, testCreation(testFddSt, fc, dataString));
-	cerr << "Vector"; 
+	cout << "Vector"; 
 	ok &= assertRecv(numOk, tot, testCreation(testFddV,  fc, dataVector));
+	cout << "String"; 
+	ok &= assertRecv(numOk, tot, testCreation(testFddSt, fc, dataString));
 
-	cerr << "Indexed"; 
+	cout << "Indexed"; 
 	ok &= assertRecv(numOk, tot, testCreation(testIFddS,  fc, keys, dataSimple));
-	cerr << "Indexed Pointer"; 
+	cout << "Indexed Pointer"; 
 	ok &= assertRecv(numOk, tot, testCreation(testIFddP,  fc, keys, dataPointer, dataSizes));
-	cerr << "Indexed String"; 
-	ok &= assertRecv(numOk, tot, testCreation(testIFddSt, fc, keys, dataString));
-	cerr << "Indexed Vector"; 
+	cout << "Indexed Vector"; 
 	ok &= assertRecv(numOk, tot, testCreation(testIFddV,  fc, keys, dataVector));
+	cout << "Indexed String"; 
+	ok &= assertRecv(numOk, tot, testCreation(testIFddSt, fc, keys, dataString));
+	cout << "Indexed (String, String)"; 
+	ok &= assertRecv(numOk, tot, testCreation(testIFddStSt, fc, stringKeys, dataString));
 
-	printResult(ok, numOk, tot);
+	printResult(numOk, tot);
 	if (! ok) return;
 }
 
-int main(int argc, char ** argv){
+int main(int argc UNUSED, char ** argv UNUSED){
 
 	fastContext fc("local");
 	
