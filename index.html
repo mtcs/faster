@@ -11,12 +11,16 @@ title: Faster - Super Fast Distributed Computing
 				Faster is distributed computing framework built to help you solve hard problems faster! 
 				</p>
 			</div>
-			<div class="lastRelease">
-				<h1>Last Releases</h1>
-				{% for release in site.categories.release limit: 3 %}
-				<p><a href="/faster{{ release.url }}">{{ release.title }}</a> <span>{{ release.date | date_to_string }}</span> </p>
+			<div class="lastNews">
+				{% for post in site.categories.news limit: 1 %}
+				<h3>{{ post.title }}</h3> <span>{{ post.date | date_to_string }}</span>
+				<p>{{ post.comment }}</br>
+				</p>
+				<a href="/faster{{ post.url }}">read more >></a>
 				{% endfor %}
 			</div>
+				
+
 
 			<div class="featureWall">
 				{% for post in site.categories.feature %}
@@ -36,7 +40,7 @@ title: Faster - Super Fast Distributed Computing
 			<a href="/faster/downloads.html">
 			<div class="downloadButton">
 				<h1>Download Faster</h1>
-				{% for release in site.categories.release | last %}
+				{% for release in site.categories.release | limit:1 %}
 				<p>{{ release.title }}</p>
 				{% endfor %}
 			</div>
@@ -46,6 +50,13 @@ title: Faster - Super Fast Distributed Computing
 				{% for post in site.categories.news limit: 10 %}
 				<li><a href="/faster{{ post.url }}">{{ post.title }}</a> <span>{{ post.date | date_to_string }}</span></li>
 				{% endfor %}
+			</ul>
+
+			<h1>Last Releases</h1>
+			<ul>
+			{% for release in site.categories.release limit: 3 %}
+				<li><a href="/faster{{ release.url }}">{{ release.title }}</a> <span>{{ release.date | date_to_string }}</span> </li>
+			{% endfor %}
 			</ul>
 		</div>
 	</div>

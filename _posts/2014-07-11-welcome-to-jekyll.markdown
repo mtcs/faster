@@ -2,6 +2,8 @@
 layout: post
 title:  "We have a new site!"
 date:   2014-07-11 21:25:20
+comment: "Thanks to Github Pages and Jekyll, we have a new site dedicated to Faster framework.
+"
 categories: news
 ---
 
