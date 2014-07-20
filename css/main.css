@@ -28,7 +28,7 @@ h3 {
 h4, h5, h6 {
   font-size: 100%; }
 
-h1 { margin-bottom: 1em; }
+h1, h2 { margin-bottom: 1em; }
 p { margin: 1em 0; }
 
 a { 
@@ -283,11 +283,29 @@ a:visited { color: #c97; }
 
 .releasePage .faqPage .downloadPage .aboutPage{
 }
+.question{
+  	font-size: 110%;
+	font-weight:bold;
+	margin-top: 3em;
+}
+.faqPage p{
+	margin-left: 2em;
+	margin-right: 2em;
+}
 .aboutPage p{
-	margin: 0 2em 0 2em;
+	margin-left: 2em;
+	margin-right: 2em;
+}
+.faqPage ul{
+	margin-left: 2em;
+	margin-right: 2em;
+}
+.aboutPage h2{
+	margin-top: 2em;
 }
 .aboutPage ul{
-	margin: 0 2em 0 2em;
+	margin-left: 2em;
+	margin-right: 2em;
 }
 
 ul > li {
