@@ -1,0 +1,75 @@
+---
+layout: default
+title: Faster - About
+---
+<div class="aboutPage">
+	<h1>About</h1>
+	<div class="aboutImgR">
+		<img style="width:15em" src="/faster/img/330px-MEGWARE.CLIC.jpg">
+	</div>
+	<p>
+	<b>Faster</b> is a Distributed computing framework based on functional computing designed to be efficient and simple to use. Transforming a single threaded algorithm into a multi-threaded distributed problem solver can be done in seconds with <b>Faster</b>. Just a few lines of code to transform a source and a single command to deploy it in a cluster. It is computation time for everybody! :D
+	</p>
+	<p>
+	As many computation environments are not comprised of homogeneous machines, <b>Faster</b> takes advantage of heterogeneous environments. We use dynamic resource allocation to increase resource occupation. If a machine is often overloaded in comparison with its peers we migrate data to idle machines to even the score. Also, we prioritize coarse grained data processing to favor scalability.
+	</p>
+	<div class="aboutImgL">
+		<img style="width:12em" src="/faster/img/clustermass.jpg">
+	</div>
+	<p>
+	Also, <b>Faster</b> uses MPI, a well established library, for process management and message passing, this way we can offer easy of deployment. Servers running Secure Shell (SSH) service is enough to allow users run <b>Faster</b> based jobs. There no requirement for any management process or sophisticated file systems or queuing mechanisms (though, we support some, of course). 
+	</p>
+	<p>
+	<b>Faster</b> uses distributed datasets called FDD (Fast Distributed Dataset). FDDs distributes data among <b>Faster</b> based processes located on computational entities. It rebalances it according to load and memory availability in order to avoid performance bottlenecks and data loss. It also supports failure tolerance though data replication and checkpointing.
+	</p>
+	<div class="aboutImgR">
+		<img style="width:12em" src="/faster/img/1200px-Cubieboard_HADOOP_cluster.JPG">
+	</div>
+	<p>
+	We use functional paradigm in order to process distributed data. <i>Maps</i> transforms data items of on type into another, <i>Reduces</i> combined multiple items and <i>CountByKey</i> count key occurrence of indexed data. Those and other functions allow us to implement most algorithms behaviours, including iterative ones. We aim to optimize iterative algorithms through exceptionally fast task management and lightweight Read-Write <i>Map</i> functions called Update. <i>Update</i> functions can perform very fast iterations because they don't generate a new dataset, it only updates item values.
+	</p>
+	<BR>
+	<h1>Features</h1>
+	<ul>
+		<li>High level and easy to use distributed computing framework.</li>
+		<li>Functional ideology similar to Apache Spark(map, reduce, flatMap, groupByKey, coGroup etc).</li>
+		<li>Coarse grained data processing for scalability.</li>
+		<li>Fault tolerance for safe execution.</li>
+		<li>Implemented in C++ for speed.</li>
+		<li>Optimized for heterogeneous clusters with a dynamic balancing of data blocks.</li>
+		<li>Optimized for iterative algorithms wit support to RW Map function (Update).</li>
+		<li>Built-in bulk functions (bulkMap, bulkReduce etc) to enable algorithms subiterations.</li>
+		<li>Masterless implementation. If the SSH is running everything is fine.</li>
+		<li>Minimal memory footprint. With manual memory free option.</li>
+		<li>Native OpenMP parallelization. Maps and Reduces are already parallelized wit OpenMP (Bulk functions are not).</li>
+		<li>Well established MPI library for message passing and process management.</li>
+		<li>Easy to use with Cuda/OpenCL.</li>
+	</ul>
+	<BR>
+	<h1>System Requirements</h1>
+	<ul>
+		<li> Operational systems supported:
+		<ul>
+			<li>Ubuntu 12.04</li>
+			<li>We still don't know what OS will support Faster. Please, let us know!</li>
+		</ul>
+		</li>
+		<li> Compilation:
+		<ul>
+			<li>Cmake</li>
+			<li>OpenMPI 1.5</li>
+			<li>GCC 4.8 or compatible with:
+			<ul>
+				<li>OpenMP</li>
+				<li> C++11:
+				<ul>
+					<li>Template Alias</li>
+					<li>Variadic Templates</li>
+				</ul>
+				</li> 
+			</ul>
+			</li>
+		</ul>
+		</li>
+	</ul>
+</div>

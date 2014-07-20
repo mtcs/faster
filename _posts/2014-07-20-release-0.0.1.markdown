@@ -1,0 +1,26 @@
+---
+layout: release
+title:  "Faster 0.0.1 Alpha"
+date:   2014-07-20 16:47:00
+docLink: "https://github.com/mtcs/faster/wiki"
+tag: "0.0.1-alpha"
+comment: "Alpha release with most dataset implemented and some function options."
+categories: [release, news]
+---
+
+[0.0.1] is a Alpha Here!
+
+It is possible to create a FDD Datasets from the memory and from file using the __fdd__ and __indexedFdd__ class constructors.
+
+We have __char__, __int__, __long int__, __float__, __double__, __vector__  and __string__ Datasets working with __Map__, __BulkMap__, __FlatMap__, __BulkFlatMap__, __reduce__ and __BulkReduce__.
+
+Collect function now can get the dataset data.
+
+A test routine is also being implemented to help with homologation and guarantee wramework's correctness.
+
+[Documantation Here] or at least it will be...
+
+Enjoy!
+
+[0.0.1]: https://github.com/mtcs/faster/releases/tag/0.0.1-alpha
+[Documantation here]: {{ page.docLink }}
