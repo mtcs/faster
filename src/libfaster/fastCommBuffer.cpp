@@ -1,12 +1,12 @@
 #include "fastCommBuffer.h"
 
-fastCommBuffer::fastCommBuffer(){
+faster::fastCommBuffer::fastCommBuffer(){
 	_size = 0; 
 	_allocatedSize = BUFFER_INITIAL_SIZE;
 	_data = new char [BUFFER_INITIAL_SIZE];
 	_ownData = true;
 }
-fastCommBuffer::fastCommBuffer(size_t s){
+faster::fastCommBuffer::fastCommBuffer(size_t s){
 	_size = 0; 
 	if (s > 0){
 		_allocatedSize = s;
@@ -18,39 +18,39 @@ fastCommBuffer::fastCommBuffer(size_t s){
 		_ownData = false;
 	}
 }
-fastCommBuffer::~fastCommBuffer(){
+faster::fastCommBuffer::~fastCommBuffer(){
 	if ((_data) && (_ownData))
 		delete [] _data;
 }
 
-void fastCommBuffer::setBuffer(void * buffer, size_t s){ 
+void faster::fastCommBuffer::setBuffer(void * buffer, size_t s){ 
 	//if (_data)
 	//	delete [] _data;
 	_size = 0; 
 	_data = (char*) buffer;
 	_allocatedSize = s;
 }
-void fastCommBuffer::reset(){ 
+void faster::fastCommBuffer::reset(){ 
 	_size = 0; 
 }
 
-char * fastCommBuffer::data(){ 
+char * faster::fastCommBuffer::data(){ 
 	return _data; 
 }
-char * fastCommBuffer::pos(){ 
+char * faster::fastCommBuffer::pos(){ 
 	return &_data[_size]; 
 }
-size_t fastCommBuffer::size(){ 
+size_t faster::fastCommBuffer::size(){ 
 	return _size; 
 }
-size_t fastCommBuffer::free(){ 
+size_t faster::fastCommBuffer::free(){ 
 	return _allocatedSize - _size; 
 }
-void fastCommBuffer::advance(size_t pos){
+void faster::fastCommBuffer::advance(size_t pos){
 	_size += pos; 
 }
 
-void fastCommBuffer::grow(size_t s){
+void faster::fastCommBuffer::grow(size_t s){
 	if (_allocatedSize < s){
 		delete [] _data;
 		_allocatedSize = std::max(size_t(1.5*_allocatedSize), s + _allocatedSize);
@@ -58,7 +58,7 @@ void fastCommBuffer::grow(size_t s){
 	}
 }
 
-void fastCommBuffer::print(){
+void faster::fastCommBuffer::print(){
 	for (size_t i = 0; i < _size; ++i){
 		std::cout << (int) _data[i] << ' ';
 	}

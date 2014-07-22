@@ -11,30 +11,30 @@
 typedef std::chrono::milliseconds milli;
 typedef std::chrono::system_clock sysClock;
 
-worker::worker(fastComm * c, void ** ft){
+faster::worker::worker(fastComm * c, void ** ft){
 	std::cerr << "  Starting Worker " << c->getProcId() << '\n';
 	funcTable = ft;
 	comm = c;
 	finished = false;
 }
 
-worker::~worker(){
+faster::worker::~worker(){
 }
 
 
-void worker::destroyFDD(unsigned long int id){
+void faster::worker::destroyFDD(unsigned long int id){
 	delete fddList[id];
 	fddList[id] = NULL;
 }
 
-void worker::setFDDData(unsigned long int id, void * data, size_t size){
+void faster::worker::setFDDData(unsigned long int id, void * data, size_t size){
 	workerFddBase * fdd = fddList[id];
 
 	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
 
 	fdd->setDataRaw( data, size );
 }
-void worker::setFDDIData(unsigned long int id, void * keys, void * data, size_t size){
+void faster::worker::setFDDIData(unsigned long int id, void * keys, void * data, size_t size){
 	workerFddBase * fdd = fddList[id];
 
 	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
@@ -42,7 +42,7 @@ void worker::setFDDIData(unsigned long int id, void * keys, void * data, size_t 
 	fdd->setDataRaw( keys, data, size );
 }
 
-void worker::setFDDData(unsigned long int id, void * data, size_t * lineSizes, size_t size){
+void faster::worker::setFDDData(unsigned long int id, void * data, size_t * lineSizes, size_t size){
 	workerFddBase * fdd = fddList[id];
 
 	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
@@ -50,7 +50,7 @@ void worker::setFDDData(unsigned long int id, void * data, size_t * lineSizes, s
 	fdd->setDataRaw( data, lineSizes, size );
 }
 
-void worker::setFDDIData(unsigned long int id, void * keys, void * data, size_t * lineSizes, size_t size){
+void faster::worker::setFDDIData(unsigned long int id, void * keys, void * data, size_t * lineSizes, size_t size){
 	workerFddBase * fdd = fddList[id];
 
 	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
@@ -58,7 +58,7 @@ void worker::setFDDIData(unsigned long int id, void * keys, void * data, size_t 
 	fdd->setDataRaw( keys, data, lineSizes, size );
 }
 
-/*void worker::getFDDData(unsigned long int id, void *& data, size_t &size){
+/*void faster::worker::getFDDData(unsigned long int id, void *& data, size_t &size){
 	workerFddBase * fdd = fddList[id];
 
 	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
@@ -70,7 +70,7 @@ void worker::setFDDIData(unsigned long int id, void * keys, void * data, size_t 
 
 
 
-void worker::preapply(fastTask &task, workerFddBase * destFDD){
+void faster::worker::preapply(fastTask &task, workerFddBase * destFDD){
 	using std::chrono::system_clock;
 	using std::chrono::duration_cast;
 	using std::chrono::milliseconds;
@@ -97,7 +97,7 @@ void worker::preapply(fastTask &task, workerFddBase * destFDD){
 }
 
 
-void worker::solve(fastTask &task){
+void faster::worker::solve(fastTask &task){
 
 	if ( task.operationType & OP_GENERICREDUCE){
 		// Don't consider the output fdd pointer
@@ -121,7 +121,7 @@ void worker::solve(fastTask &task){
 	}
 }
 
-void worker::collect(unsigned long int id){
+void faster::worker::collect(unsigned long int id){
 	workerFddBase * fdd = fddList[id];
 
 	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }

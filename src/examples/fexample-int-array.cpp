@@ -4,6 +4,7 @@
 #define NUMITEMS 10*1000
 
 using namespace std;
+using namespace faster;
 
 // Multiply every array element by 2
 pair<int*,size_t> map1(int * input, size_t size){

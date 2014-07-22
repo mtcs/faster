@@ -4,6 +4,7 @@
 #define NUMITEMS 10*1000
 
 using namespace std;
+using namespace faster;
 
 // Remove duplicated links
 int * map1(int * input, size_t size){

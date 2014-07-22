@@ -34,8 +34,8 @@ set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
 
 set (EXTRA_LIBS ${EXTRA_LIBS} efence)
 
-set (MODULES ${MODULES} fdd.cpp )
-#set (MODULES ${MODULES} indexedFdd.cpp)
+#set (MODULES ${MODULES} fdd.cpp ) # Pure templates now
+#set (MODULES ${MODULES} indexedFdd.cpp ) # Pure templates now
 set (MODULES ${MODULES} fastContext.cpp )
 set (MODULES ${MODULES} fastComm.cpp )
 set (MODULES ${MODULES} fastCommBuffer.cpp )

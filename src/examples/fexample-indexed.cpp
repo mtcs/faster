@@ -5,6 +5,7 @@
 #define NUMITEMS 10*1000
 
 using namespace std;
+using namespace faster;
 
 pair<int,int> map1(int key, int & input){
 	pair<int,int> result (key,input/2);

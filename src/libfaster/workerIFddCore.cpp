@@ -2,79 +2,80 @@
 #include "fastComm.h"
 #include "indexedFddStorageExtern.cpp"
 
+using namespace faster;
 
 template <typename K, typename T>
-workerIFddCore<K,T>::workerIFddCore(unsigned int ident, fddType t) : workerFddBase(ident, t){
+faster::workerIFddCore<K,T>::workerIFddCore(unsigned int ident, fddType t) : workerFddBase(ident, t){
 	localData = new indexedFddStorage<K,T>();
 } 
 
 
 template <typename K, typename T>
-workerIFddCore<K,T>::workerIFddCore(unsigned int ident, fddType t, size_t size) : workerFddBase(ident, t){ 
+faster::workerIFddCore<K,T>::workerIFddCore(unsigned int ident, fddType t, size_t size) : workerFddBase(ident, t){ 
 	localData = new indexedFddStorage<K,T>(size);
 }
 
 
 template <typename K, typename T>
-workerIFddCore<K,T>::~workerIFddCore(){
+faster::workerIFddCore<K,T>::~workerIFddCore(){
 	delete localData;
 	delete resultBuffer;
 }
 
 template <typename K, typename T>
-fddType workerIFddCore<K,T>::getType() { 
+fddType faster::workerIFddCore<K,T>::getType() { 
 	return type; 
 }
 
 template <typename K, typename T>
-fddType workerIFddCore<K,T>::getKeyType() { 
+fddType faster::workerIFddCore<K,T>::getKeyType() { 
 	return keyType; 
 }
 
 
 template <typename K, typename T>
-T & workerIFddCore<K,T>::operator[](size_t address){ 
+T & faster::workerIFddCore<K,T>::operator[](size_t address){ 
 	return this->localData->getData()[address]; 
 }
 
 template <typename K, typename T>
-void * workerIFddCore<K,T>::getData(){ 
+void * faster::workerIFddCore<K,T>::getData(){ 
 	return this->localData->getData(); 
 }
 
 template <typename K, typename T>
-K * workerIFddCore<K,T>::getKeys(){ 
+K * faster::workerIFddCore<K,T>::getKeys(){ 
 	return this->localData->getKeys(); 
 }
 
 template <typename K, typename T>
-size_t workerIFddCore<K,T>::getSize(){ 
+size_t faster::workerIFddCore<K,T>::getSize(){ 
 	return this->localData->getSize(); 
 }
 
 template <typename K, typename T>
-size_t workerIFddCore<K,T>::itemSize(){ 
+size_t faster::workerIFddCore<K,T>::itemSize(){ 
 	return sizeof(T); 
 }
 
 template <typename K, typename T>
-size_t workerIFddCore<K,T>::baseSize(){ 
+size_t faster::workerIFddCore<K,T>::baseSize(){ 
 	return sizeof(T); 
 }
 
 template <typename K, typename T>
-void workerIFddCore<K,T>::deleteItem(void * item) { 
+void faster::workerIFddCore<K,T>::deleteItem(void * item) { 
 	delete (T*) item; 
 }
 
 template <typename K, typename T>
-void workerIFddCore<K,T>::shrink(){ 
+void faster::workerIFddCore<K,T>::shrink(){ 
 	localData->shrink(); 
 }
 
 
 template <typename K, typename T>
-K * workerIFddCore<K,T>::distributeOwnership(fastComm * comm, K * uKeys, size_t cSize){
+K * faster::workerIFddCore<K,T>::distributeOwnership(fastComm * comm, K * uKeys, size_t cSize){
 	size_t keyPerProc = cSize/(comm->getNumProcs() - 1);
 	int procId = comm->getProcId();
 	K * recvOwnership = new K[comm->getNumProcs()];
@@ -110,7 +111,7 @@ K * workerIFddCore<K,T>::distributeOwnership(fastComm * comm, K * uKeys, size_t 
 }
 
 template <typename K, typename T>
-void workerIFddCore<K,T>::sendPartKeyCount(fastComm *comm){
+void faster::workerIFddCore<K,T>::sendPartKeyCount(fastComm *comm){
 	K * keys = localData->getKeys();
 	size_t size = localData->getSize();
 	K * uKeys;
@@ -157,7 +158,7 @@ void workerIFddCore<K,T>::sendPartKeyCount(fastComm *comm){
 }
 
 template <typename K, typename T>
-CountKeyMapT<K> workerIFddCore<K,T>::recvPartKeyMaxCount(fastComm *comm, PPCountKeyMapT<K> & keyPPMaxCount){
+CountKeyMapT<K> faster::workerIFddCore<K,T>::recvPartKeyMaxCount(fastComm *comm, PPCountKeyMapT<K> & keyPPMaxCount){
 	// Recv KeyCounts
 	int src;
 	
@@ -194,7 +195,7 @@ CountKeyMapT<K> workerIFddCore<K,T>::recvPartKeyMaxCount(fastComm *comm, PPCount
 }
 
 template <typename K, typename T>
-CountKeyMapT<K> workerIFddCore<K,T>::recvPartKeyCount(fastComm *comm){
+CountKeyMapT<K> faster::workerIFddCore<K,T>::recvPartKeyCount(fastComm *comm){
 	// Recv KeyCounts
 	int src;
 	CountKeyMapT<K> keyCount;
@@ -219,7 +220,7 @@ CountKeyMapT<K> workerIFddCore<K,T>::recvPartKeyCount(fastComm *comm){
 }
 
 template <typename K, typename T>
-CountKeyMapT<K> workerIFddCore<K,T>::distributedMaxKeyCount(fastComm *comm, PPCountKeyMapT<K> & keyPPMaxCount){
+CountKeyMapT<K> faster::workerIFddCore<K,T>::distributedMaxKeyCount(fastComm *comm, PPCountKeyMapT<K> & keyPPMaxCount){
 
 	sendPartKeyCount(comm);
 
@@ -229,7 +230,7 @@ CountKeyMapT<K> workerIFddCore<K,T>::distributedMaxKeyCount(fastComm *comm, PPCo
 }
 
 template <typename K, typename T>
-void workerIFddCore<K,T>::countByKey(fastComm *comm){
+void faster::workerIFddCore<K,T>::countByKey(fastComm *comm){
 
 	sendPartKeyCount(comm);
 
@@ -239,7 +240,7 @@ void workerIFddCore<K,T>::countByKey(fastComm *comm){
 }
 
 template <typename K, typename T>
-void workerIFddCore<K,T>::groupByKey(fastComm *comm){
+void faster::workerIFddCore<K,T>::groupByKey(fastComm *comm){
 	PPCountKeyMapT<K> keyMaxCount;
 
 	// Get Unique Keys Counts
@@ -262,105 +263,105 @@ void workerIFddCore<K,T>::groupByKey(fastComm *comm){
 
 
 
-template class workerIFddCore<char, char>;
-template class workerIFddCore<char, int>;
-template class workerIFddCore<char, long int>;
-template class workerIFddCore<char, float>;
-template class workerIFddCore<char, double>;
-template class workerIFddCore<char, char*>;
-template class workerIFddCore<char, int*>;
-template class workerIFddCore<char, long int*>;
-template class workerIFddCore<char, float*>;
-template class workerIFddCore<char, double*>;
-template class workerIFddCore<char, std::string>;
-template class workerIFddCore<char, std::vector<char>>;
-template class workerIFddCore<char, std::vector<int>>;
-template class workerIFddCore<char, std::vector<long int>>;
-template class workerIFddCore<char, std::vector<float>>;
-template class workerIFddCore<char, std::vector<double>>;
+template class faster::workerIFddCore<char, char>;
+template class faster::workerIFddCore<char, int>;
+template class faster::workerIFddCore<char, long int>;
+template class faster::workerIFddCore<char, float>;
+template class faster::workerIFddCore<char, double>;
+template class faster::workerIFddCore<char, char*>;
+template class faster::workerIFddCore<char, int*>;
+template class faster::workerIFddCore<char, long int*>;
+template class faster::workerIFddCore<char, float*>;
+template class faster::workerIFddCore<char, double*>;
+template class faster::workerIFddCore<char, std::string>;
+template class faster::workerIFddCore<char, std::vector<char>>;
+template class faster::workerIFddCore<char, std::vector<int>>;
+template class faster::workerIFddCore<char, std::vector<long int>>;
+template class faster::workerIFddCore<char, std::vector<float>>;
+template class faster::workerIFddCore<char, std::vector<double>>;
 
-template class workerIFddCore<int, char>;
-template class workerIFddCore<int, int>;
-template class workerIFddCore<int, long int>;
-template class workerIFddCore<int, float>;
-template class workerIFddCore<int, double>;
-template class workerIFddCore<int, char*>;
-template class workerIFddCore<int, int*>;
-template class workerIFddCore<int, long int*>;
-template class workerIFddCore<int, float*>;
-template class workerIFddCore<int, double*>;
-template class workerIFddCore<int, std::string>;
-template class workerIFddCore<int, std::vector<char>>;
-template class workerIFddCore<int, std::vector<int>>;
-template class workerIFddCore<int, std::vector<long int>>;
-template class workerIFddCore<int, std::vector<float>>;
-template class workerIFddCore<int, std::vector<double>>;
+template class faster::workerIFddCore<int, char>;
+template class faster::workerIFddCore<int, int>;
+template class faster::workerIFddCore<int, long int>;
+template class faster::workerIFddCore<int, float>;
+template class faster::workerIFddCore<int, double>;
+template class faster::workerIFddCore<int, char*>;
+template class faster::workerIFddCore<int, int*>;
+template class faster::workerIFddCore<int, long int*>;
+template class faster::workerIFddCore<int, float*>;
+template class faster::workerIFddCore<int, double*>;
+template class faster::workerIFddCore<int, std::string>;
+template class faster::workerIFddCore<int, std::vector<char>>;
+template class faster::workerIFddCore<int, std::vector<int>>;
+template class faster::workerIFddCore<int, std::vector<long int>>;
+template class faster::workerIFddCore<int, std::vector<float>>;
+template class faster::workerIFddCore<int, std::vector<double>>;
 
-template class workerIFddCore<long int, char>;
-template class workerIFddCore<long int, int>;
-template class workerIFddCore<long int, long int>;
-template class workerIFddCore<long int, float>;
-template class workerIFddCore<long int, double>;
-template class workerIFddCore<long int, char*>;
-template class workerIFddCore<long int, int*>;
-template class workerIFddCore<long int, long int*>;
-template class workerIFddCore<long int, float*>;
-template class workerIFddCore<long int, double*>;
-template class workerIFddCore<long int, std::string>;
-template class workerIFddCore<long, std::vector<char>>;
-template class workerIFddCore<long, std::vector<int>>;
-template class workerIFddCore<long, std::vector<long int>>;
-template class workerIFddCore<long, std::vector<float>>;
-template class workerIFddCore<long, std::vector<double>>;
+template class faster::workerIFddCore<long int, char>;
+template class faster::workerIFddCore<long int, int>;
+template class faster::workerIFddCore<long int, long int>;
+template class faster::workerIFddCore<long int, float>;
+template class faster::workerIFddCore<long int, double>;
+template class faster::workerIFddCore<long int, char*>;
+template class faster::workerIFddCore<long int, int*>;
+template class faster::workerIFddCore<long int, long int*>;
+template class faster::workerIFddCore<long int, float*>;
+template class faster::workerIFddCore<long int, double*>;
+template class faster::workerIFddCore<long int, std::string>;
+template class faster::workerIFddCore<long, std::vector<char>>;
+template class faster::workerIFddCore<long, std::vector<int>>;
+template class faster::workerIFddCore<long, std::vector<long int>>;
+template class faster::workerIFddCore<long, std::vector<float>>;
+template class faster::workerIFddCore<long, std::vector<double>>;
 
-template class workerIFddCore<float, char>;
-template class workerIFddCore<float, int>;
-template class workerIFddCore<float, long int>;
-template class workerIFddCore<float, float>;
-template class workerIFddCore<float, double>;
-template class workerIFddCore<float, char*>;
-template class workerIFddCore<float, int*>;
-template class workerIFddCore<float, long int*>;
-template class workerIFddCore<float, float*>;
-template class workerIFddCore<float, double*>;
-template class workerIFddCore<float, std::string>;
-template class workerIFddCore<float, std::vector<char>>;
-template class workerIFddCore<float, std::vector<int>>;
-template class workerIFddCore<float, std::vector<long int>>;
-template class workerIFddCore<float, std::vector<float>>;
-template class workerIFddCore<float, std::vector<double>>;
+template class faster::workerIFddCore<float, char>;
+template class faster::workerIFddCore<float, int>;
+template class faster::workerIFddCore<float, long int>;
+template class faster::workerIFddCore<float, float>;
+template class faster::workerIFddCore<float, double>;
+template class faster::workerIFddCore<float, char*>;
+template class faster::workerIFddCore<float, int*>;
+template class faster::workerIFddCore<float, long int*>;
+template class faster::workerIFddCore<float, float*>;
+template class faster::workerIFddCore<float, double*>;
+template class faster::workerIFddCore<float, std::string>;
+template class faster::workerIFddCore<float, std::vector<char>>;
+template class faster::workerIFddCore<float, std::vector<int>>;
+template class faster::workerIFddCore<float, std::vector<long int>>;
+template class faster::workerIFddCore<float, std::vector<float>>;
+template class faster::workerIFddCore<float, std::vector<double>>;
 
-template class workerIFddCore<double, char>;
-template class workerIFddCore<double, int>;
-template class workerIFddCore<double, long int>;
-template class workerIFddCore<double, float>;
-template class workerIFddCore<double, double>;
-template class workerIFddCore<double, char*>;
-template class workerIFddCore<double, int*>;
-template class workerIFddCore<double, long int*>;
-template class workerIFddCore<double, float*>;
-template class workerIFddCore<double, double*>;
-template class workerIFddCore<double, std::string>;
-template class workerIFddCore<double, std::vector<char>>;
-template class workerIFddCore<double, std::vector<int>>;
-template class workerIFddCore<double, std::vector<long int>>;
-template class workerIFddCore<double, std::vector<float>>;
-template class workerIFddCore<double, std::vector<double>>;
+template class faster::workerIFddCore<double, char>;
+template class faster::workerIFddCore<double, int>;
+template class faster::workerIFddCore<double, long int>;
+template class faster::workerIFddCore<double, float>;
+template class faster::workerIFddCore<double, double>;
+template class faster::workerIFddCore<double, char*>;
+template class faster::workerIFddCore<double, int*>;
+template class faster::workerIFddCore<double, long int*>;
+template class faster::workerIFddCore<double, float*>;
+template class faster::workerIFddCore<double, double*>;
+template class faster::workerIFddCore<double, std::string>;
+template class faster::workerIFddCore<double, std::vector<char>>;
+template class faster::workerIFddCore<double, std::vector<int>>;
+template class faster::workerIFddCore<double, std::vector<long int>>;
+template class faster::workerIFddCore<double, std::vector<float>>;
+template class faster::workerIFddCore<double, std::vector<double>>;
 
-template class workerIFddCore<std::string, char>;
-template class workerIFddCore<std::string, int>;
-template class workerIFddCore<std::string, long int>;
-template class workerIFddCore<std::string, float>;
-template class workerIFddCore<std::string, double>;
-template class workerIFddCore<std::string, char*>;
-template class workerIFddCore<std::string, int*>;
-template class workerIFddCore<std::string, long int*>;
-template class workerIFddCore<std::string, float*>;
-template class workerIFddCore<std::string, double*>;
-template class workerIFddCore<std::string, std::string>;
-template class workerIFddCore<std::string, std::vector<char>>;
-template class workerIFddCore<std::string, std::vector<int>>;
-template class workerIFddCore<std::string, std::vector<long int>>;
-template class workerIFddCore<std::string, std::vector<float>>;
-template class workerIFddCore<std::string, std::vector<double>>;
+template class faster::workerIFddCore<std::string, char>;
+template class faster::workerIFddCore<std::string, int>;
+template class faster::workerIFddCore<std::string, long int>;
+template class faster::workerIFddCore<std::string, float>;
+template class faster::workerIFddCore<std::string, double>;
+template class faster::workerIFddCore<std::string, char*>;
+template class faster::workerIFddCore<std::string, int*>;
+template class faster::workerIFddCore<std::string, long int*>;
+template class faster::workerIFddCore<std::string, float*>;
+template class faster::workerIFddCore<std::string, double*>;
+template class faster::workerIFddCore<std::string, std::string>;
+template class faster::workerIFddCore<std::string, std::vector<char>>;
+template class faster::workerIFddCore<std::string, std::vector<int>>;
+template class faster::workerIFddCore<std::string, std::vector<long int>>;
+template class faster::workerIFddCore<std::string, std::vector<float>>;
+template class faster::workerIFddCore<std::string, std::vector<double>>;
 

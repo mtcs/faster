@@ -3,7 +3,7 @@
 
 
 template <typename K>
-void worker::_createIFDD (unsigned long int id, fddType type, size_t size){
+void faster::worker::_createIFDD (unsigned long int id, fddType type, size_t size){
 	workerFddBase * newFdd;
 	switch (type){
 		case Null: break;
@@ -28,7 +28,7 @@ void worker::_createIFDD (unsigned long int id, fddType type, size_t size){
 	fddList.insert(fddList.end(), newFdd);
 }
 
-void worker::createIFDD(unsigned long int id, fddType kType, fddType tType, size_t size){
+void faster::worker::createIFDD(unsigned long int id, fddType kType, fddType tType, size_t size){
 	switch (kType){
 		case Null: break;
 		case Char:    _createIFDD<char>(id, tType, size); break;

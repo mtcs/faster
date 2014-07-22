@@ -5,7 +5,7 @@
 #include "workerFddExtern.cpp"
 #include "worker.h"
 
-void worker::createFDD (unsigned long int id, fddType type, size_t size){
+void faster::worker::createFDD (unsigned long int id, fddType type, size_t size){
 	workerFddBase * newFdd;
 	switch (type){
 		case Null: break;
@@ -31,7 +31,7 @@ void worker::createFDD (unsigned long int id, fddType type, size_t size){
 }
 
 
-void worker::readFDDFile(unsigned long int id, std::string &filename, size_t size, size_t offset){
+void faster::worker::readFDDFile(unsigned long int id, std::string &filename, size_t size, size_t offset){
 	std::string line; 
 	char c;
 

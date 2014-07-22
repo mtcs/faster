@@ -5,6 +5,7 @@
 #define NUMITEMS 10*1000
 
 using namespace std;
+using namespace faster;
 
 // Multiply every array element by 2
 vector<int> map1(vector<int> & input){

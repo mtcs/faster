@@ -9,6 +9,8 @@
 
 #include "definitions.h"
 
-fddType decodeType(size_t typeCode);
+namespace faster{
+	fddType decodeType(size_t typeCode);
+}
 
 #endif

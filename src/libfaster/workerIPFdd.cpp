@@ -9,7 +9,7 @@
 
 // REDUCE
 template <typename K, typename T>
-std::tuple<K,T*,size_t> workerIFdd<K,T*>::reduce (IPreduceIPFunctionP<K,T> reduceFunc){
+std::tuple<K,T*,size_t> faster::workerIFdd<K,T*>::reduce (IPreduceIPFunctionP<K,T> reduceFunc){
 	T ** d = this->localData->getData();
 	std::tuple<K,T*,size_t>  resultT;
 	size_t s = this->localData->getSize();
@@ -66,14 +66,14 @@ std::tuple<K,T*,size_t> workerIFdd<K,T*>::reduce (IPreduceIPFunctionP<K,T> reduc
 }
 
 template <typename K, typename T>
-std::tuple<K,T*,size_t> workerIFdd<K,T*>::bulkReduce (IPbulkReduceIPFunctionP<K,T> bulkReduceFunc){
+std::tuple<K,T*,size_t> faster::workerIFdd<K,T*>::bulkReduce (IPbulkReduceIPFunctionP<K,T> bulkReduceFunc){
 	K * ik = this->localData->getKeys();
 	return bulkReduceFunc(ik, this->localData->getData(), this->localData->getLineSizes(), this->localData->getSize());
 }
 
 
 template <typename K, typename T>
-void workerIFdd<K,T*>::applyIndependent(void * func, fddOpType op, void *& result, size_t & rSize){ 
+void faster::workerIFdd<K,T*>::applyIndependent(void * func, fddOpType op, void *& result, size_t & rSize){ 
 	std::tuple<K,T*,size_t> r;
 
 	switch (op){
@@ -99,28 +99,28 @@ void workerIFdd<K,T*>::applyIndependent(void * func, fddOpType op, void *& resul
 
 
 template <typename K, typename T>
-void workerIFdd<K,T*>::setData(K * keys, T ** data, size_t *lineSizes, size_t size){
+void faster::workerIFdd<K,T*>::setData(K * keys, T ** data, size_t *lineSizes, size_t size){
 	this->localData->setData(keys, data, lineSizes, size);
 }
 
 
 template <typename K, typename T>
-void workerIFdd<K,T*>::setDataRaw(void * keys, void * data, size_t *lineSizes, size_t size) {
+void faster::workerIFdd<K,T*>::setDataRaw(void * keys, void * data, size_t *lineSizes, size_t size) {
 	this->localData->setDataRaw(keys, data, lineSizes, size);
 }
 
 template <typename K, typename T>
-size_t * workerIFdd<K,T*>::getLineSizes(){ 
+size_t * faster::workerIFdd<K,T*>::getLineSizes(){ 
 	return this->localData->getLineSizes();
 }
 
 template <typename K, typename T>
-void workerIFdd<K,T*>::insert(K key, T* & in, size_t s){ 
+void faster::workerIFdd<K,T*>::insert(K key, T* & in, size_t s){ 
 	this->localData->insert(key, in, s); 
 }
 
 template <typename K, typename T>
-void workerIFdd<K,T*>::insert(std::list< std::tuple<K, T*, size_t> > & in){ 
+void faster::workerIFdd<K,T*>::insert(std::list< std::tuple<K, T*, size_t> > & in){ 
 	typename std::list< std::tuple<K, T*, size_t> >::iterator it;
 
 	if (this->localData->getSize() < in.size())
@@ -132,7 +132,7 @@ void workerIFdd<K,T*>::insert(std::list< std::tuple<K, T*, size_t> > & in){
 
 
 template <typename K, typename T>
-void workerIFdd<K,T*>::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){ 
+void faster::workerIFdd<K,T*>::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){ 
 	switch (op){
 		case OP_Map:
 		case OP_BulkMap:
@@ -148,110 +148,110 @@ void workerIFdd<K,T*>::apply(void * func, fddOpType op, workerFddBase * dest, vo
 
 
 template <typename K, typename T>
-void workerIFdd<K,T*>::collect(fastComm * comm) {
+void faster::workerIFdd<K,T*>::collect(fastComm * comm) {
 	comm->sendFDDDataCollect(this->id, this->localData->getKeys(), this->localData->getData(), this->localData->getLineSizes(), this->localData->getSize());
 };
 
 
 
-extern template class workerIFdd<char, char>;
-extern template class workerIFdd<char, int>;
-extern template class workerIFdd<char, long int>;
-extern template class workerIFdd<char, float>;
-extern template class workerIFdd<char, double>;
-template class workerIFdd<char, char*>;
-template class workerIFdd<char, int*>;
-template class workerIFdd<char, long int*>;
-template class workerIFdd<char, float*>;
-template class workerIFdd<char, double*>;
-extern template class workerIFdd<char, std::string>;
-extern template class workerIFdd<char, std::vector<char>>;
-extern template class workerIFdd<char, std::vector<int>>;
-extern template class workerIFdd<char, std::vector<long int>>;
-extern template class workerIFdd<char, std::vector<float>>;
-extern template class workerIFdd<char, std::vector<double>>;
+extern template class faster::workerIFdd<char, char>;
+extern template class faster::workerIFdd<char, int>;
+extern template class faster::workerIFdd<char, long int>;
+extern template class faster::workerIFdd<char, float>;
+extern template class faster::workerIFdd<char, double>;
+template class faster::workerIFdd<char, char*>;
+template class faster::workerIFdd<char, int*>;
+template class faster::workerIFdd<char, long int*>;
+template class faster::workerIFdd<char, float*>;
+template class faster::workerIFdd<char, double*>;
+extern template class faster::workerIFdd<char, std::string>;
+extern template class faster::workerIFdd<char, std::vector<char>>;
+extern template class faster::workerIFdd<char, std::vector<int>>;
+extern template class faster::workerIFdd<char, std::vector<long int>>;
+extern template class faster::workerIFdd<char, std::vector<float>>;
+extern template class faster::workerIFdd<char, std::vector<double>>;
 
-extern template class workerIFdd<int, char>;
-extern template class workerIFdd<int, int>;
-extern template class workerIFdd<int, long int>;
-extern template class workerIFdd<int, float>;
-extern template class workerIFdd<int, double>;
-template class workerIFdd<int, char*>;
-template class workerIFdd<int, int*>;
-template class workerIFdd<int, long int*>;
-template class workerIFdd<int, float*>;
-template class workerIFdd<int, double*>;
-extern template class workerIFdd<int, std::string>;
-extern template class workerIFdd<int, std::vector<char>>;
-extern template class workerIFdd<int, std::vector<int>>;
-extern template class workerIFdd<int, std::vector<long int>>;
-extern template class workerIFdd<int, std::vector<float>>;
-extern template class workerIFdd<int, std::vector<double>>;
+extern template class faster::workerIFdd<int, char>;
+extern template class faster::workerIFdd<int, int>;
+extern template class faster::workerIFdd<int, long int>;
+extern template class faster::workerIFdd<int, float>;
+extern template class faster::workerIFdd<int, double>;
+template class faster::workerIFdd<int, char*>;
+template class faster::workerIFdd<int, int*>;
+template class faster::workerIFdd<int, long int*>;
+template class faster::workerIFdd<int, float*>;
+template class faster::workerIFdd<int, double*>;
+extern template class faster::workerIFdd<int, std::string>;
+extern template class faster::workerIFdd<int, std::vector<char>>;
+extern template class faster::workerIFdd<int, std::vector<int>>;
+extern template class faster::workerIFdd<int, std::vector<long int>>;
+extern template class faster::workerIFdd<int, std::vector<float>>;
+extern template class faster::workerIFdd<int, std::vector<double>>;
 
-extern template class workerIFdd<long int, char>;
-extern template class workerIFdd<long int, int>;
-extern template class workerIFdd<long int, long int>;
-extern template class workerIFdd<long int, float>;
-extern template class workerIFdd<long int, double>;
-template class workerIFdd<long int, char*>;
-template class workerIFdd<long int, int*>;
-template class workerIFdd<long int, long int*>;
-template class workerIFdd<long int, float*>;
-template class workerIFdd<long int, double*>;
-extern template class workerIFdd<long int, std::string>;
-extern template class workerIFdd<long, std::vector<char>>;
-extern template class workerIFdd<long, std::vector<int>>;
-extern template class workerIFdd<long, std::vector<long int>>;
-extern template class workerIFdd<long, std::vector<float>>;
-extern template class workerIFdd<long, std::vector<double>>;
+extern template class faster::workerIFdd<long int, char>;
+extern template class faster::workerIFdd<long int, int>;
+extern template class faster::workerIFdd<long int, long int>;
+extern template class faster::workerIFdd<long int, float>;
+extern template class faster::workerIFdd<long int, double>;
+template class faster::workerIFdd<long int, char*>;
+template class faster::workerIFdd<long int, int*>;
+template class faster::workerIFdd<long int, long int*>;
+template class faster::workerIFdd<long int, float*>;
+template class faster::workerIFdd<long int, double*>;
+extern template class faster::workerIFdd<long int, std::string>;
+extern template class faster::workerIFdd<long, std::vector<char>>;
+extern template class faster::workerIFdd<long, std::vector<int>>;
+extern template class faster::workerIFdd<long, std::vector<long int>>;
+extern template class faster::workerIFdd<long, std::vector<float>>;
+extern template class faster::workerIFdd<long, std::vector<double>>;
 
-extern template class workerIFdd<float, char>;
-extern template class workerIFdd<float, int>;
-extern template class workerIFdd<float, long int>;
-extern template class workerIFdd<float, float>;
-extern template class workerIFdd<float, double>;
-template class workerIFdd<float, char*>;
-template class workerIFdd<float, int*>;
-template class workerIFdd<float, long int*>;
-template class workerIFdd<float, float*>;
-template class workerIFdd<float, double*>;
-extern template class workerIFdd<float, std::string>;
-extern template class workerIFdd<float, std::vector<char>>;
-extern template class workerIFdd<float, std::vector<int>>;
-extern template class workerIFdd<float, std::vector<long int>>;
-extern template class workerIFdd<float, std::vector<float>>;
-extern template class workerIFdd<float, std::vector<double>>;
+extern template class faster::workerIFdd<float, char>;
+extern template class faster::workerIFdd<float, int>;
+extern template class faster::workerIFdd<float, long int>;
+extern template class faster::workerIFdd<float, float>;
+extern template class faster::workerIFdd<float, double>;
+template class faster::workerIFdd<float, char*>;
+template class faster::workerIFdd<float, int*>;
+template class faster::workerIFdd<float, long int*>;
+template class faster::workerIFdd<float, float*>;
+template class faster::workerIFdd<float, double*>;
+extern template class faster::workerIFdd<float, std::string>;
+extern template class faster::workerIFdd<float, std::vector<char>>;
+extern template class faster::workerIFdd<float, std::vector<int>>;
+extern template class faster::workerIFdd<float, std::vector<long int>>;
+extern template class faster::workerIFdd<float, std::vector<float>>;
+extern template class faster::workerIFdd<float, std::vector<double>>;
 
-extern template class workerIFdd<double, char>;
-extern template class workerIFdd<double, int>;
-extern template class workerIFdd<double, long int>;
-extern template class workerIFdd<double, float>;
-extern template class workerIFdd<double, double>;
-template class workerIFdd<double, char*>;
-template class workerIFdd<double, int*>;
-template class workerIFdd<double, long int*>;
-template class workerIFdd<double, float*>;
-template class workerIFdd<double, double*>;
-extern template class workerIFdd<double, std::string>;
-extern template class workerIFdd<double, std::vector<char>>;
-extern template class workerIFdd<double, std::vector<int>>;
-extern template class workerIFdd<double, std::vector<long int>>;
-extern template class workerIFdd<double, std::vector<float>>;
-extern template class workerIFdd<double, std::vector<double>>;
+extern template class faster::workerIFdd<double, char>;
+extern template class faster::workerIFdd<double, int>;
+extern template class faster::workerIFdd<double, long int>;
+extern template class faster::workerIFdd<double, float>;
+extern template class faster::workerIFdd<double, double>;
+template class faster::workerIFdd<double, char*>;
+template class faster::workerIFdd<double, int*>;
+template class faster::workerIFdd<double, long int*>;
+template class faster::workerIFdd<double, float*>;
+template class faster::workerIFdd<double, double*>;
+extern template class faster::workerIFdd<double, std::string>;
+extern template class faster::workerIFdd<double, std::vector<char>>;
+extern template class faster::workerIFdd<double, std::vector<int>>;
+extern template class faster::workerIFdd<double, std::vector<long int>>;
+extern template class faster::workerIFdd<double, std::vector<float>>;
+extern template class faster::workerIFdd<double, std::vector<double>>;
 
-extern template class workerIFdd<std::string, char>;
-extern template class workerIFdd<std::string, int>;
-extern template class workerIFdd<std::string, long int>;
-extern template class workerIFdd<std::string, float>;
-extern template class workerIFdd<std::string, double>;
-template class workerIFdd<std::string, char*>;
-template class workerIFdd<std::string, int*>;
-template class workerIFdd<std::string, long int*>;
-template class workerIFdd<std::string, float*>;
-template class workerIFdd<std::string, double*>;
-extern template class workerIFdd<std::string, std::string>;
-extern template class workerIFdd<std::string, std::vector<char>>;
-extern template class workerIFdd<std::string, std::vector<int>>;
-extern template class workerIFdd<std::string, std::vector<long int>>;
-extern template class workerIFdd<std::string, std::vector<float>>;
-extern template class workerIFdd<std::string, std::vector<double>>;
+extern template class faster::workerIFdd<std::string, char>;
+extern template class faster::workerIFdd<std::string, int>;
+extern template class faster::workerIFdd<std::string, long int>;
+extern template class faster::workerIFdd<std::string, float>;
+extern template class faster::workerIFdd<std::string, double>;
+template class faster::workerIFdd<std::string, char*>;
+template class faster::workerIFdd<std::string, int*>;
+template class faster::workerIFdd<std::string, long int*>;
+template class faster::workerIFdd<std::string, float*>;
+template class faster::workerIFdd<std::string, double*>;
+extern template class faster::workerIFdd<std::string, std::string>;
+extern template class faster::workerIFdd<std::string, std::vector<char>>;
+extern template class faster::workerIFdd<std::string, std::vector<int>>;
+extern template class faster::workerIFdd<std::string, std::vector<long int>>;
+extern template class faster::workerIFdd<std::string, std::vector<float>>;
+extern template class faster::workerIFdd<std::string, std::vector<double>>;

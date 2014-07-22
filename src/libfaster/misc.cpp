@@ -1,7 +1,7 @@
 #include <iostream>
 #include "misc.h"
 
-fddType decodeType(size_t code){
+faster::fddType faster::decodeType(size_t code){
 	if ( code == typeid(char).hash_code() )
 		return Char;
 	if ( code == typeid(int).hash_code() )

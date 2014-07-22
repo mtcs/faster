@@ -6,318 +6,479 @@
 #include <stdio.h>
 #include <list>
 
-class fastTask;
-
-template <class K, class T> 
-class indexedFdd ; 
-
 
 #include "definitions.h"
-//#include "fastTask.h" 
 #include "fddBase.h"
 #include "fastContext.h"
-//#include "indexedFdd.h"
 
-template <typename T> 
-class fddCore : public fddBase {
-	protected :
-		fastContext * context;
+namespace faster{
 
-		// -------------- Core FDD Functions --------------- //
+	class fastTask;
 
-		fddCore() {}
+	template <class K, class T> 
+	class indexedFdd ; 
 
-		fddCore(fastContext & c);
+	template <typename T> 
+	class fddCore : public fddBase {
+		protected :
+			fastContext * context;
 
-		// Create a empty fdd with a pre allocated size
-		fddCore(fastContext &c, size_t s);
+			// -------------- Core FDD Functions --------------- //
 
-		// 1->1 function (map, bulkmap, flatmap...)
-		template <typename U> 
-		fdd<U> * map( void * funcP, fddOpType op);
+			fddCore() {}
 
-};
+			fddCore(fastContext & c);
 
-// Driver side FDD
-// It just sends commands to the workers.
-template <class T> 
-class fdd : public fddCore<T>{
-	private:
-		T finishReduces(char ** partResult, size_t * pSize, int funcId, fddOpType op);
-		T reduce( void * funcP, fddOpType op);
-	public:
-		// -------------- Constructors --------------- //
+			// Create a empty fdd with a pre allocated size
+			fddCore(fastContext &c, size_t s);
 
-		// Create a empty fdd
-		fdd(fastContext &c) : fddCore<T>(c){ 
-			this->id = c.createFDD(this,  typeid(T).hash_code());
-		}
+			// 1->1 function (map, bulkmap, flatmap...)
+			template <typename U> 
+			fdd<U> * map( void * funcP, fddOpType op);
+	};
 
-		// Create a empty fdd with a pre allocated size
-		fdd(fastContext &c, size_t s) : fddCore<T>(c, s){ 
-			this->id = c.createFDD(this,  typeid(T).hash_code(), s);
-		}
+	// Driver side FDD
+	// It just sends commands to the workers.
+	template <class T> 
+	class fdd : public fddCore<T>{
+		private:
+			T finishReduces(char ** partResult, size_t * pSize, int funcId, fddOpType op);
+			T reduce( void * funcP, fddOpType op);
+		public:
+			// -------------- Constructors --------------- //
 
-		// Create a fdd from a array in memory
-		fdd(fastContext &c, T * data, size_t size) : fdd(c, size){
-			c.parallelize(fddBase::id, data, size);
-		}
+			// Create a empty fdd
+			fdd(fastContext &c) : fddCore<T>(c){ 
+				this->id = c.createFDD(this,  typeid(T).hash_code());
+			}
 
-		// Create a fdd from a vector in memory
-		fdd(fastContext &c, std::vector<T> &dataV) : fdd(c, dataV.data(), dataV.size()){ }
+			// Create a empty fdd with a pre allocated size
+			fdd(fastContext &c, size_t s) : fddCore<T>(c, s){ 
+				this->id = c.createFDD(this,  typeid(T).hash_code(), s);
+			}
 
-		// Create a fdd from a file
-		fdd(fastContext &c, const char * fileName) ;
+			// Create a fdd from a array in memory
+			fdd(fastContext &c, T * data, size_t size) : fdd(c, size){
+				c.parallelize(fddBase::id, data, size);
+			}
 
-		~fdd(){
-		}
+			// Create a fdd from a vector in memory
+			fdd(fastContext &c, std::vector<T> &dataV) : fdd(c, dataV.data(), dataV.size()){ }
 
-		// -------------- FDD Functions --------------- //
+			// Create a fdd from a file
+			fdd(fastContext &c, const char * fileName) ;
 
-		// Run a Map
-		template <typename U> 
-		fdd<U> * map( mapFunctionP<T,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, OP_Map);
-		}
-		template <typename U> 
-		fdd<U> * map( PmapFunctionP<T,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, OP_Map);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * map( ImapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_Map);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * map( IPmapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_Map);
-		}
+			~fdd(){
+			}
 
+			// -------------- FDD Functions --------------- //
 
-		template <typename U> 
-		fdd<U> * bulkMap( bulkMapFunctionP<T,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, OP_BulkMap);
-		}
-		template <typename U> 
-		fdd<U> * bulkMap( PbulkMapFunctionP<T,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, OP_BulkMap);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * bulkMap( IbulkMapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkMap);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * bulkMap( IPbulkMapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkMap);
-		}
+			// Run a Map
+			template <typename U> 
+			fdd<U> * map( mapFunctionP<T,U> funcP ){
+				return fddCore<T>::template map<U>((void*) funcP, OP_Map);
+			}
+			template <typename U> 
+			fdd<U> * map( PmapFunctionP<T,U> funcP ){
+				return fddCore<T>::template map<U>((void*) funcP, OP_Map);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * map( ImapFunctionP<T,L,U> funcP ){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_Map);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * map( IPmapFunctionP<T,L,U> funcP ){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_Map);
+			}
 
 
-		template <typename U> 
-		fdd<U> * flatMap( flatMapFunctionP<T,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, OP_FlatMap);
-		}
-		template <typename U> 
-		fdd<U> * flatMap( PflatMapFunctionP<T,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, OP_FlatMap);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * flatMap( IflatMapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_FlatMap);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * flatMap( IPflatMapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_FlatMap);
-		}
+			template <typename U> 
+			fdd<U> * bulkMap( bulkMapFunctionP<T,U> funcP ){
+				return fddCore<T>::template map<U>((void*) funcP, OP_BulkMap);
+			}
+			template <typename U> 
+			fdd<U> * bulkMap( PbulkMapFunctionP<T,U> funcP ){
+				return fddCore<T>::template map<U>((void*) funcP, OP_BulkMap);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * bulkMap( IbulkMapFunctionP<T,L,U> funcP ){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkMap);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * bulkMap( IPbulkMapFunctionP<T,L,U> funcP ){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkMap);
+			}
 
 
-		template <typename U> 
-		fdd<U> * bulkFlatMap( bulkFlatMapFunctionP<T,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, OP_BulkFlatMap);
-		}
-		template <typename U> 
-		fdd<U> * bulkFlatMap( PbulkFlatMapFunctionP<T,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, OP_BulkFlatMap);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * bulkFlatMap( IbulkFlatMapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkFlatMap);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * bulkFlatMap( IPbulkFlatMapFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkFlatMap);
-		}
+			template <typename U> 
+			fdd<U> * flatMap( flatMapFunctionP<T,U> funcP ){
+				return fddCore<T>::template map<U>((void*) funcP, OP_FlatMap);
+			}
+			template <typename U> 
+			fdd<U> * flatMap( PflatMapFunctionP<T,U> funcP ){
+				return fddCore<T>::template map<U>((void*) funcP, OP_FlatMap);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * flatMap( IflatMapFunctionP<T,L,U> funcP ){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_FlatMap);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * flatMap( IPflatMapFunctionP<T,L,U> funcP ){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_FlatMap);
+			}
 
 
-		// Run a Reduce
-		T reduce( reduceFunctionP<T> funcP ){
-			return reduce((void*) funcP, OP_Reduce);
-		}
-		T bulkReduce( bulkReduceFunctionP<T> funcP ){
-			return reduce((void*) funcP, OP_BulkReduce);
-		}
-		
-		// --------------- FDD Builtin functions ------------- // 
-		// Collect a FDD
-		std::vector<T> collect( ){
-			std::vector<T> data(this->size);
-			this->context->collectFDD(data, this);
-			return data;
-		}
-		/*void * _collect( ) override{
-			return fddCore<T>::context->collectFDD(this);
-		}*/
-
-};
-
-template <class T> 
-class fdd<T *> : public fddCore<T>{
-	private:
-		std::vector <T> finishPReduces(T ** partResult, size_t * partrSize, int funcId, fddOpType op);
-		std::vector <T> reduceP(void * funcP, fddOpType op);
-	public:
-		// -------------- Constructors --------------- //
-
-		// Create a empty fdd
-		fdd(fastContext &c) : fddCore<T>(c){ 
-			this->id = c.createPFDD(this,  typeid(T).hash_code());
-		}
-
-		// Create a empty fdd with a pre allocated size
-		fdd(fastContext &c, size_t s) : fddCore<T>(c, s){ 
-			this->id = c.createPFDD(this,  typeid(T).hash_code(), s);
-		}
-
-		// Create a fdd from a array in memory
-		fdd(fastContext &c, T * data[], size_t dataSizes[], size_t size) : fdd(c, size){
-			c.parallelize(fddBase::id, data, dataSizes, size);
-		}
-
-		~fdd(){
-		}
+			template <typename U> 
+			fdd<U> * bulkFlatMap( bulkFlatMapFunctionP<T,U> funcP ){
+				return fddCore<T>::template map<U>((void*) funcP, OP_BulkFlatMap);
+			}
+			template <typename U> 
+			fdd<U> * bulkFlatMap( PbulkFlatMapFunctionP<T,U> funcP ){
+				return fddCore<T>::template map<U>((void*) funcP, OP_BulkFlatMap);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * bulkFlatMap( IbulkFlatMapFunctionP<T,L,U> funcP ){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkFlatMap);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * bulkFlatMap( IPbulkFlatMapFunctionP<T,L,U> funcP ){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkFlatMap);
+			}
 
 
-		// -------------- FDD Functions Parameter Specification --------------- //
-		// These need to be specialized because they can return a pointer or not 
+			// Run a Reduce
+			T reduce( reduceFunctionP<T> funcP ){
+				return reduce((void*) funcP, OP_Reduce);
+			}
+			T bulkReduce( bulkReduceFunctionP<T> funcP ){
+				return reduce((void*) funcP, OP_BulkReduce);
+			}
+			
+			// --------------- FDD Builtin functions ------------- // 
+			// Collect a FDD
+			std::vector<T> collect( ){
+				std::vector<T> data(this->size);
+				this->context->collectFDD(data, this);
+				return data;
+			}
+			/*void * _collect( ) override{
+				return fddCore<T>::context->collectFDD(this);
+			}*/
 
-		// Run a Map
-		template <typename U> 
-		fdd<U> * map( mapPFunctionP<T,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, OP_Map);
-		}
-		template <typename U> 
-		fdd<U> * map( PmapPFunctionP<T,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, OP_Map);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * map( ImapPFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_Map);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * map( IPmapPFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_Map);
-		}
+	};
 
+	template <class T> 
+	class fdd<T *> : public fddCore<T>{
+		private:
+			std::vector <T> finishPReduces(T ** partResult, size_t * partrSize, int funcId, fddOpType op);
+			std::vector <T> reduceP(void * funcP, fddOpType op);
+		public:
+			// -------------- Constructors --------------- //
 
-		template <typename U> 
-		fdd<U> * bulkMap( bulkMapPFunctionP<T,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, OP_BulkMap);
-		}
-		template <typename U> 
-		fdd<U> * bulkMap( PbulkMapPFunctionP<T,U> funcP ){
-			return fddCore<T>::template map<U>((void*) funcP, OP_BulkMap);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * bulkMap( IbulkMapPFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkMap);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * bulkMap( IPbulkMapPFunctionP<T,L,U> funcP ){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkMap);
-		}
+			// Create a empty fdd
+			fdd(fastContext &c) : fddCore<T>(c){ 
+				this->id = c.createPFDD(this,  typeid(T).hash_code());
+			}
 
+			// Create a empty fdd with a pre allocated size
+			fdd(fastContext &c, size_t s) : fddCore<T>(c, s){ 
+				this->id = c.createPFDD(this,  typeid(T).hash_code(), s);
+			}
 
-		template <typename U> 
-		fdd<U> * flatMap( flatMapPFunctionP<T,U> funcP){
-			return fddCore<T>::template map<U>((void*) funcP, OP_FlatMap);
-		}
-		template <typename U> 
-		fdd<U> * flatMap( PflatMapPFunctionP<T,U> funcP){
-			return fddCore<T>::template map<U>((void*) funcP, OP_FlatMap);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * flatMap( IflatMapPFunctionP<T,L,U> funcP){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_FlatMap);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * flatMap( IPflatMapPFunctionP<T,L,U> funcP){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_FlatMap);
-		}
+			// Create a fdd from a array in memory
+			fdd(fastContext &c, T * data[], size_t dataSizes[], size_t size) : fdd(c, size){
+				c.parallelize(fddBase::id, data, dataSizes, size);
+			}
+
+			~fdd(){
+			}
 
 
-		template <typename U> 
-		fdd<U> * bulkFlatMap( bulkFlatMapPFunctionP<T,U> funcP){
-			return fddCore<T>::template map<U>((void*) funcP, OP_BulkFlatMap);
+			// -------------- FDD Functions Parameter Specification --------------- //
+			// These need to be specialized because they can return a pointer or not 
+
+			// Run a Map
+			template <typename U> 
+			fdd<U> * map( mapPFunctionP<T,U> funcP ){
+				return fddCore<T>::template map<U>((void*) funcP, OP_Map);
+			}
+			template <typename U> 
+			fdd<U> * map( PmapPFunctionP<T,U> funcP ){
+				return fddCore<T>::template map<U>((void*) funcP, OP_Map);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * map( ImapPFunctionP<T,L,U> funcP ){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_Map);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * map( IPmapPFunctionP<T,L,U> funcP ){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_Map);
+			}
+
+
+			template <typename U> 
+			fdd<U> * bulkMap( bulkMapPFunctionP<T,U> funcP ){
+				return fddCore<T>::template map<U>((void*) funcP, OP_BulkMap);
+			}
+			template <typename U> 
+			fdd<U> * bulkMap( PbulkMapPFunctionP<T,U> funcP ){
+				return fddCore<T>::template map<U>((void*) funcP, OP_BulkMap);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * bulkMap( IbulkMapPFunctionP<T,L,U> funcP ){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkMap);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * bulkMap( IPbulkMapPFunctionP<T,L,U> funcP ){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkMap);
+			}
+
+
+			template <typename U> 
+			fdd<U> * flatMap( flatMapPFunctionP<T,U> funcP){
+				return fddCore<T>::template map<U>((void*) funcP, OP_FlatMap);
+			}
+			template <typename U> 
+			fdd<U> * flatMap( PflatMapPFunctionP<T,U> funcP){
+				return fddCore<T>::template map<U>((void*) funcP, OP_FlatMap);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * flatMap( IflatMapPFunctionP<T,L,U> funcP){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_FlatMap);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * flatMap( IPflatMapPFunctionP<T,L,U> funcP){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_FlatMap);
+			}
+
+
+			template <typename U> 
+			fdd<U> * bulkFlatMap( bulkFlatMapPFunctionP<T,U> funcP){
+				return fddCore<T>::template map<U>((void*) funcP, OP_BulkFlatMap);
+			}
+			template <typename U> 
+			fdd<U> * bulkFlatMap( PbulkFlatMapPFunctionP<T,U> funcP){
+				return fddCore<T>::template map<U>((void*) funcP, OP_BulkFlatMap);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * bulkFlatMap( IbulkFlatMapPFunctionP<T,L,U> funcP){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkFlatMap);
+			}
+			template <typename L, typename U> 
+			indexedFdd<L,U> * bulkFlatMap( IPbulkFlatMapPFunctionP<T,L,U> funcP){
+				return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkFlatMap);
+			}
+
+			// Run a Reduce
+			inline std::vector<T> reduce(PreducePFunctionP<T> funcP  ){
+				return reduceP((void*) funcP, OP_Reduce);
+			}
+			inline std::vector<T> bulkReduce(PbulkReducePFunctionP<T> funcP  ){
+				return reduceP((void*) funcP, OP_BulkReduce);
+			}
+			
+			// --------------- FDD Builtin functions ------------- // 
+			// Collect a FDD
+			std::vector<std::pair<T*, size_t>> collect( ) {
+				std::vector<std::pair<T*, size_t>> data(this->size);
+				this->context->collectFDD(data, this);
+				return data;
+			}
+			/*void * _collect( ) override{
+				return fddCore<T>::context->collectFDD(this);
+			}*/
+
+	};
+
+	template <typename T> 
+	template <typename U> 
+	fdd<U> * fddCore<T>::map( void * funcP, fddOpType op){
+		fdd<U> * newFdd ;
+		size_t result UNUSED;
+		size_t rSize;
+
+		if ( (op & 0xFF ) & (OP_FlatMap | OP_BulkFlatMap) ){
+			newFdd = new fdd<U>(*context);
+		}else{
+			newFdd = new fdd<U>(*context, size);
 		}
-		template <typename U> 
-		fdd<U> * bulkFlatMap( PbulkFlatMapPFunctionP<T,U> funcP){
-			return fddCore<T>::template map<U>((void*) funcP, OP_BulkFlatMap);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * bulkFlatMap( IbulkFlatMapPFunctionP<T,L,U> funcP){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkFlatMap);
-		}
-		template <typename L, typename U> 
-		indexedFdd<L,U> * bulkFlatMap( IPbulkFlatMapPFunctionP<T,L,U> funcP){
-			return fddCore<T>::template map<L,U>((void*) funcP, OP_BulkFlatMap);
+		unsigned long int newFddId = newFdd->getId();
+
+		// Decode function pointer
+		int funcId = context->findFunc(funcP);
+		//std::cerr << " " << funcId << ".\n";
+
+		// Send task
+		context->enqueueTask(op, id, newFddId, funcId);
+
+		// Receive results
+		for (int i = 1; i < context->numProcs(); ++i){
+			result = * (char*) context->recvTaskResult(id, rSize);
 		}
 
-		// Run a Reduce
-		inline std::vector<T> reduce(PreducePFunctionP<T> funcP  ){
-			return reduceP((void*) funcP, OP_Reduce);
-		}
-		inline std::vector<T> bulkReduce(PbulkReducePFunctionP<T> funcP  ){
-			return reduceP((void*) funcP, OP_BulkReduce);
-		}
-		
-		// --------------- FDD Builtin functions ------------- // 
-		// Collect a FDD
-		std::vector<std::pair<T*, size_t>> collect( ) {
-			std::vector<std::pair<T*, size_t>> data(this->size);
-			this->context->collectFDD(data, this);
-			return data;
-		}
-		/*void * _collect( ) override{
-			return fddCore<T>::context->collectFDD(this);
-		}*/
-
-};
-
-template <typename T> 
-template <typename U> 
-fdd<U> * fddCore<T>::map( void * funcP, fddOpType op){
-	fdd<U> * newFdd ;
-	size_t result;
-	size_t rSize;
-
-	if ( (op & 0xFF ) & (OP_FlatMap | OP_BulkFlatMap) ){
-		newFdd = new fdd<U>(*context);
-	}else{
-		newFdd = new fdd<U>(*context, size);
+		return newFdd;
 	}
-	unsigned long int newFddId = newFdd->getId();
 
-	// Decode function pointer
-	int funcId = context->findFunc(funcP);
-	//std::cerr << " " << funcId << ".\n";
-
-	// Send task
-	context->enqueueTask(op, id, newFddId, funcId);
-
-	// Receive results
-	for (int i = 1; i < context->numProcs(); ++i){
-		result = * (char*) context->recvTaskResult(id, rSize);
+	template <typename T>
+	fddCore<T>::fddCore(fastContext & c){
+		context = &c;
 	}
 
-	return newFdd;
+	template <typename T>
+	fddCore<T>::fddCore(fastContext &c, size_t s) : fddCore(c){
+		this->size = s;
+	}
+
+	template <typename T>
+	T fdd<T>::finishReduces(char ** partResult, size_t * pSize, int funcId, fddOpType op){
+		fastCommBuffer buffer(0);
+		T result;
+
+		if (op == OP_Reduce){
+			reduceFunctionP<T> reduceFunc = (reduceFunctionP<T>) this->context->funcTable[funcId];
+
+
+			// Get the real object behind the buffer
+			buffer.setBuffer(partResult[0], pSize[0]);
+			buffer >> result;
+
+			for (int i = 1; i < (this->context->numProcs() - 1); ++i){
+				T pr;
+
+				buffer.setBuffer(partResult[i], pSize[i]);
+				buffer >> pr;
+
+				result = reduceFunc(result, pr);
+			}
+		}else{
+			bulkReduceFunctionP<T> bulkReduceFunc = (bulkReduceFunctionP<T>) this->context->funcTable[funcId];
+			T * vals = new T[this->context->numProcs() - 1];
+
+			#pragma omp parallel for
+			for (int i = 1; i < (this->context->numProcs() - 1); ++i){
+				fastCommBuffer buffer(0);
+
+				buffer.setBuffer(partResult[i], pSize[i]);
+				buffer >> vals[i];
+			}
+
+			result = bulkReduceFunc(vals, this->context->numProcs() - 1);
+			delete [] vals;
+			// TODO do bulkreduce	
+		}
+		return result;
+	}
+
+	template <typename T>
+	T fdd<T>::reduce( void * funcP, fddOpType op){
+		//T fddCore<T>::template reduce( int funcId, fddOpType op){
+		T result;
+		unsigned long int tId;
+		int funcId = this->context->findFunc(funcP);
+		//std::cerr << " " << funcId << ".\n";
+		char ** partResult = new char*[this->context->numProcs() - 1];
+		size_t * partrSize = new size_t[this->context->numProcs() - 1];
+
+		// Send task
+		//unsigned long int reduceTaskId = 
+		this->context->enqueueTask(op, this->id, 0, funcId);
+
+		// Receive results
+		for (int i = 0; i < (this->context->numProcs() - 1); ++i){
+			char * pr = (char*) this->context->recvTaskResult(tId, partrSize[i]);
+			partResult[i] = new char [ partrSize[i]];
+			memcpy(partResult[i], pr, partrSize[i]);
+		}
+
+		// Finish applying reduces
+		result = finishReduces(partResult, partrSize, funcId, op);
+
+		for (int i = 0; i < (this->context->numProcs() - 1); ++i){
+			delete [] partResult[i];
+		}
+		delete [] partResult;
+
+		return result;
+	}
+
+	template <typename T>
+	std::vector<T> fdd<T*>::finishPReduces(T ** partResult, size_t * partrSize, int funcId, fddOpType op){
+		T * result; 
+		size_t rSize; 
+
+		if (op == OP_Reduce){
+			T * pResult;
+			size_t prSize;
+
+			PreducePFunctionP<T> reduceFunc = ( PreducePFunctionP<T> ) this->context->funcTable[funcId];
+
+			result = partResult[0];
+			rSize = partrSize[0];
+
+			// Do the rest of the reduces
+			for (int i = 1; i < (this->context->numProcs() - 1); ++i){
+				// TODO
+				pResult = result;
+				prSize = rSize;
+				std::pair<T*,size_t> r = reduceFunc(pResult, prSize, partResult[i], partrSize[i]);
+				result = r.first;
+				rSize = r.second; 
+			}
+
+		}else{
+			PbulkReducePFunctionP<T> bulkReduceFunc = (PbulkReducePFunctionP<T>) this->context->funcTable[funcId];
+			std::pair<T*,size_t> r = bulkReduceFunc(partResult, partrSize, this->context->numProcs() - 1);
+			result = r.first;
+			rSize = r.second; 
+		}
+
+		std::vector<T> vResult(rSize);
+		vResult.assign(result,  result + rSize);
+
+		return vResult;
+	}
+
+	template <typename T>
+	std::vector <T> fdd<T*>::reduceP(void * funcP, fddOpType op){
+		//T fddCore<T>::template reduce( int funcId, fddOpType op){
+		// Decode function pointer
+		int funcId = this->context->findFunc(funcP);
+		T ** partResult = new T*[this->context->numProcs() -1];
+		size_t * partrSize = new size_t[this->context->numProcs() - 1];
+		unsigned long int tId;
+		//std::cerr << " " << funcId << ".\n";
+
+		// Send task
+		//unsigned long int reduceTaskId = 
+		this->context->enqueueTask(op, this->id, 0, funcId);
+
+		// Receive results
+		for (int i = 0; i < (this->context->numProcs() - 1); ++i){
+			partResult[i] = (T*) this->context->recvTaskResult(tId, partrSize[i]);
+			partrSize[i] /= sizeof(T);
+		}
+
+		std::cerr << "\n ";
+
+		// Finish applying reduces
+		std::vector<T> vResult = finishPReduces(partResult, partrSize, funcId, op);
+
+		delete [] partResult;
+		delete [] partrSize;
+		return vResult;
+	}
+
+
+	template <typename T>
+	fdd<T>::fdd(fastContext &c, const char * fileName) {
+		fddCore<T>::context = &c;
+		this->id = c.readFDD(this, fileName);
+
+		// Recover FDD information (size, ? etc )
+		this->context->getFDDInfo(this->size);
+	}
+
+
 }
 
 #endif

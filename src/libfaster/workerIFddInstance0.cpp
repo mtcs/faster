@@ -1,12 +1,12 @@
 #include "workerIFddDependent.cpp"
 
 
-template class workerIFdd<char, char>;
-template class workerIFdd<char, int>;
-template class workerIFdd<char, long int>;
-template class workerIFdd<char, float>;
-template class workerIFdd<char, double>;
-template class workerIFdd<char, std::string>;
+template class faster::workerIFdd<char, char>;
+template class faster::workerIFdd<char, int>;
+template class faster::workerIFdd<char, long int>;
+template class faster::workerIFdd<char, float>;
+template class faster::workerIFdd<char, double>;
+template class faster::workerIFdd<char, std::string>;
 
 
 

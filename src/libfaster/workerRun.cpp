@@ -5,7 +5,7 @@
 #include "fastComm.h"
 #include "worker.h"
 
-void worker::run(){
+void faster::worker::run(){
 	std::cerr << "  Worker Working..." << '\n';
 	while (! finished ){
 		int tag;

@@ -4,6 +4,7 @@
 #define NUMITEMS 10*1000
 
 using namespace std;
+using namespace faster;
 
 int map1(int & input){
 	//cerr << input << " ";

@@ -6,10 +6,11 @@
 #define NUMITEMS 100*1000
 
 using namespace std;
+using namespace faster;
 
 void bulkMap1(int * output, int * input, size_t size){
 	#pragma omp parallel for 
-	for (int i = 0 ; i < size ; ++i){
+	for (size_t i = 0 ; i < size ; ++i){
 		output[i] = input[i] * 2;
 	}
 
@@ -21,12 +22,10 @@ int bulkReduce1(int * input, size_t size){
 	
 	#pragma omp parallel 
 	{
-		int nT = omp_get_num_threads();
-		int tN = omp_get_thread_num();
 		int partResult = 0;
 
 		#pragma omp for 
-		for (int i = 0; i < size; ++i){
+		for (size_t i = 0; i < size; ++i){
 			partResult += input[i];
 		}
 		

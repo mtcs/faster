@@ -1,9 +1,9 @@
 #include "workerIPFddDependent.cpp"
 
 
-template class workerIFdd<double, char *>;
-template class workerIFdd<double, int *>;
-template class workerIFdd<double, long int *>;
-template class workerIFdd<double, float *>;
-template class workerIFdd<double, double *>;
+template class faster::workerIFdd<double, char *>;
+template class faster::workerIFdd<double, int *>;
+template class faster::workerIFdd<double, long int *>;
+template class faster::workerIFdd<double, float *>;
+template class faster::workerIFdd<double, double *>;
 

@@ -1,24 +1,24 @@
 #include "workerFdd.cpp"
 
-extern template class workerFdd<char>;
-extern template class workerFdd<int>;
-extern template class workerFdd<long int>;
-extern template class workerFdd<float>;
-extern template class workerFdd<double>;
+extern template class faster::workerFdd<char>;
+extern template class faster::workerFdd<int>;
+extern template class faster::workerFdd<long int>;
+extern template class faster::workerFdd<float>;
+extern template class faster::workerFdd<double>;
 
-extern template class workerFdd<std::string>;
+extern template class faster::workerFdd<std::string>;
 
-extern template class workerFdd<char *>;
-extern template class workerFdd<int *>;
-extern template class workerFdd<long int *>;
-extern template class workerFdd<float *>;
-extern template class workerFdd<double *>;
-//extern template class workerFdd<void *>;
+extern template class faster::workerFdd<char *>;
+extern template class faster::workerFdd<int *>;
+extern template class faster::workerFdd<long int *>;
+extern template class faster::workerFdd<float *>;
+extern template class faster::workerFdd<double *>;
+//extern template class faster::workerFdd<void *>;
 
 
-template class workerFdd<std::vector<char>>;
-template class workerFdd<std::vector<int>>;
-template class workerFdd<std::vector<long int>>;
-template class workerFdd<std::vector<float>>;
-template class workerFdd<std::vector<double>>;
+template class faster::workerFdd<std::vector<char>>;
+template class faster::workerFdd<std::vector<int>>;
+template class faster::workerFdd<std::vector<long int>>;
+template class faster::workerFdd<std::vector<float>>;
+template class faster::workerFdd<std::vector<double>>;
 

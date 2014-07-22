@@ -4,7 +4,7 @@
 #include "indexedFddStorage.h"
 
 template <class K, class T> 
-indexedFddStorageCore<K,T>::indexedFddStorageCore(){
+faster::indexedFddStorageCore<K,T>::indexedFddStorageCore(){
 	allocSize = 200;
 	localData = new T[allocSize];
 	localKeys = new K[allocSize];
@@ -12,14 +12,14 @@ indexedFddStorageCore<K,T>::indexedFddStorageCore(){
 }
 
 template <class K, class T> 
-indexedFddStorageCore<K,T>::indexedFddStorageCore(size_t s){
+faster::indexedFddStorageCore<K,T>::indexedFddStorageCore(size_t s){
 	allocSize = s;
 	localData = new T[s];
 	localKeys = new K[s];
 	size = s;
 }
 template <class K, class T> 
-indexedFddStorageCore<K,T>::~indexedFddStorageCore(){
+faster::indexedFddStorageCore<K,T>::~indexedFddStorageCore(){
 	if (localData != NULL){
 		delete [] localData;
 		delete [] localKeys;
@@ -27,16 +27,16 @@ indexedFddStorageCore<K,T>::~indexedFddStorageCore(){
 }
 
 template <class K, class T> 
-T * indexedFddStorageCore<K,T>::getData(){ 
+T * faster::indexedFddStorageCore<K,T>::getData(){ 
 	return localData; 
 }
 
 template <class K, class T> 
-K * indexedFddStorageCore<K,T>::getKeys(){ 
+K * faster::indexedFddStorageCore<K,T>::getKeys(){ 
 	return localKeys; 
 }
 template <class K, class T> 
-T & indexedFddStorageCore<K,T>::operator[](size_t ref){ 
+T & faster::indexedFddStorageCore<K,T>::operator[](size_t ref){ 
 	return localData[ref]; 
 }
 
@@ -45,27 +45,27 @@ T & indexedFddStorageCore<K,T>::operator[](size_t ref){
 
 
 template <class K, class T> 
-indexedFddStorage<K,T>::indexedFddStorage() : indexedFddStorageCore<K,T>(){}
+faster::indexedFddStorage<K,T>::indexedFddStorage() : indexedFddStorageCore<K,T>(){}
 template <class K, class T> 
-indexedFddStorage<K,T*>::indexedFddStorage() : indexedFddStorageCore<K,T*>(){}
+faster::indexedFddStorage<K,T*>::indexedFddStorage() : indexedFddStorageCore<K,T*>(){}
 
 template <class K, class T> 
-indexedFddStorage<K,T>::indexedFddStorage(size_t s) : indexedFddStorageCore<K,T>(s){
+faster::indexedFddStorage<K,T>::indexedFddStorage(size_t s) : indexedFddStorageCore<K,T>(s){
 }
 
 template <class K, class T> 
-indexedFddStorage<K,T*>::indexedFddStorage(size_t s) : indexedFddStorageCore<K,T*>(s){
+faster::indexedFddStorage<K,T*>::indexedFddStorage(size_t s) : indexedFddStorageCore<K,T*>(s){
 	lineSizes = new size_t[s];
 }
 
 
 template <class K, class T> 
-indexedFddStorage<K,T>::indexedFddStorage(K * keys, T * data, size_t s) : indexedFddStorage<K,T>(s){
+faster::indexedFddStorage<K,T>::indexedFddStorage(K * keys, T * data, size_t s) : indexedFddStorage<K,T>(s){
 	setData(keys, data, s);
 }
 
 template <class K, class T> 
-indexedFddStorage<K,T*>::indexedFddStorage(K * keys, T ** data, size_t * lineSizes, size_t s) : indexedFddStorage<K,T *>(s){
+faster::indexedFddStorage<K,T*>::indexedFddStorage(K * keys, T ** data, size_t * lineSizes, size_t s) : indexedFddStorage<K,T *>(s){
 	setData(keys, data, lineSizes, s);
 }
 
@@ -73,7 +73,7 @@ indexedFddStorage<K,T*>::indexedFddStorage(K * keys, T ** data, size_t * lineSiz
 
 
 template <class K, class T> 
-indexedFddStorage<K,T*>::~indexedFddStorage(){
+faster::indexedFddStorage<K,T*>::~indexedFddStorage(){
 	if (lineSizes != NULL){
 		delete [] lineSizes;
 	}
@@ -83,7 +83,7 @@ indexedFddStorage<K,T*>::~indexedFddStorage(){
 
 
 template <class K, class T> 
-void indexedFddStorage<K,T>::setData(K * keys, T * data, size_t s){
+void faster::indexedFddStorage<K,T>::setData(K * keys, T * data, size_t s){
 	grow(s);
 	this->size = s;
 
@@ -94,7 +94,7 @@ void indexedFddStorage<K,T>::setData(K * keys, T * data, size_t s){
 }
 
 template <class K, class T> 
-void indexedFddStorage<K,T*>::setData( K * keys, T ** data, size_t * ls, size_t s){
+void faster::indexedFddStorage<K,T*>::setData( K * keys, T ** data, size_t * ls, size_t s){
 	grow(s);
 	#pragma omp parallel for
 	for ( int i = 0; i < s; ++i){
@@ -109,7 +109,7 @@ void indexedFddStorage<K,T*>::setData( K * keys, T ** data, size_t * ls, size_t 
 	this->size = s;
 }
 template <class K, class T> 
-void indexedFddStorage<K,T>::setDataRaw(void * keys, void * data, size_t s){
+void faster::indexedFddStorage<K,T>::setDataRaw(void * keys, void * data, size_t s){
 	fastCommBuffer buffer(0);
 	fastCommBuffer buffer2(0);
 
@@ -125,7 +125,7 @@ void indexedFddStorage<K,T>::setDataRaw(void * keys, void * data, size_t s){
 	}
 }
 template <class K, class T> 
-void indexedFddStorage<K,T*>::setDataRaw( void * keys, void * data, size_t * ls, size_t s){
+void faster::indexedFddStorage<K,T*>::setDataRaw( void * keys, void * data, size_t * ls, size_t s){
 	fastCommBuffer buffer(0);
 	fastCommBuffer buffer2(0);
 	
@@ -143,26 +143,26 @@ void indexedFddStorage<K,T*>::setDataRaw( void * keys, void * data, size_t * ls,
 }
 
 template <class K, class T> 
-void   indexedFddStorage<K,T>::setSize(size_t s){ 
+void   faster::indexedFddStorage<K,T>::setSize(size_t s){ 
 	this->grow(s); 
 	this->size = s;  
 }
 template <class K, class T> 
-void   indexedFddStorage<K,T*>::setSize(size_t s){ 
+void   faster::indexedFddStorage<K,T*>::setSize(size_t s){ 
 	this->grow(s); 
 	this->size = s;  
 }
 
 
 template <class K, class T> 
-void indexedFddStorage<K,T>::insert(K key, T & item){
+void faster::indexedFddStorage<K,T>::insert(K key, T & item){
 	grow(this->size + 1);
 	this->localKeys[this->size] = key;
 	this->localData[this->size++] = item;	
 }
 
 template <class K, class T> 
-void indexedFddStorage<K,T*>::insert(K key, T *& item, size_t s){
+void faster::indexedFddStorage<K,T*>::insert(K key, T *& item, size_t s){
 	grow(this->size + 1);
 	lineSizes[this->size] = s;	
 	this->localKeys[this->size] = key;
@@ -178,7 +178,7 @@ void indexedFddStorage<K,T*>::insert(K key, T *& item, size_t s){
 
 
 template <class K, class T> 
-size_t * indexedFddStorage<K,T*>::getLineSizes(){ 
+size_t * faster::indexedFddStorage<K,T*>::getLineSizes(){ 
 	return lineSizes; 
 }
 
@@ -186,7 +186,7 @@ size_t * indexedFddStorage<K,T*>::getLineSizes(){
 
 
 template <class K, class T> 
-void indexedFddStorage<K,T>::grow(size_t toSize){
+void faster::indexedFddStorage<K,T>::grow(size_t toSize){
 	if (this->allocSize < toSize){
 		if ((this->allocSize * 2) > toSize){
 			toSize = this->allocSize * 2;
@@ -212,7 +212,7 @@ void indexedFddStorage<K,T>::grow(size_t toSize){
 	}
 }
 template <class K, class T> 
-void indexedFddStorage<K,T*>::grow(size_t toSize){
+void faster::indexedFddStorage<K,T*>::grow(size_t toSize){
 	if (this->allocSize < toSize){
 		if ((this->allocSize * 2) > toSize){
 			toSize = this->allocSize * 2;
@@ -250,7 +250,7 @@ void indexedFddStorage<K,T*>::grow(size_t toSize){
 
 
 template <class K, class T> 
-void indexedFddStorage<K,T>::shrink(){
+void faster::indexedFddStorage<K,T>::shrink(){
 	if ( (this->size > 0) && (this->allocSize > this->size) ){
 		T * newStorage = new T [this->size];
 		K * newKeys = new K [this->size];
@@ -269,7 +269,7 @@ void indexedFddStorage<K,T>::shrink(){
 	}
 }
 template <class K, class T> 
-void indexedFddStorage<K,T*>::shrink(){
+void faster::indexedFddStorage<K,T*>::shrink(){
 	if ( (this->size > 0) && (this->allocSize > this->size) ){
 		T ** newStorage = new T* [this->size];
 		K * newKeys = new K [this->size];
@@ -293,209 +293,209 @@ void indexedFddStorage<K,T*>::shrink(){
 	}
 }
 
-template class indexedFddStorageCore<char, char>;
-template class indexedFddStorageCore<char, int>;
-template class indexedFddStorageCore<char, long int>;
-template class indexedFddStorageCore<char, float>;
-template class indexedFddStorageCore<char, double>;
-template class indexedFddStorageCore<char, char *>;
-template class indexedFddStorageCore<char, int *>;
-template class indexedFddStorageCore<char, long int *>;
-template class indexedFddStorageCore<char, float *>;
-template class indexedFddStorageCore<char, double *>;
-template class indexedFddStorageCore<char, std::string>;
-template class indexedFddStorageCore<char, std::vector<char>>;
-template class indexedFddStorageCore<char, std::vector<int>>;
-template class indexedFddStorageCore<char, std::vector<long int>>;
-template class indexedFddStorageCore<char, std::vector<float>>;
-template class indexedFddStorageCore<char, std::vector<double>>;
+template class faster::indexedFddStorageCore<char, char>;
+template class faster::indexedFddStorageCore<char, int>;
+template class faster::indexedFddStorageCore<char, long int>;
+template class faster::indexedFddStorageCore<char, float>;
+template class faster::indexedFddStorageCore<char, double>;
+template class faster::indexedFddStorageCore<char, char *>;
+template class faster::indexedFddStorageCore<char, int *>;
+template class faster::indexedFddStorageCore<char, long int *>;
+template class faster::indexedFddStorageCore<char, float *>;
+template class faster::indexedFddStorageCore<char, double *>;
+template class faster::indexedFddStorageCore<char, std::string>;
+template class faster::indexedFddStorageCore<char, std::vector<char>>;
+template class faster::indexedFddStorageCore<char, std::vector<int>>;
+template class faster::indexedFddStorageCore<char, std::vector<long int>>;
+template class faster::indexedFddStorageCore<char, std::vector<float>>;
+template class faster::indexedFddStorageCore<char, std::vector<double>>;
 
-template class indexedFddStorageCore<int, char>;
-template class indexedFddStorageCore<int, int>;
-template class indexedFddStorageCore<int, long int>;
-template class indexedFddStorageCore<int, float>;
-template class indexedFddStorageCore<int, double>;
-template class indexedFddStorageCore<int, char *>;
-template class indexedFddStorageCore<int, int *>;
-template class indexedFddStorageCore<int, long int *>;
-template class indexedFddStorageCore<int, float *>;
-template class indexedFddStorageCore<int, double *>;
-template class indexedFddStorageCore<int, std::string>;
-template class indexedFddStorageCore<int, std::vector<char>>;
-template class indexedFddStorageCore<int, std::vector<int>>;
-template class indexedFddStorageCore<int, std::vector<long int>>;
-template class indexedFddStorageCore<int, std::vector<float>>;
-template class indexedFddStorageCore<int, std::vector<double>>;
+template class faster::indexedFddStorageCore<int, char>;
+template class faster::indexedFddStorageCore<int, int>;
+template class faster::indexedFddStorageCore<int, long int>;
+template class faster::indexedFddStorageCore<int, float>;
+template class faster::indexedFddStorageCore<int, double>;
+template class faster::indexedFddStorageCore<int, char *>;
+template class faster::indexedFddStorageCore<int, int *>;
+template class faster::indexedFddStorageCore<int, long int *>;
+template class faster::indexedFddStorageCore<int, float *>;
+template class faster::indexedFddStorageCore<int, double *>;
+template class faster::indexedFddStorageCore<int, std::string>;
+template class faster::indexedFddStorageCore<int, std::vector<char>>;
+template class faster::indexedFddStorageCore<int, std::vector<int>>;
+template class faster::indexedFddStorageCore<int, std::vector<long int>>;
+template class faster::indexedFddStorageCore<int, std::vector<float>>;
+template class faster::indexedFddStorageCore<int, std::vector<double>>;
 
-template class indexedFddStorageCore<long int, char>;
-template class indexedFddStorageCore<long int, int>;
-template class indexedFddStorageCore<long int, long int>;
-template class indexedFddStorageCore<long int, float>;
-template class indexedFddStorageCore<long int, double>;
-template class indexedFddStorageCore<long int, char *>;
-template class indexedFddStorageCore<long int, int *>;
-template class indexedFddStorageCore<long int, long int *>;
-template class indexedFddStorageCore<long int, float *>;
-template class indexedFddStorageCore<long int, double *>;
-template class indexedFddStorageCore<long int, std::string>;
-template class indexedFddStorageCore<long int, std::vector<char>>;
-template class indexedFddStorageCore<long int, std::vector<int>>;
-template class indexedFddStorageCore<long int, std::vector<long int>>;
-template class indexedFddStorageCore<long int, std::vector<float>>;
-template class indexedFddStorageCore<long int, std::vector<double>>;
+template class faster::indexedFddStorageCore<long int, char>;
+template class faster::indexedFddStorageCore<long int, int>;
+template class faster::indexedFddStorageCore<long int, long int>;
+template class faster::indexedFddStorageCore<long int, float>;
+template class faster::indexedFddStorageCore<long int, double>;
+template class faster::indexedFddStorageCore<long int, char *>;
+template class faster::indexedFddStorageCore<long int, int *>;
+template class faster::indexedFddStorageCore<long int, long int *>;
+template class faster::indexedFddStorageCore<long int, float *>;
+template class faster::indexedFddStorageCore<long int, double *>;
+template class faster::indexedFddStorageCore<long int, std::string>;
+template class faster::indexedFddStorageCore<long int, std::vector<char>>;
+template class faster::indexedFddStorageCore<long int, std::vector<int>>;
+template class faster::indexedFddStorageCore<long int, std::vector<long int>>;
+template class faster::indexedFddStorageCore<long int, std::vector<float>>;
+template class faster::indexedFddStorageCore<long int, std::vector<double>>;
 
-template class indexedFddStorageCore<float, char>;
-template class indexedFddStorageCore<float, int>;
-template class indexedFddStorageCore<float, long int>;
-template class indexedFddStorageCore<float, float>;
-template class indexedFddStorageCore<float, double>;
-template class indexedFddStorageCore<float, char *>;
-template class indexedFddStorageCore<float, int *>;
-template class indexedFddStorageCore<float, long int *>;
-template class indexedFddStorageCore<float, float *>;
-template class indexedFddStorageCore<float, double *>;
-template class indexedFddStorageCore<float, std::string>;
-template class indexedFddStorageCore<float, std::vector<char>>;
-template class indexedFddStorageCore<float, std::vector<int>>;
-template class indexedFddStorageCore<float, std::vector<long int>>;
-template class indexedFddStorageCore<float, std::vector<float>>;
-template class indexedFddStorageCore<float, std::vector<double>>;
+template class faster::indexedFddStorageCore<float, char>;
+template class faster::indexedFddStorageCore<float, int>;
+template class faster::indexedFddStorageCore<float, long int>;
+template class faster::indexedFddStorageCore<float, float>;
+template class faster::indexedFddStorageCore<float, double>;
+template class faster::indexedFddStorageCore<float, char *>;
+template class faster::indexedFddStorageCore<float, int *>;
+template class faster::indexedFddStorageCore<float, long int *>;
+template class faster::indexedFddStorageCore<float, float *>;
+template class faster::indexedFddStorageCore<float, double *>;
+template class faster::indexedFddStorageCore<float, std::string>;
+template class faster::indexedFddStorageCore<float, std::vector<char>>;
+template class faster::indexedFddStorageCore<float, std::vector<int>>;
+template class faster::indexedFddStorageCore<float, std::vector<long int>>;
+template class faster::indexedFddStorageCore<float, std::vector<float>>;
+template class faster::indexedFddStorageCore<float, std::vector<double>>;
 
-template class indexedFddStorageCore<double, char>;
-template class indexedFddStorageCore<double, int>;
-template class indexedFddStorageCore<double, long int>;
-template class indexedFddStorageCore<double, float>;
-template class indexedFddStorageCore<double, double>;
-template class indexedFddStorageCore<double, char *>;
-template class indexedFddStorageCore<double, int *>;
-template class indexedFddStorageCore<double, long int *>;
-template class indexedFddStorageCore<double, float *>;
-template class indexedFddStorageCore<double, double *>;
-template class indexedFddStorageCore<double, std::string>;
-template class indexedFddStorageCore<double, std::vector<char>>;
-template class indexedFddStorageCore<double, std::vector<int>>;
-template class indexedFddStorageCore<double, std::vector<long int>>;
-template class indexedFddStorageCore<double, std::vector<float>>;
-template class indexedFddStorageCore<double, std::vector<double>>;
+template class faster::indexedFddStorageCore<double, char>;
+template class faster::indexedFddStorageCore<double, int>;
+template class faster::indexedFddStorageCore<double, long int>;
+template class faster::indexedFddStorageCore<double, float>;
+template class faster::indexedFddStorageCore<double, double>;
+template class faster::indexedFddStorageCore<double, char *>;
+template class faster::indexedFddStorageCore<double, int *>;
+template class faster::indexedFddStorageCore<double, long int *>;
+template class faster::indexedFddStorageCore<double, float *>;
+template class faster::indexedFddStorageCore<double, double *>;
+template class faster::indexedFddStorageCore<double, std::string>;
+template class faster::indexedFddStorageCore<double, std::vector<char>>;
+template class faster::indexedFddStorageCore<double, std::vector<int>>;
+template class faster::indexedFddStorageCore<double, std::vector<long int>>;
+template class faster::indexedFddStorageCore<double, std::vector<float>>;
+template class faster::indexedFddStorageCore<double, std::vector<double>>;
 
-template class indexedFddStorageCore<std::string, char>;
-template class indexedFddStorageCore<std::string, int>;
-template class indexedFddStorageCore<std::string, long int>;
-template class indexedFddStorageCore<std::string, float>;
-template class indexedFddStorageCore<std::string, double>;
-template class indexedFddStorageCore<std::string, char *>;
-template class indexedFddStorageCore<std::string, int *>;
-template class indexedFddStorageCore<std::string, long int *>;
-template class indexedFddStorageCore<std::string, float *>;
-template class indexedFddStorageCore<std::string, double *>;
-template class indexedFddStorageCore<std::string, std::string>;
-template class indexedFddStorageCore<std::string, std::vector<char>>;
-template class indexedFddStorageCore<std::string, std::vector<int>>;
-template class indexedFddStorageCore<std::string, std::vector<long int>>;
-template class indexedFddStorageCore<std::string, std::vector<float>>;
-template class indexedFddStorageCore<std::string, std::vector<double>>;
+template class faster::indexedFddStorageCore<std::string, char>;
+template class faster::indexedFddStorageCore<std::string, int>;
+template class faster::indexedFddStorageCore<std::string, long int>;
+template class faster::indexedFddStorageCore<std::string, float>;
+template class faster::indexedFddStorageCore<std::string, double>;
+template class faster::indexedFddStorageCore<std::string, char *>;
+template class faster::indexedFddStorageCore<std::string, int *>;
+template class faster::indexedFddStorageCore<std::string, long int *>;
+template class faster::indexedFddStorageCore<std::string, float *>;
+template class faster::indexedFddStorageCore<std::string, double *>;
+template class faster::indexedFddStorageCore<std::string, std::string>;
+template class faster::indexedFddStorageCore<std::string, std::vector<char>>;
+template class faster::indexedFddStorageCore<std::string, std::vector<int>>;
+template class faster::indexedFddStorageCore<std::string, std::vector<long int>>;
+template class faster::indexedFddStorageCore<std::string, std::vector<float>>;
+template class faster::indexedFddStorageCore<std::string, std::vector<double>>;
 
 
-template class indexedFddStorage<char, char>;
-template class indexedFddStorage<char, int>;
-template class indexedFddStorage<char, long int>;
-template class indexedFddStorage<char, float>;
-template class indexedFddStorage<char, double>;
-template class indexedFddStorage<char, char *>;
-template class indexedFddStorage<char, int *>;
-template class indexedFddStorage<char, long int *>;
-template class indexedFddStorage<char, float *>;
-template class indexedFddStorage<char, double *>;
-template class indexedFddStorage<char, std::string>;
-template class indexedFddStorage<char, std::vector<char>>;
-template class indexedFddStorage<char, std::vector<int>>;
-template class indexedFddStorage<char, std::vector<long int>>;
-template class indexedFddStorage<char, std::vector<float>>;
-template class indexedFddStorage<char, std::vector<double>>;
+template class faster::indexedFddStorage<char, char>;
+template class faster::indexedFddStorage<char, int>;
+template class faster::indexedFddStorage<char, long int>;
+template class faster::indexedFddStorage<char, float>;
+template class faster::indexedFddStorage<char, double>;
+template class faster::indexedFddStorage<char, char *>;
+template class faster::indexedFddStorage<char, int *>;
+template class faster::indexedFddStorage<char, long int *>;
+template class faster::indexedFddStorage<char, float *>;
+template class faster::indexedFddStorage<char, double *>;
+template class faster::indexedFddStorage<char, std::string>;
+template class faster::indexedFddStorage<char, std::vector<char>>;
+template class faster::indexedFddStorage<char, std::vector<int>>;
+template class faster::indexedFddStorage<char, std::vector<long int>>;
+template class faster::indexedFddStorage<char, std::vector<float>>;
+template class faster::indexedFddStorage<char, std::vector<double>>;
 
-template class indexedFddStorage<int, char>;
-template class indexedFddStorage<int, int>;
-template class indexedFddStorage<int, long int>;
-template class indexedFddStorage<int, float>;
-template class indexedFddStorage<int, double>;
-template class indexedFddStorage<int, char *>;
-template class indexedFddStorage<int, int *>;
-template class indexedFddStorage<int, long int *>;
-template class indexedFddStorage<int, float *>;
-template class indexedFddStorage<int, double *>;
-template class indexedFddStorage<int, std::string>;
-template class indexedFddStorage<int, std::vector<char>>;
-template class indexedFddStorage<int, std::vector<int>>;
-template class indexedFddStorage<int, std::vector<long int>>;
-template class indexedFddStorage<int, std::vector<float>>;
-template class indexedFddStorage<int, std::vector<double>>;
+template class faster::indexedFddStorage<int, char>;
+template class faster::indexedFddStorage<int, int>;
+template class faster::indexedFddStorage<int, long int>;
+template class faster::indexedFddStorage<int, float>;
+template class faster::indexedFddStorage<int, double>;
+template class faster::indexedFddStorage<int, char *>;
+template class faster::indexedFddStorage<int, int *>;
+template class faster::indexedFddStorage<int, long int *>;
+template class faster::indexedFddStorage<int, float *>;
+template class faster::indexedFddStorage<int, double *>;
+template class faster::indexedFddStorage<int, std::string>;
+template class faster::indexedFddStorage<int, std::vector<char>>;
+template class faster::indexedFddStorage<int, std::vector<int>>;
+template class faster::indexedFddStorage<int, std::vector<long int>>;
+template class faster::indexedFddStorage<int, std::vector<float>>;
+template class faster::indexedFddStorage<int, std::vector<double>>;
 
-template class indexedFddStorage<long int, char>;
-template class indexedFddStorage<long int, int>;
-template class indexedFddStorage<long int, long int>;
-template class indexedFddStorage<long int, float>;
-template class indexedFddStorage<long int, double>;
-template class indexedFddStorage<long int, char *>;
-template class indexedFddStorage<long int, int *>;
-template class indexedFddStorage<long int, long int *>;
-template class indexedFddStorage<long int, float *>;
-template class indexedFddStorage<long int, double *>;
-template class indexedFddStorage<long int, std::string>;
-template class indexedFddStorage<long int, std::vector<char>>;
-template class indexedFddStorage<long int, std::vector<int>>;
-template class indexedFddStorage<long int, std::vector<long int>>;
-template class indexedFddStorage<long int, std::vector<float>>;
-template class indexedFddStorage<long int, std::vector<double>>;
+template class faster::indexedFddStorage<long int, char>;
+template class faster::indexedFddStorage<long int, int>;
+template class faster::indexedFddStorage<long int, long int>;
+template class faster::indexedFddStorage<long int, float>;
+template class faster::indexedFddStorage<long int, double>;
+template class faster::indexedFddStorage<long int, char *>;
+template class faster::indexedFddStorage<long int, int *>;
+template class faster::indexedFddStorage<long int, long int *>;
+template class faster::indexedFddStorage<long int, float *>;
+template class faster::indexedFddStorage<long int, double *>;
+template class faster::indexedFddStorage<long int, std::string>;
+template class faster::indexedFddStorage<long int, std::vector<char>>;
+template class faster::indexedFddStorage<long int, std::vector<int>>;
+template class faster::indexedFddStorage<long int, std::vector<long int>>;
+template class faster::indexedFddStorage<long int, std::vector<float>>;
+template class faster::indexedFddStorage<long int, std::vector<double>>;
 
-template class indexedFddStorage<float, char>;
-template class indexedFddStorage<float, int>;
-template class indexedFddStorage<float, long int>;
-template class indexedFddStorage<float, float>;
-template class indexedFddStorage<float, double>;
-template class indexedFddStorage<float, char *>;
-template class indexedFddStorage<float, int *>;
-template class indexedFddStorage<float, long int *>;
-template class indexedFddStorage<float, float *>;
-template class indexedFddStorage<float, double *>;
-template class indexedFddStorage<float, std::string>;
-template class indexedFddStorage<float, std::vector<char>>;
-template class indexedFddStorage<float, std::vector<int>>;
-template class indexedFddStorage<float, std::vector<long int>>;
-template class indexedFddStorage<float, std::vector<float>>;
-template class indexedFddStorage<float, std::vector<double>>;
+template class faster::indexedFddStorage<float, char>;
+template class faster::indexedFddStorage<float, int>;
+template class faster::indexedFddStorage<float, long int>;
+template class faster::indexedFddStorage<float, float>;
+template class faster::indexedFddStorage<float, double>;
+template class faster::indexedFddStorage<float, char *>;
+template class faster::indexedFddStorage<float, int *>;
+template class faster::indexedFddStorage<float, long int *>;
+template class faster::indexedFddStorage<float, float *>;
+template class faster::indexedFddStorage<float, double *>;
+template class faster::indexedFddStorage<float, std::string>;
+template class faster::indexedFddStorage<float, std::vector<char>>;
+template class faster::indexedFddStorage<float, std::vector<int>>;
+template class faster::indexedFddStorage<float, std::vector<long int>>;
+template class faster::indexedFddStorage<float, std::vector<float>>;
+template class faster::indexedFddStorage<float, std::vector<double>>;
 
-template class indexedFddStorage<double, char>;
-template class indexedFddStorage<double, int>;
-template class indexedFddStorage<double, long int>;
-template class indexedFddStorage<double, float>;
-template class indexedFddStorage<double, double>;
-template class indexedFddStorage<double, char *>;
-template class indexedFddStorage<double, int *>;
-template class indexedFddStorage<double, long int *>;
-template class indexedFddStorage<double, float *>;
-template class indexedFddStorage<double, double *>;
-template class indexedFddStorage<double, std::string>;
-template class indexedFddStorage<double, std::vector<char>>;
-template class indexedFddStorage<double, std::vector<int>>;
-template class indexedFddStorage<double, std::vector<long int>>;
-template class indexedFddStorage<double, std::vector<float>>;
-template class indexedFddStorage<double, std::vector<double>>;
+template class faster::indexedFddStorage<double, char>;
+template class faster::indexedFddStorage<double, int>;
+template class faster::indexedFddStorage<double, long int>;
+template class faster::indexedFddStorage<double, float>;
+template class faster::indexedFddStorage<double, double>;
+template class faster::indexedFddStorage<double, char *>;
+template class faster::indexedFddStorage<double, int *>;
+template class faster::indexedFddStorage<double, long int *>;
+template class faster::indexedFddStorage<double, float *>;
+template class faster::indexedFddStorage<double, double *>;
+template class faster::indexedFddStorage<double, std::string>;
+template class faster::indexedFddStorage<double, std::vector<char>>;
+template class faster::indexedFddStorage<double, std::vector<int>>;
+template class faster::indexedFddStorage<double, std::vector<long int>>;
+template class faster::indexedFddStorage<double, std::vector<float>>;
+template class faster::indexedFddStorage<double, std::vector<double>>;
 
-template class indexedFddStorage<std::string, char>;
-template class indexedFddStorage<std::string, int>;
-template class indexedFddStorage<std::string, long int>;
-template class indexedFddStorage<std::string, float>;
-template class indexedFddStorage<std::string, double>;
-template class indexedFddStorage<std::string, char *>;
-template class indexedFddStorage<std::string, int *>;
-template class indexedFddStorage<std::string, long int *>;
-template class indexedFddStorage<std::string, float *>;
-template class indexedFddStorage<std::string, double *>;
-template class indexedFddStorage<std::string, std::string>;
-template class indexedFddStorage<std::string, std::vector<char>>;
-template class indexedFddStorage<std::string, std::vector<int>>;
-template class indexedFddStorage<std::string, std::vector<long int>>;
-template class indexedFddStorage<std::string, std::vector<float>>;
-template class indexedFddStorage<std::string, std::vector<double>>;
+template class faster::indexedFddStorage<std::string, char>;
+template class faster::indexedFddStorage<std::string, int>;
+template class faster::indexedFddStorage<std::string, long int>;
+template class faster::indexedFddStorage<std::string, float>;
+template class faster::indexedFddStorage<std::string, double>;
+template class faster::indexedFddStorage<std::string, char *>;
+template class faster::indexedFddStorage<std::string, int *>;
+template class faster::indexedFddStorage<std::string, long int *>;
+template class faster::indexedFddStorage<std::string, float *>;
+template class faster::indexedFddStorage<std::string, double *>;
+template class faster::indexedFddStorage<std::string, std::string>;
+template class faster::indexedFddStorage<std::string, std::vector<char>>;
+template class faster::indexedFddStorage<std::string, std::vector<int>>;
+template class faster::indexedFddStorage<std::string, std::vector<long int>>;
+template class faster::indexedFddStorage<std::string, std::vector<float>>;
+template class faster::indexedFddStorage<std::string, std::vector<double>>;
 
 

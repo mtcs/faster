@@ -4,6 +4,7 @@
 #define NUMITEMS 100*1000
 
 using namespace std;
+using namespace faster;
 
 int map1(string & input){
 	return atoi(input.data());

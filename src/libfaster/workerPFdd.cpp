@@ -8,7 +8,7 @@
 // MAP
 template <typename T>
 template <typename U>
-void workerFdd<T *>::map (workerFdd<U> & dest, mapPFunctionP<T,U> mapFunc){
+void faster::workerFdd<T*>::map (workerFdd<U> & dest, mapPFunctionP<T,U> mapFunc){
 	T ** d = this->localData->getData();
 	size_t s = this->localData->getSize();
 	size_t * ls = this->localData->getLineSizes();
@@ -24,7 +24,7 @@ void workerFdd<T *>::map (workerFdd<U> & dest, mapPFunctionP<T,U> mapFunc){
 
 template <typename T>
 template <typename U>
-void workerFdd<T *>::map (workerFdd<U> & dest, PmapPFunctionP<T,U> mapFunc){
+void faster::workerFdd<T*>::map (workerFdd<U> & dest, PmapPFunctionP<T,U> mapFunc){
 	T ** d = this->localData->getData();
 	size_t s = this->localData->getSize();
 	size_t * ls = this->localData->getLineSizes();
@@ -42,7 +42,7 @@ void workerFdd<T *>::map (workerFdd<U> & dest, PmapPFunctionP<T,U> mapFunc){
 
 template <typename T>
 template <typename L, typename U>
-void workerFdd<T *>::map (workerIFdd<L,U> & dest, ImapPFunctionP<T,L,U> mapFunc){
+void faster::workerFdd<T*>::map (workerIFdd<L,U> & dest, ImapPFunctionP<T,L,U> mapFunc){
 	T ** d = this->localData->getData();
 	size_t s = this->localData->getSize();
 	size_t * ls = this->localData->getLineSizes();
@@ -62,7 +62,7 @@ void workerFdd<T *>::map (workerIFdd<L,U> & dest, ImapPFunctionP<T,L,U> mapFunc)
 
 template <typename T>
 template <typename L, typename U>
-void workerFdd<T *>::map (workerIFdd<L,U> & dest, IPmapPFunctionP<T,L,U> mapFunc){
+void faster::workerFdd<T*>::map (workerIFdd<L,U> & dest, IPmapPFunctionP<T,L,U> mapFunc){
 	T ** d = this->localData->getData();
 	size_t s = this->localData->getSize();
 	size_t * ls = this->localData->getLineSizes();
@@ -84,7 +84,7 @@ void workerFdd<T *>::map (workerIFdd<L,U> & dest, IPmapPFunctionP<T,L,U> mapFunc
 // BulkMap
 template <typename T>
 template <typename U>
-void workerFdd<T *>::bulkMap (workerFdd<U> & dest, bulkMapPFunctionP<T,U> bulkMapFunc){
+void faster::workerFdd<T*>::bulkMap (workerFdd<U> & dest, bulkMapPFunctionP<T,U> bulkMapFunc){
 	size_t s = this->localData->getSize();
 	size_t * ls = this->localData->getLineSizes();
 
@@ -92,7 +92,7 @@ void workerFdd<T *>::bulkMap (workerFdd<U> & dest, bulkMapPFunctionP<T,U> bulkMa
 }
 template <typename T>
 template <typename U>
-void workerFdd<T *>::bulkMap (workerFdd<U> & dest, PbulkMapPFunctionP<T,U> bulkMapFunc){
+void faster::workerFdd<T*>::bulkMap (workerFdd<U> & dest, PbulkMapPFunctionP<T,U> bulkMapFunc){
 	size_t s = this->localData->getSize();
 	size_t * ls = this->localData->getLineSizes();
 
@@ -100,7 +100,7 @@ void workerFdd<T *>::bulkMap (workerFdd<U> & dest, PbulkMapPFunctionP<T,U> bulkM
 }
 template <typename T>
 template <typename L, typename U>
-void workerFdd<T *>::bulkMap (workerIFdd<L,U> & dest, IbulkMapPFunctionP<T,L,U> bulkMapFunc){
+void faster::workerFdd<T*>::bulkMap (workerIFdd<L,U> & dest, IbulkMapPFunctionP<T,L,U> bulkMapFunc){
 	size_t s = this->localData->getSize();
 	size_t * ls = this->localData->getLineSizes();
 
@@ -108,7 +108,7 @@ void workerFdd<T *>::bulkMap (workerIFdd<L,U> & dest, IbulkMapPFunctionP<T,L,U> 
 }
 template <typename T>
 template <typename L, typename U>
-void workerFdd<T *>::bulkMap (workerIFdd<L,U> & dest, IPbulkMapPFunctionP<T,L,U> bulkMapFunc){
+void faster::workerFdd<T*>::bulkMap (workerIFdd<L,U> & dest, IPbulkMapPFunctionP<T,L,U> bulkMapFunc){
 	size_t s = this->localData->getSize();
 	size_t * ls = this->localData->getLineSizes();
 
@@ -119,7 +119,7 @@ void workerFdd<T *>::bulkMap (workerIFdd<L,U> & dest, IPbulkMapPFunctionP<T,L,U>
 // FlatMap
 template <typename T>
 template <typename U>
-void workerFdd<T *>::flatMap(workerFdd<U> & dest,  flatMapPFunctionP<T,U> flatMapFunc ){
+void faster::workerFdd<T*>::flatMap(workerFdd<U> & dest,  flatMapPFunctionP<T,U> flatMapFunc ){
 	T ** d = this->localData->getData();
 	size_t s = this->localData->getSize();
 	std::list<U> resultList;
@@ -142,7 +142,7 @@ void workerFdd<T *>::flatMap(workerFdd<U> & dest,  flatMapPFunctionP<T,U> flatMa
 }
 template <typename T>
 template <typename U>
-void workerFdd<T *>::flatMap(workerFdd<U> & dest,  PflatMapPFunctionP<T,U> flatMapFunc ){
+void faster::workerFdd<T*>::flatMap(workerFdd<U> & dest,  PflatMapPFunctionP<T,U> flatMapFunc ){
 	T ** d = this->localData->getData();
 	size_t s = this->localData->getSize();
 	std::list<std::pair<U, size_t>> resultList;
@@ -165,7 +165,7 @@ void workerFdd<T *>::flatMap(workerFdd<U> & dest,  PflatMapPFunctionP<T,U> flatM
 }
 template <typename T>
 template <typename L, typename U>
-void workerFdd<T *>::flatMap(workerIFdd<L,U> & dest,  IflatMapPFunctionP<T,L,U> flatMapFunc ){
+void faster::workerFdd<T*>::flatMap(workerIFdd<L,U> & dest,  IflatMapPFunctionP<T,L,U> flatMapFunc ){
 	T ** d = this->localData->getData();
 	size_t s = this->localData->getSize();
 	std::list<std::pair<L,U>> resultList;
@@ -188,7 +188,7 @@ void workerFdd<T *>::flatMap(workerIFdd<L,U> & dest,  IflatMapPFunctionP<T,L,U> 
 }
 template <typename T>
 template <typename L, typename U>
-void workerFdd<T *>::flatMap(workerIFdd<L,U> & dest,  IPflatMapPFunctionP<T,L,U> flatMapFunc ){
+void faster::workerFdd<T*>::flatMap(workerIFdd<L,U> & dest,  IPflatMapPFunctionP<T,L,U> flatMapFunc ){
 	T ** d = this->localData->getData();
 	size_t s = this->localData->getSize();
 	std::list<std::tuple<L,U, size_t>> resultList;
@@ -212,7 +212,7 @@ void workerFdd<T *>::flatMap(workerIFdd<L,U> & dest,  IPflatMapPFunctionP<T,L,U>
 
 template <typename T>
 template <typename U>
-void workerFdd<T *>::bulkFlatMap(workerFdd<U> & dest,  bulkFlatMapPFunctionP<T,U> bulkFlatMapFunc ){
+void faster::workerFdd<T*>::bulkFlatMap(workerFdd<U> & dest,  bulkFlatMapPFunctionP<T,U> bulkFlatMapFunc ){
 	U * result;
 	size_t rSize;
 
@@ -221,7 +221,7 @@ void workerFdd<T *>::bulkFlatMap(workerFdd<U> & dest,  bulkFlatMapPFunctionP<T,U
 }
 template <typename T>
 template <typename U>
-void workerFdd<T *>::bulkFlatMap(workerFdd<U> & dest,  PbulkFlatMapPFunctionP<T,U> bulkFlatMapFunc ){
+void faster::workerFdd<T*>::bulkFlatMap(workerFdd<U> & dest,  PbulkFlatMapPFunctionP<T,U> bulkFlatMapFunc ){
 	U * result;
 	size_t * rDataSizes = NULL;
 	size_t rSize;
@@ -231,7 +231,7 @@ void workerFdd<T *>::bulkFlatMap(workerFdd<U> & dest,  PbulkFlatMapPFunctionP<T,
 }
 template <typename T>
 template <typename L, typename U>
-void workerFdd<T *>::bulkFlatMap(workerIFdd<L,U> & dest,  IbulkFlatMapPFunctionP<T,L,U> bulkFlatMapFunc ){
+void faster::workerFdd<T*>::bulkFlatMap(workerIFdd<L,U> & dest,  IbulkFlatMapPFunctionP<T,L,U> bulkFlatMapFunc ){
 	L * keys;
 	U * result;
 	size_t rSize;
@@ -241,7 +241,7 @@ void workerFdd<T *>::bulkFlatMap(workerIFdd<L,U> & dest,  IbulkFlatMapPFunctionP
 }
 template <typename T>
 template <typename L, typename U>
-void workerFdd<T *>::bulkFlatMap(workerIFdd<L,U> & dest,  IPbulkFlatMapPFunctionP<T,L,U> bulkFlatMapFunc ){
+void faster::workerFdd<T*>::bulkFlatMap(workerIFdd<L,U> & dest,  IPbulkFlatMapPFunctionP<T,L,U> bulkFlatMapFunc ){
 	L * keys;
 	U * result;
 	size_t * rDataSizes = NULL;
@@ -254,7 +254,7 @@ void workerFdd<T *>::bulkFlatMap(workerIFdd<L,U> & dest,  IPbulkFlatMapPFunction
 
 // REDUCE
 template <typename T>
-std::pair<T*,size_t>  workerFdd<T *>::reduce (PreducePFunctionP<T> reduceFunc){
+std::pair<T*,size_t>  faster::workerFdd<T*>::reduce (PreducePFunctionP<T> reduceFunc){
 	T ** d = this->localData->getData();
 	std::pair<T*,size_t> result;
 	size_t s = this->localData->getSize();
@@ -309,13 +309,13 @@ std::pair<T*,size_t>  workerFdd<T *>::reduce (PreducePFunctionP<T> reduceFunc){
 }
 
 template <typename T>
-std::pair<T*,size_t> workerFdd<T *>::bulkReduce (PbulkReducePFunctionP<T> bulkReduceFunc){
+std::pair<T*,size_t> faster::workerFdd<T*>::bulkReduce (PbulkReducePFunctionP<T> bulkReduceFunc){
 	std::pair<T *, size_t> r = bulkReduceFunc((T**) this->localData->getData(), this->localData->getLineSizes(), this->localData->getSize());
 	return r;
 }
 template <typename T>
 template <typename U>
-void workerFdd<T *>::_apply(void * func, fddOpType op, workerFdd<U> * dest){
+void faster::workerFdd<T*>::_apply(void * func, fddOpType op, workerFdd<U> * dest){
 	switch (op){
 		case OP_Map:
 			map(*dest, (mapPFunctionP<T,U>) func);
@@ -339,7 +339,7 @@ void workerFdd<T *>::_apply(void * func, fddOpType op, workerFdd<U> * dest){
 // Pointer -> Pointer
 template <typename T>
 template <typename U>
-void workerFdd<T *>::_applyP(void * func, fddOpType op, workerFdd<U> * dest){
+void faster::workerFdd<T*>::_applyP(void * func, fddOpType op, workerFdd<U> * dest){
 	switch (op){
 		case OP_Map:
 			map(*dest, (PmapPFunctionP<T,U>) func);
@@ -362,7 +362,7 @@ void workerFdd<T *>::_applyP(void * func, fddOpType op, workerFdd<U> * dest){
 
 template <typename T>
 template <typename L, typename U>
-void workerFdd<T *>::_applyI(void * func, fddOpType op, workerIFdd<L,U> * dest){
+void faster::workerFdd<T*>::_applyI(void * func, fddOpType op, workerIFdd<L,U> * dest){
 	switch (op){
 		case OP_Map:
 			map(*dest, (ImapPFunctionP<T,L,U>) func);
@@ -386,7 +386,7 @@ void workerFdd<T *>::_applyI(void * func, fddOpType op, workerIFdd<L,U> * dest){
 // Pointer -> Pointer
 template <typename T>
 template <typename L, typename U>
-void workerFdd<T *>::_applyIP(void * func, fddOpType op, workerIFdd<L,U> * dest){
+void faster::workerFdd<T*>::_applyIP(void * func, fddOpType op, workerIFdd<L,U> * dest){
 	switch (op){
 		case OP_Map:
 			map(*dest, (IPmapPFunctionP<T,L,U>) func);
@@ -408,7 +408,7 @@ void workerFdd<T *>::_applyIP(void * func, fddOpType op, workerIFdd<L,U> * dest)
 }
 
 template <typename T>
-void workerFdd<T *>::_applyReduce(void * func, fddOpType op, void *& result, size_t & rSize){
+void faster::workerFdd<T*>::_applyReduce(void * func, fddOpType op, void *& result, size_t & rSize){
 	std::pair<T*,size_t> r;
 	switch (op){
 		case OP_Reduce:
@@ -430,7 +430,7 @@ void workerFdd<T *>::_applyReduce(void * func, fddOpType op, void *& result, siz
 
 
 template <typename T>
-void workerFdd<T *>::_preApply(void * func, fddOpType op, workerFddBase * dest){ 
+void faster::workerFdd<T*>::_preApply(void * func, fddOpType op, workerFddBase * dest){ 
 	switch (dest->getType()){
 		case Null: break;
 		case Char:     _apply(func, op, (workerFdd<char> *) dest); break;
@@ -455,7 +455,7 @@ void workerFdd<T *>::_preApply(void * func, fddOpType op, workerFddBase * dest){
 
 template <typename T>
 template <typename L>
-void workerFdd<T *>::_preApplyI(void * func, fddOpType op, workerFddBase * dest){ 
+void faster::workerFdd<T*>::_preApplyI(void * func, fddOpType op, workerFddBase * dest){ 
 	switch (dest->getType()){
 		case Null: break;
 		case Char:     _applyI(func, op,  (workerIFdd<L, char> *) dest); break;
@@ -481,7 +481,7 @@ void workerFdd<T *>::_preApplyI(void * func, fddOpType op, workerFddBase * dest)
 // -------------------------- Public Functions ------------------------ //
 
 template <typename T>
-void workerFdd<T *>::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){ 
+void faster::workerFdd<T*>::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){ 
 	if (op & OP_GENERICREDUCE){
 		_applyReduce(func, op, result, rSize);
 	}else{
@@ -498,28 +498,28 @@ void workerFdd<T *>::apply(void * func, fddOpType op, workerFddBase * dest, void
 }
 
 template <typename T>
-void workerFdd<T*>::setData(T ** data, size_t *lineSizes, size_t size) {
+void faster::workerFdd<T*>::setData(T ** data, size_t *lineSizes, size_t size) {
 	this->localData->setData( data, lineSizes, size);
 }
 
 template <typename T>
-void workerFdd<T*>::setDataRaw(void * data, size_t *lineSizes, size_t size) {
+void faster::workerFdd<T*>::setDataRaw(void * data, size_t *lineSizes, size_t size) {
 	this->localData->setDataRaw( data, lineSizes, size);
 }
 
 
 template <typename T>
-size_t * workerFdd<T*>::getLineSizes(){ 
+size_t * faster::workerFdd<T*>::getLineSizes(){ 
 	return this->localData->getLineSizes(); 
 }
 
 template <typename T>
-void workerFdd<T*>::insert(T* & in, size_t s){ 
+void faster::workerFdd<T*>::insert(T* & in, size_t s){ 
 	this->localData->insert(in, s); 
 }
 
 template <typename T>
-void workerFdd<T*>::insert(std::list< std::pair<T*, size_t> > & in){ 
+void faster::workerFdd<T*>::insert(std::list< std::pair<T*, size_t> > & in){ 
 	typename std::list< std::pair<T*, size_t> >::iterator it;
 
 	if (this->localData->getSize() < in.size())
@@ -530,27 +530,28 @@ void workerFdd<T*>::insert(std::list< std::pair<T*, size_t> > & in){
 }
 
 template <typename T>
-void workerFdd<T*>::collect(fastComm * comm) {
+void faster::workerFdd<T*>::collect(fastComm * comm) {
 	comm->sendFDDDataCollect(this->id, this->localData->getData(), this->localData->getLineSizes(), this->localData->getSize());
+
 };
 
-extern template class workerFdd<char>;
-extern template class workerFdd<int>;
-extern template class workerFdd<long int>;
-extern template class workerFdd<float>;
-extern template class workerFdd<double>;
+extern template class faster::workerFdd<char>;
+extern template class faster::workerFdd<int>;
+extern template class faster::workerFdd<long int>;
+extern template class faster::workerFdd<float>;
+extern template class faster::workerFdd<double>;
 
-extern template class workerFdd<std::string>;
+extern template class faster::workerFdd<std::string>;
 
-template class workerFdd<char *>;
-template class workerFdd<int *>;
-template class workerFdd<long int *>;
-template class workerFdd<float *>;
-template class workerFdd<double *>;
+template class faster::workerFdd<char *>;
+template class faster::workerFdd<int *>;
+template class faster::workerFdd<long int *>;
+template class faster::workerFdd<float *>;
+template class faster::workerFdd<double *>;
 //template class workerFdd<void *>;
  
-extern template class workerFdd<std::vector<char>>;
-extern template class workerFdd<std::vector<int>>;
-extern template class workerFdd<std::vector<long int>>;
-extern template class workerFdd<std::vector<float>>;
-extern template class workerFdd<std::vector<double>>;
+extern template class faster::workerFdd<std::vector<char>>;
+extern template class faster::workerFdd<std::vector<int>>;
+extern template class faster::workerFdd<std::vector<long int>>;
+extern template class faster::workerFdd<std::vector<float>>;
+extern template class faster::workerFdd<std::vector<double>>;

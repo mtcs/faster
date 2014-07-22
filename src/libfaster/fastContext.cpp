@@ -5,7 +5,7 @@
 #include "misc.h"
 
 // Create a context with local as master
-fastContext::fastContext(const fastSettings & s){
+faster::fastContext::fastContext(const fastSettings & s){
 
 	settings = new fastSettings(s);
 	comm = new fastComm( s.getMaster() );
@@ -15,7 +15,7 @@ fastContext::fastContext(const fastSettings & s){
 }
 
 
-fastContext::~fastContext(){ 
+faster::fastContext::~fastContext(){ 
 	// Tell workers to go home!
 	std::cerr << "    S:FINISH! ";
 	comm->sendFinish();
@@ -27,13 +27,13 @@ fastContext::~fastContext(){
 	delete settings;
 }
 
-void fastContext::registerFunction(void * funcP){
+void faster::fastContext::registerFunction(void * funcP){
 	//std::cerr << "  Register " << funcP ;
 	funcTable.insert(funcTable.end(), funcP);
 	//std::cerr << ".\n";
 }
 
-void fastContext::startWorkers(){
+void faster::fastContext::startWorkers(){
 	// Create a Worker context and exit after finished
 	if ( ! comm->isDriver() ){
 		// Start worker role
@@ -49,7 +49,7 @@ void fastContext::startWorkers(){
 
 }
 
-int fastContext::findFunc(void * funcP){
+int faster::fastContext::findFunc(void * funcP){
 	//std::cerr << "  Find Function " << funcP ;
 	for( size_t i = 0; i < funcTable.size(); ++i){
 		if (funcTable[i] == funcP)
@@ -58,7 +58,7 @@ int fastContext::findFunc(void * funcP){
 	return -1;
 }
 
-unsigned long int fastContext::_createFDD(fddBase * ref, fddType type, size_t size){
+unsigned long int faster::fastContext::_createFDD(fddBase * ref, fddType type, size_t size){
 	
 	for (int i = 1; i < comm->numProcs; ++i){
 		size_t dataPerProc = size / (comm->numProcs - 1);
@@ -74,7 +74,7 @@ unsigned long int fastContext::_createFDD(fddBase * ref, fddType type, size_t si
 	return numFDDs++;
 }
 
-unsigned long int fastContext::_createIFDD(fddBase * ref, fddType kType, fddType tType, size_t size){
+unsigned long int faster::fastContext::_createIFDD(fddBase * ref, fddType kType, fddType tType, size_t size){
 
 	for (int i = 1; i < comm->numProcs; ++i){
 		size_t dataPerProc = size / (comm->numProcs - 1);
@@ -90,32 +90,32 @@ unsigned long int fastContext::_createIFDD(fddBase * ref, fddType kType, fddType
 }
 
 // TODO CHANGE THIS!
-unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode, size_t size){
+unsigned long int faster::fastContext::createFDD(fddBase * ref, size_t typeCode, size_t size){
 	return _createFDD(ref, decodeType(typeCode), size);
 }
-unsigned long int fastContext::createFDD(fddBase * ref, size_t typeCode){
+unsigned long int faster::fastContext::createFDD(fddBase * ref, size_t typeCode){
 	return _createFDD(ref, decodeType(typeCode), 0);
 }
-unsigned long int fastContext::createPFDD(fddBase * ref, size_t typeCode, size_t size){
+unsigned long int faster::fastContext::createPFDD(fddBase * ref, size_t typeCode, size_t size){
 	return _createFDD(ref, POINTER | decodeType(typeCode), size);
 }
-unsigned long int fastContext::createPFDD(fddBase * ref, size_t typeCode){
+unsigned long int faster::fastContext::createPFDD(fddBase * ref, size_t typeCode){
 	return _createFDD(ref, POINTER | decodeType(typeCode), 0);
 }
-unsigned long int fastContext::createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size){
+unsigned long int faster::fastContext::createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size){
 	return _createIFDD(ref, decodeType(kTypeCode), decodeType(tTypeCode), size);
 }
-unsigned long int fastContext::createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode){
+unsigned long int faster::fastContext::createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode){
 	return _createIFDD(ref, decodeType(kTypeCode), decodeType(tTypeCode), 0);
 }
-unsigned long int fastContext::createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size){
+unsigned long int faster::fastContext::createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size){
 	return _createIFDD(ref, decodeType(kTypeCode), POINTER | decodeType(tTypeCode), size);
 }
-unsigned long int fastContext::createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode){
+unsigned long int faster::fastContext::createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode){
 	return _createIFDD(ref, decodeType(kTypeCode), POINTER | decodeType(tTypeCode), 0);
 }
 
-unsigned long int fastContext::createFddGroup(fddBase * ref, std::vector<fddBase*> & fddV){
+unsigned long int faster::fastContext::createFddGroup(fddBase * ref, std::vector<fddBase*> & fddV){
 	std::vector<unsigned long int> idV(fddV.size());
 	std::vector<fddType> kV(fddV.size());
 	std::vector<fddType> tV(fddV.size());
@@ -145,7 +145,7 @@ size_t findFileSize(const char* filename)
 	return in.tellg(); 
 }
 
-unsigned long int fastContext::readFDD(fddBase * ref, const char * fileName){
+unsigned long int faster::fastContext::readFDD(fddBase * ref, const char * fileName){
 	//send read fdd n. numFdds from file fileName
 	size_t fileSize = findFileSize(fileName);
 	size_t offset = 0;
@@ -166,7 +166,7 @@ unsigned long int fastContext::readFDD(fddBase * ref, const char * fileName){
 	return numFDDs++;
 }
 
-void fastContext::getFDDInfo(size_t & s){
+void faster::fastContext::getFDDInfo(size_t & s){
 	s = 0;
 	for (int i = 1; i < comm->numProcs; ++i){
 		size_t size;
@@ -177,7 +177,7 @@ void fastContext::getFDDInfo(size_t & s){
 
 
 
-unsigned long int fastContext::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId){
+unsigned long int faster::fastContext::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId){
 	fastTask * newTask = new fastTask();
 	newTask->id = numTasks++;
 	newTask->srcFDD = idSrc;
@@ -194,11 +194,11 @@ unsigned long int fastContext::enqueueTask(fddOpType opT, unsigned long int idSr
 
 	return newTask->id;
 }
-unsigned long int fastContext::enqueueTask(fddOpType opT, unsigned long int id){
+unsigned long int faster::fastContext::enqueueTask(fddOpType opT, unsigned long int id){
 	return enqueueTask(opT, id, 0, -1);
 }
 
-void * fastContext::recvTaskResult(unsigned long int &id, size_t & size){
+void * faster::fastContext::recvTaskResult(unsigned long int &id, size_t & size){
 	double time;
 	int proc;
 
@@ -211,7 +211,7 @@ void * fastContext::recvTaskResult(unsigned long int &id, size_t & size){
 }
 
 
-void fastContext::destroyFDD(unsigned long int id){
+void faster::fastContext::destroyFDD(unsigned long int id){
 	comm->sendDestroyFDD(id);
 }
 

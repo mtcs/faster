@@ -2,8 +2,8 @@
 
 
 
-template class workerIFdd<int, std::vector<char>>;
-template class workerIFdd<int, std::vector<int>>;
-template class workerIFdd<int, std::vector<long int>>;
-template class workerIFdd<int, std::vector<float>>;
-template class workerIFdd<int, std::vector<double>>;
+template class faster::workerIFdd<int, std::vector<char>>;
+template class faster::workerIFdd<int, std::vector<int>>;
+template class faster::workerIFdd<int, std::vector<long int>>;
+template class faster::workerIFdd<int, std::vector<float>>;
+template class faster::workerIFdd<int, std::vector<double>>;

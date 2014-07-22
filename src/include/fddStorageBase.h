@@ -6,21 +6,22 @@
 
 #include "definitions.h"
 
-class fddStorageBase{
-	protected:
-		size_t size;
-		size_t allocSize;
+namespace faster{
+	class fddStorageBase{
+		protected:
+			size_t size;
+			size_t allocSize;
 
-	public:
-		virtual ~fddStorageBase(){}
+		public:
+			virtual ~fddStorageBase(){}
 
-		virtual void grow(size_t toSize) = 0;
+			virtual void grow(size_t toSize) = 0;
 
-		size_t getSize(){ return size; }
+			size_t getSize(){ return size; }
 
-		//void   setSize(size_t s){ this->grow(s); size = s;  }
-		virtual void setSize(size_t s UNUSED) { std::cerr << "OPS! " << s; }
-};
-
+			//void   setSize(size_t s){ this->grow(s); size = s;  }
+			virtual void setSize(size_t s UNUSED) { std::cerr << "OPS! " << s; }
+	};
+}
 
 #endif

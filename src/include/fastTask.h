@@ -5,16 +5,18 @@
 #include "definitions.h"
 
 
-class fastTask{
-	public:
-		unsigned long int id;
-		unsigned long int srcFDD;
-		unsigned long int destFDD;
-		fddOpType	operationType;
-		unsigned int	functionId;
-		void * result;
-		size_t resultSize;
-		size_t workersFinished;
-};
+namespace faster{
+	class fastTask{
+		public:
+			unsigned long int id;
+			unsigned long int srcFDD;
+			unsigned long int destFDD;
+			fddOpType	operationType;
+			unsigned int	functionId;
+			void * result;
+			size_t resultSize;
+			size_t workersFinished;
+	};
+}
 
 #endif
