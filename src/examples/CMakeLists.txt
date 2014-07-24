@@ -30,7 +30,7 @@ link_directories(${MPI_CXX_LIBRARIES})
 set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
 
 include_directories ("${PROJECT_SOURCE_DIR}/../libfaster")
-set (EXTRA_LIBS ${EXTRA_LIBS} libfaster)
+set (EXTRA_LIBS ${EXTRA_LIBS} faster)
 
 set (EXTRA_LIBS ${EXTRA_LIBS} efence)
 

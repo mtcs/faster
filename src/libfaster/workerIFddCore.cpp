@@ -44,7 +44,7 @@ void * faster::workerIFddCore<K,T>::getData(){
 }
 
 template <typename K, typename T>
-K * faster::workerIFddCore<K,T>::getKeys(){ 
+void * faster::workerIFddCore<K,T>::getKeys(){ 
 	return this->localData->getKeys(); 
 }
 

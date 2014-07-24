@@ -31,7 +31,7 @@ namespace faster{
 			~worker();
 
 			void run();
-
+			
 			// Worker functions
 			void createFDD (unsigned long int id, fddType type, size_t size);
 			template <typename K>

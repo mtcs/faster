@@ -2,8 +2,6 @@
 
 #include "fastComm.h"
 #include "fastTask.h" 
-#include "workerIFdd.h"
-#include "workerFdd.h"
 
 bool faster::fastComm::isDriver(){
 	return (procId == 0);

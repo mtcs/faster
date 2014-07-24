@@ -1,6 +1,7 @@
-#include "workerFdd.h"
+#include "_workerFdd.h"
 #include "fastCommBuffer.h"
 #include "fddStorageExtern.cpp"
+
 
 template <typename T>
 faster::workerFddCore<T>::workerFddCore(unsigned int ident, fddType t) : workerFddBase(ident, t){
@@ -57,6 +58,7 @@ void faster::workerFddCore<T>::shrink(){
 }
 
 
+
 template class faster::workerFddCore<char>;
 template class faster::workerFddCore<int>;
 template class faster::workerFddCore<long int>;
@@ -75,4 +77,5 @@ template class faster::workerFddCore<std::vector<char>>;
 template class faster::workerFddCore<std::vector<int>>;
 template class faster::workerFddCore<std::vector<long int>>;
 template class faster::workerFddCore<std::vector<float>>;
-template class faster::workerFddCore<std::vector<double>>;
+template class faster::workerFddCore<std::vector<double>>; 
+

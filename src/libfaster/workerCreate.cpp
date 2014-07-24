@@ -2,12 +2,12 @@
 #include <iostream>
 
 #include "fastComm.h"
-#include "workerFddExtern.cpp"
+#include "workerFdd.h"
 #include "worker.h"
 
 void faster::worker::createFDD (unsigned long int id, fddType type, size_t size){
 	workerFddBase * newFdd;
-	switch (type){
+	/*switch (type){
 		case Null: break;
 		case Char: newFdd = new workerFdd<char>(id, type, size); break;
 		case Int: newFdd = new workerFdd<int>(id, type, size); break;
@@ -26,7 +26,8 @@ void faster::worker::createFDD (unsigned long int id, fddType type, size_t size)
 		case LongIntV: newFdd = new workerFdd<std::vector<long int>>(id, type, size); break;
 		case FloatV: newFdd = new workerFdd<std::vector<float>>(id, type, size); break;
 		case DoubleV: newFdd = new workerFdd<std::vector<double>>(id, type, size); break;
-	}
+	}// */
+	newFdd = new workerFdd(id, type, size);
 	fddList.insert(fddList.end(), newFdd);
 }
 
@@ -35,7 +36,8 @@ void faster::worker::readFDDFile(unsigned long int id, std::string &filename, si
 	std::string line; 
 	char c;
 
-	workerFdd<std::string> * newFdd = new workerFdd<std::string>(id, String);
+	//workerFdd<std::string> * newFdd = new workerFdd<std::string>(id, String);
+	workerFdd * newFdd = new workerFdd(id, String);
 
 	if (newFdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
 
@@ -56,7 +58,7 @@ void faster::worker::readFDDFile(unsigned long int id, std::string &filename, si
 		// If the other process doesn't have this line, get it!
 		if ( c == '\n' ) {
 			std::getline( inFile, line ); 
-			newFdd->insert(line);
+			newFdd->insert(&line, 0);
 		}
 	}
 	
@@ -64,7 +66,7 @@ void faster::worker::readFDDFile(unsigned long int id, std::string &filename, si
 	while( size_t(inFile.tellg()) < (offset + size) ){
 		std::getline( inFile, line ); 
 
-		newFdd->insert(line);
+		newFdd->insert(&line, 0);
 	}
 	inFile.close();
 

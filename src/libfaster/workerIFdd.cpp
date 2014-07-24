@@ -91,7 +91,7 @@ void faster::workerIFdd<K,T>::setDataRaw(void * keys, void * data, size_t size){
 
 
 template <typename K, typename T>
-void faster::workerIFdd<K,T>::insert(K key, T & in){ 
+void faster::workerIFdd<K,T>::insert(K & key, T & in){ 
 	this->localData->insert(key, in); 
 }
 

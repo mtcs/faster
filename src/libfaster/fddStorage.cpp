@@ -176,7 +176,6 @@ void faster::fddStorage<T*>::insert(T *& item, size_t s){
 
 
 
-
 template <class T> 
 size_t * faster::fddStorage<T*>::getLineSizes(){ 
 	return lineSizes; 

@@ -1,4 +1,4 @@
-#include "workerFddCore.cpp"
+#include "_workerFdd.h"
 
 extern template class faster::workerFddCore<char>;
 extern template class faster::workerFddCore<int>;
