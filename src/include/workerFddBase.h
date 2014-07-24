@@ -51,7 +51,7 @@ namespace faster{
 
 			virtual void shrink() = 0;
 			virtual void insertl(void * v) = 0;
-			virtual void insert(void * v, size_t s) = 0;
+			virtual void insert(void * k, void * v, size_t s) = 0;
 
 			virtual void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize) = 0;
 

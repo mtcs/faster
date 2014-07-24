@@ -2,9 +2,6 @@
 #include "workerFddBase.h"
 #include "workerFddModule.h"
 
-faster::workerFddBase * faster::newWorkerDL(unsigned int id, fddType type){
-	return newWorkerSDL(id, type, 0);
-}
 void faster::destroyWorkerDL(faster::workerFddBase * fdd){
 	delete fdd;
 }
@@ -69,8 +66,8 @@ void faster::shrinkDL(workerFddBase * fdd){
 	fdd->shrink();
 }
 
-void faster::insertDL(workerFddBase * fdd, void * v, size_t s){
-	fdd->insert(v, s);
+void faster::insertDL(workerFddBase * fdd, void * k, void * v, size_t s){
+	fdd->insert(k, v, s);
 }
 void faster::insertListDL(workerFddBase * fdd, void * v){
 	fdd->insertl(v);

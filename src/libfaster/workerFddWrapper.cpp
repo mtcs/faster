@@ -5,7 +5,23 @@
 #include "workerFdd.h"
 #include "workerFddModule.h"
 
-void * load(const std::string libraryName){
+void * faster::workerFdd::dLHandler[3][7] = {};
+
+// Key Type
+std::unordered_map<faster::fddType, int> faster::workerFdd::khAssign = std::unordered_map<fddType, int> ({
+		{0,0},{Char,1}, {Int,2}, {LongInt,3}, {Float,4}, {Double,5},{String,6}
+		});
+// Data Type
+std::unordered_map<faster::fddType, int> faster::workerFdd::hAssign = std::unordered_map<fddType, int>({
+		{Char,0}, {Int,0}, {LongInt,0}, {Float,0}, {Double,0},
+		{CharP,1},{IntP,1},{LongIntP,1},{FloatP,1},{DoubleP,1},{Custom,1},
+		{CharV,2},{IntV,2},{LongIntV,2},{FloatV,2},{DoubleV,2},{String,2},
+	});
+
+std::unordered_map<char, void *> faster::workerFdd::funcTable[3][7];
+
+
+void * faster::workerFdd::load(const std::string libraryName){
 	std::cerr << "[Loading " << libraryName << "]  ";
 	
 	void * hdlr = dlopen(libraryName.data(), RTLD_LAZY);
@@ -19,261 +35,282 @@ void * load(const std::string libraryName){
 	return hdlr;
 }
 
-void * loadSymbol(void * hdlr, const std::string symbolName){
-	void * symbl = dlsym(hdlr, symbolName.data());
+void faster::workerFdd::loadSym(dFuncName funcName, const std::string symbolName){
+	void * symbl = dlsym(dLHandler[hAssign[type]][khAssign[keyType]], symbolName.data());
 
 	if(symbl == NULL){
 		std::cerr << "\n\033[5m\033[91mERROR!\033[0m\033[38;5;202m"<< dlerror() << "\033[0m " << std::endl;
 		exit(-1);
 	}
-
-	return symbl;
+	funcTable[hAssign[type]] [khAssign[keyType]] [funcName] = symbl;
 }
 
-void * faster::workerFddWrapper::dLHandler[3] = {0,0,0};
-
-std::unordered_map<faster::fddType, int> faster::workerFddWrapper::hAssign = std::unordered_map<fddType, int>({
-		{Char,0}, {Int,0}, {LongInt,0}, {Float,0}, {Double,0},
-		{CharP,1},{IntP,1},{LongIntP,1},{FloatP,1},{DoubleP,1},{Custom,1},
-		{CharV,2},{IntV,2},{LongIntV,2},{FloatV,2},{DoubleV,2},{String,2},
-	});
-
-std::unordered_map<char, void *> faster::workerFddWrapper::funcTable[3];
-
-//template <class T>
-void faster::workerFdd::loadLib(const fddType t){
-
-	std::cerr << " (" << dLHandler[hAssign[t]] ;
-	if ( dLHandler[hAssign[t]] )
+void faster::workerFdd::loadLib(){
+	if ( dLHandler[hAssign[type]][0] )
 		return;
 
-	switch (t){
-		case Char:
-		case Int:
-		case LongInt:
-		case Float:
-		case Double:
-			dLHandler[hAssign[t]] = load("libfaster/libfasterWorkerSFdd.so");
-			break;
-		case CharP:
-		case IntP:
-		case LongIntP:
-		case FloatP:
-		case DoubleP:
-		case Custom:
-			dLHandler[hAssign[t]] = load("libfaster/libfasterWorkerPFdd.so");
-			break;
-		case String:
-		case CharV:
-		case IntV:
-		case LongIntV:
-		case FloatV:
-		case DoubleV:
-			dLHandler[hAssign[t]] = load("libfaster/libfasterWorkerCFdd.so");
-			break;
+	if (type & POINTER){
+			dLHandler[hAssign[type]][0] = load("libfaster/libfasterWorkerPFdd.so");
+	}else{
+		if (type & VECTOR)
+			dLHandler[hAssign[type]][0] = load("libfaster/libfasterWorkerCFdd.so");
+		else
+			dLHandler[hAssign[type]][0] = load("libfaster/libfasterWorkerSFdd.so");
 	}
-	std::cerr  << dLHandler[hAssign[t]] << " )";
 
 }
 
-//template <class T>
-void faster::workerFdd::loadSymbols(const fddType t){
-	//funcTable[hAssign[t]] = std::unordered_map<char, void *>();
-	if (funcTable[hAssign[t]].size() != 0)
+void faster::workerFdd::loadLibI(){
+	if ( dLHandler[hAssign[type]][khAssign[keyType]] )
 		return;
-	std::cerr << "[Locating Symbols";
-	funcTable[hAssign[t]][NewWorkerDL]		= loadSymbol(dLHandler[hAssign[t]], "newWorkerDL");
-	funcTable[hAssign[t]][NewWorkerSDL]		= loadSymbol(dLHandler[hAssign[t]], "newWorkerSDL");
-	funcTable[hAssign[t]][DestroyWorkerDL]		= loadSymbol(dLHandler[hAssign[t]], "destroyWorkerDL");
 
-	funcTable[hAssign[t]][GetTypeDL]		= loadSymbol(dLHandler[hAssign[t]], "getTypeDL");
-	funcTable[hAssign[t]][GetKeyTypeDL]		= loadSymbol(dLHandler[hAssign[t]], "getKeyTypeDL");
+
+	if (type & POINTER){
+		switch (keyType){
+			case Char:    dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIPFddInstance0.so"); break;
+			case Int:     dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIPFddInstance1.so"); break;
+			case LongInt: dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIPFddInstance2.so"); break;
+			case Float:   dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIPFddInstance3.so"); break;
+			case Double:  dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIPFddInstance4.so"); break;
+			case String:  dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIPFddInstance5.so"); break;
+		}
+	}else{
+		if (type & (VECTOR | String))
+			switch (keyType){
+				case Char:    dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIFddInstance6.so"); break;
+				case Int:     dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIFddInstance7.so"); break;
+				case LongInt: dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIFddInstance8.so"); break;
+				case Float:   dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIFddInstance9.so"); break;
+				case Double:  dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIFddInstance10.so"); break;
+				case String:  dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIFddInstance11.so"); break;
+			}
+		else
+			switch (keyType){
+				case Char:    dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIFddInstance0.so"); break;
+				case Int:     dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIFddInstance1.so"); break;
+				case LongInt: dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIFddInstance2.so"); break;
+				case Float:   dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIFddInstance3.so"); break;
+				case Double:  dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIFddInstance4.so"); break;
+				case String:  dLHandler[hAssign[type]][khAssign[keyType]] = load("libfaster/libfasterWorkerIFddInstance5.so"); break;
+			}
+	}
+
+}
+
+
+void faster::workerFdd::loadSymbols(){
+	//funcTable[hAssign[t]] = std::unordered_map<char, void *>();
+	if (funcTable[hAssign[type]] [khAssign[keyType]] .size() != 0)
+		return;
+	std::cerr << "[Locating Symbols (" << hAssign[type] << "," << khAssign[keyType] << ") ";
+	loadSym(NewWorkerSDL	, "newWorkerSDL");
+	loadSym(DestroyWorkerDL	, "destroyWorkerDL");
+                                      
+	loadSym(GetTypeDL	, "getTypeDL");
+	loadSym(GetKeyTypeDL	, "getKeyTypeDL");
+	                              
+                                      
+	loadSym(SetDataDL	, "setDataDL");
+	loadSym(SetDataRawDL	, "setDataRawDL");
 	std::cerr << ".";
-
-	funcTable[hAssign[t]][SetDataDL]		= loadSymbol(dLHandler[hAssign[t]], "setDataDL");
-	funcTable[hAssign[t]][SetDataRawDL]		= loadSymbol(dLHandler[hAssign[t]], "setDataRawDL");
-
-	funcTable[hAssign[t]][GetLineSizesDL]		= loadSymbol(dLHandler[hAssign[t]], "getLineSizesDL");
-
-	funcTable[hAssign[t]][GetFddItemDL]		= loadSymbol(dLHandler[hAssign[t]], "getFddItemDL");
-	funcTable[hAssign[t]][GetDataDL]		= loadSymbol(dLHandler[hAssign[t]], "getDataDL");
-	funcTable[hAssign[t]][GetSizeDL]		= loadSymbol(dLHandler[hAssign[t]], "getSizeDL");
-	funcTable[hAssign[t]][ItemSizeDL]		= loadSymbol(dLHandler[hAssign[t]], "itemSizeDL");
-	funcTable[hAssign[t]][BaseSizeDL]		= loadSymbol(dLHandler[hAssign[t]], "baseSizeDL");
-	funcTable[hAssign[t]][DeleteItemDL]		= loadSymbol(dLHandler[hAssign[t]], "deleteItemDL");
-	funcTable[hAssign[t]][ShrinkDL]			= loadSymbol(dLHandler[hAssign[t]], "shrinkDL");
+                                      
+	loadSym(GetLineSizesDL	, "getLineSizesDL");
+                                      
+	loadSym(GetFddItemDL	, "getFddItemDL");
+	loadSym(GetDataDL	, "getDataDL");
+	loadSym(GetSizeDL	, "getSizeDL");
+	loadSym(ItemSizeDL	, "itemSizeDL");
+	loadSym(BaseSizeDL	, "baseSizeDL");
+	loadSym(DeleteItemDL	, "deleteItemDL");
+	loadSym(ShrinkDL	, "shrinkDL");
 	std::cerr << ".";
-
-	funcTable[hAssign[t]][InsertDL]			= loadSymbol(dLHandler[hAssign[t]], "insertDL");
-	funcTable[hAssign[t]][InsertListDL]		= loadSymbol(dLHandler[hAssign[t]], "insertListDL");
-
-	funcTable[hAssign[t]][ApplyDL]			= loadSymbol(dLHandler[hAssign[t]], "applyDL");
-
-	funcTable[hAssign[t]][CollectDL]		= loadSymbol(dLHandler[hAssign[t]], "collectDL");
-	funcTable[hAssign[t]][GroupByKeyDL]		= loadSymbol(dLHandler[hAssign[t]], "groupByKeyDL");
-	funcTable[hAssign[t]][CountByKeyDL]		= loadSymbol(dLHandler[hAssign[t]], "countByKeyDL");
+	                              
+                                      
+	loadSym(InsertDL	, "insertDL");
+	loadSym(InsertListDL	, "insertListDL");
+                                      
+	loadSym(ApplyDL		, "applyDL");
+                                      
+	loadSym(CollectDL	, "collectDL");
+	loadSym(GroupByKeyDL	, "groupByKeyDL");
+	loadSym(CountByKeyDL	, "countByKeyDL");
 	std::cerr << ".]  ";
 }
 
-//template <class T>
+
+// Create Indexed FDDs
 faster::workerFdd::workerFdd(fddType t){
 	type = t;
-	loadLib(t);
-	loadSymbols(t);
+	keyType = 0;
+	loadLib();
+	loadSymbols();
+}
+faster::workerFdd::workerFdd(unsigned long int ident, fddType t) : workerFdd(t){
+	void * funcP = funcTable[hAssign[t]] [0] [NewWorkerSDL];
+	_fdd = ((workerFddBase * (*)(unsigned long int, fddType, size_t)) funcP)(ident, t, 0);
 }
 
-//template <class T>
-faster::workerFdd::workerFdd(unsigned int ident, fddType t) : workerFdd(t){
-	_fdd = ((workerFddBase * (*)(unsigned int, fddType)) funcTable[hAssign[t]][NewWorkerDL])(ident, t);
+faster::workerFdd::workerFdd(unsigned long int ident, fddType t, size_t size) : workerFdd(t){
+	void * funcP = funcTable[hAssign[t]] [0] [NewWorkerSDL];
+	_fdd = ((workerFddBase * (*)(unsigned long int, fddType, size_t)) funcP)(ident, t, size);
 }
-//template <class T>
-faster::workerFdd::workerFdd(unsigned int ident, fddType t, size_t size) : workerFdd(t){
-	//funcTable.reserve(50);
-	void * func = funcTable[hAssign[t]][NewWorkerSDL];
-	if (! func ) {
-		std::cerr << "\n\033[5m\033[91mERROR!\033[0m\033[38;5;202m Could not find symbol NewWorkerSDL ("<< NewWorkerSDL  << ")\033[0m " << std::endl;
-		exit(-1);
-	}
-	_fdd = ((workerFddBase * (*)(unsigned int, fddType, size_t)) funcTable[hAssign[t]][NewWorkerSDL])(ident, t, size);
+
+// Create Indexed FDDs
+faster::workerFdd::workerFdd(fddType kt, fddType t){
+	type = t;
+	keyType = kt;
+	loadLibI();
+	loadSymbols();
 }
-//template <class T>
+faster::workerFdd::workerFdd(unsigned long int ident, fddType kt, fddType t) : workerFdd(kt, t){
+	void * funcP = funcTable[hAssign[t]] [khAssign[kt]] [NewWorkerSDL];
+	_fdd = ((workerFddBase * (*)(unsigned long int, fddType, size_t)) funcP)(ident, t, 0);
+}
+faster::workerFdd::workerFdd(unsigned long int ident, fddType kt, fddType t, size_t size) : workerFdd(kt, t){
+	std::cerr << "C(" << hAssign[t] << "," << khAssign[kt] << ")";
+	void * funcP = funcTable[hAssign[t]] [khAssign[kt]] [NewWorkerSDL];
+	_fdd = ((workerFddBase * (*)(unsigned long int, fddType, size_t)) funcP)(ident, t, size);
+	std::cerr << "!";
+}
+
+
 faster::workerFdd::~workerFdd(){
-	((void (*) (workerFddBase *)) funcTable[hAssign[type]][DestroyWorkerDL])(_fdd);
+	void * funcP =  funcTable[hAssign[type]] [khAssign[keyType]] [DestroyWorkerDL];
+	((void (*) (workerFddBase *)) funcP)(_fdd);
 }
 
-//template <class T>
+
 faster::fddType faster::workerFdd::getType(){
-	return ((fddType (*)(workerFddBase *)) funcTable[hAssign[type]][GetTypeDL])(_fdd);
-}
-//template <class T>
-faster::fddType faster::workerFdd::getKeyType(){
-	return ((fddType (*)(workerFddBase *)) funcTable[hAssign[type]][GetKeyTypeDL])(_fdd);
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GetTypeDL];
+	return ((fddType (*)(workerFddBase *)) funcP)(_fdd);
 }
 
-//template <class T>
+faster::fddType faster::workerFdd::getKeyType(){
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GetKeyTypeDL];
+	return ((fddType (*)(workerFddBase *)) funcP)(_fdd);
+}
+
+
 //T & faster::workerFdd::operator[](size_t address){
 void * faster::workerFdd::getItem(size_t address){
-	return ((void * (*)(workerFddBase *, size_t)) funcTable[hAssign[type]][GetFddItemDL])(_fdd, address);
-}
-//template <class T>
-void * faster::workerFdd::getData(){
-	return ((void * (*)(workerFddBase * fdd)) funcTable[hAssign[type]][GetDataDL])(_fdd);
-}
-//template <class T>
-size_t faster::workerFdd::getSize(){
-	return ((size_t (*)(workerFddBase *)) funcTable[hAssign[type]][GetSizeDL])(_fdd);
-}
-//template <class T>
-size_t faster::workerFdd::itemSize(){
-	return ((size_t (*)(workerFddBase *)) funcTable[hAssign[type]][ItemSizeDL])(_fdd);
-}
-//template <class T>
-size_t faster::workerFdd::baseSize(){
-	return ((size_t (*)(workerFddBase *)) funcTable[hAssign[type]][BaseSizeDL])(_fdd);
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GetFddItemDL];
+	return ((void * (*)(workerFddBase *, size_t)) funcP)(_fdd, address);
 }
 
-//template <class T>
-void faster::workerFdd::deleteItem(void * item){
-	((void (*)(workerFddBase *, void*)) funcTable[hAssign[type]][DeleteItemDL])(_fdd, item);
+void * faster::workerFdd::getData(){
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GetDataDL];
+	return ((void * (*)(workerFddBase * fdd)) funcP)(_fdd);
 }
-//template <class T>
+
+size_t faster::workerFdd::getSize(){
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GetSizeDL];
+	return ((size_t (*)(workerFddBase *)) funcP)(_fdd);
+}
+
+size_t faster::workerFdd::itemSize(){
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [ItemSizeDL];
+	return ((size_t (*)(workerFddBase *)) funcP)(_fdd);
+}
+
+size_t faster::workerFdd::baseSize(){
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [BaseSizeDL];
+	return ((size_t (*)(workerFddBase *)) funcP)(_fdd);
+}
+
+
+void faster::workerFdd::deleteItem(void * item){
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [DeleteItemDL];
+	((void (*)(workerFddBase *, void*)) funcP)(_fdd, item);
+}
+
 void faster::workerFdd::shrink(){
-	((void (*)(workerFddBase *)) funcTable[hAssign[type]][ShrinkDL])(_fdd);
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [ShrinkDL];
+	((void (*)(workerFddBase *)) funcP)(_fdd);
 }
 
 // For known types
-//template <class T>
 void faster::workerFdd::setData(void * data, size_t size) {
-	((void (*)(workerFddBase *, void*, void*, size_t*, size_t)) funcTable[hAssign[type]][SetDataDL])(_fdd, NULL, data, NULL, size);
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [SetDataDL];
+	((void (*)(workerFddBase *, void*, void*, size_t*, size_t)) funcP)(_fdd, NULL, data, NULL, size);
 }
-//template <class T>
+
 void faster::workerFdd::setData(void * data, size_t * lineSizes, size_t size) {
-	((void (*)(workerFddBase *, void*, void*, size_t*, size_t)) funcTable[hAssign[type]][SetDataDL])(_fdd, NULL, data, lineSizes, size);
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [SetDataDL];
+	((void (*)(workerFddBase *, void*, void*, size_t*, size_t)) funcP)(_fdd, NULL, data, lineSizes, size);
+}
+void faster::workerFdd::setData(void * keys, void * data, size_t size) {
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [SetDataDL];
+	((void (*)(workerFddBase *, void*, void*, size_t*, size_t)) funcP)(_fdd, keys, data, NULL, size);
+}
+
+void faster::workerFdd::setData(void * keys, void * data, size_t * lineSizes, size_t size) {
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [SetDataDL];
+	((void (*)(workerFddBase *, void*, void*, size_t*, size_t)) funcP)(_fdd, keys, data, lineSizes, size);
 }
 
 // For anonymous types
-//template <class T>
+
 void faster::workerFdd::setDataRaw(void * data, size_t size){
-	((void (*)(workerFddBase*, void*, void*, size_t*, size_t)) funcTable[hAssign[type]][SetDataRawDL])(_fdd, NULL, data, NULL, size);
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [SetDataRawDL];
+	((void (*)(workerFddBase*, void*, void*, size_t*, size_t)) funcP)(_fdd, NULL, data, NULL, size);
 }
-//template <class T>
+
 void faster::workerFdd::setDataRaw(void * data, size_t *lineSizes, size_t size){
-	((void (*)(workerFddBase*, void*, void*, size_t*, size_t)) funcTable[hAssign[type]][SetDataRawDL])(_fdd, NULL, data, lineSizes, size);
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [SetDataRawDL];
+	((void (*)(workerFddBase*, void*, void*, size_t*, size_t)) funcP)(_fdd, NULL, data, lineSizes, size);
+}
+void faster::workerFdd::setDataRaw(void * keys, void * data, size_t size){
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [SetDataRawDL];
+	((void (*)(workerFddBase*, void*, void*, size_t*, size_t)) funcP)(_fdd, keys, data, NULL, size);
 }
 
-//template <class T>
+void faster::workerFdd::setDataRaw(void * keys, void * data, size_t *lineSizes, size_t size){
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [SetDataRawDL];
+	((void (*)(workerFddBase*, void*, void*, size_t*, size_t)) funcP)(_fdd, keys, data, lineSizes, size);
+}
+
+
 size_t * faster::workerFdd::getLineSizes(){
-	return ((size_t * (*)(workerFddBase *)) funcTable[hAssign[type]][GetLineSizesDL])(_fdd);
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GetLineSizesDL];
+	return ((size_t * (*)(workerFddBase *)) funcP)(_fdd);
 }
 
 
-//template <class T>
-void faster::workerFdd::insert(void * v, size_t s){
-	((void (*)(workerFddBase *, void *, size_t)) funcTable[hAssign[type]][InsertDL])(_fdd, &v, s);
+
+void faster::workerFdd::insert(void * k, void * v, size_t s){
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [InsertDL];
+	((void (*)(workerFddBase *, void *, void *, size_t)) funcP)(_fdd, k, v, s);
 }
-//template <class T>
+
 void faster::workerFdd::insertl(void * v){
-	((void (*)(workerFddBase *, void *)) funcTable[hAssign[type]][InsertListDL])(_fdd, &v);
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [InsertListDL];
+	((void (*)(workerFddBase *, void *)) funcP)(_fdd, &v);
 }
 
-
-/*
-//template <class T>
-void faster::workerFdd::insert(T & v){
-	((void (*)(workerFddBase *, void *, size_t)) funcTable[hAssign[type]][InsertDL])(_fdd, &v, 0);
-}
-//template <class T>
-void faster::workerFdd::insert(T & v, size_t s){
-	((void (*)(workerFddBase *, void *, size_t)) funcTable[hAssign[type]][InsertDL])(_fdd, &v, s);
-}
-//template <class T>
-void faster::workerFdd::insert(std::list<T> & in){
-	((void (*)(workerFddBase *, void *)) funcTable[hAssign[type]][InsertListDL])(_fdd, &in);
-}
-//template <class T>
-void faster::workerFdd::insert(std::list< std::pair<T, size_t> > & in){
-	((void (*)(workerFddBase *, void *)) funcTable[hAssign[type]][InsertListDL])(_fdd, &in);
-}// */
 
 
 // Apply task functions to FDDs
-//template <class T>
+
 void faster::workerFdd::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){
-	((void (*)(workerFddBase*, void*, fddOpType, workerFddBase*, void**, size_t*)) funcTable[hAssign[type]][ApplyDL])(_fdd, func, op, dest, &result, &rSize);
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [ApplyDL];
+	((void (*)(workerFddBase*, void*, fddOpType, workerFddBase*, void**, size_t*)) funcP)(_fdd, func, op, dest, &result, &rSize);
 }
 
-//template <class T>
+
 void faster::workerFdd::collect(fastComm * comm){
-	((void (*)(workerFddBase *, fastComm *)) funcTable[hAssign[type]][CollectDL])(_fdd, comm);
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [CollectDL];
+	((void (*)(workerFddBase *, fastComm *)) funcP)(_fdd, comm);
 }
 
-//template <class T>
+
 void faster::workerFdd::groupByKey(fastComm *comm){
-	((void (*)(workerFddBase *, fastComm *)) funcTable[hAssign[type]][GroupByKeyDL])(_fdd, comm);
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GroupByKeyDL];
+	((void (*)(workerFddBase *, fastComm *)) funcP)(_fdd, comm);
 }
-//template <class T>
+
 void faster::workerFdd::countByKey(fastComm *comm){
-	((void (*)(workerFddBase *, fastComm *)) funcTable[hAssign[type]][CountByKeyDL])(_fdd, comm);
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [CountByKeyDL];
+	((void (*)(workerFddBase *, fastComm *)) funcP)(_fdd, comm);
 }
 
-/*
-template class faster::workerFdd<char>;
-template class faster::workerFdd<int>;
-template class faster::workerFdd<long int>;
-template class faster::workerFdd<float>;
-template class faster::workerFdd<double>;
 
-template class faster::workerFdd<char*>;
-template class faster::workerFdd<int*>;
-template class faster::workerFdd<long int*>;
-template class faster::workerFdd<float*>;
-template class faster::workerFdd<double*>;
-
-template class faster::workerFdd<std::string>;
-
-template class faster::workerFdd<std::vector<char>>;
-template class faster::workerFdd<std::vector<int>>;
-template class faster::workerFdd<std::vector<long int>>;
-template class faster::workerFdd<std::vector<float>>;
-template class faster::workerFdd<std::vector<double>>;
-*/

@@ -1,7 +1,8 @@
-#include "workerIFddExtern.cpp"
+#include "workerFdd.h"
 #include "worker.h"
 
 
+/*
 template <typename K>
 void faster::worker::_createIFDD (unsigned long int id, fddType type, size_t size){
 	workerFddBase * newFdd;
@@ -24,12 +25,14 @@ void faster::worker::_createIFDD (unsigned long int id, fddType type, size_t siz
 		case LongIntV: newFdd = new workerIFdd<K, std::vector<long int>>(id, type, size); break;
 		case FloatV: newFdd = new workerIFdd<K, std::vector<float>>(id, type, size); break;
 		case DoubleV: newFdd = new workerIFdd<K, std::vector<double>>(id, type, size); break;
-	}
-	fddList.insert(fddList.end(), newFdd);
-}
+	}	fddList.insert(fddList.end(), newFdd);
+}// */
+
 
 void faster::worker::createIFDD(unsigned long int id, fddType kType, fddType tType, size_t size){
-	switch (kType){
+	workerFddBase * newFdd = new workerFdd(id, kType, tType, size);
+	fddList.insert(fddList.end(), newFdd);
+	/*switch (kType){
 		case Null: break;
 		case Char:    _createIFDD<char>(id, tType, size); break;
 		case Int:     _createIFDD<int>(id, tType, size); break;
@@ -37,6 +40,6 @@ void faster::worker::createIFDD(unsigned long int id, fddType kType, fddType tTy
 		case Float:   _createIFDD<float>(id, tType, size); break;
 		case Double:  _createIFDD<double>(id, tType, size); break;
 		case String:  _createIFDD<std::string>(id, tType, size); break;
-	}
+	}// */
 }
 

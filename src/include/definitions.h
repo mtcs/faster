@@ -48,6 +48,38 @@ namespace faster{
 	#define OP_CountByKey		0x0001
 	#define OP_GroupByKey		0x0002
 
+	typedef enum : char {
+		NewWorkerDL,
+		NewWorkerSDL,
+		DestroyWorkerDL,
+
+		GetTypeDL,
+		GetKeyTypeDL,
+
+		SetDataDL,
+		SetDataRawDL,
+
+		GetLineSizesDL,
+
+		GetFddItemDL,
+		GetDataDL,
+		GetSizeDL,
+		ItemSizeDL,
+		BaseSizeDL,
+		DeleteItemDL,
+		ShrinkDL,
+
+		InsertDL,
+		InsertListDL,
+
+		ApplyDL,
+
+		CollectDL,
+		GroupByKeyDL,
+		CountByKeyDL,
+
+	} dFuncName;
+
 	// Not Indexed FFDs
 	// FDD function pointer types
 

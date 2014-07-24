@@ -1,7 +1,7 @@
 #include "_workerFdd.cpp"
 #include "workerFddModule.cpp"
 
-faster::workerFddBase * faster::newWorkerSDL(unsigned int id, fddType type, size_t size){
+faster::workerFddBase * faster::newWorkerSDL(unsigned long int id, fddType type, size_t size){
 	switch (type){
 		case Char: return new _workerFdd<char>(id, type, size); break;
 		case Int: return new _workerFdd<int>(id, type, size); break;

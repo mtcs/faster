@@ -1,0 +1,557 @@
+#include <iostream>
+#include <tuple>
+#include "_workerFdd.h"
+#include "workerFddBase.h"
+#include "fddStorageExtern.cpp"
+#include "fastComm.h"
+
+#include "workerFddCoreExtern.cpp"
+
+// MAP
+template <typename T>
+template <typename U>
+void faster::_workerFdd<T>::map (workerFddBase * dest, mapFunctionP<T,U> mapFunc){
+	T * d = this->localData->getData();
+	size_t s = this->localData->getSize();
+	U * od = (U*) dest->getData();
+
+	//std::cerr << "START " << id << " " << s << "  ";
+
+	#pragma omp parallel for 
+	for (int i = 0; i < s; ++i){
+		od[i] = mapFunc(d[i]);
+	}
+	//std::cerr << "END ";
+}		
+
+template <typename T>
+template <typename U>
+void faster::_workerFdd<T>::map (workerFddBase * dest, PmapFunctionP<T,U> mapFunc){
+	T * d = this->localData->getData();
+	size_t s = this->localData->getSize();
+	size_t * ls = dest->getLineSizes() ;
+	U * od = (U*) dest->getData();
+
+	//std::cerr << "START " << id << " " << s << "  ";
+
+	#pragma omp parallel for 
+	for (int i = 0; i < s; ++i){
+		std::pair<U,size_t> r = mapFunc(d[i]);
+		od[i] = r.first;
+		ls[i] = r.second;
+	}
+	//std::cerr << "END ";
+}		
+
+template <typename T>
+template <typename L, typename U>
+void faster::_workerFdd<T>::map (workerFddBase * dest, ImapFunctionP<T,L,U> mapFunc){
+	T * d = this->localData->getData();
+	size_t s = this->localData->getSize();
+	L * ok = (L*) dest->getKeys();
+	U * od = (U*) dest->getData();
+
+	//std::cerr << "START " << id << " " << s << "  ";
+
+	#pragma omp parallel for 
+	for (int i = 0; i < s; ++i){
+		std::pair<L,U> r = mapFunc(d[i]);
+		ok[i] = r.first;
+		od[i] = r.second;
+	}
+	//std::cerr << "END ";
+}		
+
+template <typename T>
+template <typename L, typename U>
+void faster::_workerFdd<T>::map (workerFddBase * dest, IPmapFunctionP<T,L,U> mapFunc){
+	T * d = this->localData->getData();
+	size_t s = this->localData->getSize();
+	size_t * ls = dest->getLineSizes() ;
+	L * ok = (L*) dest->getKeys();
+	U * od = (U*) dest->getData();
+
+	//std::cerr << "START " << id << " " << s << "  ";
+
+	#pragma omp parallel for 
+	for (int i = 0; i < s; ++i){
+		std::tuple<L,U,size_t> r = mapFunc(d[i]);
+		std::tie(ok[i], od[i], ls[i]) = r;
+	}
+	//std::cerr << "END ";
+}		
+
+
+// BulkMap
+template <typename T>
+template <typename U>
+void faster::_workerFdd<T>::bulkMap (workerFddBase * dest, bulkMapFunctionP<T,U> bulkMapFunc){
+	bulkMapFunc((U*) dest->getData(), (T *)this->localData->getData(), this->localData->getSize());
+}
+template <typename T>
+template <typename U>
+void faster::_workerFdd<T>::bulkMap (workerFddBase * dest, PbulkMapFunctionP<T,U> bulkMapFunc){
+	bulkMapFunc((U*) dest->getData(), dest->getLineSizes(), (T *) this->localData->getData(), this->localData->getSize());
+}
+template <typename T>
+template <typename L, typename U>
+void faster::_workerFdd<T>::bulkMap (workerFddBase * dest, IbulkMapFunctionP<T,L,U> bulkMapFunc){
+	bulkMapFunc((L*) dest->getKeys(), (U*) dest->getData(), (T *)this->localData->getData(), this->localData->getSize());
+}
+template <typename T>
+template <typename L, typename U>
+void faster::_workerFdd<T>::bulkMap (workerFddBase * dest, IPbulkMapFunctionP<T,L,U> bulkMapFunc){
+	bulkMapFunc((L*) dest->getKeys(), (U*) dest->getData(), dest->getLineSizes(), (T *) this->localData->getData(), this->localData->getSize());
+}
+
+
+// FlatMap
+template <typename T>
+template <typename U>
+void faster::_workerFdd<T>::flatMap(workerFddBase * dest,  flatMapFunctionP<T,U> flatMapFunc ){
+	T * d = this->localData->getData();
+	size_t s = this->localData->getSize();
+	std::list<U> resultList;
+
+	#pragma omp parallel 
+	{
+		std::list<U> partResultList;
+
+		#pragma omp for 
+		for (int i = 0; i < s; ++i){
+			std::list<U> r = flatMapFunc(d[i]);
+
+			partResultList.insert(partResultList.end(), r.begin(), r.end());
+		}
+
+		#pragma omp critical
+		resultList.insert(resultList.end(), partResultList.begin(), partResultList.end() );
+
+	}
+	dest->insertl(&resultList);
+}
+template <typename T>
+template <typename U>
+void faster::_workerFdd<T>::flatMap(workerFddBase * dest,  PflatMapFunctionP<T,U> flatMapFunc ){
+	T * d = this->localData->getData();
+	size_t s = this->localData->getSize();
+	std::list< std::pair<U, size_t> > resultList;
+
+	#pragma omp parallel 
+	{
+		std::list<std::pair<U, size_t>> partResultList;
+
+		#pragma omp for 
+		for (int i = 0; i < s; ++i){
+			std::list<std::pair<U, size_t>> r = flatMapFunc(d[i]);
+
+			partResultList.insert(partResultList.end(), r.begin(), r.end());
+		}
+
+		#pragma omp critical
+		resultList.insert(resultList.end(), partResultList.begin(), partResultList.end() );
+
+	}
+	dest->insertl(&resultList);
+}
+template <typename T>
+template <typename L, typename U>
+void faster::_workerFdd<T>::flatMap(workerFddBase * dest,  IflatMapFunctionP<T,L,U> flatMapFunc ){
+	T * d = this->localData->getData();
+	size_t s = this->localData->getSize();
+	std::list<std::pair<L,U>> resultList;
+
+	#pragma omp parallel 
+	{
+		std::list<std::pair<L,U>> partResultList;
+
+		#pragma omp for 
+		for (int i = 0; i < s; ++i){
+			std::list<std::pair<L,U>> r = flatMapFunc(d[i]);
+
+			partResultList.insert(partResultList.end(), r.begin(), r.end());
+		}
+
+		#pragma omp critical
+		resultList.insert(resultList.end(), partResultList.begin(), partResultList.end() );
+
+	}
+	dest->insertl(&resultList);
+}
+template <typename T>
+template <typename L, typename U>
+void faster::_workerFdd<T>::flatMap(workerFddBase * dest,  IPflatMapFunctionP<T,L,U> flatMapFunc ){
+	T * d = this->localData->getData();
+	size_t s = this->localData->getSize();
+	std::list< std::tuple<L, U, size_t> > resultList;
+
+	#pragma omp parallel 
+	{
+		std::list<std::tuple<L, U, size_t>> partResultList;
+
+		#pragma omp for 
+		for (int i = 0; i < s; ++i){
+			std::list<std::tuple<L, U, size_t>> r = flatMapFunc(d[i]);
+
+			partResultList.insert(partResultList.end(), r.begin(), r.end());
+		}
+
+		#pragma omp critical
+		resultList.insert(resultList.end(), partResultList.begin(), partResultList.end() );
+
+	}
+	dest->insertl(&resultList);
+}
+
+// BlockFlatMap
+template <typename T>
+template <typename U>
+void faster::_workerFdd<T>::bulkFlatMap(workerFddBase * dest,  bulkFlatMapFunctionP<T,U> bulkFlatMapFunc ){
+	U * result;
+	size_t rSize;
+
+	bulkFlatMapFunc(result, rSize, this->localData->getData(), this->localData->getSize());
+	dest->setData(result, rSize);
+}
+template <typename T>
+template <typename U>
+void faster::_workerFdd<T>::bulkFlatMap(workerFddBase * dest,  PbulkFlatMapFunctionP<T,U> bulkFlatMapFunc ){
+	U * result;
+	size_t * rDataSizes = NULL;
+	size_t rSize;
+
+	bulkFlatMapFunc( result, rDataSizes, rSize, (T*) this->localData->getData(), this->localData->getSize());
+	dest->setData( result, rDataSizes, rSize);
+}
+template <typename T>
+template <typename L, typename U>
+void faster::_workerFdd<T>::bulkFlatMap(workerFddBase * dest,  IbulkFlatMapFunctionP<T,L,U> bulkFlatMapFunc ){
+	L * keys;
+	U * result;
+	size_t rSize;
+
+	bulkFlatMapFunc(keys, result, rSize, this->localData->getData(), this->localData->getSize());
+	dest->setData(keys, result, rSize);
+}
+template <typename T>
+template <typename L, typename U>
+void faster::_workerFdd<T>::bulkFlatMap(workerFddBase * dest,  IPbulkFlatMapFunctionP<T,L,U> bulkFlatMapFunc ){
+	L * keys;
+	U * result;
+	size_t * rDataSizes = NULL;
+	size_t rSize;
+
+	bulkFlatMapFunc(keys, result, rDataSizes, rSize, (T*) this->localData->getData(), this->localData->getSize());
+	dest->setData(keys, result, rDataSizes, rSize);
+}
+
+
+// REDUCE
+template <typename T>
+T faster::_workerFdd<T>::reduce (reduceFunctionP<T> reduceFunc){
+	T * d = this->localData->getData();
+	T result;
+	size_t s = this->localData->getSize();
+	//std::cerr << "START " << id << " " << s << " | ";
+
+	#pragma omp parallel 
+	{
+		int nT = omp_get_num_threads();
+		int tN = omp_get_thread_num();
+		T partResult = d[tN];
+
+		//#pragma omp master
+		//std::cerr << "Thread:"<< tN << "(" << nT << ")" << " ";
+		
+		#pragma omp for 
+		for (int i = nT; i < s; ++i){
+			partResult = reduceFunc(partResult, d[i]);
+			//std::cerr << partResult<< "<" << d[i] << "  " ;
+		}
+		#pragma omp master
+		result = partResult;
+
+		#pragma omp barrier
+		
+		#pragma omp critical
+		if (omp_get_thread_num() != 0){
+			result = reduceFunc(result, partResult);
+		}
+	}
+	//std::cerr << "END";
+	//std::cerr << "END (RESULT:" << result << ")";
+	return result;
+}
+
+template <typename T>
+T faster::_workerFdd<T>::bulkReduce (bulkReduceFunctionP<T> bulkReduceFunc){
+	return bulkReduceFunc((T*) this->localData->getData(), this->localData->getSize());
+}
+
+
+
+template <typename T>
+template <typename U>
+void faster::_workerFdd<T>::_apply(void * func, fddOpType op, workerFddBase * dest){
+	switch (op){
+		case OP_Map:
+			map<U>(dest, (mapFunctionP<T,U>) func);
+			std::cerr << "Map ";
+			break;
+		case OP_BulkMap:
+			bulkMap<U>(dest, ( bulkMapFunctionP<T,U> ) func);
+			std::cerr << "BulkMap ";
+			break;
+		case OP_FlatMap:
+			flatMap<U>(dest, ( flatMapFunctionP<T,U> ) func);
+			std::cerr << "FlatMap ";
+			break;
+		case OP_BulkFlatMap:
+			bulkFlatMap<U>(dest, ( bulkFlatMapFunctionP<T,U> ) func);
+			std::cerr << "BulkFlatMap ";
+			break;
+	}
+}
+
+// Not Pointer -> Pointer
+template <typename T>
+template <typename U>
+void faster::_workerFdd<T>::_applyP(void * func, fddOpType op, workerFddBase * dest){
+	switch (op){
+		case OP_Map:
+			map(dest, (PmapFunctionP<T,U>) func);
+			std::cerr << "Map ";
+			break;
+		case OP_BulkMap:
+			bulkMap(dest, ( PbulkMapFunctionP<T,U> ) func);
+			std::cerr << "BulkMap ";
+			break;
+		case OP_FlatMap:
+			flatMap(dest, ( PflatMapFunctionP<T,U> ) func);
+			std::cerr << "FlatMap ";
+			break;
+		case OP_BulkFlatMap:
+			bulkFlatMap(dest, ( PbulkFlatMapFunctionP<T,U> ) func);
+			std::cerr << "BulkFlatMap ";
+			break;
+	}
+}
+
+template <typename T>
+template <typename L, typename U>
+void faster::_workerFdd<T>::_applyI(void * func, fddOpType op, workerFddBase * dest){
+	switch (op){
+		case OP_Map:
+			map(dest, ( ImapFunctionP<T,L,U> ) func);
+			std::cerr << "Map ";
+			break;
+		case OP_BulkMap:
+			bulkMap(dest, ( IbulkMapFunctionP<T,L,U> ) func);
+			std::cerr << "BulkMap ";
+			break;
+		case OP_FlatMap:
+			flatMap(dest, ( IflatMapFunctionP<T,L,U> ) func);
+			std::cerr << "FlatMap ";
+			break;
+		case OP_BulkFlatMap:
+			bulkFlatMap(dest, ( IbulkFlatMapFunctionP<T,L,U> ) func);
+			std::cerr << "BulkFlatMap ";
+			break;
+	}
+}
+
+// Not Pointer -> Pointer
+template <typename T>
+template <typename L, typename U>
+void faster::_workerFdd<T>::_applyIP(void * func, fddOpType op, workerFddBase * dest){
+	switch (op){
+		case OP_Map:
+			map(dest, ( IPmapFunctionP<T,L,U> ) func);
+			std::cerr << "Map ";
+			break;
+		case OP_BulkMap:
+			bulkMap(dest, ( IPbulkMapFunctionP<T,L,U> ) func);
+			std::cerr << "BulkMap ";
+			break;
+		case OP_FlatMap:
+			flatMap(dest, ( IPflatMapFunctionP<T,L,U> ) func);
+			std::cerr << "FlatMap ";
+			break;
+		case OP_BulkFlatMap:
+			bulkFlatMap(dest, ( IPbulkFlatMapFunctionP<T,L,U> ) func);
+			std::cerr << "BulkFlatMap ";
+			break;
+	}
+}
+
+template <typename T>
+void faster::_workerFdd<T>::_applyReduce(void * func, fddOpType op, void *& result, size_t & rSize){
+	T r;
+	switch (op){
+		case OP_Reduce:
+			r = reduce( ( reduceFunctionP<T> ) func);
+			std::cerr << "Reduce ";
+			break;
+		case OP_BulkReduce:
+			r = bulkReduce( ( bulkReduceFunctionP<T> ) func);
+			std::cerr << "BulkReduce ";
+			break;
+	}
+	this->resultBuffer->reset();
+	(*this->resultBuffer) << r;
+	result = this->resultBuffer->data();
+	rSize = this->resultBuffer->size();
+}
+
+
+template <typename T>
+void faster::_workerFdd<T>::_preApply(void * func, fddOpType op, workerFddBase * dest){ 
+/*	switch (dest->getType()){
+		case Char:     _apply(func, op,  (workerFdd<char> *) dest); break;
+		case Int:      _apply(func, op,  (workerFdd<int> *) dest); break;
+		case LongInt:  _apply(func, op,  (workerFdd<long int> *) dest); break;
+		case Float:    _apply(func, op,  (workerFdd<float> *) dest); break;
+		case Double:   _apply(func, op,  (workerFdd<double> *) dest); break;
+		case CharP:    _applyP(func, op, (workerFdd<char *> *) dest); break;
+		case IntP:     _applyP(func, op, (workerFdd<int *> *) dest); break;
+		case LongIntP: _applyP(func, op, (workerFdd<long int *> *) dest); break;
+		case FloatP:   _applyP(func, op, (workerFdd<float *> *) dest); break;
+		case DoubleP:  _applyP(func, op, (workerFdd<double *> *) dest); break;
+		case String:   _apply(func, op,  (workerFdd<std::string> *) dest); break;
+		//case Custom:   _apply(func, op, (workerFdd<void *> *) dest); break;
+		case CharV:     _apply(func, op, (workerFdd<std::vector<char>> *) dest); break;
+		case IntV:      _apply(func, op, (workerFdd<std::vector<int>> *) dest); break;
+		case LongIntV:  _apply(func, op, (workerFdd<std::vector<long int>> *) dest); break;
+		case FloatV:    _apply(func, op, (workerFdd<std::vector<float>> *) dest); break;
+		case DoubleV:   _apply(func, op, (workerFdd<std::vector<double>> *) dest); break;
+	}*/
+	switch (dest->getType()){
+		case Char:      _apply<char>(func, op,  dest); break;
+		case Int:       _apply<int>(func, op,  dest); break;
+		case LongInt:   _apply<long int>(func, op, dest); break;
+		case Float:     _apply<float>(func, op,  dest); break;
+		case Double:    _apply<double>(func, op,  dest); break;
+		case CharP:    _applyP<char *>(func, op, dest); break;
+		case IntP:     _applyP<int *>(func, op, dest); break;
+		case LongIntP: _applyP<long int *>(func, op, dest); break;
+		case FloatP:   _applyP<float *>(func, op, dest); break;
+		case DoubleP:  _applyP<double *>(func, op, dest); break;
+		case String:    _apply<std::string>(func, op,  dest); break;
+		//case Custom:   _apply<void *>(func, op, (workerFdd *) dest); break;
+		case CharV:     _apply<std::vector<char>>(func, op, dest); break;
+		case IntV:      _apply<std::vector<int>>(func, op, dest); break;
+		case LongIntV:  _apply<std::vector<long int>>(func, op, dest); break;
+		case FloatV:    _apply<std::vector<float>>(func, op, dest); break;
+		case DoubleV:   _apply<std::vector<double>>(func, op, dest); break;
+	}
+}
+template <typename T>
+template <typename L>
+void faster::_workerFdd<T>::_preApplyI(void * func, fddOpType op, workerFddBase * dest){ 
+/*	switch (dest->getType()){
+		case Null: break;
+		case Char:     _applyI(func, op,  (workerIFdd<L, char> *) dest); break;
+		case Int:      _applyI(func, op,  (workerIFdd<L, int> *) dest); break;
+		case LongInt:  _applyI(func, op,  (workerIFdd<L, long int> *) dest); break;
+		case Float:    _applyI(func, op,  (workerIFdd<L, float> *) dest); break;
+		case Double:   _applyI(func, op,  (workerIFdd<L, double> *) dest); break;
+		case CharP:    _applyIP(func, op, (workerIFdd<L, char *> *) dest); break;
+		case IntP:     _applyIP(func, op, (workerIFdd<L, int *> *) dest); break;
+		case LongIntP: _applyIP(func, op, (workerIFdd<L, long int *> *) dest); break;
+		case FloatP:   _applyIP(func, op, (workerIFdd<L, float *> *) dest); break;
+		case DoubleP:  _applyIP(func, op, (workerIFdd<L, double *> *) dest); break;
+		case String:   _applyI(func, op,  (workerIFdd<L, std::string> *) dest); break;
+		//case Custom:   _applyI(func, op, (workerIFdd<L, void *> *) dest); break;
+		case CharV:     _applyI(func, op, (workerIFdd<L, std::vector<char>> *) dest); break;
+		case IntV:      _applyI(func, op, (workerIFdd<L, std::vector<int>> *) dest); break;
+		case LongIntV:  _applyI(func, op, (workerIFdd<L, std::vector<long int>> *) dest); break;
+		case FloatV:    _applyI(func, op, (workerIFdd<L, std::vector<float>> *) dest); break;
+		case DoubleV:   _applyI(func, op, (workerIFdd<L, std::vector<double>> *) dest); break;
+	}*/
+	switch (dest->getType()){
+		case Null: break;
+		case Char:      _applyI<L, char> 	(func, op, dest); break;
+		case Int:       _applyI<L, int> 	(func, op, dest); break;
+		case LongInt:   _applyI<L, long int> 	(func, op, dest); break;
+		case Float:     _applyI<L, float> 	(func, op, dest); break;
+		case Double:    _applyI<L, double> 	(func, op, dest); break;
+		case CharP:    _applyIP<L, char *> 	(func, op, dest); break;
+		case IntP:     _applyIP<L, int *> 	(func, op, dest); break;
+		case LongIntP: _applyIP<L, long int *> 	(func, op, dest); break;
+		case FloatP:   _applyIP<L, float *> 	(func, op, dest); break;
+		case DoubleP:  _applyIP<L, double *> 	(func, op, dest); break;
+		case String:    _applyI<L, std::string> (func, op, dest); break;
+		//case Custom:    _applyI<L, void *> 	(func, op, dest); break;
+		case CharV:     _applyI<L, std::vector<char>> 	(func, op, dest); break;
+		case IntV:      _applyI<L, std::vector<int>> 	(func, op, dest); break;
+		case LongIntV:  _applyI<L, std::vector<long int>>(func, op, dest); break;
+		case FloatV:    _applyI<L, std::vector<float>> 	(func, op, dest); break;
+		case DoubleV:   _applyI<L, std::vector<double>> (func, op, dest); break;
+	}
+}
+
+
+// -------------------------- Public Functions ------------------------ //
+
+
+
+// For known primitive types
+template <typename T>
+void faster::_workerFdd<T>::setData(T * data, size_t size) {
+	this->localData->setData(data, size);
+}
+// For anonymous primitive types
+template <typename T>
+void faster::_workerFdd<T>::setDataRaw(void * data, size_t size) {
+	this->localData->setDataRaw(data, size);
+}
+
+template <typename T>
+void faster::_workerFdd<T>::insert(void * k UNUSED, void * in, size_t s UNUSED){ 
+	this->localData->insert(* (T*) in);
+}
+template <typename T>
+void faster::_workerFdd<T>::insertl(void * in){ 
+	insert(* (std::list<T> *) in);
+}
+
+
+template <typename T>
+void faster::_workerFdd<T>::insert(T & in){ 
+	this->localData->insert(in); 
+}
+template <typename T>
+void faster::_workerFdd<T>::insert(std::list<T> & in){ 
+	typename std::list<T>::iterator it;
+
+	if (this->localData->getSize() < in.size())
+		this->localData->grow(in.size());
+
+	for ( it = in.begin(); it != in.end(); it++)
+		this->localData->insert(*it); 
+}
+
+
+
+template <typename T>
+void faster::_workerFdd<T>::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){ 
+	if (op & OP_GENERICREDUCE){
+		_applyReduce(func, op, result, rSize);
+	}else{
+		switch (dest->getKeyType()){
+			case Null:     _preApply(func, op, dest);break;
+			case Char:     _preApplyI<char>(func, op, dest); break;
+			case Int:      _preApplyI<int>(func, op, dest); break;
+			case LongInt:  _preApplyI<long int>(func, op, dest); break;
+			case Float:    _preApplyI<float>(func, op, dest); break;
+			case Double:   _preApplyI<double>(func, op, dest); break;
+			case String:   _preApplyI<std::string>(func, op, dest); break;
+		}
+	}
+}
+
+
+template <typename T>
+void faster::_workerFdd<T>::collect(fastComm * comm) {
+	comm->sendFDDDataCollect(this->id, this->localData->getData(), this->localData->getSize());
+};

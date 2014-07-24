@@ -58,7 +58,7 @@ void faster::worker::readFDDFile(unsigned long int id, std::string &filename, si
 		// If the other process doesn't have this line, get it!
 		if ( c == '\n' ) {
 			std::getline( inFile, line ); 
-			newFdd->insert(&line, 0);
+			newFdd->insert(0, &line, 0);
 		}
 	}
 	
@@ -66,7 +66,7 @@ void faster::worker::readFDDFile(unsigned long int id, std::string &filename, si
 	while( size_t(inFile.tellg()) < (offset + size) ){
 		std::getline( inFile, line ); 
 
-		newFdd->insert(&line, 0);
+		newFdd->insert(0, &line, 0);
 	}
 	inFile.close();
 

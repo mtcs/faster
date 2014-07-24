@@ -65,7 +65,7 @@ namespace faster{
 
 	// Worker side FDD
 	template <class K, class T>
-	class workerIFdd : public workerIFddCore<K,T>{
+	class _workerIFdd : public workerIFddCore<K,T>{
 		private:
 			// Procedures that apply the FDD core functions
 			template <typename L, typename U>
@@ -134,9 +134,9 @@ namespace faster{
 
 
 		public:
-			workerIFdd(unsigned int ident, fddType t) : workerIFddCore<K,T>(ident, t) {}
-			workerIFdd(unsigned int ident, fddType t, size_t size) : workerIFddCore<K,T>(ident, t, size) {}
-			~workerIFdd(){}
+			_workerIFdd(unsigned int ident, fddType t) : workerIFddCore<K,T>(ident, t) {}
+			_workerIFdd(unsigned int ident, fddType t, size_t size) : workerIFddCore<K,T>(ident, t, size) {}
+			~_workerIFdd(){}
 
 			// For known types
 			void setData(K * keys, T * data, size_t size) ;
@@ -155,8 +155,8 @@ namespace faster{
 				return NULL; 
 			}
 
-			void insert(void * in UNUSED, size_t s UNUSED){}
-			void insertl(void * in UNUSED){}
+			void insert(void * k, void * in, size_t s);
+			void insertl(void * in);
 
 			void insert(K & key, T & in);
 			void insert(std::list< std::pair<K, T> > & in);
@@ -171,7 +171,7 @@ namespace faster{
 
 	// Pointer specialization
 	template <class K, class T>
-	class workerIFdd<K,T*> : public workerIFddCore<K,T*>{
+	class _workerIFdd<K,T*> : public workerIFddCore<K,T*>{
 		private:
 			// Procedures that apply the FDD core functions
 			template <typename L, typename U>
@@ -239,9 +239,9 @@ namespace faster{
 			
 
 		public:
-			workerIFdd(unsigned int ident, fddType t) : workerIFddCore<K,T*>(ident, t) {}
-			workerIFdd(unsigned int ident, fddType t, size_t size) : workerIFddCore<K,T*>(ident, t, size) {}
-			~workerIFdd(){}
+			_workerIFdd(unsigned int ident, fddType t) : workerIFddCore<K,T*>(ident, t) {}
+			_workerIFdd(unsigned int ident, fddType t, size_t size) : workerIFddCore<K,T*>(ident, t, size) {}
+			~_workerIFdd(){}
 
 
 			// For known types
@@ -258,10 +258,10 @@ namespace faster{
 
 			size_t * getLineSizes();
 
-			void insert(void * in UNUSED, size_t s UNUSED){}
-			void insertl(void * in UNUSED){}
+			void insert(void * k, void * in, size_t s);
+			void insertl(void * in);
 
-			void insert(K key, T* & in, size_t s);
+			void insert(K & key, T* & in, size_t s);
 			void insert(std::list< std::tuple<K, T*, size_t> > & in);
 
 

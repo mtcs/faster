@@ -8,7 +8,7 @@
 #include "workerFddCoreExtern.cpp"
 #include "workerFddModule.cpp"
 
-faster::workerFddBase * faster::newWorkerSDL(unsigned int id, fddType type, size_t size){
+faster::workerFddBase * faster::newWorkerSDL(unsigned long int id, fddType type, size_t size){
 	switch (type){
 		case CharP: return new _workerFdd<char *>(id, type, size); break;
 		case IntP: return new _workerFdd<int *>(id, type, size); break;
@@ -533,7 +533,7 @@ size_t * faster::_workerFdd<T*>::getLineSizes(){
 }
 
 template <typename T>
-void faster::_workerFdd<T*>::insert(void * in, size_t s){ 
+void faster::_workerFdd<T*>::insert(void * k UNUSED, void * in, size_t s){ 
 	this->localData->insert((T*&)in, s);
 }
 template <typename T>

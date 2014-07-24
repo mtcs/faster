@@ -152,7 +152,7 @@ namespace faster {
 				return NULL;
 			}
 
-			void insert(void * in, size_t s);
+			void insert(void * k, void * in, size_t s);
 			void insertl(void * in); 
 
 			void insert(T & in);
@@ -252,7 +252,7 @@ namespace faster {
 
 			size_t * getLineSizes();
 
-			void insert(void * in, size_t s);
+			void insert(void * k, void * in, size_t s);
 			void insertl(void * in);
 
 			void insert(T & in);

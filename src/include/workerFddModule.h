@@ -2,43 +2,11 @@
 #define LIBFASTER_WORKERFDDMODULE_H
 
 namespace faster{
-	typedef enum : char {
-		NewWorkerDL,
-		NewWorkerSDL,
-		DestroyWorkerDL,
-
-		GetTypeDL,
-		GetKeyTypeDL,
-
-		SetDataDL,
-		SetDataRawDL,
-
-		GetLineSizesDL,
-
-		GetFddItemDL,
-		GetDataDL,
-		GetSizeDL,
-		ItemSizeDL,
-		BaseSizeDL,
-		DeleteItemDL,
-		ShrinkDL,
-
-		InsertDL,
-		InsertListDL,
-
-		ApplyDL,
-
-		CollectDL,
-		GroupByKeyDL,
-		CountByKeyDL,
-
-	} dFuncName;
 
 	
 	// C-stile Dynamic loaded functions
 	extern "C"{
-		workerFddBase * newWorkerDL(unsigned int ident, fddType type);
-		workerFddBase * newWorkerSDL(unsigned int ident, fddType type, size_t size);
+		workerFddBase * newWorkerSDL(unsigned long int ident, fddType type, size_t size);
 		void destroyWorkerDL(workerFddBase * fdd);
 
 		fddType getTypeDL(workerFddBase * fdd);
@@ -57,7 +25,7 @@ namespace faster{
 		void deleteItemDL(workerFddBase * fdd, void * item);
 		void shrinkDL(workerFddBase * fdd);
 
-		void insertDL(workerFddBase * fdd, void * v, size_t s);
+		void insertDL(workerFddBase * fdd, void * k, void * v, size_t s);
 		void insertListDL(workerFddBase * fdd, void * v);
 
 		void applyDL(workerFddBase * fdd, void * func, fddOpType op, workerFddBase * dest, void ** result, size_t * rSize);

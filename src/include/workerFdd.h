@@ -20,26 +20,31 @@ namespace faster {
 	template <class K, class T>
 	class workerIFdd;
 
-	class workerFddWrapper : public workerFddBase{
-		protected:
-			static std::unordered_map<fddType, int> hAssign; 
-			static void * dLHandler[3];
-			static std::unordered_map<char, void *> funcTable[3];
-
-	};
 
 	// Interface for dynamic loading that wraps C-style language
 	//template <class T>
-	class workerFdd : public workerFddWrapper{
+	class workerFdd : public workerFddBase{
 		private:
 			workerFddBase * _fdd;
 
-			void loadLib(const fddType t);
-			void loadSymbols(const fddType t);
+			static std::unordered_map<fddType, int> hAssign; 
+			static std::unordered_map<fddType, int> khAssign; 
+			static void * dLHandler[3][7];
+			static std::unordered_map<char, void *> funcTable[3][7];
+
+			void * load(const std::string);
+			void loadSym(dFuncName funcName, const std::string symbolName);
+
+			void loadLib();
+			void loadLibI();
+			void loadSymbols();
 		public:
 			workerFdd(fddType t);
-			workerFdd(unsigned int ident, fddType t);
-			workerFdd(unsigned int ident, fddType t, size_t size);
+			workerFdd(fddType kt, fddType t);
+			workerFdd(unsigned long int ident, fddType t);
+			workerFdd(unsigned long int ident, fddType t, size_t size);
+			workerFdd(unsigned long int ident, fddType kt, fddType t);
+			workerFdd(unsigned long int ident, fddType kt, fddType t, size_t size);
 			~workerFdd();
 
 			fddType getType();
@@ -47,9 +52,6 @@ namespace faster {
 
 			//T & operator[](size_t address);
 			void * getItem(size_t address);
-			//{
-			//	return &(*this)[address];
-			//}
 			void * getKeys(){
 				return NULL;
 			}
@@ -63,18 +65,18 @@ namespace faster {
 			// For known types
 			void setData(void * d , size_t size );
 			void setData(void * d , size_t * lineSizes , size_t size );
-			void setData(void * k  UNUSED, void * d  UNUSED, size_t size  UNUSED){}
-			void setData(void * k  UNUSED, void * d  UNUSED, size_t *lineSizes  UNUSED, size_t size  UNUSED){}
+			void setData(void * k , void * d , size_t size );
+			void setData(void * k , void * d , size_t *lineSizes , size_t size );
 
 			// For anonymous types
 			void setDataRaw(void * data, size_t size) override;
-			void setDataRaw(void * data, size_t *lineSizes, size_t size) override;
-			void setDataRaw( void *k UNUSED, void *d UNUSED, size_t s UNUSED) {}
-			void setDataRaw( void *k UNUSED, void *d UNUSED, size_t *l UNUSED, size_t s UNUSED) {}
+			void setDataRaw(void * data, size_t *lineSizes, size_t size);
+			void setDataRaw( void *k, void *d, size_t s);
+			void setDataRaw( void *k, void *d, size_t *l, size_t s);
 
 			size_t * getLineSizes();
 
-			void insert(void * in, size_t s);
+			void insert(void * k, void * in, size_t s);
 			void insertl(void * in);
 
 			//void insert(T & in);
