@@ -5,11 +5,13 @@
 #include <vector>
 #include <queue>
 #include <typeinfo>
+#include <tuple>
 #include <math.h>
 
 #include "definitions.h"
 #include "fddBase.h"
 #include "fastComm.h"
+#include "fastScheduler.h"
 
 namespace faster{
 
@@ -27,16 +29,13 @@ namespace faster{
 		friend class fastContext;
 		public:
 
-			fastSettings(const std::string &m, unsigned int b){
+			fastSettings(const std::string & m){ 
 				master = m;
-				blockSize = b;
 			}
-			fastSettings(const std::string m): fastSettings(m, 1024){ }
-			fastSettings() : fastSettings("local", 1024){ }
+			fastSettings() : fastSettings("local"){ }
 
 			fastSettings(const fastSettings & s){
 				master = s.master;
-				blockSize = s.blockSize;
 			}
 
 			std::string getMaster() const{ return master; } 
@@ -45,8 +44,6 @@ namespace faster{
 		private:
 
 		std::string master;
-		unsigned int blockSize;
-
 	};
 
 	// General context
@@ -71,14 +68,14 @@ namespace faster{
 		private:
 			int id;
 			unsigned long int numFDDs;
-			unsigned long int numTasks;
+			//unsigned long int numTasks;
 			fastSettings * settings;
-			//std::list< std::pair<void *, fddType> > fddList;
 			std::vector< fddBase * > fddList;
 			std::vector<void*> funcTable;
 			fastComm * comm;
+			fastScheduler * scheduler;
 
-			std::vector<fastTask *> taskList;
+			//std::vector<fastTask *> taskList;
 
 			int findFunc(void * funcP);
 
@@ -100,10 +97,13 @@ namespace faster{
 			int numProcs(){ return comm->numProcs; }
 			
 
-			unsigned long int enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId);
-			unsigned long int enqueueTask(fddOpType opT, unsigned long int id);
+			unsigned long int enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size);
+			unsigned long int enqueueTask(fddOpType opT, unsigned long int id, size_t size);
 
-			void * recvTaskResult(unsigned long int &id, size_t & size);
+			void * recvTaskResult(unsigned long int &tid, unsigned long int &sid, size_t & size);
+
+			template <typename K>
+			void sendKeyMap(unsigned long id, std::unordered_map<K, int> & keyMap);
 					
 
 			template <typename Z, typename FDD> 
@@ -126,6 +126,7 @@ namespace faster{
 				//int numBlocks = ceil ( size / settings->blockSize );
 				//int blocksPerProc = numBlocks / (comm->numProcs - 1); // TODO DYNAMICALLY VARIATE BLOCK PER PROC LATER
 				size_t offset = 0;
+				std::cerr << "  Parallelize Data\n";
 
 				for (int i = 1; i < comm->numProcs; ++i){
 					int dataPerProc = size/(comm->numProcs - 1);
@@ -134,17 +135,19 @@ namespace faster{
 						dataPerProc += 1;
 					std::cerr << "    S:FDDSetData P" << i << " ID:" << id << " S:" << dataPerProc << "";
 
-					comm->sendFDDSetData(id, i, &data[offset], dataPerProc * sizeof(T));
+					comm->sendFDDSetData(id, i, &data[offset], dataPerProc);
 					offset += dataPerProc;
 					std::cerr << ".\n";
 				}
 				comm->waitForReq(comm->numProcs - 1);
+				std::cerr << "  Done\n";
 			}
 			template <typename K, typename T>
 			void parallelizeI(unsigned long int id, K * keys, T * data, size_t size){
 				//int numBlocks = ceil ( size / settings->blockSize );
 				//int blocksPerProc = numBlocks / (comm->numProcs - 1); // TODO DYNAMICALLY VARIATE BLOCK PER PROC LATER
 				size_t offset = 0;
+				std::cerr << "  Parallelize Data\n";
 
 				for (int i = 1; i < comm->numProcs; ++i){
 					int dataPerProc = size/(comm->numProcs - 1);
@@ -158,6 +161,7 @@ namespace faster{
 					std::cerr << ".\n";
 				}
 				comm->waitForReq(comm->numProcs - 1);
+				std::cerr << "  Done\n";
 			}
 
 			//Pointers
@@ -165,6 +169,7 @@ namespace faster{
 			void parallelize(unsigned long int id, T ** data, size_t * dataSizes, size_t size){
 				size_t offset = 0;
 
+				std::cerr << "  Parallelize Data\n";
 				for (int i = 1; i < comm->numProcs; ++i){
 					int dataPerProc = size/ (comm->numProcs - 1);
 					int rem = size % (comm->numProcs -1);
@@ -176,11 +181,14 @@ namespace faster{
 					offset += dataPerProc;
 					std::cerr << ".\n";
 				}
+				comm->waitForReq(comm->numProcs - 1);
+				std::cerr << "  Done\n";
 			}
 			template <typename K, typename T>
 			void parallelizeI(unsigned long int id, K * keys, T ** data, size_t * dataSizes, size_t size){
 				size_t offset = 0;
 
+				std::cerr << "  Parallelize Data\n";
 				for (int i = 1; i < comm->numProcs; ++i){
 					int dataPerProc = size/ (comm->numProcs - 1);
 					int rem = size % (comm->numProcs -1);
@@ -192,70 +200,22 @@ namespace faster{
 					offset += dataPerProc;
 					std::cerr << ".\n";
 				}
-			}
-			//Containers
-			template <typename T>
-			void parallelizeC(unsigned long int id, T * data, size_t size ){
-				size_t offset = 0;
-
-				for (int i = 1; i < comm->numProcs; ++i){
-					int dataPerProc = size/ (comm->numProcs - 1);
-					int rem = size % (comm->numProcs -1);
-					if (i <= rem)
-						dataPerProc += 1;
-					std::cerr << "    S:FDDSetVData P" << i << " " << id << " " << dataPerProc << "";
-
-					comm->sendFDDSetData(id, i, &data[offset], dataPerProc);
-					offset += dataPerProc;
-					std::cerr << ".\n";
-				}
-				//comm->waitForReq(comm->numProcs - 1);
-			}
-			template <typename K, typename T>
-			void parallelizeIC(unsigned long int id, K * keys, T * data, size_t size ){
-				size_t offset = 0;
-
-				for (int i = 1; i < comm->numProcs; ++i){
-					int dataPerProc = size/ (comm->numProcs - 1);
-					int rem = size % (comm->numProcs -1);
-					if (i <= rem)
-						dataPerProc += 1;
-					std::cerr << "    S:FDDSetVData P" << i << " " << id << " " << dataPerProc << "";
-
-					comm->sendFDDSetIData(id, i, &keys[offset], &data[offset], dataPerProc);
-					offset += dataPerProc;
-					std::cerr << ".\n";
-				}
-				//comm->waitForReq(comm->numProcs - 1);
-			}
-			template <typename T>
-			void parallelize(unsigned long int id, std::vector<T> * data, size_t size ){
-				parallelizeC(id, data, size);
-			}
-			void parallelize(unsigned long int id, std::string * data, size_t size){
-				parallelizeC(id, data, size);
-			}
-			template <typename K, typename T>
-			void parallelizeI(unsigned long int id, K * keys, std::vector<T> * data, size_t size ){
-				parallelizeIC(id, keys, data, size);
-			}
-			template <typename K>
-			void parallelizeI(unsigned long int id, K * keys, std::string * data, size_t size){
-				parallelizeIC(id, keys, data, size);
+				comm->waitForReq(comm->numProcs - 1);
+				std::cerr << "  Done\n";
 			}
 
-			template <typename K>
-			CountKeyMapT<K> recvCountByKey(size_t size){
-				CountKeyMapT<K> count(size);
-				for ( int i = 0; i < (comm->numProcs - 1); ++i){
-					comm->recvCountByKey(count);
-				}
-				return count;
-			}
+
+			std::vector<size_t> getAllocation(size_t size);
 
 			void destroyFDD(unsigned long int id);
 
 	};
+
+	template <typename K>
+	void faster::fastContext::sendKeyMap(unsigned long tid, std::unordered_map<K, int> & keyMap){
+		comm->sendKeyMap(tid, keyMap);
+	}
+
 
 }
 

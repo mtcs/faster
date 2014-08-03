@@ -2,30 +2,33 @@
 #include <iostream>
 #include "libfaster.h"
 
-#define NUMITEMS 10*1000
+#define NUMITEMS (10*1000)
 
 using namespace std;
 using namespace faster;
 
 pair<int,int> map1(int key, int & input){
-	pair<int,int> result (key,input/2);
+	pair<int,int> result (key, input);
 
 	return result;
 }
 
 
 pair<int,int> reduce1(int keyA, int &a, int keyB, int &b){
-	pair<int,int> result (keyA + keyB/2 ,a+b);
-
-	cerr << result.first << "," << result.second << "  ";
+	pair<int,int> result ((keyA + keyB), (a+b));
 
 	return result;
 }
 
 void printHistogram(const CountKeyMapT<int> & hist ){
 	for( auto it = hist.begin(); it != hist.end(); it++){
-		cout << it->first << " " << it->second << "\n";
+		cout << it->first << "\t";
 	}
+	cout << "\n ";
+	for( auto it = hist.begin(); it != hist.end(); it++){
+		cout  << it->second << "\t";
+	}
+	cout << "\n ";
 }
 
 int main(int argc, char ** argv){
@@ -43,8 +46,8 @@ int main(int argc, char ** argv){
 	int rawKeys[NUMITEMS];
 
 	for ( int i = 0; i < NUMITEMS; ++i ){
-		rawKeys[i] = rand() % 100;
-		rawdata[i] = rand() % 20;
+		rawKeys[i] = 1 + rand() % 10;
+		rawdata[i] = 1 + rand() % 100;
 	}
 
 	cout << "Import Data" << '\n';
@@ -58,7 +61,7 @@ int main(int argc, char ** argv){
 
 	cout << "DONE!" << '\n';
 
-	std::cout << "Resut: " << result.first << ", " << result.second << "\n";
+	std::cout << "Result: " << result.first/NUMITEMS << ", " << result.second/NUMITEMS << "\n";
 
 	return 0;
 }

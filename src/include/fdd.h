@@ -296,6 +296,8 @@ namespace faster{
 		fdd<U> * newFdd ;
 		size_t result UNUSED;
 		size_t rSize;
+		unsigned long int tid, sid;
+		std::cerr << "  Map\n";
 
 		if ( (op & 0xFF ) & (OP_FlatMap | OP_BulkFlatMap) ){
 			newFdd = new fdd<U>(*context);
@@ -309,12 +311,13 @@ namespace faster{
 		//std::cerr << " " << funcId << ".\n";
 
 		// Send task
-		context->enqueueTask(op, id, newFddId, funcId);
+		context->enqueueTask(op, id, newFddId, funcId, this->size);
 
 		// Receive results
 		for (int i = 1; i < context->numProcs(); ++i){
-			result = * (char*) context->recvTaskResult(id, rSize);
+			result = * (char*) context->recvTaskResult(tid, sid, rSize);
 		}
+		std::cerr << "  Done\n";
 
 		return newFdd;
 	}
@@ -336,7 +339,6 @@ namespace faster{
 
 		if (op == OP_Reduce){
 			reduceFunctionP<T> reduceFunc = (reduceFunctionP<T>) this->context->funcTable[funcId];
-
 
 			// Get the real object behind the buffer
 			buffer.setBuffer(partResult[0], pSize[0]);
@@ -371,33 +373,36 @@ namespace faster{
 
 	template <typename T>
 	T fdd<T>::reduce( void * funcP, fddOpType op){
+		std::cerr << "  Reduce\n";
 		//T fddCore<T>::template reduce( int funcId, fddOpType op){
 		T result;
-		unsigned long int tId;
+		unsigned long int tid, sid;
 		int funcId = this->context->findFunc(funcP);
 		//std::cerr << " " << funcId << ".\n";
 		char ** partResult = new char*[this->context->numProcs() - 1];
-		size_t * partrSize = new size_t[this->context->numProcs() - 1];
+		size_t * rSize = new size_t[this->context->numProcs() - 1];
 
 		// Send task
 		//unsigned long int reduceTaskId = 
-		this->context->enqueueTask(op, this->id, 0, funcId);
+		this->context->enqueueTask(op, this->id, 0, funcId, this->size);
 
 		// Receive results
 		for (int i = 0; i < (this->context->numProcs() - 1); ++i){
-			char * pr = (char*) this->context->recvTaskResult(tId, partrSize[i]);
-			partResult[i] = new char [ partrSize[i]];
-			memcpy(partResult[i], pr, partrSize[i]);
+			char * pr = (char*) this->context->recvTaskResult(tid, sid,rSize[i]);
+			partResult[i] = new char [ rSize[i]];
+			memcpy(partResult[i], pr, rSize[i]);
 		}
 
 		// Finish applying reduces
-		result = finishReduces(partResult, partrSize, funcId, op);
+		result = finishReduces(partResult, rSize, funcId, op);
 
 		for (int i = 0; i < (this->context->numProcs() - 1); ++i){
 			delete [] partResult[i];
 		}
 		delete [] partResult;
+		delete [] rSize;
 
+		std::cerr << "  Done\n";
 		return result;
 	}
 
@@ -440,21 +445,22 @@ namespace faster{
 
 	template <typename T>
 	std::vector <T> fdd<T*>::reduceP(void * funcP, fddOpType op){
+		std::cerr << "  Reduce\n";
 		//T fddCore<T>::template reduce( int funcId, fddOpType op){
 		// Decode function pointer
 		int funcId = this->context->findFunc(funcP);
 		T ** partResult = new T*[this->context->numProcs() -1];
 		size_t * partrSize = new size_t[this->context->numProcs() - 1];
-		unsigned long int tId;
+		unsigned long int tid, sid;
 		//std::cerr << " " << funcId << ".\n";
 
 		// Send task
 		//unsigned long int reduceTaskId = 
-		this->context->enqueueTask(op, this->id, 0, funcId);
+		this->context->enqueueTask(op, this->id, 0, funcId, this->size);
 
 		// Receive results
 		for (int i = 0; i < (this->context->numProcs() - 1); ++i){
-			partResult[i] = (T*) this->context->recvTaskResult(tId, partrSize[i]);
+			partResult[i] = (T*) this->context->recvTaskResult(tid, sid, partrSize[i]);
 			partrSize[i] /= sizeof(T);
 		}
 
@@ -465,6 +471,7 @@ namespace faster{
 
 		delete [] partResult;
 		delete [] partrSize;
+		std::cerr << "  Done\n";
 		return vResult;
 	}
 

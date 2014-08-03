@@ -33,14 +33,10 @@ namespace faster{
 			CountKeyMapT<K> distributedMaxKeyCount(fastComm *comm, PPCountKeyMapT<K> & keyPPMaxCount);
 
 		public:
-			workerIFddCore(unsigned int ident, fddType t);
-			workerIFddCore(unsigned int ident, fddType t, size_t size);
+			workerIFddCore(unsigned int ident, fddType kt, fddType t);
+			workerIFddCore(unsigned int ident, fddType kt, fddType t, size_t size);
 			~workerIFddCore();
 			
-			// ByKey Functions
-			void groupByKey(fastComm *comm) override;
-			void countByKey(fastComm *comm) override;
-
 			fddType getType() override ;
 			fddType getKeyType() override ;
 
@@ -58,8 +54,17 @@ namespace faster{
 			size_t getSize() override;
 			size_t itemSize() override;
 			size_t baseSize() override;
+			void   setSize(size_t s);
+
 			void deleteItem(void * item) override ;
 			void shrink();
+
+			void preapply(unsigned long int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm);
+			
+			// ByKey Functions
+			void groupByKey(fastComm *comm);
+			void countByKey(fastComm *comm);
+
 
 	};
 
@@ -82,7 +87,7 @@ namespace faster{
 			void _preApply(void * func, fddOpType op, workerFddBase * destze);
 
 			void applyDependent(void * func, fddOpType op, workerFddBase * destze);
-			void applyIndependent(void * func, fddOpType op, void *& result, size_t & rSize);
+			void applyIndependent(void * func, fddOpType op, fastCommBuffer & buffer);
 
 			// --------- FUNCTIONS ----------
 
@@ -94,6 +99,15 @@ namespace faster{
 			void map (workerFddBase * dest, mapIFunctionP<K,T,U> mapFunc);
 			template <typename U>
 			void map (workerFddBase * dest, PmapIFunctionP<K,T,U> mapFunc);
+
+			template <typename L, typename U>
+			void mapByKey (workerFddBase * dest, ImapByKeyIFunctionP<K,T,L,U> mapByKeyFunc);
+			template <typename L, typename U>
+			void mapByKey (workerFddBase * dest, IPmapByKeyIFunctionP<K,T,L,U> mapByKeyFunc);
+			template < typename U>
+			void mapByKey (workerFddBase * dest, mapByKeyIFunctionP<K,T,U> mapByKeyFunc);
+			template <typename U>
+			void mapByKey (workerFddBase * dest, PmapByKeyIFunctionP<K,T,U> mapByKeyFunc);
 
 
 			template <typename L, typename U>
@@ -134,8 +148,8 @@ namespace faster{
 
 
 		public:
-			_workerIFdd(unsigned int ident, fddType t) : workerIFddCore<K,T>(ident, t) {}
-			_workerIFdd(unsigned int ident, fddType t, size_t size) : workerIFddCore<K,T>(ident, t, size) {}
+			_workerIFdd(unsigned int ident, fddType kt, fddType t) : workerIFddCore<K,T>(ident, kt, t) {}
+			_workerIFdd(unsigned int ident, fddType kt, fddType t, size_t size) : workerIFddCore<K,T>(ident, kt, t, size) {}
 			~_workerIFdd(){}
 
 			// For known types
@@ -163,7 +177,7 @@ namespace faster{
 
 
 			// Apply task functions to FDDs
-			void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize);
+			void apply(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer);
 
 			void collect(fastComm * comm) override;
 
@@ -188,7 +202,7 @@ namespace faster{
 			void _preApply(void * func, fddOpType op, workerFddBase * dest);
 
 			void applyDependent(void * func, fddOpType op, workerFddBase * dest);
-			void applyIndependent(void * func, fddOpType op, void *& result, size_t & rSize);
+			void applyIndependent(void * func, fddOpType op, fastCommBuffer & buffer);
 
 			// --------- FUNCTIONS ----------
 
@@ -200,6 +214,15 @@ namespace faster{
 			void map (workerFddBase * dest, mapIPFunctionP<K,T,U> mapFunc);
 			template <typename U>
 			void map (workerFddBase * dest, PmapIPFunctionP<K,T,U> mapFunc);
+
+			template <typename L, typename U>
+			void mapByKey (workerFddBase * dest, ImapByKeyIPFunctionP<K,T,L,U> mapByKeyFunc);
+			template <typename L, typename U>
+			void mapByKey (workerFddBase * dest, IPmapByKeyIPFunctionP<K,T,L,U> mapByKeyFunc);
+			template <typename U>
+			void mapByKey (workerFddBase * dest, mapByKeyIPFunctionP<K,T,U> mapByKeyFunc);
+			template <typename U>
+			void mapByKey (workerFddBase * dest, PmapByKeyIPFunctionP<K,T,U> mapByKeyFunc);
 
 
 			template <typename L, typename U>
@@ -239,8 +262,8 @@ namespace faster{
 			
 
 		public:
-			_workerIFdd(unsigned int ident, fddType t) : workerIFddCore<K,T*>(ident, t) {}
-			_workerIFdd(unsigned int ident, fddType t, size_t size) : workerIFddCore<K,T*>(ident, t, size) {}
+			_workerIFdd(unsigned int ident, fddType kt, fddType t) : workerIFddCore<K,T*>(ident, kt, t) {}
+			_workerIFdd(unsigned int ident, fddType kt, fddType t, size_t size) : workerIFddCore<K,T*>(ident, kt, t, size) {}
 			~_workerIFdd(){}
 
 
@@ -266,7 +289,7 @@ namespace faster{
 
 
 			// Apply task functions to FDDs
-			void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize);
+			void apply(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer);
 
 			void collect(fastComm * comm) override;
 

@@ -27,7 +27,7 @@ void faster::worker::run(){
 				std::cerr << "    R:Task ";
 				comm->recvTask(task);
 				std::cerr << "ID:" << task.id << " FDD:" << task.srcFDD  << " F:" << task.functionId << " ";
-				solve(task); // TODO Separate in a different thread ?
+				solve(task); 
 				std::cerr << ".\n";
 				break;
 

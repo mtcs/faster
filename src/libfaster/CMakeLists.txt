@@ -33,11 +33,12 @@ link_directories(${MPI_CXX_LIBRARIES})
 #include_directories("/usr/include/openmpi/")
 set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
 
-#set (EXTRA_LIBS ${EXTRA_LIBS} efence)
+set (EXTRA_LIBS ${EXTRA_LIBS} efence)
 
 #set (MODULES ${MODULES} fdd.cpp ) # Pure templates now
 #set (MODULES ${MODULES} indexedFdd.cpp ) # Pure templates now
 set (MODULES ${MODULES} fastContext.cpp )
+set (MODULES ${MODULES} fastScheduler.cpp )
 #set (MODULES ${MODULES} fastComm.cpp ) to DL
 #set (MODULES ${MODULES} fastCommBuffer.cpp ) to DL
 set (MODULES ${MODULES} misc.cpp )
@@ -79,6 +80,7 @@ set (HEADERS ${HEADERS} ../include/definitions.h  )
 set (HEADERS ${HEADERS} ../include/fastComm.h  )
 set (HEADERS ${HEADERS} ../include/fastCommBuffer.h)
 set (HEADERS ${HEADERS} ../include/fastContext.h  )
+set (HEADERS ${HEADERS} ../include/fastScheduler.h  )
 set (HEADERS ${HEADERS} ../include/fastTask.h  )
 set (HEADERS ${HEADERS} ../include/fdd.h  )
 set (HEADERS ${HEADERS} ../include/fddBase.h  )
@@ -94,7 +96,7 @@ set (HEADERS ${HEADERS} ../include/workerFdd.h  )
 set (HEADERS ${HEADERS} ../include/workerIFdd.h)
 
 # Common Dynamic LINKED libs
-add_library( fasterCommon SHARED fastComm.cpp fastCommBuffer.cpp ${EXTRA_LIBS} )
+add_library( fasterCommon SHARED fastComm.cpp fastCommBuffer.cpp )
 set ( COMMDLIBS  fasterCommon )
 
 # Worker Side Dynamic LINKED libs

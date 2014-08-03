@@ -47,6 +47,9 @@ size_t * faster::getLineSizesDL(workerFddBase * fdd){
 void * faster::getFddItemDL(workerFddBase * fdd, size_t address){
 	return fdd->getItem(address);
 }
+void * faster::getKeysDL(workerFddBase * fdd){
+	return fdd->getKeys();
+}
 void * faster::getDataDL(workerFddBase * fdd){
 	return fdd->getData();
 }
@@ -58,6 +61,9 @@ size_t faster::itemSizeDL(workerFddBase * fdd){
 }
 size_t faster::baseSizeDL(workerFddBase * fdd){
 	return fdd->baseSize();
+}
+void faster::setSizeDL(workerFddBase * fdd, size_t s){
+	fdd->setSize(s);
 }
 void faster::deleteItemDL(workerFddBase * fdd, void * item){
 	fdd->deleteItem(item);
@@ -73,18 +79,11 @@ void faster::insertListDL(workerFddBase * fdd, void * v){
 	fdd->insertl(v);
 }
 
-void faster::applyDL(workerFddBase * fdd, void * func, fddOpType op, workerFddBase * dest, void ** result, size_t * rSize){
-	fdd->apply(func, op, dest, *result, *rSize);
+void faster::preapplyDL(workerFddBase * fdd, unsigned long int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm){
+	fdd->preapply(id, func, op, dest, comm);
 }
 
 void faster::collectDL(workerFddBase * fdd, fastComm * comm){
 	fdd->collect(comm);
 }
-void faster::groupByKeyDL(workerFddBase * fdd, fastComm * comm){
-	fdd->groupByKey(comm);
-}
-void faster::countByKeyDL(workerFddBase * fdd, fastComm * comm){
-	fdd->countByKey(comm);
-}
-
 

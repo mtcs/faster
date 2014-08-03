@@ -1,21 +1,28 @@
+#include <chrono>
+
 #include "_workerFdd.h"
+#include "fastComm.h"
 #include "fastCommBuffer.h"
 #include "fddStorageExtern.cpp"
 
 
 template <typename T>
 faster::workerFddCore<T>::workerFddCore(unsigned int ident, fddType t) : workerFddBase(ident, t){
+	keyType = Null;
 	localData = new fddStorage<T>();
 } 
 
 template <typename T>
 faster::workerFddCore<T>::workerFddCore(unsigned int ident, fddType t, size_t size) : workerFddBase(ident, t){ 
-	localData = new fddStorage<T>(size);
+	keyType = Null;
+	if (size == 0)
+		localData = new fddStorage<T>();
+	else
+		localData = new fddStorage<T>(size);
 }
 
 template <typename T>
 faster::workerFddCore<T>::~workerFddCore(){
-	delete resultBuffer;
 	delete localData;
 }
 
@@ -49,6 +56,11 @@ size_t faster::workerFddCore<T>::baseSize() {
 	return sizeof(T); 
 }
 template <typename T>
+void faster::workerFddCore<T>::setSize(size_t s) { 
+	localData->setSize(s); 
+}
+
+template <typename T>
 void faster::workerFddCore<T>::deleteItem(void * item)  { 
 	delete (T*) item; 
 }
@@ -57,6 +69,53 @@ void faster::workerFddCore<T>::shrink(){
 	localData->shrink(); 
 }
 
+
+template <typename T>
+void faster::workerFddCore<T>::preapply(long unsigned int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm){ 
+	using std::chrono::system_clock;
+	using std::chrono::duration_cast;
+	using std::chrono::milliseconds;
+
+
+	fastCommBuffer &buffer = comm->getResultBuffer();
+	size_t durationP;
+	size_t rSizeP;
+	size_t headerSize;
+
+	buffer.reset();
+	buffer << id;
+
+	// Reserve space for the time duration
+	durationP = buffer.size();
+	buffer.advance(sizeof(size_t));
+
+	rSizeP = buffer.size();
+	buffer.advance(sizeof(size_t));
+
+	headerSize = buffer.size();
+
+	auto start = system_clock::now();
+	if (op & (OP_GENERICMAP | OP_GENERICREDUCE)){
+		buffer << size_t(localData->getSize());
+		this->apply(func, op, dest, buffer);
+	}/*else{
+		switch(op){
+			case OP_CountByKey:
+			case OP_GroupByKey:
+				break;
+		}
+	}*/
+	auto end = system_clock::now();
+
+	auto duration = duration_cast<milliseconds>(end - start);
+	std::cerr << " ET:" << duration.count() << " ";
+
+	buffer.writePos(duration.count(), durationP);
+	buffer.writePos(buffer.size() - headerSize, rSizeP);
+
+	comm->sendTaskResult();
+
+}
 
 
 template class faster::workerFddCore<char>;

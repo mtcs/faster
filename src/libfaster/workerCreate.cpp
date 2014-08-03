@@ -6,6 +6,7 @@
 #include "worker.h"
 
 void faster::worker::createFDD (unsigned long int id, fddType type, size_t size){
+	std::cerr << "createFDD ";
 	workerFddBase * newFdd;
 	/*switch (type){
 		case Null: break;

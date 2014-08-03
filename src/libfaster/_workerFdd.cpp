@@ -385,7 +385,7 @@ void faster::_workerFdd<T>::_applyIP(void * func, fddOpType op, workerFddBase * 
 }
 
 template <typename T>
-void faster::_workerFdd<T>::_applyReduce(void * func, fddOpType op, void *& result, size_t & rSize){
+void faster::_workerFdd<T>::_applyReduce(void * func, fddOpType op, fastCommBuffer & buffer){
 	T r;
 	switch (op){
 		case OP_Reduce:
@@ -397,10 +397,7 @@ void faster::_workerFdd<T>::_applyReduce(void * func, fddOpType op, void *& resu
 			std::cerr << "BulkReduce ";
 			break;
 	}
-	this->resultBuffer->reset();
-	(*this->resultBuffer) << r;
-	result = this->resultBuffer->data();
-	rSize = this->resultBuffer->size();
+	buffer << r;
 }
 
 
@@ -532,12 +529,9 @@ void faster::_workerFdd<T>::insert(std::list<T> & in){
 }
 
 
-
 template <typename T>
-void faster::_workerFdd<T>::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){ 
-	if (op & OP_GENERICREDUCE){
-		_applyReduce(func, op, result, rSize);
-	}else{
+void faster::_workerFdd<T>::apply(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer){ 
+	if (op & OP_GENERICMAP){
 		switch (dest->getKeyType()){
 			case Null:     _preApply(func, op, dest);break;
 			case Char:     _preApplyI<char>(func, op, dest); break;
@@ -547,6 +541,8 @@ void faster::_workerFdd<T>::apply(void * func, fddOpType op, workerFddBase * des
 			case Double:   _preApplyI<double>(func, op, dest); break;
 			case String:   _preApplyI<std::string>(func, op, dest); break;
 		}
+	}else{
+		_applyReduce(func, op, buffer);
 	}
 }
 

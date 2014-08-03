@@ -4,11 +4,11 @@
 
 faster::workerFddBase * faster::newWorkerSDL(unsigned long int id, fddType type, size_t size){
 	switch (type){
-		case Char: return new    _workerIFdd<std::string, char>(id, type, size); break;
-		case Int: return new     _workerIFdd<std::string, int>(id, type, size); break;
-		case LongInt: return new _workerIFdd<std::string, long int>(id, type, size); break;
-		case Float: return new   _workerIFdd<std::string, float>(id, type, size); break;
-		case Double: return new  _workerIFdd<std::string, double>(id, type, size); break;
+		case Char: return new    _workerIFdd<std::string, char>(id, String, type, size); break;
+		case Int: return new     _workerIFdd<std::string, int>(id, String, type, size); break;
+		case LongInt: return new _workerIFdd<std::string, long int>(id, String, type, size); break;
+		case Float: return new   _workerIFdd<std::string, float>(id, String, type, size); break;
+		case Double: return new  _workerIFdd<std::string, double>(id, String, type, size); break;
 	}
 	return NULL;
 }

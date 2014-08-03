@@ -52,13 +52,13 @@ namespace faster {
 
 			//T & operator[](size_t address);
 			void * getItem(size_t address);
-			void * getKeys(){
-				return NULL;
-			}
+			void * getKeys();
 			void * getData();
 			size_t getSize();
 			size_t itemSize();
 			size_t baseSize();
+			void   setSize(size_t s);
+
 			void deleteItem(void * item);
 			void shrink();
 
@@ -85,7 +85,8 @@ namespace faster {
 			//void insert(std::list< std::pair<T, size_t> > & in);
 
 			// Apply task functions to FDDs
-			void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize);
+			void apply(void * func UNUSED, fddOpType op UNUSED, workerFddBase * dest UNUSED, fastCommBuffer & comm UNUSED){}
+			void preapply(unsigned long int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm) override;
 
 			void collect(fastComm * comm) override;
 

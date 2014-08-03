@@ -1,11 +1,12 @@
 #include <string>
+#include <algorithm>
 
 #include "fastCommBuffer.h"
 #include "indexedFddStorage.h"
 
 template <class K, class T> 
 faster::indexedFddStorageCore<K,T>::indexedFddStorageCore(){
-	allocSize = 200;
+	allocSize = 1000;
 	localData = new T[allocSize];
 	localKeys = new K[allocSize];
 	size = 0;
@@ -13,9 +14,13 @@ faster::indexedFddStorageCore<K,T>::indexedFddStorageCore(){
 
 template <class K, class T> 
 faster::indexedFddStorageCore<K,T>::indexedFddStorageCore(size_t s){
-	allocSize = s;
-	localData = new T[s];
-	localKeys = new K[s];
+	if (s > 0){
+		allocSize = s;
+	}else{
+		allocSize = 1000;
+	}
+	localData = new T[allocSize];
+	localKeys = new K[allocSize];
 	size = s;
 }
 template <class K, class T> 
@@ -40,6 +45,60 @@ T & faster::indexedFddStorageCore<K,T>::operator[](size_t ref){
 	return localData[ref]; 
 }
 
+
+template <class K, class T> 
+void faster::indexedFddStorageCore<K,T>::sortByKey(){
+	std::vector<size_t> p(size,0);
+	std::vector<size_t> rp(size);
+	std::vector<bool> sorted(size, false);
+	size_t i = 0;
+
+	// Sort
+	std::iota(p.begin(), p.end(), 0);
+	std::sort(p.begin(), p.end(),
+			        [&](size_t i, size_t j){ return localKeys[i] < localKeys[j]; });
+	
+	// Apply in-place
+	
+	// get reverse permutation item>position
+	for (i = 0; i < size; ++i){
+		rp[p[i]] = i;
+	}
+
+	i = 0;
+	K savedKey;
+	T savedData;
+	while ( i < size){
+		size_t pos = i;
+		// Save This element;
+		if ( ! sorted[pos] ){
+			savedKey = localKeys[p[pos]];
+			savedData = localData[p[pos]];
+		}
+		while ( ! sorted[pos] ){
+			// Hold item to be replaced
+			K holdenKey  = localKeys[pos];
+			T holdenData = localData[pos];
+			// Save where it should go
+			size_t holdenPos = rp[pos];
+
+			// Replace 
+			localKeys[pos] = savedKey;
+			localData[pos] = savedData;
+
+			// Get last item to be the pivot
+			savedKey = holdenKey;
+			savedData = holdenData;
+
+			// Mark this item as sorted
+			sorted[pos] = true;
+
+			// Go to the saved item proper location
+			pos = holdenPos;
+		}
+		++i;
+	}
+}
 
 
 
@@ -144,6 +203,7 @@ void faster::indexedFddStorage<K,T*>::setDataRaw( void * keys, void * data, size
 
 template <class K, class T> 
 void   faster::indexedFddStorage<K,T>::setSize(size_t s){ 
+	std::cerr << "SetSize: " << s << "\n";
 	this->grow(s); 
 	this->size = s;  
 }
@@ -169,8 +229,7 @@ void faster::indexedFddStorage<K,T*>::insert(K key, T *& item, size_t s){
 	this->localData[this->size++] = item;	
 
 }
-
-
+			
 
 
 
@@ -196,6 +255,7 @@ void faster::indexedFddStorage<K,T>::grow(size_t toSize){
 		K * newKeys = new K [toSize];
 
 		if (this->size >0) {
+			#pragma omp parallel for
 			for ( size_t i = 0; i < this->size; ++i){
 				newStorage[i] = this->localData[i];
 				newKeys[i] = this->localKeys[i];
@@ -225,6 +285,7 @@ void faster::indexedFddStorage<K,T*>::grow(size_t toSize){
 		if (this->size > 0){
 			//memcpy(newStorage, localData, this->size * sizeof( T* ) );
 			//memcpy(newLineSizes, lineSizes, this->size * sizeof( size_t ) );
+			#pragma omp parallel for
 			for ( int i = 0; i < this->size; ++i){
 				newStorage[i] =  this->localData[i];
 				newLineSizes[i] = lineSizes[i];

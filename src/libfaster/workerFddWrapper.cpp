@@ -117,10 +117,13 @@ void faster::workerFdd::loadSymbols(){
 	loadSym(GetLineSizesDL	, "getLineSizesDL");
                                       
 	loadSym(GetFddItemDL	, "getFddItemDL");
+	loadSym(GetKeysDL	, "getKeysDL");
 	loadSym(GetDataDL	, "getDataDL");
 	loadSym(GetSizeDL	, "getSizeDL");
 	loadSym(ItemSizeDL	, "itemSizeDL");
 	loadSym(BaseSizeDL	, "baseSizeDL");
+	loadSym(SetSizeDL	, "setSizeDL");
+
 	loadSym(DeleteItemDL	, "deleteItemDL");
 	loadSym(ShrinkDL	, "shrinkDL");
 	std::cerr << ".";
@@ -129,11 +132,9 @@ void faster::workerFdd::loadSymbols(){
 	loadSym(InsertDL	, "insertDL");
 	loadSym(InsertListDL	, "insertListDL");
                                       
-	loadSym(ApplyDL		, "applyDL");
+	loadSym(PreapplyDL	, "preapplyDL");
                                       
 	loadSym(CollectDL	, "collectDL");
-	loadSym(GroupByKeyDL	, "groupByKeyDL");
-	loadSym(CountByKeyDL	, "countByKeyDL");
 	std::cerr << ".]  ";
 }
 
@@ -145,15 +146,14 @@ faster::workerFdd::workerFdd(fddType t){
 	loadLib();
 	loadSymbols();
 }
-faster::workerFdd::workerFdd(unsigned long int ident, fddType t) : workerFdd(t){
+faster::workerFdd::workerFdd(unsigned long int id, fddType t, size_t size) : workerFdd(t){
+	this->id = id;
 	void * funcP = funcTable[hAssign[t]] [0] [NewWorkerSDL];
-	_fdd = ((workerFddBase * (*)(unsigned long int, fddType, size_t)) funcP)(ident, t, 0);
+	_fdd = ((workerFddBase * (*)(unsigned long int, fddType, size_t)) funcP)(id, t, size);
+}
+faster::workerFdd::workerFdd(unsigned long int id, fddType t) : workerFdd(id, t, size_t(0)){
 }
 
-faster::workerFdd::workerFdd(unsigned long int ident, fddType t, size_t size) : workerFdd(t){
-	void * funcP = funcTable[hAssign[t]] [0] [NewWorkerSDL];
-	_fdd = ((workerFddBase * (*)(unsigned long int, fddType, size_t)) funcP)(ident, t, size);
-}
 
 // Create Indexed FDDs
 faster::workerFdd::workerFdd(fddType kt, fddType t){
@@ -162,15 +162,12 @@ faster::workerFdd::workerFdd(fddType kt, fddType t){
 	loadLibI();
 	loadSymbols();
 }
-faster::workerFdd::workerFdd(unsigned long int ident, fddType kt, fddType t) : workerFdd(kt, t){
+faster::workerFdd::workerFdd(unsigned long int id, fddType kt, fddType t, size_t size) : workerFdd(kt, t){
+	this->id = id;
 	void * funcP = funcTable[hAssign[t]] [khAssign[kt]] [NewWorkerSDL];
-	_fdd = ((workerFddBase * (*)(unsigned long int, fddType, size_t)) funcP)(ident, t, 0);
+	_fdd = ((workerFddBase * (*)(unsigned long int, fddType, size_t)) funcP)(id, t, size);
 }
-faster::workerFdd::workerFdd(unsigned long int ident, fddType kt, fddType t, size_t size) : workerFdd(kt, t){
-	std::cerr << "C(" << hAssign[t] << "," << khAssign[kt] << ")";
-	void * funcP = funcTable[hAssign[t]] [khAssign[kt]] [NewWorkerSDL];
-	_fdd = ((workerFddBase * (*)(unsigned long int, fddType, size_t)) funcP)(ident, t, size);
-	std::cerr << "!";
+faster::workerFdd::workerFdd(unsigned long int id, fddType kt, fddType t) : workerFdd(id, kt, t, 0){
 }
 
 
@@ -197,6 +194,11 @@ void * faster::workerFdd::getItem(size_t address){
 	return ((void * (*)(workerFddBase *, size_t)) funcP)(_fdd, address);
 }
 
+void * faster::workerFdd::getKeys(){
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GetKeysDL];
+	return ((void * (*)(workerFddBase * fdd)) funcP)(_fdd);
+}
+
 void * faster::workerFdd::getData(){
 	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GetDataDL];
 	return ((void * (*)(workerFddBase * fdd)) funcP)(_fdd);
@@ -215,6 +217,11 @@ size_t faster::workerFdd::itemSize(){
 size_t faster::workerFdd::baseSize(){
 	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [BaseSizeDL];
 	return ((size_t (*)(workerFddBase *)) funcP)(_fdd);
+}
+
+void faster::workerFdd::setSize(size_t s){
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [SetSizeDL];
+	return ((void (*)(workerFddBase *, size_t s)) funcP)(_fdd, s);
 }
 
 
@@ -290,26 +297,14 @@ void faster::workerFdd::insertl(void * v){
 
 
 // Apply task functions to FDDs
-
-void faster::workerFdd::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){
-	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [ApplyDL];
-	((void (*)(workerFddBase*, void*, fddOpType, workerFddBase*, void**, size_t*)) funcP)(_fdd, func, op, dest, &result, &rSize);
+void faster::workerFdd::preapply(unsigned long int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm){
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [PreapplyDL];
+	((void (*)(workerFddBase*, unsigned long int id, void*, fddOpType, workerFddBase*, fastComm *)) funcP)(_fdd, id, func, op, dest, comm);
 }
 
 
 void faster::workerFdd::collect(fastComm * comm){
 	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [CollectDL];
-	((void (*)(workerFddBase *, fastComm *)) funcP)(_fdd, comm);
-}
-
-
-void faster::workerFdd::groupByKey(fastComm *comm){
-	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GroupByKeyDL];
-	((void (*)(workerFddBase *, fastComm *)) funcP)(_fdd, comm);
-}
-
-void faster::workerFdd::countByKey(fastComm *comm){
-	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [CountByKeyDL];
 	((void (*)(workerFddBase *, fastComm *)) funcP)(_fdd, comm);
 }
 

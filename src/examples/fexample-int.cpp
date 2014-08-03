@@ -11,7 +11,6 @@ int map1(int & input){
 	return input / 2;
 }
 
-
 int reduce1(int &a, int &b){
 	//cerr << a+b << " ";
 	return a + b;

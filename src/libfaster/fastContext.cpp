@@ -9,8 +9,9 @@ faster::fastContext::fastContext(const fastSettings & s){
 
 	settings = new fastSettings(s);
 	comm = new fastComm( s.getMaster() );
+	scheduler = new fastScheduler( comm->numProcs );
 	numFDDs = 0;
-	numTasks = 0;
+	//numTasks = 0;
 
 }
 
@@ -22,7 +23,7 @@ faster::fastContext::~fastContext(){
 
 	// Clean process
 	fddList.clear();
-	taskList.clear();
+	//taskList.clear();
 	delete comm;
 	delete settings;
 }
@@ -60,6 +61,7 @@ int faster::fastContext::findFunc(void * funcP){
 
 unsigned long int faster::fastContext::_createFDD(fddBase * ref, fddType type, size_t size){
 	
+	std::cerr << "    Create FDD\n";
 	for (int i = 1; i < comm->numProcs; ++i){
 		size_t dataPerProc = size / (comm->numProcs - 1);
 		int rem = size % (comm->numProcs -1);
@@ -67,15 +69,18 @@ unsigned long int faster::fastContext::_createFDD(fddBase * ref, fddType type, s
 			dataPerProc += 1;
 		comm->sendCreateFDD(numFDDs, type, dataPerProc, i);
 
-		std::cerr << "    S:CreateFdd ID:" << numFDDs << " T:" << (int) type << " S:" << dataPerProc << '\n';
+		std::cerr << "    S:CreateFdd ID:" << numFDDs << " T:" << type << " S:" << dataPerProc << '\n';
 	}
 	fddList.insert(fddList.begin(), ref);
+	comm->waitForReq(comm->numProcs - 1);
+	std::cerr << "    Done\n";
 	
 	return numFDDs++;
 }
 
 unsigned long int faster::fastContext::_createIFDD(fddBase * ref, fddType kType, fddType tType, size_t size){
 
+	std::cerr << "    Create FDD\n";
 	for (int i = 1; i < comm->numProcs; ++i){
 		size_t dataPerProc = size / (comm->numProcs - 1);
 		int rem = size % (comm->numProcs -1);
@@ -86,6 +91,9 @@ unsigned long int faster::fastContext::_createIFDD(fddBase * ref, fddType kType,
 		std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:" << dataPerProc <<'\n';
 	}
 	fddList.insert(fddList.begin(), ref);
+	comm->waitForReq(comm->numProcs - 1);
+	std::cerr << "    Done\n";
+
 	return numFDDs++;
 }
 
@@ -176,40 +184,40 @@ void faster::fastContext::getFDDInfo(size_t & s){
 }
 
 
+unsigned long int faster::fastContext::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size){
+	fastTask * newTask = scheduler->enqueueTask(opT, idSrc, idRes, funcId, size);
 
-unsigned long int faster::fastContext::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId){
-	fastTask * newTask = new fastTask();
-	newTask->id = numTasks++;
-	newTask->srcFDD = idSrc;
-	newTask->destFDD = idRes;
-	newTask->operationType = opT;
-	newTask->functionId = funcId;
-	newTask->workersFinished = 0;
+	if(scheduler->dataMigrationNeeded()){
+		//comm->migrateData(scheduler->getDataMigrationInfo());
+		scheduler->getDataMigrationInfo();
+	}
 
 	// TODO do this later on a shceduler?
 	comm->sendTask(*newTask);
 	std::cerr << "    S:Task ID:" << newTask->id << " FDD:" << idSrc << " F:" << funcId << '\n';
 
-	taskList.insert(taskList.end(), newTask);
-
 	return newTask->id;
 }
-unsigned long int faster::fastContext::enqueueTask(fddOpType opT, unsigned long int id){
-	return enqueueTask(opT, id, 0, -1);
+unsigned long int faster::fastContext::enqueueTask(fddOpType opT, unsigned long int id, size_t size){
+	return enqueueTask(opT, id, 0, -1, size);
 }
 
-void * faster::fastContext::recvTaskResult(unsigned long int &id, size_t & size){
-	double time;
+void * faster::fastContext::recvTaskResult(unsigned long int &id, unsigned long int &sid, size_t & size){
+	size_t time;
 	int proc;
 
-	void * result = comm->recvTaskResult(id, proc, size, time);
-	std::cerr << "    R:TaskResult P:" << proc << " ID:" << id << " Result:"  << * (int*) result << '\n';
+	void * result = comm->recvTaskResult(id, sid, proc, size, time);
+	std::cerr << "    R:TaskResult P:" << proc << " ID:" << id << '\n';
 
-	taskList[id]->workersFinished++;
+	//taskList[id]->workersFinished++;
+	scheduler->taskProgress(id, sid, time);
 
 	return result;
 }
 
+std::vector<size_t> faster::fastContext::getAllocation(size_t size){
+	return scheduler->getAllocation(size);
+}
 
 void faster::fastContext::destroyFDD(unsigned long int id){
 	comm->sendDestroyFDD(id);

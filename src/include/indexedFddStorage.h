@@ -16,6 +16,7 @@ namespace faster {
 		protected:
 			T * localData;
 			K * localKeys;
+			size_t numKeys;
 		public:
 			indexedFddStorageCore();
 			indexedFddStorageCore(size_t s);
@@ -24,11 +25,13 @@ namespace faster {
 
 			T * getData();
 			K * getKeys();
-			void   setSize(size_t s UNUSED) {};
+			void setSize(size_t s UNUSED) {};
+			size_t getNumKeys() { return numKeys; };
+			void setNumKeys(size_t n) { numKeys = n; };
 
 			T & operator[](size_t ref);
 
-
+			void sortByKey();
 	};
 
 	// FDD storage place
@@ -45,6 +48,7 @@ namespace faster {
 			void setSize(size_t s) override;
 
 			void insert(K key, T & item);
+			void insertRaw(void * d, size_t s);
 
 			void grow(size_t toSize);
 			void shrink();
@@ -67,6 +71,7 @@ namespace faster {
 			void setSize(size_t s) override;
 
 			void insert(K key, T *& item, size_t s);
+			void insertRaw(void * d, size_t s);
 
 			size_t * getLineSizes();
 

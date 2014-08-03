@@ -53,8 +53,6 @@ namespace faster{
 			
 			void readFDDFile(unsigned long int id, std::string &filename, size_t size, size_t offset);
 
-			void preapply(fastTask &task, workerFddBase * destFDD);
-
 			void solve(fastTask & task);
 
 			void collect(unsigned long int id);

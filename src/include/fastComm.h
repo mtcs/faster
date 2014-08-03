@@ -47,6 +47,8 @@ namespace faster{
 	#define MSG_IFDDDATAKEYS	0x001b
 	#define MSG_IFDDDATA 		0x001c
 	#define MSG_COLLECTDATA		0x001d
+	#define MSG_KEYMAP		0x001a
+	#define MSG_GROUPBYKEYDATA	0x001b
 		// . . .
 	#define MSG_FINISH 		0x8000
 
@@ -97,33 +99,45 @@ namespace faster{
 		void sendDataUltra(unsigned long int id, int dest, K * keys, T * data, size_t * lineSizes, size_t size, int tagID, int tagDataSize, int tagKeys, int tagData);
 
 
-		void recvDataUltraPlus(int src, void *& data, int tag, fastCommBuffer & b UNUSED);
+		void recvDataUltraPlus(int src, void *& data, int & size, int tag, fastCommBuffer & b UNUSED);
 
 		void recvDataUltra(unsigned long int &id, int src, void *& keys, void *& data, size_t *& lineSizes, size_t &size, int tagID, int tagDataSize, int tagKeys, int tagData);
 
 
-		public:
 		fastCommBuffer * buffer;
 		fastCommBuffer * buffer3;
 		fastCommBuffer  bufferRecv[3];
+		fastCommBuffer resultBuffer;
+		public:
 
 		fastComm(const std::string master);
 		~fastComm();
 
 		int getProcId(){ return procId; }
 		int getNumProcs(){ return numProcs; }
+		fastCommBuffer & getResultBuffer(){ return resultBuffer; }
+		fastCommBuffer * getSendBuffers(){ return buffer; }
 
 		bool isDriver();
 
 		void probeMsgs(int & tag);
 		void waitForReq(int numReqs);
 
+		template <typename T>
+		size_t getSize(  T * data UNUSED, size_t * ds UNUSED, size_t s );
+		template <typename T>
+		size_t getSize(  std::vector<T> * data, size_t * ds UNUSED, size_t s );
+		template <typename T>
+		size_t getSize(  T ** data UNUSED, size_t * ds, size_t s );
+		size_t getSize(  std::string * data, size_t * ds UNUSED, size_t s );
+
 		// Task
 		void sendTask(fastTask & task);
 		void recvTask(fastTask & task);
 
-		void sendTaskResult(unsigned long int id, void * res, size_t size, double time);
-		void * recvTaskResult(unsigned long int &id, int &proc, size_t &size, double &time);
+		//void sendTaskResult(unsigned long int id, void * res, size_t size, double time);
+		void sendTaskResult();
+		void * recvTaskResult(unsigned long int &tid, unsigned long int & sid, int &proc, size_t &size, size_t & time);
 
 		// FDD Creation / Destruction
 		void sendCreateFDD(unsigned long int id,  fddType type, size_t size, int dest);
@@ -207,6 +221,15 @@ namespace faster{
 
 		// GroupByKey
 		template <typename K>
+		void sendKeyMap(unsigned long tid, std::unordered_map<K, int> & keyMap);
+		template <typename K>
+		void recvKeyMap(unsigned long tid, std::unordered_map<K, int> & keyMap);
+
+		void sendGroupByKeyData(int i);
+		void * recvGroupByKeyData(int &size);
+
+		/*
+		template <typename K>
 		void sendKeyOwnershipSugest(int dest, K key);
 		template <typename K>
 		void sendMyKeyOwnership(K key);
@@ -220,9 +243,10 @@ namespace faster{
 		template <typename K>
 		typename std::list<std::pair<K,size_t>>  recvMyKeyCount(int & src);
 		template <typename K>
-		void sendCountByKey(CountKeyMapT<K> & count);
+		void sendCountByKey(std::unordered_map<K,size_t> & count);
 		template <typename K>
-		void recvCountByKey(CountKeyMapT<K> & count);
+		void recvCountByKey(std::unordered_map<K,size_t> & count);
+		*/
 
 	};
 
@@ -232,12 +256,12 @@ namespace faster{
 
 
 	template <typename T>
-	size_t getSize(  T * data UNUSED, size_t * ds UNUSED, size_t s ){
+	size_t faster::fastComm::getSize(  T * data UNUSED, size_t * ds UNUSED, size_t s ){
 		return s*sizeof(T);
 	}
 
 	template <typename T>
-	size_t getSize(  std::vector<T> * data, size_t * ds UNUSED, size_t s ){
+	size_t faster::fastComm::getSize(  std::vector<T> * data, size_t * ds UNUSED, size_t s ){
 		size_t rawDataSize = 0;
 		for( size_t i = 0; i < s; ++i ){
 			rawDataSize += (sizeof(size_t) + data[i].size()*sizeof(T));
@@ -246,7 +270,7 @@ namespace faster{
 	}
 
 	template <typename T>
-	size_t getSize(  T ** data UNUSED, size_t * ds, size_t s ){
+	size_t faster::fastComm::getSize(  T ** data UNUSED, size_t * ds, size_t s ){
 		size_t rawDataSize = 0;
 		for( size_t i = 0; i < s; ++i ){
 			rawDataSize += ds[i]*sizeof(T);
@@ -290,7 +314,7 @@ namespace faster{
 		// Send data information
 		buffer[dest].reset();
 		buffer[dest] << id << size;
-		MPI_Isend( buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, tagID , MPI_COMM_WORLD, &req2[dest]);
+		MPI_Isend( buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, tagID , MPI_COMM_WORLD, &req2[dest-1]);
 
 		// Send subarrays sizes
 		if (tagDataSize) 
@@ -303,7 +327,7 @@ namespace faster{
 		// Send subarrays
 		sendDataUltraPlus(dest, data, lineSizes, size, tagData, buffer[dest], &req[dest-1] );
 
-		//MPI_Waitall( size, localReq, stat);
+		//MPI_Waitall( size, req, MPI_STATUSES_IGNORE);
 
 	}
 
@@ -447,85 +471,46 @@ namespace faster{
 		}
 	}
 
-
 	// GroupByKey
-	// Distribute Key Ownership
 	template <typename K>
-	void fastComm::sendKeyOwnershipSugest(int dest, K key){
-		buffer[dest].reset();
-		buffer[dest] << key;
-		MPI_Isend(buffer[dest].data(), buffer[dest].free(), MPI_BYTE, dest, MSG_KEYOWNERSHIPSUGEST, MPI_COMM_WORLD, &req[dest-1]);
-	}
-	template <typename K>
-	void fastComm::sendMyKeyOwnership(K key){
-		for ( int i = 1; i < (numProcs); ++i){
-			if (i != procId){
-				buffer[i].reset();
-				buffer[i] << key;
-				MPI_Isend(buffer[i].data(), buffer[i].free(), MPI_BYTE, i, MSG_MYKEYOWNERSHIP, MPI_COMM_WORLD, &req[i-1]);
-			}
-		}
-	}
-
-	template <typename K>
-	void fastComm::recvKeyOwnershipGeneric(K * keys, int tag){
-		bufferRecv[0].reset();
-		for ( int i = 0; i < (numProcs - 2); ++i){
-			MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, status);	
-			bufferRecv[0] >> keys[status[0].MPI_SOURCE];
-		}
-	}
-	template <typename K>
-	void fastComm::recvKeyOwnershipSugest(K * keys){
-		recvKeyOwnershipGeneric(keys, MSG_KEYOWNERSHIPSUGEST);
-	}
-	template <typename K>
-	void fastComm::recvAllKeyOwnership(K * keys){
-		recvKeyOwnershipGeneric(keys, MSG_MYKEYOWNERSHIP);
-	}
-
-
-	template <typename K>
-	typename std::list<std::pair<K,size_t>>  fastComm::recvMyKeyCount(int & src){
-		size_t numKeys = 0;
-		std::list<std::pair<K,size_t>> countList;
-
-		MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, MPI_ANY_SOURCE, MSG_KEYOWNERSHIPSUGEST, MPI_COMM_WORLD, status);	
-		src = status->MPI_SOURCE;
-		bufferRecv[0] >> numKeys;
-		for ( int i = 0; i < numKeys; ++i ){
-			K k;
-			size_t c;
-			bufferRecv[0] >> k >> c;
-			countList.push_back(std::pair<K,size_t>(k,c));
-		}
-		return countList;
-	}
-
-	template <typename K>
-	void fastComm::sendCountByKey(CountKeyMapT<K> & count){
-
+	void faster::fastComm::sendKeyMap(unsigned long tid, std::unordered_map<K, int> & keyMap){
 		buffer[0].reset();
-		buffer[0] << count.size();
+		buffer[0] << tid << size_t(keyMap.size()); 
 
-		for ( auto it = count.begin(); it != count.end(); it++ ){
-			buffer[0] << it->first << it->second;
-			MPI_Isend(buffer[0].data(), buffer[0].free(), MPI_BYTE, 0, MSG_MYKEYCOUNT, MPI_COMM_WORLD, &req[0]);
+		for ( auto it = keyMap.begin(); it != keyMap.end(); it++){
+			buffer[0] << it->first << it->second; 
 		}
+
+		for ( int i = 1; i < (numProcs); ++i)
+			MPI_Isend(buffer[0].data(), buffer[0].size(), MPI_BYTE, i, MSG_KEYMAP, MPI_COMM_WORLD, &req[i-1]);
+		MPI_Waitall( numProcs - 1, req, MPI_STATUSES_IGNORE);
 	}
+
 	template <typename K>
-	void fastComm::recvCountByKey(CountKeyMapT<K> & count){
+	void faster::fastComm::recvKeyMap(unsigned long tid, std::unordered_map<K, int> & keyMap){
 		size_t size;
+		int rsize;
+		
+		MPI_Probe(0, MSG_KEYMAP, MPI_COMM_WORLD, status);
+		MPI_Get_count(status, MPI_BYTE, &rsize);
+		bufferRecv[0].grow(rsize);
 
-		buffer[0].reset();
-		buffer[0] >> size;
+		bufferRecv[0].reset();
+		
+		MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_KEYMAP, MPI_COMM_WORLD, status);	
 
-		for ( size_t i = 0; i < size; ++i){
+		bufferRecv[0] >> tid >> size;
+		
+		// Allocate map with pre-known size
+		keyMap.reserve(size);
+
+		for ( int i = 0; i < size; ++i){
 			K key;
-			size_t c;
-			buffer[0] >> key >> c;
-			count[key] = c;
+			int count;
+			bufferRecv[0] >> key >> count;
+			keyMap[key] = count;
 		}
 	}
+
 }
 #endif

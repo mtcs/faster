@@ -89,6 +89,143 @@ void faster::_workerIFdd<K,T>::map (workerFddBase * dest, PmapIFunctionP<K,T,U> 
 }		
 
 
+// --------- MAPBYKEY
+template <typename K, typename T>
+std::vector< std::tuple<K, T*, size_t>> findKeyInterval(K * keys, T * data, size_t size, size_t numKeys){
+	std::vector<std::tuple<K, T*, size_t>> keyLocations;
+	K * lastKey = &keys[0];
+	size_t kCount;
+	size_t pos = 0;
+
+	keyLocations.reserve(numKeys);
+	keyLocations.insert(keyLocations.end(), std::make_tuple(keys[pos], &data[pos], size));
+	kCount = 1;
+
+	if(numKeys == 1) 
+		return keyLocations;
+
+	for ( size_t i = 1; i < size; ++i){
+		if (*lastKey == keys[i]){
+			kCount++;
+			continue;
+		}else{
+			std::get<2>(keyLocations[pos]) = kCount;
+			pos ++;
+			keyLocations.insert(keyLocations.end(), std::make_tuple(keys[i], &data[i],1));
+			kCount = 1;
+		}
+		lastKey = &keys[i];
+	}
+	std::get<2>(keyLocations[pos]) = kCount;
+
+	return keyLocations;
+}
+
+template <typename K, typename T>
+template <typename L, typename U>
+void faster::_workerIFdd<K,T>::mapByKey (workerFddBase * dest, ImapByKeyIFunctionP<K,T,L,U> mapByKeyFunc){
+	T * d = this->localData->getData();
+	size_t s = this->localData->getSize();
+	size_t nk = this->localData->getNumKeys();
+	K * ik = (K*) this->localData->getKeys();
+	L * ok = (L*) dest->getKeys();
+	U * od = (U*) dest->getData();
+
+	auto keyLocations = findKeyInterval(ik, d, s, nk);
+
+	//std::cerr << "START " << id << " " << s << "  ";
+	std::cerr << "NK: " << nk << "\n";
+
+	dest->setSize(nk);
+
+	#pragma omp parallel for 
+	for (int i = 0; i < keyLocations.size(); ++i){
+		auto & location = keyLocations[i];
+		std::pair<L,U> r = mapByKeyFunc(std::get<0>(location), std::get<1>(location), std::get<2>(location) );
+		ok[i] = r.first;
+		od[i] = r.second;
+	}
+	//std::cerr << "END ";
+}		
+
+template <typename K, typename T>
+template <typename L, typename U>
+void faster::_workerIFdd<K,T>::mapByKey (workerFddBase * dest, IPmapByKeyIFunctionP<K,T,L,U> mapByKeyFunc){
+	T * d = this->localData->getData();
+	size_t s = this->localData->getSize();
+	size_t nk = this->localData->getNumKeys();
+	K * ik = (K*) this->localData->getKeys();
+	size_t * ols = dest->getLineSizes() ;
+	L * ok = (L*) dest->getKeys();
+	U * od = (U*) dest->getData();
+
+	auto keyLocations = findKeyInterval(ik, d, s, nk);
+
+	//std::cerr << "START " << id << " " << s << "  ";
+
+	dest->setSize(nk);
+
+	#pragma omp parallel for 
+	for (int i = 0; i < keyLocations.size(); ++i){
+		auto & location = keyLocations[i];
+		std::tuple <L,U,size_t> r = mapByKeyFunc(std::get<0>(location), std::get<1>(location), std::get<2>(location) ) ;
+		ok[i] = std::get<0>(r);
+		od[i] = std::get<1>(r);
+		ols[i] = std::get<2>(r);
+	}
+	//std::cerr << "END ";
+}		
+
+template <typename K, typename T>
+template < typename U>
+void faster::_workerIFdd<K,T>::mapByKey (workerFddBase * dest, mapByKeyIFunctionP<K,T,U> mapByKeyFunc){
+	T * d = this->localData->getData();
+	size_t s = this->localData->getSize();
+	size_t nk = this->localData->getNumKeys();
+	K * ik = (K*) this->localData->getKeys();
+	U * od = (U*) dest->getData();
+
+	auto keyLocations = findKeyInterval(ik, d, s, nk);
+
+	//std::cerr << "START " << id << " " << s << "  ";
+
+	dest->setSize(nk);
+
+	#pragma omp parallel for 
+	for (int i = 0; i < keyLocations.size(); ++i){
+		auto & location = keyLocations[i];
+		od[i] = mapByKeyFunc(std::get<0>(location), std::get<1>(location), std::get<2>(location) );
+	}
+	//std::cerr << "END ";
+}		
+
+template <typename K, typename T>
+template <typename U>
+void faster::_workerIFdd<K,T>::mapByKey (workerFddBase * dest, PmapByKeyIFunctionP<K,T,U> mapByKeyFunc){
+	T * d = this->localData->getData();
+	size_t s = this->localData->getSize();
+	size_t nk = this->localData->getNumKeys();
+	K * ik = (K*) this->localData->getKeys();
+	size_t * ols = dest->getLineSizes() ;
+	U * od = (U*) dest->getData();
+
+	auto keyLocations = findKeyInterval(ik, d, s, nk);
+
+	//std::cerr << "START " << id << " " << s << "  ";
+
+	dest->setSize(nk);
+
+	#pragma omp parallel for 
+	for (int i = 0; i < keyLocations.size(); ++i){
+		auto & location = keyLocations[i];
+		std::pair<U, size_t> r = mapByKeyFunc(std::get<0>(location), std::get<1>(location), std::get<2>(location) );
+		od[i] = r.first;
+		ols[i] = r.second;
+	}
+	//std::cerr << "END ";
+}		
+
+
 
 // --------- BulkMAP
 template <typename K, typename T>
@@ -268,6 +405,10 @@ void faster::_workerIFdd<K,T>::_applyI(void * func, fddOpType op, workerFddBase 
 			map<L,U>(dest, (ImapIFunctionP<K,T,L,U>) func);
 			std::cerr << "Map ";
 			break;
+		case OP_MapByKey:
+			mapByKey<L,U>(dest, (ImapByKeyIFunctionP<K,T,L,U>) func);
+			std::cerr << "MapByKey ";
+			break;
 		case OP_BulkMap:
 			bulkMap<L,U>(dest, ( IbulkMapIFunctionP<K,T,L,U> ) func);
 			std::cerr << "BulkMap ";
@@ -292,6 +433,10 @@ void faster::_workerIFdd<K,T>::_applyIP(void * func, fddOpType op, workerFddBase
 			map<L,U>(dest, (IPmapIFunctionP<K,T,L,U>) func);
 			std::cerr << "Map ";
 			break;
+		case OP_MapByKey:
+			mapByKey<L,U>(dest, (IPmapByKeyIFunctionP<K,T,L,U>) func);
+			std::cerr << "MapByKey ";
+			break;
 		case OP_BulkMap:
 			bulkMap<L,U>(dest, ( IPbulkMapIFunctionP<K,T,L,U> ) func);
 			std::cerr << "BulkMap ";
@@ -314,6 +459,10 @@ void faster::_workerIFdd<K,T>::_apply(void * func, fddOpType op, workerFddBase *
 		case OP_Map:
 			map<U>(dest, (mapIFunctionP<K,T,U>) func);
 			std::cerr << "Map ";
+			break;
+		case OP_MapByKey:
+			mapByKey<U>(dest, (mapByKeyIFunctionP<K,T,U>) func);
+			std::cerr << "MapByKey ";
 			break;
 		case OP_BulkMap:
 			bulkMap<U>(dest, ( bulkMapIFunctionP<K,T,U> ) func);
@@ -338,6 +487,10 @@ void faster::_workerIFdd<K,T>::_applyP(void * func, fddOpType op, workerFddBase 
 		case OP_Map:
 			map<U>(dest, (PmapIFunctionP<K,T,U>) func);
 			std::cerr << "Map ";
+			break;
+		case OP_MapByKey:
+			mapByKey<U>(dest, (PmapByKeyIFunctionP<K,T,U>) func);
+			std::cerr << "MapByKey ";
 			break;
 		case OP_BulkMap:
 			bulkMap<U>(dest, ( PbulkMapIFunctionP<K,T,U> ) func);

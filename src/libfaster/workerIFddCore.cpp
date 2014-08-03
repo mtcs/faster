@@ -1,3 +1,5 @@
+#include <chrono>
+
 #include "_workerIFdd.h"
 #include "fastComm.h"
 #include "indexedFddStorageExtern.cpp"
@@ -5,13 +7,15 @@
 using namespace faster;
 
 template <typename K, typename T>
-faster::workerIFddCore<K,T>::workerIFddCore(unsigned int ident, fddType t) : workerFddBase(ident, t){
+faster::workerIFddCore<K,T>::workerIFddCore(unsigned int ident, fddType kt, fddType t) : workerFddBase(ident, t){
+	keyType = kt;
 	localData = new indexedFddStorage<K,T>();
 } 
 
 
 template <typename K, typename T>
-faster::workerIFddCore<K,T>::workerIFddCore(unsigned int ident, fddType t, size_t size) : workerFddBase(ident, t){ 
+faster::workerIFddCore<K,T>::workerIFddCore(unsigned int ident, fddType kt, fddType t, size_t size) : workerFddBase(ident, t){ 
+	keyType = kt;
 	localData = new indexedFddStorage<K,T>(size);
 }
 
@@ -19,7 +23,6 @@ faster::workerIFddCore<K,T>::workerIFddCore(unsigned int ident, fddType t, size_
 template <typename K, typename T>
 faster::workerIFddCore<K,T>::~workerIFddCore(){
 	delete localData;
-	delete resultBuffer;
 }
 
 template <typename K, typename T>
@@ -62,6 +65,11 @@ template <typename K, typename T>
 size_t faster::workerIFddCore<K,T>::baseSize(){ 
 	return sizeof(T); 
 }
+template <typename K, typename T>
+void faster::workerIFddCore<K,T>::setSize(size_t s) { 
+	localData->setSize(s); 
+}
+
 
 template <typename K, typename T>
 void faster::workerIFddCore<K,T>::deleteItem(void * item) { 
@@ -74,21 +82,26 @@ void faster::workerIFddCore<K,T>::shrink(){
 }
 
 
-template <typename K, typename T>
+/*template <typename K, typename T>
 K * faster::workerIFddCore<K,T>::distributeOwnership(fastComm * comm, K * uKeys, size_t cSize){
 	size_t keyPerProc = cSize/(comm->getNumProcs() - 1);
 	int procId = comm->getProcId();
 	K * recvOwnership = new K[comm->getNumProcs()];
 
+	std::cerr << "\n Keys to distribute: " << cSize << "\n" ;
+	std::cerr << " Key per proc: " << keyPerProc << "\n" ;
 	// Send Ownership start sugestion to others
+	std::cerr << "Ownership Sugest: " ;
 	for ( int i = 1; i < (comm->getNumProcs()); ++i){
 		if (i != procId){
 			comm->sendKeyOwnershipSugest(i, uKeys[i * keyPerProc]);
+			std::cerr << i << "->" << uKeys[i * keyPerProc] << "   " ;
 		}
 	}
 
 	// Recv Key onwership sugestions
 	comm->recvKeyOwnershipSugest(recvOwnership);
+	std::cerr << ".\n" ;
 	
 	// Find out what will be my ownership
 	K myOwnership = recvOwnership[procId * keyPerProc];
@@ -101,11 +114,13 @@ K * faster::workerIFddCore<K,T>::distributeOwnership(fastComm * comm, K * uKeys,
 	}
 	
 	// Send my ownership to others
+	std::cerr << "My Ownership: " << myOwnership << " ";
 	comm->sendMyKeyOwnership(myOwnership);
 	
 	// Receive all ownerships
 	comm->recvAllKeyOwnership(recvOwnership);
 	recvOwnership[procId - 1] = myOwnership;
+	std::cerr << ".\n";
 
 	return recvOwnership;
 }
@@ -148,7 +163,7 @@ void faster::workerIFddCore<K,T>::sendPartKeyCount(fastComm *comm){
 			comm->sendMyKeyCount(i, numKeys);
 			comm->buffer[i].reset();
 			i++;
-			numKeys	= 0;;
+			numKeys	= 0;
 			comm->buffer[i] << numKeys;
 		}
 		numKeys++;
@@ -227,8 +242,10 @@ CountKeyMapT<K> faster::workerIFddCore<K,T>::distributedMaxKeyCount(fastComm *co
 	CountKeyMapT<K> keyCount = recvPartKeyMaxCount(comm, keyPPMaxCount);
 
 	return keyCount;
-}
+} */
 
+
+/* OLD Confusing distributted group by key....
 template <typename K, typename T>
 void faster::workerIFddCore<K,T>::countByKey(fastComm *comm){
 
@@ -238,6 +255,7 @@ void faster::workerIFddCore<K,T>::countByKey(fastComm *comm){
 
 	comm->sendCountByKey(keyCount);
 }
+
 
 template <typename K, typename T>
 void faster::workerIFddCore<K,T>::groupByKey(fastComm *comm){
@@ -259,8 +277,211 @@ void faster::workerIFddCore<K,T>::groupByKey(fastComm *comm){
 	// Recv Items + keys
 
 	groupedByKey = true;
+}*/
+
+template <typename K, typename T>
+void faster::workerIFddCore<K,T>::countByKey(fastComm *comm){
+
+	K * keys = localData->getKeys();
+	size_t size = localData->getSize();
+	fastCommBuffer &buffer = comm->getResultBuffer();
+
+	// TODO PARALELIZE!
+	// This needs to be ordered to send in order
+	std::unordered_map<K, size_t> count;
+	// Count keys
+	for (int i = 0; i < size; ++i){
+		//typename std::unordered_map<K, size_t>::iterator it = count.find(keys[i]);
+		//if (count.find(keys[i]) == count.end()) 
+			//count[keys[i]] = 1;
+		//else 
+			count[keys[i]] += 1;
+	}
+	buffer << size_t(count.size());
+	int sum = 0;
+	for ( auto it = count.begin(); it != count.end(); it++){
+		sum += it->second;
+		buffer << it->first << it->second;
+	}
+
 }
 
+template <typename K, typename T>
+void faster::workerIFddCore<K,T>::groupByKey(fastComm *comm){
+	std::cerr << "\n    GroupByKey\n";
+	unsigned long tid = 0;
+	std::unordered_map<K, int> keyMap;
+	K * keys = localData->getKeys();
+	T * data = localData->getData();
+	size_t size = localData->getSize();
+	fastCommBuffer * buffer = comm->getSendBuffers();
+	fastCommBuffer &resultBuffer = comm->getResultBuffer();
+	std::vector<size_t> dataSize(comm->getNumProcs(), 0);
+	std::vector<bool> deleted(size, false);
+	size_t numMyKeys = 0;
+	size_t pos;
+
+	std::cerr << "      RecvKeyMap\n";
+	comm->recvKeyMap(tid, keyMap);
+
+	// Find out how many keys I own
+	for ( auto it = keyMap.begin(); it != keyMap.end(); it++)
+		if (it->second == comm->getProcId())
+			numMyKeys++;
+	localData->setNumKeys(numMyKeys);
+	std::cerr << "      NumKeys: " << numMyKeys << "\n";
+	
+	//std::cerr << "        [ KeyMap: ";
+	//for ( auto it = keyMap.begin(); it != keyMap.end(); it++)
+		//std::cerr << it->first << ":" << it->second << " ";
+	//std::cerr << "] \n";
+
+	std::cerr << "      Write Buffers\n";
+	// Reserve space in the message for the header
+	for (int i = 1; i < (comm->getNumProcs()); ++i){
+		if (i == comm->getProcId())
+			continue;
+		buffer[i].reset();
+		buffer[i].advance( sizeof(size_t) );
+	}
+
+	//std::cerr << "        [ Del: ";
+	// Insert Data that dont belong to me in the message
+	for (int i = 0; i < size; ++i){
+		K key = keys[i];
+		int owner = keyMap[key];
+		if (owner == comm->getProcId()){
+			continue;
+		}
+		buffer[owner] << key << data[i];
+		dataSize[owner]++;
+		deleted[i] = true;
+		//std::cerr << i << ":" << key << ">" << owner << "  ";
+		//std::cerr << i << " ";
+	}
+
+	// Include the data size in the message header
+	for (int i = 1; i < (comm->getNumProcs()); ++i){
+		if (i == comm->getProcId())
+			continue;
+		buffer[i].writePos(dataSize[i], 0);
+		comm->sendGroupByKeyData(i);
+		//std::cerr << dataSize[i] << ">" << i << "  ";
+	}
+	//std::cerr << " ) \n";
+
+	std::cerr << "      Recv data In-place\n";
+	// Recv all keys I own in-place
+	pos = 0;
+	for (int i = 1; i < (comm->getNumProcs() - 1); ++i){
+		//std::cerr << "        [ Insert:";
+		int rSize;
+		size_t numItems;
+		fastCommBuffer rb(0);
+		void * rData = comm->recvGroupByKeyData(rSize);
+		rb.setBuffer(rData, rSize);
+
+		rb >> numItems;
+		//std::cerr << numItems << " - ";
+
+		for (size_t i = 0; i < numItems; ++i){
+			// Find a empty space in the local data
+			while ( (pos < deleted.size() ) && ( ! deleted[pos] ) )
+				pos++;
+			// Make sure it is not out of bounds, if it is, grow local data to fit new data
+			if(pos == deleted.size()){
+				localData->setSize(localData->getSize() + numItems - i);
+				data = localData->getData();
+				keys = localData->getKeys();
+				//std::cerr << "( GROW: "<< localData->getSize() << " ) ";
+			}
+			rb >> keys[pos] >> data[pos];
+			//std::cerr << pos << ":" << keys[pos] << " ";
+			pos++;
+		}
+		//std::cerr << " ]\n";
+	}
+
+	// If there are elements that are still sparse in the memory
+	if( pos < size ){
+		std::cerr << "        Shrink\n";
+		//std::cerr << "        [ Shrink:";
+		// Bring them forward and correct size
+		for (size_t i = (pos); i < size; ++i){
+			// Found sparse a item
+			//std::cerr << " " << i;
+			if ( ( ! deleted[i] ) && (i > pos) ){
+				keys[pos] = keys[i];
+				data[pos] = data[i];
+				pos++;
+			}
+			//if ( ! deleted[i] ) 
+				//std::cerr << ">" << pos;
+		}
+		localData->setSize(pos);
+		//std::cerr << " ]\n" ;
+	}
+	std::cerr << "        (new size: " << localData->getSize() << ")\n";
+	
+	// SORT LOCAL DATA??????
+	std::cerr << "      SortByKey\n";
+	localData->sortByKey();
+
+	//comm->waitForReq(comm->getNumProcs()-1);
+	resultBuffer << size_t(localData->getSize());
+
+	std::cerr << "    DONE\n";
+}
+
+
+template <typename K, typename T>
+void faster::workerIFddCore<K, T>::preapply(long unsigned int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm){ 
+	using std::chrono::system_clock;
+	using std::chrono::duration_cast;
+	using std::chrono::milliseconds;
+
+	fastCommBuffer &buffer = comm->getResultBuffer();
+	size_t durationP;
+	size_t rSizeP;
+	size_t headerSize;
+
+	buffer.reset();
+	buffer << id;
+	
+	// Reserve space for the time duration
+	durationP = buffer.size();
+	buffer.advance(sizeof(size_t));
+
+	rSizeP = buffer.size();
+	buffer.advance(sizeof(size_t));
+
+	headerSize = buffer.size();
+
+	auto start = system_clock::now();
+	if (op & (OP_GENERICMAP | OP_GENERICREDUCE)){
+		this->apply(func, op, dest, buffer);
+		buffer << dest->getSize();
+	}else{
+		switch(op){
+			case OP_CountByKey:
+				countByKey(comm);
+				break;
+			case OP_GroupByKey:
+				groupByKey(comm);
+				break;
+		}
+	}
+	auto end = system_clock::now();
+
+	auto duration = duration_cast<milliseconds>(end - start);
+	std::cerr << " ET:" << duration.count() << " ";
+
+	buffer.writePos(duration.count(), durationP);
+	buffer.writePos(buffer.size() - headerSize, rSizeP);
+
+	comm->sendTaskResult();
+
+}
 
 
 template class faster::workerIFddCore<char, char>;

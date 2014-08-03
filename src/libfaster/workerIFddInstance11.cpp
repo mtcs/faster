@@ -4,12 +4,12 @@
 
 faster::workerFddBase * faster::newWorkerSDL(unsigned long int id, fddType type, size_t size){
 	switch (type){
-		case String: return new   _workerIFdd<std::string, std::string>(id, type, size); break;
-		case CharV: return new    _workerIFdd<std::string, std::vector<char>>(id, type, size); break;
-		case IntV: return new     _workerIFdd<std::string, std::vector<int>>(id, type, size); break;
-		case LongIntV: return new _workerIFdd<std::string, std::vector<long int>>(id, type, size); break;
-		case FloatV: return new   _workerIFdd<std::string, std::vector<float>>(id, type, size); break;
-		case DoubleV: return new  _workerIFdd<std::string, std::vector<double>>(id, type, size); break;
+		case String: return new   _workerIFdd<std::string, std::string>(id, String, type, size); break;
+		case CharV: return new    _workerIFdd<std::string, std::vector<char>>(id, String, type, size); break;
+		case IntV: return new     _workerIFdd<std::string, std::vector<int>>(id, String, type, size); break;
+		case LongIntV: return new _workerIFdd<std::string, std::vector<long int>>(id, String, type, size); break;
+		case FloatV: return new   _workerIFdd<std::string, std::vector<float>>(id, String, type, size); break;
+		case DoubleV: return new  _workerIFdd<std::string, std::vector<double>>(id, String, type, size); break;
 	}
 	return NULL;
 }

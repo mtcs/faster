@@ -69,28 +69,31 @@ void faster::fastComm::recvTask(fastTask & task){
 	buffer[0] >> task.id >> task.operationType >> task.srcFDD >> task.destFDD >> task.functionId;
 }
 
-void faster::fastComm::sendTaskResult(unsigned long int id, void * res, size_t size, double time){
+//void faster::fastComm::sendTaskResult(unsigned long int id, void * res, size_t size, double time){
+void faster::fastComm::sendTaskResult(){
 
-	buffer[0].reset();
+	//buffer[0].reset();
 
-	buffer[0] << id << time << size;
-	buffer[0].write(res, size);
+	//buffer[0] << id << time << size;
+	//buffer[0].write(res, size);
 
-	MPI_Isend(buffer[0].data(), buffer[0].size() , MPI_BYTE, 0, MSG_TASKRESULT, MPI_COMM_WORLD, req);
+	//MPI_Isend(buffer[0].data(), buffer[0].size() , MPI_BYTE, 0, MSG_TASKRESULT, MPI_COMM_WORLD, req);
+	MPI_Isend(resultBuffer.data(), resultBuffer.size() , MPI_BYTE, 0, MSG_TASKRESULT, MPI_COMM_WORLD, req);
 }
 
-void * faster::fastComm::recvTaskResult(unsigned long int & id, int & proc, size_t & size, double & time){
+void * faster::fastComm::recvTaskResult(unsigned long int & id, unsigned long int & sid, int & proc, size_t & size, size_t & time){
 
-	buffer[0].reset();
+	bufferRecv[0].reset();
 
-	MPI_Recv(buffer[0].data(), buffer[0].free(), MPI_BYTE, MPI_ANY_SOURCE, MSG_TASKRESULT, MPI_COMM_WORLD, status);	
+	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, MPI_ANY_SOURCE, MSG_TASKRESULT, MPI_COMM_WORLD, status);	
 	
-	buffer[0] >> id >> time >> size;
+	bufferRecv[0] >> id >> time >> size;
+	sid = status->MPI_SOURCE;
 
 	proc = status->MPI_SOURCE;
-	void * res = buffer[0].pos();
+	void * res = bufferRecv[0].pos();
 	//char * res = new char[size];
-	//buffer[0].read(res, size);
+	//bufferRecv[0].read(res, size);
 
 	return res;
 }
@@ -160,7 +163,7 @@ void faster::fastComm::recvDestroyFDD(unsigned long int &id){
 	MPI_Recv(&id, sizeof(long unsigned int), MPI_BYTE, 0, MSG_DESTROYFDD, MPI_COMM_WORLD, status);	
 }
 
-size_t getSize(  std::string * data, size_t * ds UNUSED, size_t s ){
+size_t faster::fastComm::getSize(  std::string * data, size_t * ds UNUSED, size_t s ){
 	size_t rawDataSize = 0;
 	for( size_t i = 0; i < s; ++i ){
 		rawDataSize += (sizeof(size_t) + data[i].size());
@@ -179,12 +182,10 @@ void faster::fastComm::sendDataUltraPlus(int dest, std::string * data, size_t * 
 	MPI_Isend( b.data(), b.size(), MPI_BYTE, dest, tag, MPI_COMM_WORLD, request);
 }
 
-void faster::fastComm::recvDataUltraPlus(int src, void *& data, int tag, fastCommBuffer & b UNUSED){
-	int recvDataSize;
-
+void faster::fastComm::recvDataUltraPlus(int src, void *& data, int & size, int tag, fastCommBuffer & b){
 	MPI_Probe(src, tag, MPI_COMM_WORLD, status);
-	MPI_Get_count(status, MPI_BYTE, &recvDataSize);
-	b.grow(recvDataSize);
+	MPI_Get_count(status, MPI_BYTE, &size);
+	b.grow(size);
 	b.reset();
 	MPI_Recv(b.data(), b.free(), MPI_BYTE, src, tag, MPI_COMM_WORLD, status);	
 	data = b.data();
@@ -192,22 +193,27 @@ void faster::fastComm::recvDataUltraPlus(int src, void *& data, int tag, fastCom
 
 // Receive 2D data
 void faster::fastComm::recvDataUltra(unsigned long int &id, int src, void *& keys, void *& data, size_t *& lineSizes, size_t &size, int tagID, int tagDataSize, int tagKeys, int tagData){
+	int rSize = 0;
 
 	// Receive the FDD ID, size and item size
 	bufferRecv[0].reset();
 	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, src, tagID, MPI_COMM_WORLD, status);	
 	bufferRecv[0] >> id >> size;
+		std::cerr << ".";
 
 	// Receive the size of every line to be received
 	if (tagDataSize)
-		recvDataUltraPlus(src, (void*&) lineSizes, tagDataSize, bufferRecv[2]);
+		recvDataUltraPlus(src, (void*&) lineSizes, rSize, tagDataSize, bufferRecv[2]);
+		std::cerr << ".";
 
 	// Receive Keys
 	if (tagKeys)
-		recvDataUltraPlus(src, keys, tagKeys, bufferRecv[1]);
+		recvDataUltraPlus(src, keys, rSize, tagKeys, bufferRecv[1]);
+		std::cerr << ".";
 
 	
-	recvDataUltraPlus(src, data, tagData, bufferRecv[0]);
+	recvDataUltraPlus(src, data, rSize, tagData, bufferRecv[0]);
+	std::cerr << ".";
 }
 
 
@@ -264,6 +270,20 @@ void faster::fastComm::recvFDDInfo(size_t &size){
 }
 
 
+
+void faster::fastComm::sendGroupByKeyData(int i){
+	MPI_Isend( buffer[i].data(), buffer[i].size(), MPI_BYTE, i, MSG_GROUPBYKEYDATA, MPI_COMM_WORLD, &req[i-1]);
+}
+void * faster::fastComm::recvGroupByKeyData(int & size){
+	void * data;
+	
+	recvDataUltraPlus(MPI_ANY_SOURCE, data, size, MSG_GROUPBYKEYDATA, bufferRecv[0]);
+
+	return data;
+}
+
+
+
 void faster::fastComm::sendCollect(unsigned long int id){
 	for (int i = 1; i < numProcs; ++i){
 		MPI_Isend( &id, sizeof(long unsigned int), MPI_BYTE, i, MSG_COLLECT, MPI_COMM_WORLD, &req[i-1]);
@@ -287,9 +307,4 @@ void faster::fastComm::recvFinish(){
 	MPI_Recv(buffer[0].data(), 1, MPI_BYTE, 0, MSG_FINISH, MPI_COMM_WORLD, status);	
 }
 
-// Distribute Key Count
-void faster::fastComm::sendMyKeyCount(int dest, size_t numKeys){
-	memcpy(buffer[dest].data(), &numKeys, sizeof(size_t));
-	MPI_Isend(buffer[dest].data(), buffer[dest].free(), MPI_BYTE, dest, MSG_MYKEYCOUNT, MPI_COMM_WORLD, &req[dest-1]);
-}
 

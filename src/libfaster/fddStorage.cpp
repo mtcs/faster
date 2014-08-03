@@ -6,15 +6,18 @@
 
 template <class T> 
 faster::fddStorageCore<T>::fddStorageCore(){
-	allocSize = 200;
+	allocSize = 1000;
 	localData = new T[allocSize];
 	size = 0;
 }
 
 template <class T> 
 faster::fddStorageCore<T>::fddStorageCore(size_t s){
-	allocSize = s;
-	localData = new T[s];
+	if (s > 0)
+		allocSize = s;
+	else
+		allocSize = 1000;
+	localData = new T[allocSize];
 	size = s;
 }
 template <class T> 
@@ -194,6 +197,7 @@ void faster::fddStorage<T>::grow(size_t toSize){
 		T * newStorage = new T [toSize];
 
 		if (this->size >0) 
+			#pragma omp parallel for
 			for ( size_t i = 0; i < this->size; ++i)
 				newStorage[i] = this->localData[i];
 			//memcpy(newStorage, localData, size * sizeof( T ) );
@@ -217,6 +221,7 @@ void faster::fddStorage<T*>::grow(size_t toSize){
 		if (this->size > 0){
 			//memcpy(newStorage, localData, this->size * sizeof( T* ) );
 			//memcpy(newLineSizes, lineSizes, this->size * sizeof( size_t ) );
+			#pragma omp parallel for
 			for ( int i = 0; i < this->size; ++i){
 				newStorage[i] =  this->localData[i];
 				newLineSizes[i] = lineSizes[i];

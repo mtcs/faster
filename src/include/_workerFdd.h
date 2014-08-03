@@ -54,11 +54,13 @@ namespace faster {
 			size_t getSize() override;
 			size_t itemSize() override;
 			size_t baseSize() override;
+			void   setSize(size_t s);
+
 			void deleteItem(void * item) override ;
 			void shrink();
 
-			void groupByKey(fastComm *comm UNUSED) override {}
-			void countByKey(fastComm *comm UNUSED) override {}
+			void preapply(unsigned long int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm);
+
 	};
 
 	// Worker side FDD
@@ -74,7 +76,7 @@ namespace faster {
 			void _applyI(void * func, fddOpType op, workerFddBase * dest);
 			template <typename L, typename U>
 			void _applyIP(void * func, fddOpType op, workerFddBase * dest);
-			void _applyReduce(void * func, fddOpType op, void *& result, size_t & rSize);
+			void _applyReduce(void * func, fddOpType op, fastCommBuffer & buffer);
 
 			template <typename L>
 			void _preApplyI(void * func, fddOpType op, workerFddBase * dest);
@@ -161,7 +163,7 @@ namespace faster {
 			void insert(std::list<std::pair<T*,size_t>> & in UNUSED){}
 
 			// Apply task functions to FDDs
-			void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize);
+			void apply(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer);
 
 			void collect(fastComm * comm) override;
 
@@ -181,7 +183,7 @@ namespace faster {
 			void _applyI(void * func, fddOpType op, workerFddBase * dest);
 			template <typename L, typename U>
 			void _applyIP(void * func, fddOpType op, workerFddBase * dest);
-			void _applyReduce(void * func, fddOpType op, void *& result, size_t & rSize);
+			void _applyReduce(void * func, fddOpType op, fastCommBuffer & buffer);
 
 			template <typename L>
 			void _preApplyI(void * func, fddOpType op, workerFddBase * dest);
@@ -261,7 +263,7 @@ namespace faster {
 			void insert(std::list< std::pair<T*, size_t> > & in);
 
 			// Apply task functions to FDDs
-			void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize);
+			void apply(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer);
 			void collect(fastComm * comm) override;
 
 	};

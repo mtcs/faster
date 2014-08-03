@@ -427,7 +427,7 @@ void faster::_workerFdd<T*>::_applyIP(void * func, fddOpType op, workerFddBase *
 }
 
 template <typename T>
-void faster::_workerFdd<T*>::_applyReduce(void * func, fddOpType op, void *& result, size_t & rSize){
+void faster::_workerFdd<T*>::_applyReduce(void * func, fddOpType op, fastCommBuffer & buffer){
 	std::pair<T*,size_t> r;
 	switch (op){
 		case OP_Reduce:
@@ -439,11 +439,7 @@ void faster::_workerFdd<T*>::_applyReduce(void * func, fddOpType op, void *& res
 			std::cerr << "BulkReduce ";
 			break;
 	}
-	result = r.first;
-	rSize = r.second*sizeof(T);
-	//for (int j = 0; j < rSize; ++j)
-		//std::cerr << (T*) result << " ";
-	//std::cerr << "\n ";
+	buffer.write(r.first, r.second);
 
 }
 
@@ -500,9 +496,9 @@ void faster::_workerFdd<T*>::_preApplyI(void * func, fddOpType op, workerFddBase
 // -------------------------- Public Functions ------------------------ //
 
 template <typename T>
-void faster::_workerFdd<T*>::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){ 
+void faster::_workerFdd<T*>::apply(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer){ 
 	if (op & OP_GENERICREDUCE){
-		_applyReduce(func, op, result, rSize);
+		_applyReduce(func, op, buffer);
 	}else{
 		switch (dest->getKeyType()){
 			case Null:     _preApply(func, op, dest);break;

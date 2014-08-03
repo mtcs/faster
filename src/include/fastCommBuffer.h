@@ -27,6 +27,7 @@ namespace faster {
 
 			char * data();
 			char * pos();
+			char * pos(size_t pos);
 			size_t size();
 			size_t free();
 			void advance(size_t pos);
@@ -41,6 +42,17 @@ namespace faster {
 				grow(_size + s);
 				memcpy( &_data[_size], &v, s );
 				_size += s;
+			}
+			template <typename T>
+			void writePos(const T &v, size_t s, size_t pos){
+				grow(pos + s);
+				memcpy( &_data[pos], (char*) &v, s );
+				if(_size < pos+s)
+					_size += pos+s;
+			}
+			template <typename T>
+			void writePos(const T &v, size_t pos){
+				writePos(v, sizeof(v), pos);
 			}
 
 			template <typename T>

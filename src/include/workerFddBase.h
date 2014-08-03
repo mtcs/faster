@@ -17,8 +17,6 @@ namespace faster{
 			unsigned long int id;
 			fddType type;
 			fddType keyType;
-			fastCommBuffer * resultBuffer;
-
 		public:
 			workerFddBase() ;
 			workerFddBase(unsigned int ident, fddType t);
@@ -43,6 +41,7 @@ namespace faster{
 			virtual void * getData() = 0;
 			virtual size_t getSize() = 0;
 			virtual size_t * getLineSizes() = 0;
+			virtual void   setSize(size_t s) = 0;
 
 			virtual size_t itemSize() = 0;
 			virtual size_t baseSize() = 0;
@@ -53,12 +52,10 @@ namespace faster{
 			virtual void insertl(void * v) = 0;
 			virtual void insert(void * k, void * v, size_t s) = 0;
 
-			virtual void apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize) = 0;
+			virtual void preapply(unsigned long int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm) = 0;
+			virtual void apply(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer) = 0;
 
 			virtual void collect(fastComm * comm) = 0;
-			virtual void groupByKey(fastComm * comm) = 0;
-			virtual void countByKey(fastComm * comm) = 0;
-					
 	};
 }
 

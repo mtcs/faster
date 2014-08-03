@@ -2,6 +2,7 @@
 #define LIBFASTER_FASTTASK_H
 
 
+#include <vector>
 #include "definitions.h"
 
 
@@ -12,10 +13,14 @@ namespace faster{
 			unsigned long int srcFDD;
 			unsigned long int destFDD;
 			fddOpType	operationType;
-			unsigned int	functionId;
+			int		functionId;
+			size_t size;
 			void * result;
 			size_t resultSize;
 			size_t workersFinished;
+			std::vector<size_t> times;
+			double * allocation;
+
 	};
 }
 

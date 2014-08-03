@@ -15,12 +15,20 @@ inline bool diff(T & a, U & b){
 	return a != b;
 }
 template <typename T, typename U>
-inline bool diff(T * a, U & b){
-	return a[0] != b;
+inline bool diff(T & a, U * b){
+	return a != b[0];
 }
 template <typename T, typename U>
-inline bool diff(std::vector<T> & a, U & b){
-	return a[0] != b;
+inline bool diff(T & a, std::pair<U*,size_t> & b){
+	return a != b.first[0];
+}
+template <typename T, typename U>
+inline bool diff(T & a, std::vector<U> & b){
+	return a != b[0];
+}
+template <typename T>
+inline bool diff(T & a, std::string & b){
+	return char(a) != b[0];
 }
 template <typename T, typename U>
 inline bool diff(std::vector<T> & a, std::vector<U> & b){
@@ -31,10 +39,6 @@ inline bool diff(std::vector<T> & a, std::vector<U> & b){
 		return a[i] != b[i];
 	}
 	return true;
-}
-template <typename U>
-inline bool diff(std::string & a, U & b){
-	return a[0] != b;
 }
 inline bool diff(std::string & a, std::string & b){
 	if ( a.size() != b.size() )
@@ -141,7 +145,7 @@ bool verify(std::vector<K> & k, std::vector<T*> & a, std::vector<size_t> & ds, s
 //Test String > Collect
 //Test Vector > Collect
 template <typename T>
-bool testCreation(fdd<T> * testFDD, fastContext & fc, std::vector<T> & data){
+bool testCreation(fdd<T> *& testFDD, fastContext & fc, std::vector<T> & data){
 	testFDD =  new fdd <T> (fc, data);
 	std::vector <T> tv = testFDD->collect();
 
@@ -149,7 +153,7 @@ bool testCreation(fdd<T> * testFDD, fastContext & fc, std::vector<T> & data){
 }
 //Test Pointer > Collect
 template <typename T>
-bool testCreation(fdd<T*> * testFDD, fastContext & fc, std::vector<T*> & data, std::vector<size_t> & dataSizes){
+bool testCreation(fdd<T*> *& testFDD, fastContext & fc, std::vector<T*> & data, std::vector<size_t> & dataSizes){
 	testFDD =  new fdd <T*> (fc, data.data(), dataSizes.data(), data.size());
 	std::vector <std::pair<T*,size_t>> tv = testFDD->collect();
 
@@ -159,7 +163,7 @@ bool testCreation(fdd<T*> * testFDD, fastContext & fc, std::vector<T*> & data, s
 //Test Indexed String > Collect
 //Test Indexed Vector > Collect
 template <typename K, typename T>
-bool testCreation(faster::indexedFdd<K,T> * testFDD, fastContext & fc, std::vector<K> & keys, std::vector<T> & data){
+bool testCreation(faster::indexedFdd<K,T> *& testFDD, fastContext & fc, std::vector<K> & keys, std::vector<T> & data){
 
 	testFDD =  new faster::indexedFdd <K,T> (fc, keys.data(), data.data(), data.size());
 	std::vector <std::pair<K,T>> tv = testFDD->collect();
@@ -168,7 +172,7 @@ bool testCreation(faster::indexedFdd<K,T> * testFDD, fastContext & fc, std::vect
 }
 //Test Indexed Pointer > Collect
 template <typename K, typename T>
-bool testCreation(faster::indexedFdd<K,T*> * testFDD, fastContext & fc, std::vector<K> & keys, std::vector<T*> & data, std::vector<size_t> & dataSizes){
+bool testCreation(faster::indexedFdd<K,T*> *& testFDD, fastContext & fc, std::vector<K> & keys, std::vector<T*> & data, std::vector<size_t> & dataSizes){
 
 	testFDD =  new faster::indexedFdd <K,T*> (fc, keys.data(), data.data(), dataSizes.data(), data.size());
 	std::vector <std::tuple<K,T*, size_t>> tv = testFDD->collect();
@@ -187,28 +191,28 @@ bool testCreation(faster::indexedFdd<K,T*> * testFDD, fastContext & fc, std::vec
 
 // To simple
 template <typename T, typename U>
-U map1S(T & a){
+U map1SS(T & a){
 	return U(a);
 }
 // To pointer
 template <typename T, typename U>
-std::pair<U *,size_t> map1S(T & a){
+std::pair<U *,size_t> map1SP(T & a){
 	U * r = new U[1];
 	r[0] = U(a);
 	return std::pair<U*,size_t>(r, 1);
 }
 // To vector
 template <typename T, typename U>
-std::vector<U> map1S(T & a){
+std::vector<U> map1SV(T & a){
 	std::vector<U> r(1);
 	r[0] = U(a);
 	return r;
 }
 // To String
 template <typename T>
-std::string map1S(T & a){
-	std::string r;
-	r[0] = char(a);
+std::string map1SSt(T & a){
+	std::string r(1,' ');
+	r[0] = char (a);
 	return r;
 }
 
@@ -220,31 +224,26 @@ bool testTransformation(fdd<T> * testFDD, std::vector<U>  data){
 	bool ok = true;
 
 	// Transform to another simple
-	std::vector <U> tv = testFDD->template map<U>(&map1S<T,U>)->collect();
+	std::cout << "To Simple\n"; 
+	std::vector <U> tv = testFDD->template map<U>(&map1SS<T,U>)->collect();
 	ok &= verify(data, tv);
-	std::cout << "."; 
+	if (! ok ) std::cout << "\n   \033[38;5;196m NOT PASSED\033[0m\n";
 
 	// Transform to a pointer
-	//std::vector <std::pair<U*,size_t>> tvP = testFDD->template map<U*>(&map1S<T,U>)->collect();
-	//ok &= verify(data, tvP);
-	//std::cout << "."; 
+	std::cout << "To Pointer\n"; 
+	std::vector <std::pair<U*,size_t>> tvP = testFDD->template map<U*>(&map1SP<T,U>)->collect();
+	ok &= verify(data, tvP);
+	if (! ok ) std::cout << "\n   \033[38;5;196m NOT PASSED\033[0m\n";
 
 	// Transform to pointer
-	//std::vector <std::vector<U>> tvV = testFDD->template map<std::vector<U>>(&map1S<T,U>)->collect();
-	//ok &= verify(data, tvV);
-	//std::cout << "."; 
+	std::cout << "To Vector\n"; 
+	std::vector <std::vector<U>> tvV = testFDD->template map<std::vector<U>>(&map1SV<T,U>)->collect();
+	ok &= verify(data, tvV);
 
-	return ok;
-}
-//Test Simple Map> String
-template <typename T>
-bool testTransformation(fdd<T> * testFDD, std::vector<std::string> & data){
-	bool ok = true;
-
-	// Transform to another simple
-	//std::vector <std::string> tv = testFDD->template map<std::string>(&map1S<T,std::string>)->collect();
-	//ok &= verify(data, tv);
-	//std::cout << "."; 
+	// Transform to string
+	std::cout << "To String\n"; 
+	std::vector <std::string> tvSt = testFDD->template map<std::string>(&map1SSt<T>)->collect();
+	ok &= verify(data, tvSt);
 
 	return ok;
 }
@@ -252,12 +251,12 @@ bool testTransformation(fdd<T> * testFDD, std::vector<std::string> & data){
 
 // To simple
 template <typename T, typename U>
-U map1P(T * a, size_t s UNUSED){
-	return U(a[0]);
+U map1PS(T * a, size_t s UNUSED){
+	return (U) a[0];
 }
 // To pointer
 template <typename T, typename U>
-std::pair<U *,size_t> map1P(T * a, size_t s){
+std::pair<U *,size_t> map1PP(T * a, size_t s){
 	U * r = new U[s];
 	for ( size_t i = 0; i < s; ++i ){
 		r[i] = U(a[i]);
@@ -266,7 +265,7 @@ std::pair<U *,size_t> map1P(T * a, size_t s){
 }
 // To vector
 template <typename T, typename U>
-std::vector<U> map1P(T * a, size_t s){
+std::vector<U> map1PV(T * a, size_t s){
 	std::vector<U> r(s);
 	for ( size_t i = 0; i < s; ++i ){
 		r[i] = U(a[i]);
@@ -275,7 +274,7 @@ std::vector<U> map1P(T * a, size_t s){
 }
 // To String
 template <typename T>
-std::string map1P(T * a, size_t s){
+std::string map1PSt(T * a, size_t s){
 	std::string r(s, ' ');
 	for ( size_t i = 0; i < s; ++i ){
 		r[i] = char(a[i]);
@@ -290,31 +289,24 @@ bool testTransformation(fdd<T*> * testFDD, std::vector<U*> & data, std::vector<s
 	bool ok = true;
 
 	// Transform to another simple
-	//std::vector <U> tv = testFDD->template map<U>(&map1P<T,U>)->collect();
-	//ok &= verify(data, tv);
-	//std::cout << "."; 
+	std::cout << "To Simple\n"; 
+	std::vector <U> tv = testFDD->template map<U>(&map1PS<T,U>)->collect();
+	ok &= verify(data, tv);
 
 	// Transform to a pointer
-	std::vector <std::pair<U*,size_t>> tvP = testFDD->template map<U*>(&map1P<T,U>)->collect();
+	std::cout << "To Pointer\n"; 
+	std::vector <std::pair<U*,size_t>> tvP = testFDD->template map<U*>(&map1PP<T,U>)->collect();
 	ok &= verify(data, tvP, dataSizes);
-	std::cout << "."; 
 
 	// Transform to pointer
-	//std::vector <std::vector<U>> tvV = testFDD->template map<std::vector<U>>(&map1P<T,U>)->collect();
-	//ok &= verify(data, tvV, dataSizes);
-	//std::cout << "."; 
-
-	return ok;
-}
-//Test Pointer Map> String
-template <typename T>
-bool testTransformation(fdd<T*> * testFDD, std::vector<std::string> & data, std::vector<size_t> & dataSizes){
-	bool ok = true;
+	std::cout << "To Vector\n"; 
+	std::vector <std::vector<U>> tvV = testFDD->template map<std::vector<U>>(&map1PV<T,U>)->collect();
+	ok &= verify(data, tvV, dataSizes);
 
 	// Transform to another simple
-	//std::vector <std::string> tv = testFDD->template map<std::string>(&map1P<T,std::string>)->collect();
-	//ok &= verify(data, tv);
-	//std::cout << "."; 
+	std::cout << "To String\n"; 
+	std::vector <std::string> tvSt = testFDD->template map<std::string>(&map1PSt<T>)->collect();
+	ok &= verify(data, tvSt);
 
 	return ok;
 }
@@ -322,12 +314,12 @@ bool testTransformation(fdd<T*> * testFDD, std::vector<std::string> & data, std:
 
 // To simple
 template <typename T, typename U>
-U map1V(std::vector<T> & a){
+U map1VS(std::vector<T> & a){
 	return U(a[0]);
 }
 // To pointer
 template <typename T, typename U>
-std::pair<U *,size_t> map1V(std::vector<T> & a){
+std::pair<U *,size_t> map1VP(std::vector<T> & a){
 	U * r = new U[a.size()];
 	for ( size_t i = 0; i < a.size(); ++i ){
 		r[i] = U(a[i]);
@@ -336,7 +328,7 @@ std::pair<U *,size_t> map1V(std::vector<T> & a){
 }
 // To vector
 template <typename T, typename U>
-std::vector<U> map1V(std::vector<T> & a){
+std::vector<U> map1VV(std::vector<T> & a){
 	std::vector<U> r(a.size());
 	for ( size_t i = 0; i < a.size(); ++i ){
 		r[i] = U(a[i]);
@@ -345,7 +337,7 @@ std::vector<U> map1V(std::vector<T> & a){
 }
 // To String
 template <typename T>
-std::string map1V(std::vector<T> & a){
+std::string map1VSt(std::vector<T> & a){
 	std::string r(a.size(), ' ');
 	for ( size_t i = 0; i < a.size(); ++i ){
 		r[i] = char(a[i]);
@@ -360,31 +352,24 @@ bool testTransformation(fdd<std::vector<T>> * testFDD, std::vector<std::vector<U
 	bool ok = true;
 
 	// Transform to another simple
-	std::vector <U> tv = testFDD->template map<U>(&map1V<T,U>)->collect();
+	std::cout << "To Simple\n"; 
+	std::vector <U> tv = testFDD->template map<U>(&map1VS<T,U>)->collect();
 	ok &= verify(data, tv);
-	std::cout << "."; 
 
 	// Transform to a pointer
-	std::vector <std::pair<U*,size_t>> tvP = testFDD->template map<U*>(&map1V<T,U>)->collect();
+	std::cout << "To Pointer\n"; 
+	std::vector <std::pair<U*,size_t>> tvP = testFDD->template map<U*>(&map1VP<T,U>)->collect();
 	ok &= verify(data, tvP);
-	std::cout << "."; 
 
 	// Transform to pointer
-	std::vector <std::vector<U>> tvV = testFDD->template map<std::vector<U>>(&map1V<T,U>)->collect();
+	std::cout << "To Vector\n"; 
+	std::vector <std::vector<U>> tvV = testFDD->template map<std::vector<U>>(&map1VV<T,U>)->collect();
 	ok &= verify(data, tvV);
-	std::cout << "."; 
 
-	return ok;
-}
-//Test Vector Map> String
-template <typename T>
-bool testTransformation(fdd<std::vector<T>> * testFDD, std::vector<std::string> & data){
-	bool ok = true;
-
-	// Transform to another simple
-	std::vector <std::string> tv = testFDD->template map<std::string>(&map1V<T,std::string>)->collect();
-	ok &= verify(data, tv);
-	std::cout << "."; 
+	// Transform to string
+	std::cout << "To String\n"; 
+	std::vector <std::string> tvSt = testFDD->template map<std::string>(&map1VSt<T>)->collect();
+	ok &= verify(data, tvSt);
 
 	return ok;
 }
@@ -419,13 +404,13 @@ bool testTransformation(fdd<std::vector<T>> * testFDD, std::vector<std::string> 
 //Test Indexed Pointer Reduce> Indexed Pointer
 //Test Indexed String Reduce> Indexed String
 //Test Indexed Vector Reduce> Indexed Vector
-template <typename K, typename T, typename L, typename U>
+/*template <typename K, typename T, typename L, typename U>
 bool testTransformation(indexedFdd<K,T> * testFDD, fastContext & fc, std::vector<L> & Keys, std::vector<U> & data){
 
 	std::vector <U> tv = testFDD->template map<U>(&map1S<T,U>)->collect();
 
 	return verify(data, tv);
-}
+}*/
 
 
 
@@ -525,6 +510,14 @@ std::vector<U> transformData(std::vector<T> & v){
 	}
 	return d;
 }
+template <typename T>
+std::vector<std::string> transformDataSt(std::vector<T> & v){
+	std::vector<std::string> d (v.size());
+	for ( size_t i = 0; i < v.size(); ++i ){
+		d[i] = char(v[i]);
+	}
+	return d;
+}
 
 
 void test(fastContext & fc){
@@ -538,6 +531,8 @@ void test(fastContext & fc){
 	auto stringKeys = createData(svK);
 	
 	auto dataSimple = createData<int>();
+	auto dataSimpleF = transformData<int, float>(dataSimple);
+	auto dataSimpleSt = transformDataSt<int>(dataSimple);
 	auto dataPointer = createData(v.data());
 	auto dataString = createData(sv);
 	auto dataVector = createData(v);
@@ -586,7 +581,7 @@ void test(fastContext & fc){
 	if (! ok) return;
 
 	std::cout << "Simple"; 
-	ok &= assertRecv(numOk, tot, testTransformation(testFddS,  dataSimple));
+	ok &= assertRecv(numOk, tot, testTransformation(testFddS,  dataSimpleF));
 	//std::cout << "Pointer"; 
 	//ok &= assertRecv(numOk, tot, testTransformation(testFddP, dataPointer, dataSizes));
 	//std::cout << "Vector"; 
@@ -602,6 +597,26 @@ void test(fastContext & fc){
 int main(int argc UNUSED, char ** argv UNUSED){
 
 	fastContext fc("local");
+
+	fc.registerFunction((void*) &map1SS<int,float>);
+	fc.registerFunction((void*) &map1SP<int,float>);
+	fc.registerFunction((void*) &map1SV<int,float>);
+	fc.registerFunction((void*) &map1SSt<int>);
+
+	fc.registerFunction((void*) &map1PS<int,float>);
+	fc.registerFunction((void*) &map1PP<int,float>);
+	fc.registerFunction((void*) &map1PV<int,float>);
+	fc.registerFunction((void*) &map1PSt<int>);
+	
+	fc.registerFunction((void*) &map1VS<int,float>);
+	fc.registerFunction((void*) &map1VP<int,float>);
+	fc.registerFunction((void*) &map1VV<int,float>);
+	fc.registerFunction((void*) &map1VSt<int>);
+	
+	//fc.registerFunction((void*) &map1StS<float>);
+	//fc.registerFunction((void*) &map1StP<float*>);
+	//fc.registerFunction((void*) &map1StV<std::vector<float>>);
+	//fc.registerFunction((void*) &map1StSt);
 	
 	fc.startWorkers();
 

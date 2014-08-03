@@ -37,8 +37,11 @@ void faster::fastCommBuffer::reset(){
 char * faster::fastCommBuffer::data(){ 
 	return _data; 
 }
+char * faster::fastCommBuffer::pos(size_t pos){ 
+	return &(_data[pos]); 
+}
 char * faster::fastCommBuffer::pos(){ 
-	return &_data[_size]; 
+	return &(_data[_size]); 
 }
 size_t faster::fastCommBuffer::size(){ 
 	return _size; 

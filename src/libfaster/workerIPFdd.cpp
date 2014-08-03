@@ -73,7 +73,7 @@ std::tuple<K,T*,size_t> faster::_workerIFdd<K,T*>::bulkReduce (IPbulkReduceIPFun
 
 
 template <typename K, typename T>
-void faster::_workerIFdd<K,T*>::applyIndependent(void * func, fddOpType op, void *& result, size_t & rSize){ 
+void faster::_workerIFdd<K,T*>::applyIndependent(void * func, fddOpType op, fastCommBuffer & buffer){ 
 	std::tuple<K,T*,size_t> r;
 
 	switch (op){
@@ -87,10 +87,7 @@ void faster::_workerIFdd<K,T*>::applyIndependent(void * func, fddOpType op, void
 			break;
 	}
 	
-	this->resultBuffer->reset();
-	*this->resultBuffer << r;
-	result = this->resultBuffer->data();
-	rSize = this->resultBuffer->size();
+	buffer <<  r;
 }
 
 
@@ -145,17 +142,11 @@ void faster::_workerIFdd<K,T*>::insert(std::list< std::tuple<K, T*, size_t> > & 
 
 
 template <typename K, typename T>
-void faster::_workerIFdd<K,T*>::apply(void * func, fddOpType op, workerFddBase * dest, void *& result, size_t & rSize){ 
-	switch (op){
-		case OP_Map:
-		case OP_BulkMap:
-		case OP_FlatMap:
-		case OP_BulkFlatMap:
-			applyDependent(func, op, dest);
-		case OP_Reduce:
-		case OP_BulkReduce:
-			applyIndependent(func, op, result, rSize);
-	}
+void faster::_workerIFdd<K,T*>::apply(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer){ 
+	if (op & OP_GENERICMAP)
+		applyDependent(func, op, dest);
+	else
+		applyIndependent(func, op, buffer);
 }
 
 

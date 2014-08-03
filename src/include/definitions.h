@@ -42,11 +42,13 @@ namespace faster{
 	#define OP_BulkMap		0x0102
 	#define OP_FlatMap		0x0104
 	#define OP_BulkFlatMap		0x0108
+	#define OP_MapByKey		0x0110
 	#define OP_GENERICREDUCE	0x0200
 	#define OP_Reduce		0x0201
 	#define OP_BulkReduce		0x0202
-	#define OP_CountByKey		0x0001
-	#define OP_GroupByKey		0x0002
+	#define OP_GENERICMISC		0x0400
+	#define OP_CountByKey		0x0401
+	#define OP_GroupByKey		0x0402
 
 	typedef enum : char {
 		NewWorkerDL,
@@ -62,17 +64,20 @@ namespace faster{
 		GetLineSizesDL,
 
 		GetFddItemDL,
+		GetKeysDL,
 		GetDataDL,
 		GetSizeDL,
 		ItemSizeDL,
 		BaseSizeDL,
+		SetSizeDL,
+
 		DeleteItemDL,
 		ShrinkDL,
 
 		InsertDL,
 		InsertListDL,
 
-		ApplyDL,
+		PreapplyDL,
 
 		CollectDL,
 		GroupByKeyDL,
@@ -172,7 +177,6 @@ namespace faster{
 	template <typename T>
 	using PreducePFunctionP = std::pair<T *, size_t> (*) (T * a, size_t sizeA, T * b, size_t sizeB);
 
-
 	template <typename T>
 	using PbulkReducePFunctionP = std::pair<T *, size_t> (*) (T ** input, size_t * inputDataSizes, size_t size);
 
@@ -188,6 +192,15 @@ namespace faster{
 	using IPmapIFunctionP = std::tuple<L,U,size_t> (*) (K inKey, T & input);
 	template <typename K, typename T, typename U>
 	using PmapIFunctionP = std::pair<U, size_t> (*) (K inKey, T & input);
+
+	template <typename K, typename T, typename L, typename U>
+	using ImapByKeyIFunctionP = std::pair<L,U> (*) (const K & inKey, T * input, size_t size);
+	template <typename K, typename T, typename U>
+	using mapByKeyIFunctionP = U (*) (const K & inKey, T * input, size_t size);
+	template <typename K, typename T, typename L, typename U>
+	using IPmapByKeyIFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, T * input, size_t size);
+	template <typename K, typename T, typename U>
+	using PmapByKeyIFunctionP = std::pair<U, size_t> (*) (const K & inKey, T * input, size_t size);
 
 	template <typename K, typename T, typename L, typename U>
 	using IbulkMapIFunctionP = void (*) (L * outKey, U * output, K * inKey, T * input, size_t size);
@@ -220,6 +233,9 @@ namespace faster{
 	using IreduceIFunctionP = std::pair<K,T> (*) (K keyA, T & a, K keyB, T & b);
 
 	template <typename K, typename T>
+	using IreduceByKeyIFunctionP = std::pair<K,T> (*) (K keyA, T * a, size_t sizeA, K keyB, T * b, size_t sizeB);
+
+	template <typename K, typename T>
 	using IbulkReduceIFunctionP = std::pair<K,T> (*) (K * key, T * input, size_t size);
 
 	// Pointer FDD function pointer types
@@ -234,6 +250,14 @@ namespace faster{
 	template <typename K, typename T, typename U>
 	using  PmapIPFunctionP = std::pair<U, size_t> (*) (K inKey, T * input, size_t size);
 
+	template <typename K, typename T, typename L, typename U>
+	using ImapByKeyIPFunctionP = std::pair<L,U> (*) (const K & inKey, T ** input, size_t * dataSizes, size_t size);
+	template <typename K, typename T, typename U>
+	using  mapByKeyIPFunctionP = U (*) (const K & inKey, T ** input, size_t * dataSizes, size_t size);
+	template <typename K, typename T, typename L, typename U>
+	using IPmapByKeyIPFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, T ** input, size_t * dataSizes, size_t size);
+	template <typename K, typename T, typename U>
+	using  PmapByKeyIPFunctionP = std::pair<U, size_t> (*) (const K & inKey, T ** input, size_t * dataSizes, size_t size);
 
 	template <typename K, typename T, typename L, typename U>
 	using IbulkMapIPFunctionP = void (*) (L * outKey, U * output, K * inKey, T ** input, size_t * inputDataSizes, size_t size);
@@ -268,6 +292,9 @@ namespace faster{
 	// Reduce
 	template <typename K, typename T>
 	using IPreduceIPFunctionP = std::tuple<K,T*,size_t> (*) (K keyA, T * a, size_t sizeA, K keyB, T * b, size_t sizeB);
+
+	template <typename K, typename T>
+	using IPreduceByKeyIPFunctionP = std::tuple<K,T*,size_t> (*) (K keyA, T ** a, size_t * dataSizesA, size_t sizeA, K keyB, T ** b, size_t * dataSizesB, size_t sizeB);
 
 	template <typename K, typename T>
 	using IPbulkReduceIPFunctionP = std::tuple<K,T*,size_t> (*) (K * key, T ** input, size_t * inputDataSizes, size_t size);
