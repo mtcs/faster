@@ -92,6 +92,7 @@ namespace faster {
 
 			void groupByKey(fastComm *comm);
 			void countByKey(fastComm *comm);
+			void exchangeDataByKey(fastComm *comm, void * keyMap);
 	};
 
 }

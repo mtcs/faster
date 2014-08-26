@@ -5,6 +5,7 @@
 #include <tuple>
 #include <omp.h>
 #include <set>
+#include <unordered_map>
 
 #include "workerFddBase.h"
 
@@ -28,9 +29,9 @@ namespace faster{
 			// ByKey Functions
 			K * distributeOwnership(fastComm * comm, K * uKeys, size_t cSize);
 			void sendPartKeyCount(fastComm *comm);
-			CountKeyMapT<K> recvPartKeyMaxCount(fastComm *comm, PPCountKeyMapT<K> & keyPPMaxCount);
-			CountKeyMapT<K> recvPartKeyCount(fastComm *comm);
-			CountKeyMapT<K> distributedMaxKeyCount(fastComm *comm, PPCountKeyMapT<K> & keyPPMaxCount);
+			std::unordered_map<K, size_t> recvPartKeyMaxCount(fastComm *comm, std::unordered_map<K, std::pair<size_t, std::list<int>> > & keyPPMaxCount);
+			std::unordered_map<K, size_t> recvPartKeyCount(fastComm *comm);
+			std::unordered_map<K, size_t> distributedMaxKeyCount(fastComm *comm, std::unordered_map<K, std::pair<size_t, std::list<int>> > & keyPPMaxCount);
 
 		public:
 			workerIFddCore(unsigned int ident, fddType kt, fddType t);
@@ -64,6 +65,7 @@ namespace faster{
 			// ByKey Functions
 			void groupByKey(fastComm *comm);
 			void countByKey(fastComm *comm);
+			void exchangeDataByKey(fastComm *comm, void * keyMap);
 
 
 	};

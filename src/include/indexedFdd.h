@@ -17,19 +17,20 @@ namespace faster{
 
 	class fastContext;
 
-	template<typename... Types> 
+	template<typename K> 
 	class groupedFdd;
 
-	template <class K, class T> 
+	template <typename K, typename T> 
 	class indexedFdd ; 
 
 	// Driver side FDD
 	// It just sends commands to the workers.
-	template <class K, class T> 
+	template <typename K, typename T> 
 	class iFddCore : public fddBase{
 
 		protected:
 			bool groupedByKey;
+			std::unordered_map<K, int> keyMap;
 			fastContext * context;
 
 			iFddCore() {
@@ -54,26 +55,39 @@ namespace faster{
 
 			~iFddCore(){}
 
-			std::unordered_map<T, int> calculateKeyMigration(std::unordered_map<T, std::tuple<size_t, int, size_t>> count);
+			std::unordered_map<T, int> calculateKeyMap(std::unordered_map<T, std::tuple<size_t, int, size_t>> count);
 
 			// -------------- Core FDD Functions --------------- //
 			template <typename L, typename U> 
 			indexedFdd<L,U> * map( void * funcP, fddOpType op);
 
 		public:
-			template<typename... FddTypes> 
-			groupedFdd<iFddCore<K,T> *, FddTypes...> * cogroup(FddTypes &... fddTypes){
-				return new groupedFdd<iFddCore<K,T>*, FddTypes...>(context, this, fddTypes...);
+			//template<typename... FddTypes, typename... Args> 
+			//groupedFdd<K, T, FddTypes...> * cogroup(Args * ... args){
+				//return new groupedFdd<K, T, FddTypes...>(context, this, args...);
+			//}
+			template<typename U> 
+			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1){
+				std::cerr << "  Cogroup\n";
+				groupByKey();
+				return new groupedFdd<K>(context, this, fdd1, keyMap);
 			}
 
-			CountKeyMapT<K> countByKey();
+			template<typename U, typename V> 
+			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1, iFddCore<K,V> * fdd2){
+				std::cerr << "  Cogroup\n";
+				groupByKey();
+				return new groupedFdd<K>(context, this, fdd1, fdd2, keyMap);
+			}
+
+			std::unordered_map<K, size_t> countByKey();
 
 			indexedFdd<K,T> * groupByKey();
 
 
 	};
 
-	template <class K, class T> 
+	template <typename K, typename T> 
 	class indexedFdd : public iFddCore<K,T>{
 		private:
 			std::pair <K,T> finishReduces(char ** partResult, size_t * pSize, int funcId, fddOpType op);
@@ -221,7 +235,7 @@ namespace faster{
 			}
 	};
 
-	template <class K, class T> 
+	template <typename K, typename T> 
 	class indexedFdd<K,T *> : public iFddCore<K,T*>{
 		private:
 			std::tuple <K,T,size_t>  finishReducesP(char ** partResult, size_t * pSize, int funcId, fddOpType op);
@@ -441,7 +455,7 @@ namespace faster{
 	}
 
 	template <typename K, typename T> 
-	std::unordered_map<T, int> iFddCore<K,T>::calculateKeyMigration(std::unordered_map<T, std::tuple<size_t, int, size_t>> count){ 
+	std::unordered_map<T, int> iFddCore<K,T>::calculateKeyMap(std::unordered_map<T, std::tuple<size_t, int, size_t>> count){ 
 		size_t size = this->size;
 		std::unordered_map<T, int> keyMap;
 		size_t numProcs = context->numProcs();
@@ -494,7 +508,6 @@ namespace faster{
 
 	template <typename K, typename T> 
 	indexedFdd<K,T> * iFddCore<K,T>::groupByKey(){
-		std::cerr << "  Group By Key\n";
 		fastCommBuffer decoder(0);
 		void * result;
 		size_t rSize;
@@ -502,6 +515,7 @@ namespace faster{
 		// Key -> totalKeycount, maxowner, ownerCount
 
 		if (! groupedByKey){
+			std::cerr << "  Group By Key\n";
 			auto * count = new std::unordered_map<K, std::tuple<size_t, int, size_t>>(this->size);
 
 			context->enqueueTask(OP_CountByKey, id, this->size);
@@ -538,7 +552,7 @@ namespace faster{
 					}
 				}
 			}
-			std::unordered_map<K, int> keyMap = calculateKeyMigration(*count);
+			this->keyMap = calculateKeyMap(*count);
 			delete count;
 
 			// Migrate data according to key ownership

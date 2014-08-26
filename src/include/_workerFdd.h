@@ -30,6 +30,8 @@ namespace faster {
 		protected:
 			fddStorage <T> * localData;
 
+			void exchangeDataByKey(fastComm *comm UNUSED, void * keyMap UNUSED){};
+
 		public:
 			workerFddCore(unsigned int ident, fddType t);
 			workerFddCore(unsigned int ident, fddType t, size_t size);

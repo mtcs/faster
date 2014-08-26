@@ -152,6 +152,33 @@ void faster::fastComm::recvCreateIFDD(unsigned long int &id, fddType &kType, fdd
 	//std::cerr << '(' << id << ' ' << (int) t << ":" << buffer[dest].size()  << ')';
 }
 
+void faster::fastComm::sendCreateFDDGroup(unsigned long int id, fddType keyType, std::vector<unsigned long int> & idV){
+	for (int dest = 1; dest < numProcs; ++dest){
+		buffer[dest].reset();
+
+		buffer[dest] << id << keyType << size_t(idV.size());
+
+		for ( size_t i = 0; i < idV.size(); ++i){
+			buffer[dest] << idV[i];
+		}
+		MPI_Isend(buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, MSG_CREATEGFDD, MPI_COMM_WORLD, &req[dest-1]);
+	}
+}
+void faster::fastComm::recvCreateFDDGroup(unsigned long int & id, fddType & keyType, std::vector<unsigned long int> & idV){
+	size_t numMembers;
+	buffer[0].reset();
+
+	MPI_Recv(buffer[0].data(), buffer[0].free(), MPI_BYTE, 0, MSG_CREATEGFDD, MPI_COMM_WORLD, status);	
+
+	buffer[0] >> id >> keyType >> numMembers;
+
+	idV = std::vector<unsigned long int>(numMembers);
+
+	for ( size_t i = 0; i < numMembers; ++i){
+		buffer[0] >> idV[i];
+	}
+}
+
 void faster::fastComm::sendDestroyFDD(unsigned long int id){
 	for (int i = 1; i < numProcs; ++i){
 		MPI_Isend( &id, sizeof(long unsigned int), MPI_BYTE, i, MSG_DESTROYFDD, MPI_COMM_WORLD, &req[i-1]);

@@ -5,12 +5,18 @@ project (faster)
 set (faster_VERSION_MAJOR 0)
 set (faster_VERSION_MINOR 1)
 
-add_definitions(-O3)
+add_definitions(-O0)
 add_definitions(-ggdb)
+add_definitions(-g3)
+#add_definitions(-pg)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
+include(cotire)
+
+
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 
 find_package(OpenMP)
 if(OPENMP_FOUND)
@@ -31,9 +37,9 @@ set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
 
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 
+add_subdirectory (libfaster) 
 add_subdirectory (test) 
 add_subdirectory (examples) 
-add_subdirectory (libfaster) 
 
 
 

@@ -37,6 +37,7 @@ namespace faster{
 			template <typename K>
 			void _createIFDD (unsigned long int id, fddType type, size_t size);
 			void createIFDD (unsigned long int id, fddType kType, fddType tType, size_t size);
+			void createFDDGroup(unsigned long int id, fddType kType, std::vector<unsigned long int> & members);
 			
 			void destroyFDD(unsigned long int id);
 			

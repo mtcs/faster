@@ -54,6 +54,7 @@ namespace faster{
 		template <class T> friend class fddCore;
 		template <class K, class T> friend class iFddCore;
 		template <class K, class T> friend class indexedFdd;
+		template <class K> friend class groupedFdd;
 		friend class worker;
 
 		public:

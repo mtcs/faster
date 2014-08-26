@@ -18,6 +18,7 @@ void faster::worker::run(){
 		size_t * lineSizes = NULL;
 		size_t size, offset;
 		std::string name;
+		std::vector<unsigned long int> idV;
 
 		// Wait for a message to arrive
 		comm->probeMsgs(tag);
@@ -44,6 +45,13 @@ void faster::worker::run(){
 				comm->recvCreateIFDD(id, kType, tType, size);
 				std::cerr << "ID:" << id << " K:" << (int) kType << " T:" << (int) tType << " S:" << size << " ";
 				createIFDD(id, kType, tType, size);
+				std::cerr << ".\n";
+				break;
+			case MSG_CREATEGFDD:
+				std::cerr << "    R:CreateFDDGroup ";
+				comm->recvCreateFDDGroup(id, kType, idV);
+				std::cerr << "ID:" << id << " K:" << (int) kType << " NumMembers:" << (int) idV.size() << " ";
+				createFDDGroup(id, kType, idV );
 				std::cerr << ".\n";
 				break;
 

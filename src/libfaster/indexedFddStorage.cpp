@@ -203,7 +203,6 @@ void faster::indexedFddStorage<K,T*>::setDataRaw( void * keys, void * data, size
 
 template <class K, class T> 
 void   faster::indexedFddStorage<K,T>::setSize(size_t s){ 
-	std::cerr << "SetSize: " << s << "\n";
 	this->grow(s); 
 	this->size = s;  
 }

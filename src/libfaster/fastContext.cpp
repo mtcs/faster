@@ -124,18 +124,16 @@ unsigned long int faster::fastContext::createIPFDD(fddBase * ref, size_t kTypeCo
 }
 
 unsigned long int faster::fastContext::createFddGroup(fddBase * ref, std::vector<fddBase*> & fddV){
-	std::vector<unsigned long int> idV(fddV.size());
-	std::vector<fddType> kV(fddV.size());
-	std::vector<fddType> tV(fddV.size());
+	std::vector<unsigned long int> members(fddV.size());
+	std::vector<fddType> dataTypeV(fddV.size());
+
+	fddType kType = fddV[0]->kType();
 
 	for( size_t i = 0; i < fddV.size(); ++i){
-		idV[i] = fddV[i]->getId();
-		tV[i] = fddV[i]->tType();
-		kV[i] = fddV[i]->kType();
+		members[i] = fddV[i]->getId();
 	}
 
-	//comm->sendCreateFDDGroup( numFDDs,  idV, kV, tV);
-	// >>>>>>>>>>>>>>>>>>>>>>>>>> RESUME HERE <<<<<<<<<<<<<<<<<<<<<<<<<< //
+	comm->sendCreateFDDGroup( numFDDs, kType,  members);
 
 	std::cerr << "    S:CreateFddGroup ID:" << numFDDs << '\n';
 

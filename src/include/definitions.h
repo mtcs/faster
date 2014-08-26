@@ -34,6 +34,7 @@ namespace faster{
 	#define LongIntV	0x1004
 	#define FloatV		0x1008
 	#define DoubleV		0x1010
+	#define GroupFDD	0x8000
 
 	typedef unsigned int fddOpType;
 
@@ -49,6 +50,7 @@ namespace faster{
 	#define OP_GENERICMISC		0x0400
 	#define OP_CountByKey		0x0401
 	#define OP_GroupByKey		0x0402
+	#define OP_CoGroup		0x0404
 
 	typedef enum : char {
 		NewWorkerDL,
@@ -82,6 +84,7 @@ namespace faster{
 		CollectDL,
 		GroupByKeyDL,
 		CountByKeyDL,
+		ExchangeDataByKeyDL
 
 	} dFuncName;
 
@@ -180,7 +183,7 @@ namespace faster{
 	template <typename T>
 	using PbulkReducePFunctionP = std::pair<T *, size_t> (*) (T ** input, size_t * inputDataSizes, size_t size);
 
-	// Indexed FDDs
+	// --------------- Indexed FDDs -------------- //
 	// FDD function pointer types
 	// TODO CHANGE THIS BELOW!
 	template <typename K, typename T, typename L, typename U>
@@ -300,14 +303,52 @@ namespace faster{
 	using IPbulkReduceIPFunctionP = std::tuple<K,T*,size_t> (*) (K * key, T ** input, size_t * inputDataSizes, size_t size);
 
 
+	// --------------- Grouped FDDs -------------//
+
+	/*template <typename K, typename T, typename U, typename To>
+	using mapByKeyG2FunctionP = To (*) (const K & key, T * a, size_t sizeA, U * b, size_t sizeB);
+
+	template <typename K, typename T, typename U, typename V, typename To>
+	using mapByKeyG3FunctionP = To (*) (const K & key, T * a, size_t sizeA, U * b, size_t sizeB, V * c, size_t sizeC);
+
+	template <typename K, typename T, typename U, typename Ko, typename To>
+	using ImapByKeyG2FunctionP = std::pair<Ko,To> (*) (const K & key, T * a, size_t sizeA, U * b, size_t sizeB);
+
+	template <typename K, typename T, typename U, typename V, typename Ko, typename To>
+	using ImapByKeyG3FunctionP = std::pair<Ko,To> (*) (const K & key, T * a, size_t sizeA, U * b, size_t sizeB, V * c, size_t sizeC);// */
+
+	template <typename K, typename To>
+	using mapByKeyG2FunctionP = To (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB);
+
+	template <typename K, typename To>
+	using mapByKeyG3FunctionP = To (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB, void * c, size_t sizeC);
+
+	template <typename K, typename Ko, typename To>
+	using ImapByKeyG2FunctionP = std::pair<Ko,To> (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB);
+
+	template <typename K, typename Ko, typename To>
+	using ImapByKeyG3FunctionP = std::pair<Ko,To> (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB, void * c, size_t sizeC);
+
+
+	/*template <typename K, typename To>
+	using mapByKeyG2VFunctionP = To (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB);
+
+	template <typename K, typename To>
+	using mapByKeyG3VFunctionP = To (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB, void * c, size_t sizeC);
+
+	template <typename K, typename Ko, typename To>
+	using ImapByKeyG2VFunctionP = std::pair<Ko,To> (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB);
+
+	template <typename K, typename Ko, typename To>
+	using ImapByKeyG3VFunctionP = std::pair<Ko,To> (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB, void * c, size_t sizeC); // */
 
 
 	// DATA TYPES
-	template <typename K>
-	using CountKeyMapT = std::unordered_map<K, size_t> ;
+	//template <typename K>
+	//using CountKeyMapT = std::unordered_map<K, size_t> ;
 
-	template <typename K>
-	using PPCountKeyMapT = std::unordered_map<K, std::pair<size_t, std::list<int>> > ;
+	//template <typename K>
+	//using PPCountKeyMapT = std::unordered_map<K, std::pair<size_t, std::list<int>> > ;
 
 
 }

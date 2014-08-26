@@ -86,4 +86,7 @@ void faster::preapplyDL(workerFddBase * fdd, unsigned long int id, void * func, 
 void faster::collectDL(workerFddBase * fdd, fastComm * comm){
 	fdd->collect(comm);
 }
+void faster::exchangeDataByKeyDL(workerFddBase * fdd, fastComm * comm, void * keyMap){
+	fdd->exchangeDataByKey(comm, keyMap);
+}
 

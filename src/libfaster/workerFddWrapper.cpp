@@ -135,6 +135,7 @@ void faster::workerFdd::loadSymbols(){
 	loadSym(PreapplyDL	, "preapplyDL");
                                       
 	loadSym(CollectDL	, "collectDL");
+	loadSym(ExchangeDataByKeyDL, "exchangeDataByKeyDL");
 	std::cerr << ".]  ";
 }
 
@@ -306,6 +307,10 @@ void faster::workerFdd::preapply(unsigned long int id, void * func, fddOpType op
 void faster::workerFdd::collect(fastComm * comm){
 	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [CollectDL];
 	((void (*)(workerFddBase *, fastComm *)) funcP)(_fdd, comm);
+}
+void faster::workerFdd::exchangeDataByKey(fastComm *comm, void * keyMap){
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [ExchangeDataByKeyDL];
+	((void (*)(workerFddBase *, fastComm *, void*)) funcP)(_fdd, comm, keyMap);
 }
 
 

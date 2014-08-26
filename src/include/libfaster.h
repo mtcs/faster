@@ -3,6 +3,7 @@
 
 #include "fdd.h"
 #include "indexedFdd.h"
+#include "groupedFdd.h"
 #include "fastContext.h"
 
 #endif

@@ -96,15 +96,9 @@ void faster::workerFddCore<T>::preapply(long unsigned int id, void * func, fddOp
 
 	auto start = system_clock::now();
 	if (op & (OP_GENERICMAP | OP_GENERICREDUCE)){
-		buffer << size_t(localData->getSize());
 		this->apply(func, op, dest, buffer);
-	}/*else{
-		switch(op){
-			case OP_CountByKey:
-			case OP_GroupByKey:
-				break;
-		}
-	}*/
+		if (dest) buffer << size_t(localData->getSize());
+	}
 	auto end = system_clock::now();
 
 	auto duration = duration_cast<milliseconds>(end - start);

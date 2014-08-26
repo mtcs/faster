@@ -18,43 +18,82 @@ namespace faster{
 		Mesos
 	};
 
+	/*
 	#define MSG_TASK 		0x0001
 	#define MSG_CREATEFDD 		0x0002
 	#define MSG_CREATEIFDD 		0x0003
-	#define MSG_DESTROYFDD 		0x0004
-	#define MSG_FDDSETDATAID 	0x0005
-	#define MSG_FDDSETDATA 		0x0006
-	#define MSG_FDDSET2DDATAID 	0x0007
-	#define MSG_FDDSET2DDATASIZES	0x0008
-	#define MSG_FDDSET2DDATA 	0x0009
-	#define MSG_READFDDFILE		0x000A
-	#define MSG_COLLECT		0x000B
-	#define MSG_FDDDATAID 		0x000C
-	#define MSG_FDDDATA 		0x000D
-	#define MSG_TASKRESULT		0x000E
-	#define MSG_FDDINFO		0x000F
-	#define MSG_FDDSETIDATAID 	0x0010
-	#define MSG_FDDSETIDATA		0x0011
-	#define MSG_FDDSETIKEYS		0x0012
-	#define MSG_FDDSET2DIDATAID 	0x0013
-	#define MSG_FDDSET2DIDATASIZES	0x0014
-	#define MSG_FDDSET2DIDATA 	0x0015
-	#define MSG_FDDSET2DIKEYS 	0x0016
-	#define MSG_KEYOWNERSHIPSUGEST	0x0017
-	#define MSG_MYKEYOWNERSHIP	0x0018
-	#define MSG_MYKEYCOUNT		0x0019
-	#define MSG_IFDDDATAID 		0x001a
-	#define MSG_IFDDDATAKEYS	0x001b
-	#define MSG_IFDDDATA 		0x001c
-	#define MSG_COLLECTDATA		0x001d
-	#define MSG_KEYMAP		0x001a
-	#define MSG_GROUPBYKEYDATA	0x001b
+	#define MSG_CREATEIFDD 		0x0004
+	#define MSG_DESTROYFDD 		0x0005
+	#define MSG_FDDSETDATAID 	0x0006
+	#define MSG_FDDSETDATA 		0x0007
+	#define MSG_FDDSET2DDATAID 	0x0008
+	#define MSG_FDDSET2DDATASIZES	0x0009
+	#define MSG_FDDSET2DDATA 	0x000A
+	#define MSG_READFDDFILE		0x000B
+	#define MSG_COLLECT		0x000C
+	#define MSG_FDDDATAID 		0x000D
+	#define MSG_FDDDATA 		0x000E
+	#define MSG_TASKRESULT		0x000F
+	#define MSG_FDDINFO		0x0010
+	#define MSG_FDDSETIDATAID 	0x0011
+	#define MSG_FDDSETIDATA		0x0012
+	#define MSG_FDDSETIKEYS		0x0013
+	#define MSG_FDDSET2DIDATAID 	0x0014
+	#define MSG_FDDSET2DIDATASIZES	0x0015
+	#define MSG_FDDSET2DIDATA 	0x0016
+	#define MSG_FDDSET2DIKEYS 	0x0017
+	#define MSG_KEYOWNERSHIPSUGEST	0x0018
+	#define MSG_MYKEYOWNERSHIP	0x0019
+	#define MSG_MYKEYCOUNT		0x001a
+	#define MSG_IFDDDATAID 		0x001b
+	#define MSG_IFDDDATAKEYS	0x001c
+	#define MSG_IFDDDATA 		0x001d
+	#define MSG_COLLECTDATA		0x001a
+	#define MSG_KEYMAP		0x001b
+	#define MSG_GROUPBYKEYDATA	0x001c
 		// . . .
-	#define MSG_FINISH 		0x8000
+	#define MSG_FINISH 		0x8000 // */
+	enum msgTag : int {
+		MSG_TASK 	,
+		MSG_CREATEFDD 	,
+		MSG_CREATEIFDD 	,
+		MSG_CREATEGFDD 	,
+		MSG_DESTROYFDD 	,
+		MSG_FDDSETDATAID ,
+		MSG_FDDSETDATA 	,
+		MSG_FDDSET2DDATAID ,
+		MSG_FDDSET2DDATASIZES,
+		MSG_FDDSET2DDATA ,
+		MSG_READFDDFILE	,
+		MSG_COLLECT	,
+		MSG_FDDDATAID 	,
+		MSG_FDDDATA 	,
+		MSG_TASKRESULT	,
+		MSG_FDDINFO	,
+		MSG_FDDSETIDATAID ,
+		MSG_FDDSETIDATA	,
+		MSG_FDDSETIKEYS	,
+		MSG_FDDSET2DIDATAID ,
+		MSG_FDDSET2DIDATASIZES,
+		MSG_FDDSET2DIDATA ,
+		MSG_FDDSET2DIKEYS ,
+		MSG_KEYOWNERSHIPSUGEST,
+		MSG_MYKEYOWNERSHIP,
+		MSG_MYKEYCOUNT	,
+		MSG_IFDDDATAID 	,
+		MSG_IFDDDATAKEYS,
+		MSG_IFDDDATA 	,
+		MSG_COLLECTDATA	,
+		MSG_KEYMAP	,
+		MSG_GROUPBYKEYDATA,
+
+		MSG_FINISH
+	};
 
 
-	#define FDDTYPE_NULL 		0x00
-	#define FDDTYPE_CHAR 		0x01
+
+ 	#define FDDTYPE_NULL 		0x00
+ 	#define FDDTYPE_CHAR 		0x01
 	#define FDDTYPE_INT 		0x02
 	#define FDDTYPE_LONGINT 	0x03
 	#define FDDTYPE_FLOAT 		0x04
@@ -145,8 +184,8 @@ namespace faster{
 		void sendCreateIFDD(unsigned long int id,  fddType kType,  fddType tType,  size_t size, int dest);
 		void recvCreateIFDD(unsigned long int &id, fddType &kType, fddType &tType, size_t & size);
 
-		void sendCreateFDDGroup(unsigned long int id, std::vector<unsigned long int> &idV, std::vector<fddType> &kV, std::vector<fddType> tV);
-		void recvCreateFDDGroup(unsigned long int &id, std::vector<unsigned long int> &idV, std::vector<fddType> &kV, std::vector<fddType> tV);
+		void sendCreateFDDGroup(unsigned long int id, fddType keyType, std::vector<unsigned long int> & members);
+		void recvCreateFDDGroup(unsigned long int & id, fddType & keyType, std::vector<unsigned long int> & members);
 
 		void sendDestroyFDD(unsigned long int id);
 		void recvDestroyFDD(unsigned long int &id);

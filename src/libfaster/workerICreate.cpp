@@ -1,45 +1,48 @@
+#include <iostream>
 #include "workerFdd.h"
+#include "workerFddGroup.h"
 #include "worker.h"
 
-
-/*
-template <typename K>
-void faster::worker::_createIFDD (unsigned long int id, fddType type, size_t size){
-	workerFddBase * newFdd;
-	switch (type){
-		case Null: break;
-		case Char: newFdd = new workerIFdd<K, char>(id, type, size); break;
-		case Int: newFdd = new workerIFdd<K, int>(id, type, size); break;
-		case LongInt: newFdd = new workerIFdd<K, long int>(id, type, size); break;
-		case Float: newFdd = new workerIFdd<K, float>(id, type, size); break;
-		case Double: newFdd = new workerIFdd<K, double>(id, type, size); break;
-		case CharP: newFdd = new workerIFdd<K, char *>(id, type, size); break;
-		case IntP: newFdd = new workerIFdd<K, int *>(id, type, size); break;
-		case LongIntP: newFdd = new workerIFdd<K, long int *>(id, type, size); break;
-		case FloatP: newFdd = new workerIFdd<K, float *>(id, type, size); break;
-		case DoubleP: newFdd = new workerIFdd<K, double *>(id, type, size); break;
-		// case Custom: //newFdd = new workerIFdd<K, void *>(id, type, size); break;
-		case String: newFdd = new workerIFdd<K, std::string>(id, type, size); break;
-		case CharV: newFdd = new workerIFdd<K, std::vector<char>>(id, type, size); break;
-		case IntV: newFdd = new workerIFdd<K, std::vector<int>>(id, type, size); break;
-		case LongIntV: newFdd = new workerIFdd<K, std::vector<long int>>(id, type, size); break;
-		case FloatV: newFdd = new workerIFdd<K, std::vector<float>>(id, type, size); break;
-		case DoubleV: newFdd = new workerIFdd<K, std::vector<double>>(id, type, size); break;
-	}	fddList.insert(fddList.end(), newFdd);
-}// */
 
 
 void faster::worker::createIFDD(unsigned long int id, fddType kType, fddType tType, size_t size){
 	workerFddBase * newFdd = new workerFdd(id, kType, tType, size);
 	fddList.insert(fddList.end(), newFdd);
-	/*switch (kType){
-		case Null: break;
-		case Char:    _createIFDD<char>(id, tType, size); break;
-		case Int:     _createIFDD<int>(id, tType, size); break;
-		case LongInt: _createIFDD<long int>(id, tType, size); break;
-		case Float:   _createIFDD<float>(id, tType, size); break;
-		case Double:  _createIFDD<double>(id, tType, size); break;
-		case String:  _createIFDD<std::string>(id, tType, size); break;
-	}// */
 }
+
+void faster::worker::createFDDGroup(unsigned long int id, fddType kType, std::vector<unsigned long int> & idV){
+	std::vector<workerFddBase *> members(idV.size(), NULL);
+
+	for ( size_t i = 0; i < members.size(); ++i){
+		members[i] = fddList[idV[i]];;
+	}
+
+	workerFddBase * newFdd;
+	switch(kType){
+		case Char:
+			newFdd = new workerFddGroup<char>(id, kType, members);
+			break;
+		case Int:
+			newFdd = new workerFddGroup<int>(id, kType, members);
+			break;
+		case LongInt:
+			newFdd = new workerFddGroup<long int>(id, kType, members);
+			break;
+		case Float:
+			newFdd = new workerFddGroup<float>(id, kType, members);
+			break;
+		case Double:
+			newFdd = new workerFddGroup<double>(id, kType, members);
+			break;
+		case String:
+			newFdd = new workerFddGroup<std::string>(id, kType, members);
+			break;
+		default:
+			std::cerr << " Error: could not identify FddGroup Key Type!\n";
+			break;
+	}
+	if (newFdd != NULL)
+		fddList.insert(fddList.end(), newFdd);
+}
+
 

@@ -33,6 +33,7 @@ namespace faster{
 		void preapplyDL(workerFddBase * fdd, unsigned long int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm);
 
 		void collectDL(workerFddBase * fdd, fastComm * comm);
+		void exchangeDataByKeyDL(workerFddBase * fdd, fastComm *comm, void * keyMap);
 	}
 }
 

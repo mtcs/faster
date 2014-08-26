@@ -177,7 +177,7 @@ faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned lo
 	newTask->functionId = funcId;
 	newTask->workersFinished = 0;
 	newTask->allocation = getNewAllocation();
-	newTask->times = std::vector<size_t>(size, 0);
+	newTask->times = std::vector<size_t>(numProcs, 0);
 
 	taskList.insert(taskList.end(), newTask);
 

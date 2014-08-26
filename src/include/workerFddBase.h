@@ -56,6 +56,7 @@ namespace faster{
 			virtual void apply(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer) = 0;
 
 			virtual void collect(fastComm * comm) = 0;
+			virtual void exchangeDataByKey(fastComm *comm, void * keyMap) = 0;
 	};
 }
 
