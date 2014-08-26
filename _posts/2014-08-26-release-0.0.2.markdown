@@ -4,7 +4,7 @@ title:  "Faster 0.0.2 Alpha"
 date:   2014-08-26 20:27:00
 docLink: "https://github.com/mtcs/faster/wiki"
 tag: "0.0.2-alpha"
-comment: "Alpha release that includes ByKe yfunctions and cogrouped datasets."
+comment: "Alpha release that includes ByKey functions and cogrouped datasets."
 categories: [release, news]
 ---
 
