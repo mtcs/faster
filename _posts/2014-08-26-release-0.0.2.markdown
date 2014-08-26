@@ -1,0 +1,22 @@
+---
+layout: release
+title:  "Faster 0.0.2 Alpha"
+date:   2014-08-26 20:27:00
+docLink: "https://github.com/mtcs/faster/wiki"
+tag: "0.0.2-alpha"
+comment: "Alpha release that includes ByKe yfunctions and cogrouped datasets."
+categories: [release, news]
+---
+
+[0.0.2] is a Alpha Here!
+
+We included ByKey functions for indexed datasets and grouped datasets created through cogroup function.
+
+The automated unity testing is still underway... although it is becoming too complex to my taste.
+
+[Documantation Here] or at least it will be...
+
+Enjoy!
+
+[0.0.2]: https://github.com/mtcs/faster/releases/tag/0.0.2-alpha
+[Documantation here]: {{ page.docLink }}
