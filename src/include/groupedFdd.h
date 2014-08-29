@@ -59,8 +59,10 @@ namespace faster{
 					context = c;
 					members.reserve(4);
 			}
+			template <typename To> 
+			fddBase * map(void * funcP, fddOpType op);
 			template <typename Ko, typename To> 
-			fddBase * map (void * funcP, fddOpType op);
+			fddBase * mapI(void * funcP, fddOpType op);
 
 			void cogroup(std::unordered_map<K, int> & keyMap);
 		public:
@@ -80,21 +82,53 @@ namespace faster{
 				cogroup(keyMap);
 			}
 
+			// MapByKey
+
 			template <typename T, typename U, typename Ko, typename To> 
 			indexedFdd<Ko,To> * mapByKey( ImapByKeyG2FunctionP<K,Ko,To> funcP){
-				return (indexedFdd<Ko,To> *) map<Ko,To>((void*) funcP, OP_MapByKey);
+				return (indexedFdd<Ko,To> *) mapI<Ko,To>((void*) funcP, OP_MapByKey);
 			}
 
 			template <typename T, typename U, typename V, typename Ko, typename To> 
 			indexedFdd<Ko,To> * mapByKey( ImapByKeyG3FunctionP<K,Ko,To> funcP){
-				return (indexedFdd<Ko,To> *) map<Ko,To>((void*) funcP, OP_MapByKey);
+				return (indexedFdd<Ko,To> *) mapI<Ko,To>((void*) funcP, OP_MapByKey);
+			}
+			template <typename T, typename U, typename To> 
+			fdd<To> * mapByKey( mapByKeyG2FunctionP<K,To> funcP){
+				return (fdd<To> *) map<To>((void*) funcP, OP_MapByKey);
+			}
+
+			template <typename T, typename U, typename V, typename To> 
+			fdd<To> * mapByKey( mapByKeyG3FunctionP<K,To> funcP){
+				return (fdd<To> *) map<To>((void*) funcP, OP_MapByKey);
+			}
+
+			// FlatMapByKey
+
+			template <typename T, typename U, typename Ko, typename To> 
+			indexedFdd<Ko,To> * flatMapByKey( IflatMapByKeyG2FunctionP<K,Ko,To> funcP){
+				return (indexedFdd<Ko,To> *) mapI<Ko,To>((void*) funcP, OP_FlatMapByKey);
+			}
+
+			template <typename T, typename U, typename V, typename Ko, typename To> 
+			indexedFdd<Ko,To> * flatMapByKey( IflatMapByKeyG3FunctionP<K,Ko,To> funcP){
+				return (indexedFdd<Ko,To> *) mapI<Ko,To>((void*) funcP, OP_FlatMapByKey);
+			}
+			template <typename T, typename U, typename To> 
+			fdd<To> * flatMapByKey( flatMapByKeyG2FunctionP<K,To> funcP){
+				return (fdd<To> *) map<To>((void*) funcP, OP_FlatMapByKey);
+			}
+
+			template <typename T, typename U, typename V, typename To> 
+			fdd<To> * flatMapByKey( flatMapByKeyG3FunctionP<K,To> funcP){
+				return (fdd<To> *) map<To>((void*) funcP, OP_FlatMapByKey);
 			}
 
 	};
 
 	template <typename K>
 	template <typename Ko, typename To> 
-	fddBase * groupedFdd<K>::map (void * funcP, fddOpType op){
+	fddBase * groupedFdd<K>::mapI (void * funcP, fddOpType op){
 		std::cerr << "  Map\n";
 		indexedFdd<Ko,To> * newFdd;
 		size_t result;
@@ -102,7 +136,7 @@ namespace faster{
 		size_t fddSize;
 		unsigned long int tid, sid;
 
-		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMap | OP_BulkFlatMap) ){
+		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
 			newFdd = new indexedFdd<Ko,To>(*context);
 		}else{
 			newFdd = new indexedFdd<Ko,To>(*context, size);
@@ -119,10 +153,47 @@ namespace faster{
 		fddSize = 0;
 		for (int i = 1; i < context->numProcs(); ++i){
 			result = * (size_t*) context->recvTaskResult(tid, sid, rSize);
-			if ( (op & 0xff) & (OP_MapByKey | OP_FlatMap) )
+			std::cerr << " r:" << result;
+			if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
 				fddSize += result;
 		}
-		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMap) )
+		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
+			newFdd->setSize(fddSize);
+
+		std::cerr << " ns:" << fddSize << "  Done\n";
+		return newFdd;
+	}
+	template <typename K>
+	template <typename To> 
+	fddBase * groupedFdd<K>::map (void * funcP, fddOpType op){
+		std::cerr << "  Map\n";
+		fdd<To> * newFdd;
+		size_t result;
+		size_t rSize;
+		size_t fddSize;
+		unsigned long int tid, sid;
+
+		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
+			newFdd = new fdd<To>(*context);
+		}else{
+			newFdd = new fdd<To>(*context, size);
+		}
+		unsigned long int newFddId = newFdd->getId();
+
+		// Decode function pointer
+		int funcId = context->findFunc(funcP);
+
+		// Send task
+		context->enqueueTask(op, id, newFddId, funcId, this->size);
+
+		// Receive results
+		fddSize = 0;
+		for (int i = 1; i < context->numProcs(); ++i){
+			result = * (size_t*) context->recvTaskResult(tid, sid, rSize);
+			if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
+				fddSize += result;
+		}
+		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
 			newFdd->setSize(fddSize);
 
 		std::cerr << "  Done\n";

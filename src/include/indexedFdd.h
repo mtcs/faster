@@ -229,6 +229,7 @@ namespace faster{
 			// --------------- FDD Builtin functions ------------- // 
 			// Collect a FDD
 			std::vector<std::pair<K,T>> collect( ){
+				std::cerr << " \033[0;31mSIZE: " << this->size << "\033[0m";
 				std::vector<std::pair<K,T>> data(this->size);
 				this->context->collectFDD(data, this);
 				return data;
@@ -393,7 +394,7 @@ namespace faster{
 		size_t rSize;
 		unsigned long int tid, sid;
 
-		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMap | OP_BulkFlatMap) ){
+		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
 			newFdd = new indexedFdd<L,U>(*context);
 		}else{
 			newFdd = new indexedFdd<L,U>(*context, size);
@@ -407,11 +408,11 @@ namespace faster{
 		context->enqueueTask(op, id, newFddId, funcId, this->size);
 
 		// Receive results
-		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMap) )
+		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
 			newFdd->size = 0;
 		for (int i = 1; i < context->numProcs(); ++i){
 			result = * (size_t*) context->recvTaskResult(tid, sid, rSize);
-			if ( (op & 0xff) & (OP_MapByKey | OP_FlatMap) )
+			if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
 				newFdd->size += result;
 		}
 

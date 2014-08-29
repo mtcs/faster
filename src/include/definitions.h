@@ -44,6 +44,7 @@ namespace faster{
 	#define OP_FlatMap		0x0104
 	#define OP_BulkFlatMap		0x0108
 	#define OP_MapByKey		0x0110
+	#define OP_FlatMapByKey		0x0120
 	#define OP_GENERICREDUCE	0x0200
 	#define OP_Reduce		0x0201
 	#define OP_BulkReduce		0x0202
@@ -328,6 +329,19 @@ namespace faster{
 
 	template <typename K, typename Ko, typename To>
 	using ImapByKeyG3FunctionP = std::pair<Ko,To> (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB, void * c, size_t sizeC);
+
+
+	template <typename K, typename To>
+	using flatMapByKeyG2FunctionP = std::list<To> (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB);
+
+	template <typename K, typename To>
+	using flatMapByKeyG3FunctionP = std::list<To> (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB, void * c, size_t sizeC);
+
+	template <typename K, typename Ko, typename To>
+	using IflatMapByKeyG2FunctionP = std::list<std::pair<Ko,To>> (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB);
+
+	template <typename K, typename Ko, typename To>
+	using IflatMapByKeyG3FunctionP = std::list<std::pair<Ko,To>> (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB, void * c, size_t sizeC);
 
 
 	/*template <typename K, typename To>

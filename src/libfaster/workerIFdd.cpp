@@ -106,8 +106,9 @@ void faster::_workerIFdd<K,T>::insert(std::list< std::pair<K, T> > & in){
 	if (this->localData->getSize() < in.size())
 		this->localData->grow(in.size());
 
-	for ( auto it = in.begin(); it != in.end(); it++)
+	for ( auto it = in.begin(); it != in.end(); it++){
 		this->localData->insert(it->first, it->second); 
+	}
 }
 
 

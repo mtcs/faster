@@ -292,7 +292,7 @@ void faster::workerFdd::insert(void * k, void * v, size_t s){
 
 void faster::workerFdd::insertl(void * v){
 	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [InsertListDL];
-	((void (*)(workerFddBase *, void *)) funcP)(_fdd, &v);
+	((void (*)(workerFddBase *, void *)) funcP)(_fdd, v);
 }
 
 

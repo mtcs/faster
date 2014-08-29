@@ -46,6 +46,13 @@ namespace faster{
 			template <typename L, typename U>
 			void mapByKeyI(workerFddBase * dest, void * mapByKeyFunc);
 
+			//template <typename U, typename T0, typename T1, typename T2>
+			template <typename U>
+			void flatMapByKey(workerFddBase * dest, void * mapByKeyFunc);
+			//template <typename L, typename U, typename T0, typename T1, typename T2>
+			template <typename L, typename U>
+			void flatMapByKeyI(workerFddBase * dest, void * mapByKeyFunc);
+
 			void exchangeDataByKey(fastComm *comm UNUSED, void * keyMap UNUSED){};
 			void coGroup(fastComm *comm);
 

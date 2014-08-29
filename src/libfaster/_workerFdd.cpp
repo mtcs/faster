@@ -478,6 +478,7 @@ template <typename T>
 void faster::_workerFdd<T>::insert(T & in){ 
 	this->localData->insert(in); 
 }
+// TODO CHANGE THIS !!!! MAK THE LIST ITERATION INSIDE THE STORAGE
 template <typename T>
 void faster::_workerFdd<T>::insert(std::list<T> & in){ 
 	typename std::list<T>::iterator it;
