@@ -80,20 +80,20 @@ namespace faster{
 
 			int findFunc(void * funcP);
 
-			unsigned long int _createFDD(fddBase * ref, fddType type, size_t size);
-			unsigned long int _createIFDD(fddBase * ref, fddType kTypeCode, fddType tTypeCode, size_t size);
+			unsigned long int _createFDD(fddBase * ref, fddType type, const std::vector<size_t> * dataAlloc);
+			unsigned long int _createIFDD(fddBase * ref, fddType kTypeCode, fddType tTypeCode, const std::vector<size_t> * dataAlloc);
 			unsigned long int createFDD(fddBase * ref, size_t typeCode);
-			unsigned long int createFDD(fddBase * ref, size_t typeCode, size_t size);
+			unsigned long int createFDD(fddBase * ref, size_t typeCode, const std::vector<size_t> & dataAlloc);
 			unsigned long int createPFDD(fddBase * ref, size_t typeCode);
-			unsigned long int createPFDD(fddBase * ref, size_t typeCode, size_t size);
+			unsigned long int createPFDD(fddBase * ref, size_t typeCode, const std::vector<size_t> & dataAlloc);
 			unsigned long int createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode);
-			unsigned long int createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size);
+			unsigned long int createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, const std::vector<size_t> & dataAlloc);
 			unsigned long int createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode);
-			unsigned long int createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size);
+			unsigned long int createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, const std::vector<size_t> & dataAlloc);
 			unsigned long int createFddGroup(fddBase * ref, std::vector<fddBase*> & fdds);
 
 			unsigned long int readFDD(fddBase * ref, const char * fileName);
-			void getFDDInfo(size_t & size);
+			void getFDDInfo(size_t & size, std::vector<size_t> & dataAlloc);
 
 			int numProcs(){ return comm->numProcs; }
 			

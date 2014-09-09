@@ -7,7 +7,7 @@
 using namespace std;
 using namespace faster;
 
-pair<int,int> map1(int key, int & input){
+pair<int,int> map1(const int & key, int & input){
 	pair<int,int> result (key, input);
 
 	return result;

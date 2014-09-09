@@ -59,17 +59,27 @@ int faster::fastContext::findFunc(void * funcP){
 	return -1;
 }
 
-unsigned long int faster::fastContext::_createFDD(fddBase * ref, fddType type, size_t size){
+unsigned long int faster::fastContext::_createFDD(fddBase * ref, fddType type, const std::vector<size_t> * dataAlloc){
 	
 	std::cerr << "    Create FDD\n";
 	for (int i = 1; i < comm->numProcs; ++i){
-		size_t dataPerProc = size / (comm->numProcs - 1);
+		/*size_t dataPerProc = size / (comm->numProcs - 1);
 		int rem = size % (comm->numProcs -1);
 		if (i <= rem)
 			dataPerProc += 1;
 		comm->sendCreateFDD(numFDDs, type, dataPerProc, i);
 
-		std::cerr << "    S:CreateFdd ID:" << numFDDs << " T:" << type << " S:" << dataPerProc << '\n';
+		std::cerr << "    S:CreateFdd ID:" << numFDDs << " T:" << type << " S:" << dataPerProc << '\n';// */
+		if (dataAlloc){
+			std::cerr << "    S:CreateFdd ID:" << numFDDs << " T:" << type << " S:" << (*dataAlloc)[i] ;
+			comm->sendCreateFDD(numFDDs, type, (*dataAlloc)[i], i);
+			std::cerr << ".\n";
+		}else{
+			std::cerr << "    S:CreateFdd ID:" << numFDDs << " T:" << type << " S: ?";
+			comm->sendCreateFDD(numFDDs, type, 0, i);
+			std::cerr << ".\n";
+		}
+
 	}
 	fddList.insert(fddList.begin(), ref);
 	comm->waitForReq(comm->numProcs - 1);
@@ -78,17 +88,26 @@ unsigned long int faster::fastContext::_createFDD(fddBase * ref, fddType type, s
 	return numFDDs++;
 }
 
-unsigned long int faster::fastContext::_createIFDD(fddBase * ref, fddType kType, fddType tType, size_t size){
+unsigned long int faster::fastContext::_createIFDD(fddBase * ref, fddType kType, fddType tType, const std::vector<size_t> * dataAlloc){
 
 	std::cerr << "    Create FDD\n";
 	for (int i = 1; i < comm->numProcs; ++i){
-		size_t dataPerProc = size / (comm->numProcs - 1);
+		/*size_t dataPerProc = size / (comm->numProcs - 1);
 		int rem = size % (comm->numProcs -1);
 		if (i <= rem)
 			dataPerProc += 1;
 		comm->sendCreateIFDD(numFDDs, kType, tType, dataPerProc, i);
 
-		std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:" << dataPerProc <<'\n';
+		std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:" << dataPerProc <<'\n';// */
+		if (dataAlloc){
+			std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:" << (*dataAlloc)[i];
+			comm->sendCreateIFDD(numFDDs, kType, tType, (*dataAlloc)[i], i);
+			std::cerr << ".\n";
+		}else{
+			std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:? ";
+			comm->sendCreateIFDD(numFDDs, kType, tType, 0, i);
+			std::cerr << ".\n";
+		}
 	}
 	fddList.insert(fddList.begin(), ref);
 	comm->waitForReq(comm->numProcs - 1);
@@ -98,29 +117,29 @@ unsigned long int faster::fastContext::_createIFDD(fddBase * ref, fddType kType,
 }
 
 // TODO CHANGE THIS!
-unsigned long int faster::fastContext::createFDD(fddBase * ref, size_t typeCode, size_t size){
-	return _createFDD(ref, decodeType(typeCode), size);
+unsigned long int faster::fastContext::createFDD(fddBase * ref, size_t typeCode, const std::vector<size_t> & dataAlloc){
+	return _createFDD(ref, decodeType(typeCode), &dataAlloc);
 }
 unsigned long int faster::fastContext::createFDD(fddBase * ref, size_t typeCode){
-	return _createFDD(ref, decodeType(typeCode), 0);
+	return _createFDD(ref, decodeType(typeCode), NULL);
 }
-unsigned long int faster::fastContext::createPFDD(fddBase * ref, size_t typeCode, size_t size){
-	return _createFDD(ref, POINTER | decodeType(typeCode), size);
+unsigned long int faster::fastContext::createPFDD(fddBase * ref, size_t typeCode, const std::vector<size_t> & dataAlloc){
+	return _createFDD(ref, POINTER | decodeType(typeCode), &dataAlloc);
 }
 unsigned long int faster::fastContext::createPFDD(fddBase * ref, size_t typeCode){
-	return _createFDD(ref, POINTER | decodeType(typeCode), 0);
+	return _createFDD(ref, POINTER | decodeType(typeCode), NULL);
 }
-unsigned long int faster::fastContext::createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size){
-	return _createIFDD(ref, decodeType(kTypeCode), decodeType(tTypeCode), size);
+unsigned long int faster::fastContext::createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, const std::vector<size_t> & dataAlloc){
+	return _createIFDD(ref, decodeType(kTypeCode), decodeType(tTypeCode), &dataAlloc);
 }
 unsigned long int faster::fastContext::createIFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode){
-	return _createIFDD(ref, decodeType(kTypeCode), decodeType(tTypeCode), 0);
+	return _createIFDD(ref, decodeType(kTypeCode), decodeType(tTypeCode), NULL);
 }
-unsigned long int faster::fastContext::createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, size_t size){
-	return _createIFDD(ref, decodeType(kTypeCode), POINTER | decodeType(tTypeCode), size);
+unsigned long int faster::fastContext::createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode, const std::vector<size_t> & dataAlloc){
+	return _createIFDD(ref, decodeType(kTypeCode), POINTER | decodeType(tTypeCode), &dataAlloc);
 }
 unsigned long int faster::fastContext::createIPFDD(fddBase * ref, size_t kTypeCode, size_t tTypeCode){
-	return _createIFDD(ref, decodeType(kTypeCode), POINTER | decodeType(tTypeCode), 0);
+	return _createIFDD(ref, decodeType(kTypeCode), POINTER | decodeType(tTypeCode), NULL);
 }
 
 unsigned long int faster::fastContext::createFddGroup(fddBase * ref, std::vector<fddBase*> & fddV){
@@ -172,11 +191,19 @@ unsigned long int faster::fastContext::readFDD(fddBase * ref, const char * fileN
 	return numFDDs++;
 }
 
-void faster::fastContext::getFDDInfo(size_t & s){
+void faster::fastContext::getFDDInfo(size_t & s, std::vector<size_t> & dataAlloc){
 	s = 0;
+	dataAlloc = std::vector<size_t>(comm->numProcs,0);
+
 	for (int i = 1; i < comm->numProcs; ++i){
 		size_t size;
-		comm->recvFDDInfo(size);
+		int src;
+
+		std::cerr << "    R:GetFDDInfo ";
+		comm->recvFDDInfo(size, src);
+		dataAlloc[src] = size;
+
+		std::cerr << "S:" << size << "\n";
 		s += size;
 	}
 }

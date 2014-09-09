@@ -2,7 +2,6 @@
 #include "workerIFddDependent.cpp"
 #include "workerFddModule.cpp"
 
-
 faster::workerFddBase * faster::newWorkerSDL(unsigned long int id, fddType type, size_t size){
 	switch (type){
 		case String:  return new _workerIFdd<int, std::string>(id, Int, type, size); break;

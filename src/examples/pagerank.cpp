@@ -1,5 +1,4 @@
 #include <iostream>
-#include <sstream>
 #include "libfaster.h"
 
 #define NUMITEMS 100*1000
@@ -9,25 +8,34 @@ using namespace faster;
 
 const double contribRate = 0.85;
 
-vector<int> split(const string & input){
-	vector<int> v;
-	int i = 0;
-	string token;
+pair<int,vector<int>> toAList(string & input){
+	size_t lastPos = 0;
+	list<pair<size_t,size_t>> pos;
 
-	std::istringstream ss( input );
-	while (!ss.eof()){
-		getline(ss, token, ' ');
-		v[i++] = atoi(token.data());
+	//cerr << input << '\n';
+
+
+	for ( size_t i = 0; i < input.size(); ++i ){
+		if ((input[i] == ' ') || (input[i] == '\n')){
+			if ((i-lastPos) > 1){
+				pos.push_back(make_pair(lastPos, i - lastPos ));
+				lastPos = i;
+			}
+		}
 	}
+	vector<int> v(pos.size()-1);
 
-	return v;
-}
+	auto it = pos.begin();
+	int key = atoi(input.substr(it->first,it->second).data());
+	it++;
+	for ( size_t i = 0; i < (pos.size()-1) ; ++i){
+		v[i] = atoi(input.substr(it->first,it->second).data());
+		it++;
+		//cerr << v[i-1] << ",";
+	}
+	//cerr << '\n';
 
-pair<int, vector<int>> toAList(string & input){
-	vector<int>  v = split(input);
-	int k = v[0];
-	v.erase(v.begin());
-	return make_pair( k, v );
+	return make_pair(key,v);
 }
 
 pair<int, double> createPR(const int & key, vector<int> & s){
@@ -72,7 +80,7 @@ int main(int argc, char ** argv){
 
 
 	cout << "Import Data" << '\n';
-	auto data = new fdd<string>(fc, "../res/testM.txt");
+	auto data = new fdd<string>(fc, "../res/graph1000.al");
 	auto structure = data->map<int, vector<int>>(&toAList);
 
 	cout << "Init Pagerank" << '\n';

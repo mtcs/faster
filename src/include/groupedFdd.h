@@ -59,10 +59,13 @@ namespace faster{
 					context = c;
 					members.reserve(4);
 			}
+			fddBase * _map (void * funcP, fddOpType op, fddBase * newFdd);
 			template <typename To> 
-			fddBase * map(void * funcP, fddOpType op);
+			fdd<To> * map(void * funcP, fddOpType op);
 			template <typename Ko, typename To> 
-			fddBase * mapI(void * funcP, fddOpType op);
+			indexedFdd<Ko,To> * mapI(void * funcP, fddOpType op);
+
+			groupedFdd<K> * update(void * funcP, fddOpType op);
 
 			void cogroup(std::unordered_map<K, int> & keyMap);
 		public:
@@ -82,44 +85,55 @@ namespace faster{
 				cogroup(keyMap);
 			}
 
-			// MapByKey
+			// UpdateByKey
+			groupedFdd<K> * updateByKey( updateByKeyG2FunctionP<K> funcP){
+				update((void*) funcP, OP_UpdateByKey);
+				return this;
+			}
 
-			template <typename T, typename U, typename Ko, typename To> 
+			groupedFdd<K> * updateByKey( updateByKeyG3FunctionP<K> funcP){
+				update((void*) funcP, OP_UpdateByKey);
+				return this;
+			}
+
+
+			// MapByKey
+			template <typename Ko, typename To> 
 			indexedFdd<Ko,To> * mapByKey( ImapByKeyG2FunctionP<K,Ko,To> funcP){
 				return (indexedFdd<Ko,To> *) mapI<Ko,To>((void*) funcP, OP_MapByKey);
 			}
 
-			template <typename T, typename U, typename V, typename Ko, typename To> 
+			template <typename V, typename Ko, typename To> 
 			indexedFdd<Ko,To> * mapByKey( ImapByKeyG3FunctionP<K,Ko,To> funcP){
 				return (indexedFdd<Ko,To> *) mapI<Ko,To>((void*) funcP, OP_MapByKey);
 			}
-			template <typename T, typename U, typename To> 
+			template <typename To> 
 			fdd<To> * mapByKey( mapByKeyG2FunctionP<K,To> funcP){
 				return (fdd<To> *) map<To>((void*) funcP, OP_MapByKey);
 			}
 
-			template <typename T, typename U, typename V, typename To> 
+			template <typename V, typename To> 
 			fdd<To> * mapByKey( mapByKeyG3FunctionP<K,To> funcP){
 				return (fdd<To> *) map<To>((void*) funcP, OP_MapByKey);
 			}
 
 			// FlatMapByKey
 
-			template <typename T, typename U, typename Ko, typename To> 
+			template <typename Ko, typename To> 
 			indexedFdd<Ko,To> * flatMapByKey( IflatMapByKeyG2FunctionP<K,Ko,To> funcP){
 				return (indexedFdd<Ko,To> *) mapI<Ko,To>((void*) funcP, OP_FlatMapByKey);
 			}
 
-			template <typename T, typename U, typename V, typename Ko, typename To> 
+			template <typename V, typename Ko, typename To> 
 			indexedFdd<Ko,To> * flatMapByKey( IflatMapByKeyG3FunctionP<K,Ko,To> funcP){
 				return (indexedFdd<Ko,To> *) mapI<Ko,To>((void*) funcP, OP_FlatMapByKey);
 			}
-			template <typename T, typename U, typename To> 
+			template <typename To> 
 			fdd<To> * flatMapByKey( flatMapByKeyG2FunctionP<K,To> funcP){
 				return (fdd<To> *) map<To>((void*) funcP, OP_FlatMapByKey);
 			}
 
-			template <typename T, typename U, typename V, typename To> 
+			template <typename V, typename To> 
 			fdd<To> * flatMapByKey( flatMapByKeyG3FunctionP<K,To> funcP){
 				return (fdd<To> *) map<To>((void*) funcP, OP_FlatMapByKey);
 			}
@@ -127,57 +141,12 @@ namespace faster{
 	};
 
 	template <typename K>
-	template <typename Ko, typename To> 
-	fddBase * groupedFdd<K>::mapI (void * funcP, fddOpType op){
+	fddBase * groupedFdd<K>::_map (void * funcP, fddOpType op, fddBase * newFdd){
 		std::cerr << "  Map\n";
-		indexedFdd<Ko,To> * newFdd;
 		size_t result;
 		size_t rSize;
 		size_t fddSize;
 		unsigned long int tid, sid;
-
-		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
-			newFdd = new indexedFdd<Ko,To>(*context);
-		}else{
-			newFdd = new indexedFdd<Ko,To>(*context, size);
-		}
-		unsigned long int newFddId = newFdd->getId();
-
-		// Decode function pointer
-		int funcId = context->findFunc(funcP);
-
-		// Send task
-		context->enqueueTask(op, id, newFddId, funcId, this->size);
-
-		// Receive results
-		fddSize = 0;
-		for (int i = 1; i < context->numProcs(); ++i){
-			result = * (size_t*) context->recvTaskResult(tid, sid, rSize);
-			std::cerr << " r:" << result;
-			if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
-				fddSize += result;
-		}
-		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
-			newFdd->setSize(fddSize);
-
-		std::cerr << " ns:" << fddSize << "  Done\n";
-		return newFdd;
-	}
-	template <typename K>
-	template <typename To> 
-	fddBase * groupedFdd<K>::map (void * funcP, fddOpType op){
-		std::cerr << "  Map\n";
-		fdd<To> * newFdd;
-		size_t result;
-		size_t rSize;
-		size_t fddSize;
-		unsigned long int tid, sid;
-
-		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
-			newFdd = new fdd<To>(*context);
-		}else{
-			newFdd = new fdd<To>(*context, size);
-		}
 		unsigned long int newFddId = newFdd->getId();
 
 		// Decode function pointer
@@ -198,6 +167,44 @@ namespace faster{
 
 		std::cerr << "  Done\n";
 		return newFdd;
+	}
+	template <typename K>
+	template <typename To> 
+	fdd<To> * groupedFdd<K>::map (void * funcP, fddOpType op){
+		fdd<To> * newFdd;
+
+		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
+			newFdd = new fdd<To>(*context);
+		}else{
+			newFdd = new fdd<To>(*context, size);
+		}
+
+		return (fdd<To> *) _map(funcP, op, newFdd);
+	}
+	template <typename K>
+	template <typename Ko, typename To> 
+	indexedFdd<Ko,To> * groupedFdd<K>::mapI(void * funcP, fddOpType op){
+		indexedFdd<Ko,To> * newFdd;
+
+		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
+			newFdd = new indexedFdd<Ko,To>(*context);
+		}else{
+			newFdd = new indexedFdd<Ko,To>(*context, size);
+		}
+
+		return (indexedFdd<Ko,To> *) _map(funcP, op, newFdd);
+	}
+
+	template <typename K>
+	groupedFdd<K> * groupedFdd<K>::update(void * funcP, fddOpType op){
+
+		// Decode function pointer
+		int funcId = context->findFunc(funcP);
+
+		// Send task
+		unsigned long int tid = context->enqueueTask(op, this->id, 0, funcId, this->size);
+
+		return this;
 	}
 
 	template <typename K>

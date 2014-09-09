@@ -56,6 +56,42 @@ std::unordered_map<K, std::pair<void*, size_t>> findKeyInterval(std::vector<K> &
 	return keyLocations;
 }
 
+template <typename K>
+void faster::workerFddGroup<K>::updateByKey(void * mapByKeyFunc){
+
+	std::unordered_map<K, std::pair<void*, size_t>> keyLocations[3];
+
+	for (int i = 0; i < members.size(); ++i){
+		keyLocations[i] = findKeyInterval(uKeys, members[i]);
+	}
+
+	if ( members.size() < 3 ){  
+		#pragma omp parallel for 
+		for (int i = 0; i < uKeys.size(); ++i){
+			K key = uKeys[i];
+			auto location0 = keyLocations[0][key];
+			auto location1 = keyLocations[1][key];
+			((updateByKeyG2FunctionP<K>) mapByKeyFunc) 
+				(key, 
+				 location0.first, location0.second, 
+				 location1.first, location1.second );
+		}
+	}else{
+		#pragma omp parallel for 
+		for (int i = 0; i < uKeys.size(); ++i){
+			K key = uKeys[i];
+			auto location0 = keyLocations[0][key];
+			auto location1 = keyLocations[1][key];
+			auto location2 = keyLocations[2][key];
+			((updateByKeyG3FunctionP<K>) mapByKeyFunc) 
+				(key, 
+				 location0.first, location0.second, 
+				 location1.first, location1.second, 
+				 location2.first, location2.second );
+		}
+	}
+}
+
 
 template <typename K>
 //template <typename U, typename T0, typename T1, typename T2>
@@ -298,7 +334,6 @@ void faster::workerFddGroup<K>::flatMapByKeyI(workerFddBase * dest, void * mapBy
 	std::cerr << "END ";
 }		
 
-
 template <typename K>
 //template <typename U, typename T0, typename T1, typename T2>
 template <typename U>
@@ -341,18 +376,22 @@ void faster::workerFddGroup<K>::_applyReduce(void * func UNUSED, fddOpType op UN
 	void * r = NULL;
 	size_t rSize = 0;
 
-	/*switch (op){
-		case OP_Reduce:
+	switch (op){
+		case OP_UpdateByKey:
+			updateByKey(func);
+			std::cerr << "Update ";
+			break;
+		/*case OP_Reduce:
 			r = reduce( ( reduceGFunctionP<T> ) func);
 			std::cerr << "Reduce ";
 			break;
 		case OP_BulkReduce:
 			r = bulkReduce( ( bulkReduceGFunctionP<T> ) func);
 			std::cerr << "BulkReduce ";
-			break;
-	}*/
+			break;*/
+	}
 
-	buffer.write(r,rSize);
+	if (op & OP_GENERICREDUCE) buffer.write(r,rSize);
 }
 template <typename K>
 void faster::workerFddGroup<K>::_preApply(void * func, fddOpType op, workerFddBase * dest){ 
@@ -587,7 +626,7 @@ void faster::workerFddGroup<K>::preapply(unsigned long int id, void * func, fddO
 	headerSize = buffer.size();
 
 	auto start = system_clock::now();
-	if (op & (OP_GENERICMAP | OP_GENERICREDUCE)){
+	if (op & (OP_GENERICMAP | OP_GENERICREDUCE | OP_GENERICUPDATE)){
 		apply(func, op, dest, buffer);
 
 		std::cerr << "         RSIZE:" << size_t(dest->getSize());

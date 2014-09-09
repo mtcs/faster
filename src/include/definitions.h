@@ -48,6 +48,9 @@ namespace faster{
 	#define OP_GENERICREDUCE	0x0200
 	#define OP_Reduce		0x0201
 	#define OP_BulkReduce		0x0202
+	#define OP_GENERICUPDATE	0x0300
+	#define OP_UpdateByKey		0x0301
+	#define OP_BulkUpdateByKey	0x0302
 	#define OP_GENERICMISC		0x0400
 	#define OP_CountByKey		0x0401
 	#define OP_GroupByKey		0x0402
@@ -188,14 +191,14 @@ namespace faster{
 	// FDD function pointer types
 	// TODO CHANGE THIS BELOW!
 	template <typename K, typename T, typename L, typename U>
-	using ImapIFunctionP = std::pair<L,U> (*) (K inKey, T & input);
+	using ImapIFunctionP = std::pair<L,U> (*) (const K & inKey, T & input);
 	template <typename K, typename T, typename U>
-	using mapIFunctionP = U (*) (K inKey, T & input);
+	using mapIFunctionP = U (*) (const K & inKey, T & input);
 	template <typename K, typename T, typename L, typename U>
 	//using IPmapIFunctionP = void (*) (L & outKey, U & output, size_t &outputSize, T & input);
-	using IPmapIFunctionP = std::tuple<L,U,size_t> (*) (K inKey, T & input);
+	using IPmapIFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, T & input);
 	template <typename K, typename T, typename U>
-	using PmapIFunctionP = std::pair<U, size_t> (*) (K inKey, T & input);
+	using PmapIFunctionP = std::pair<U, size_t> (*) (const K & inKey, T & input);
 
 	template <typename K, typename T, typename L, typename U>
 	using ImapByKeyIFunctionP = std::pair<L,U> (*) (const K & inKey, T * input, size_t size);
@@ -305,6 +308,13 @@ namespace faster{
 
 
 	// --------------- Grouped FDDs -------------//
+
+
+	template <typename K>
+	using updateByKeyG2FunctionP = void (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB);
+
+	template <typename K>
+	using updateByKeyG3FunctionP = void (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB, void * c, size_t sizeC);
 
 	/*template <typename K, typename T, typename U, typename To>
 	using mapByKeyG2FunctionP = To (*) (const K & key, T * a, size_t sizeA, U * b, size_t sizeB);

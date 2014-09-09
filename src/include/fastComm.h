@@ -249,7 +249,7 @@ namespace faster{
 		void recvReadFDDFile(unsigned long int &id, std::string & filename, size_t &size, size_t & offset);
 
 		void sendFDDInfo(size_t size);
-		void recvFDDInfo(size_t &size);
+		void recvFDDInfo(size_t &size, int & src);
 
 		void sendCollect(unsigned long int id);
 		void recvCollect(unsigned long int &id);

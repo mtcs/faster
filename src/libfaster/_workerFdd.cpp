@@ -51,15 +51,16 @@ void faster::_workerFdd<T>::map (workerFddBase * dest, ImapFunctionP<T,L,U> mapF
 	L * ok = (L*) dest->getKeys();
 	U * od = (U*) dest->getData();
 
-	//std::cerr << "START " << id << " " << s << "  ";
+	std::cerr << "START " << s << " \n ";
 
 	#pragma omp parallel for 
 	for (int i = 0; i < s; ++i){
+		std::cerr << i << " ";
 		std::pair<L,U> r = mapFunc(d[i]);
 		ok[i] = r.first;
 		od[i] = r.second;
 	}
-	//std::cerr << "END ";
+	std::cerr << "END ";
 }		
 
 template <typename T>
@@ -75,8 +76,7 @@ void faster::_workerFdd<T>::map (workerFddBase * dest, IPmapFunctionP<T,L,U> map
 
 	#pragma omp parallel for 
 	for (int i = 0; i < s; ++i){
-		std::tuple<L,U,size_t> r = mapFunc(d[i]);
-		std::tie(ok[i], od[i], ls[i]) = r;
+		std::tie(ok[i], od[i], ls[i]) = mapFunc(d[i]);
 	}
 	//std::cerr << "END ";
 }		

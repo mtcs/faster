@@ -274,17 +274,19 @@ void faster::fastComm::sendReadFDDFile(unsigned long int id, std::string filenam
 
 	buffer[dest] << id << size << offset << filename;
 
-	MPI_Isend( buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, MSG_READFDDFILE, MPI_COMM_WORLD, &req[dest]);
+	MPI_Isend( buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, MSG_READFDDFILE, MPI_COMM_WORLD, &req[dest-1]);
 }
 
 void faster::fastComm::recvReadFDDFile(unsigned long int &id, std::string & filename, size_t &size, size_t & offset){
-	size_t filenameSize;
+	//size_t filenameSize;
 
-	buffer[0].reset();
+	bufferRecv[0].reset();
 
-	MPI_Recv(buffer[0].data(), buffer[0].free(), MPI_BYTE, 0, MSG_READFDDFILE, MPI_COMM_WORLD, status);	
-	buffer[0] >> id >> size >> offset >> filenameSize;
-	buffer[0].read(filename, filenameSize);
+	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_READFDDFILE, MPI_COMM_WORLD, status);	
+	//buffer[0] >> id >> size >> offset >> filenameSize;
+	//buffer[0].read(filename, filenameSize);
+	bufferRecv[0] >> id >> size >> offset >> filename;
+	std::cerr << filename << "\n"; 
 }
 
 
@@ -292,8 +294,9 @@ void faster::fastComm::sendFDDInfo(size_t size){
 	MPI_Send( &size, sizeof(size_t), MPI_BYTE, 0, MSG_FDDINFO, MPI_COMM_WORLD);
 }
 
-void faster::fastComm::recvFDDInfo(size_t &size){
+void faster::fastComm::recvFDDInfo(size_t &size, int & src){
 	MPI_Recv(&size, sizeof(size_t), MPI_BYTE, MPI_ANY_SOURCE, MSG_FDDINFO, MPI_COMM_WORLD, status);
+	src = status[0].MPI_SOURCE;
 }
 
 

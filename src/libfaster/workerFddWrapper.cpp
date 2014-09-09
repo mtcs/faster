@@ -22,15 +22,16 @@ std::unordered_map<char, void *> faster::workerFdd::funcTable[3][7];
 
 
 void * faster::workerFdd::load(const std::string libraryName){
-	std::cerr << "[Loading " << libraryName << "]  ";
+	std::cerr << "[Loading " << libraryName ;
 	
 	void * hdlr = dlopen(libraryName.data(), RTLD_LAZY);
 	//void * hdlr = dlopen(libraryName.data(), RTLD_NOW);
 	
 	if(hdlr == NULL){
-		std::cerr << "\n\033[5m\033[91mERROR!\033[0m\033[38;5;202m"<< dlerror() << "\033[0m " << std::endl;
+		std::cerr << "\n\033[5m\033[91mERROR! \033[0m\033[38;5;202m"<< dlerror() << "\033[0m " << std::endl;
 		exit(-1);
 	}
+	std::cerr << "]  ";
 
 	return hdlr;
 }
@@ -39,7 +40,7 @@ void faster::workerFdd::loadSym(dFuncName funcName, const std::string symbolName
 	void * symbl = dlsym(dLHandler[hAssign[type]][khAssign[keyType]], symbolName.data());
 
 	if(symbl == NULL){
-		std::cerr << "\n\033[5m\033[91mERROR!\033[0m\033[38;5;202m"<< dlerror() << "\033[0m " << std::endl;
+		std::cerr << "\n\033[5m\033[91mERROR! \033[0m\033[38;5;202m"<< dlerror() << "\033[0m " << std::endl;
 		exit(-1);
 	}
 	funcTable[hAssign[type]] [khAssign[keyType]] [funcName] = symbl;
@@ -52,7 +53,7 @@ void faster::workerFdd::loadLib(){
 	if (type & POINTER){
 			dLHandler[hAssign[type]][0] = load("libfaster/libfasterWorkerPFdd.so");
 	}else{
-		if (type & VECTOR)
+		if (type & (VECTOR | String))
 			dLHandler[hAssign[type]][0] = load("libfaster/libfasterWorkerCFdd.so");
 		else
 			dLHandler[hAssign[type]][0] = load("libfaster/libfasterWorkerSFdd.so");
@@ -103,6 +104,7 @@ void faster::workerFdd::loadSymbols(){
 	if (funcTable[hAssign[type]] [khAssign[keyType]] .size() != 0)
 		return;
 	std::cerr << "[Locating Symbols (" << hAssign[type] << "," << khAssign[keyType] << ") ";
+	std::cerr.flush();
 	loadSym(NewWorkerSDL	, "newWorkerSDL");
 	loadSym(DestroyWorkerDL	, "destroyWorkerDL");
                                       

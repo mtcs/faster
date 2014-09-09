@@ -53,6 +53,8 @@ namespace faster{
 			template <typename L, typename U>
 			void flatMapByKeyI(workerFddBase * dest, void * mapByKeyFunc);
 
+			void updateByKey(void * mapByKeyFunc);
+
 			void exchangeDataByKey(fastComm *comm UNUSED, void * keyMap UNUSED){};
 			void coGroup(fastComm *comm);
 

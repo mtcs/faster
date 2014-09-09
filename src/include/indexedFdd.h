@@ -46,20 +46,24 @@ namespace faster{
 			}
 
 			// Create a empty fdd with a pre allocated size
-			iFddCore(fastContext &c, size_t s) {
+			iFddCore(fastContext &c, size_t s, const std::vector<size_t> & dataAlloc) {
 				_kType = decodeType(typeid(K).hash_code());
 				groupedByKey = false;
 				context = &c;
 				this->size = s;
+				this->dataAlloc = dataAlloc;
 			}
 
 			~iFddCore(){}
 
-			std::unordered_map<T, int> calculateKeyMap(std::unordered_map<T, std::tuple<size_t, int, size_t>> count);
+			std::unordered_map<K, int> calculateKeyMap(std::unordered_map<K, std::tuple<size_t, int, size_t>> count);
 
 			// -------------- Core FDD Functions --------------- //
+			fddBase * _map( void * funcP, fddOpType op, fddBase * newFdd);
+			template <typename U> 
+			fdd<U> * map( void * funcP, fddOpType op);
 			template <typename L, typename U> 
-			indexedFdd<L,U> * map( void * funcP, fddOpType op);
+			indexedFdd<L,U> * mapI( void * funcP, fddOpType op);
 
 		public:
 			//template<typename... FddTypes, typename... Args> 
@@ -69,14 +73,14 @@ namespace faster{
 			template<typename U> 
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1){
 				std::cerr << "  Cogroup\n";
-				groupByKey();
+				this->groupByKey();
 				return new groupedFdd<K>(context, this, fdd1, keyMap);
 			}
 
 			template<typename U, typename V> 
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1, iFddCore<K,V> * fdd2){
 				std::cerr << "  Cogroup\n";
-				groupByKey();
+				this->groupByKey();
 				return new groupedFdd<K>(context, this, fdd1, fdd2, keyMap);
 			}
 
@@ -105,10 +109,11 @@ namespace faster{
 			}
 
 			// Create a empty fdd with a pre allocated size
-			indexedFdd(fastContext &c, size_t s) : iFddCore<K,T>(c, s){ 
+			indexedFdd(fastContext &c, size_t s, const std::vector<size_t> & dataAlloc) : iFddCore<K,T>(c, s, dataAlloc){ 
 				this->_tType = decodeType(typeid(T).hash_code());
-				this->id = c.createIFDD(this, typeid(K).hash_code(), typeid(T).hash_code(), s);
+				this->id = c.createIFDD(this, typeid(K).hash_code(), typeid(T).hash_code(), dataAlloc);
 			}
+			indexedFdd(fastContext &c, size_t s) : iFddCore<K,T>(c, s, c.getAllocation(s)) { }
 
 			// Create a fdd from a array in memory
 			indexedFdd(fastContext &c, K * keys, T * data, size_t size) : indexedFdd(c, size){
@@ -124,11 +129,11 @@ namespace faster{
 			// Map
 			template <typename L, typename U> 
 			indexedFdd<L,U> * map( ImapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template map<L,U>((void*) funcP, OP_Map);
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_Map);
 			}
 			template <typename L, typename U> 
 			indexedFdd<L,U> * map( IPmapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template map<L,U>((void*) funcP, OP_Map);
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_Map);
 			}
 			template <typename L, typename U> 
 			fdd<U> * map( mapIFunctionP<K,T,U> funcP ){
@@ -142,11 +147,11 @@ namespace faster{
 			// MapByKey
 			template <typename L, typename U> 
 			indexedFdd<L,U> * mapByKey( ImapByKeyIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template map<L,U>((void*) funcP, OP_MapByKey);
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_MapByKey);
 			}
 			template <typename L, typename U> 
 			indexedFdd<L,U> * mapByKey( IPmapByKeyIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template map<L,U>((void*) funcP, OP_MapByKey);
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_MapByKey);
 			}
 			template <typename L, typename U> 
 			fdd<U> * mapByKey( mapByKeyIFunctionP<K,T,U> funcP ){
@@ -161,11 +166,11 @@ namespace faster{
 			// BulkMap
 			template <typename L, typename U> 
 			indexedFdd<L,U> * bulkMap( IbulkMapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template map<L,U>((void*) funcP, OP_BulkMap);
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_BulkMap);
 			}
 			template <typename L, typename U> 
 			indexedFdd<L,U> * bulkMap( IPbulkMapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template map<L,U>((void*) funcP, OP_BulkMap);
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_BulkMap);
 			}
 			template <typename L, typename U> 
 			fdd<U> * bulkMap( bulkMapIFunctionP<K,T,U> funcP ){
@@ -180,11 +185,11 @@ namespace faster{
 			// FlatMap
 			template <typename L, typename U> 
 			indexedFdd<L,U> * flatMap( IflatMapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template map<L,U>((void*) funcP, OP_FlatMap);
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_FlatMap);
 			}
 			template <typename L, typename U> 
 			indexedFdd<L,U> * flatMap( IPflatMapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template map<L,U>((void*) funcP, OP_FlatMap);
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_FlatMap);
 			}
 			template <typename L, typename U> 
 			fdd<U> * flatMap( flatMapIFunctionP<K,T,U> funcP ){
@@ -198,11 +203,11 @@ namespace faster{
 
 			template <typename L, typename U> 
 			indexedFdd<L,U> * bulkFlatMap( IbulkFlatMapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template map<L,U>((void*) funcP, OP_BulkFlatMap);
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_BulkFlatMap);
 			}
 			template <typename L, typename U> 
 			indexedFdd<L,U> * bulkFlatMap( IPbulkFlatMapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template map<L,U>((void*) funcP, OP_BulkFlatMap);
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_BulkFlatMap);
 			}
 			template <typename L, typename U> 
 			fdd<U> * bulkFlatMap( bulkFlatMapIFunctionP<K,T,U> funcP ){
@@ -252,9 +257,11 @@ namespace faster{
 			}
 
 			// Create a empty fdd with a pre allocated size
-			indexedFdd(fastContext &c, size_t s) : iFddCore<K,T *>(c, s){ 
+			indexedFdd(fastContext &c, size_t s, const std::vector<size_t> & dataAlloc) : iFddCore<K,T *>(c, s, dataAlloc){ 
 				this->_tType = POINTER | decodeType(typeid(T).hash_code());
 				this->id = c.createIPFDD(this, typeid(K).hash_code(), typeid(T).hash_code(), s);
+			}
+			indexedFdd(fastContext &c, size_t s) : iFddCore<K,T *>(c, s, c.getAllocation(s)) {
 			}
 
 			// Create a fdd from a array in memory
@@ -386,19 +393,12 @@ namespace faster{
 
 
 	template <typename K, typename T> 
-	template <typename L, typename U> 
-	indexedFdd<L,U> * iFddCore<K,T>::map( void * funcP, fddOpType op){
+	fddBase * iFddCore<K,T>::_map( void * funcP, fddOpType op, fddBase * newFdd){
 		std::cerr << "  Map\n";
-		indexedFdd<L,U> * newFdd;
 		size_t result;
 		size_t rSize;
 		unsigned long int tid, sid;
 
-		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
-			newFdd = new indexedFdd<L,U>(*context);
-		}else{
-			newFdd = new indexedFdd<L,U>(*context, size);
-		}
 		unsigned long int newFddId = newFdd->getId();
 
 		// Decode function pointer
@@ -408,16 +408,43 @@ namespace faster{
 		context->enqueueTask(op, id, newFddId, funcId, this->size);
 
 		// Receive results
-		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
-			newFdd->size = 0;
+		size_t newSize = 0;
 		for (int i = 1; i < context->numProcs(); ++i){
 			result = * (size_t*) context->recvTaskResult(tid, sid, rSize);
-			if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
-				newFdd->size += result;
+			newSize += result;
 		}
+		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) ) 
+			newFdd->setSize(newSize);
 
 		std::cerr << "  Done\n";
 		return newFdd;
+	}
+	template <typename K, typename T> 
+	template <typename L, typename U> 
+	indexedFdd<L,U> * iFddCore<K,T>::mapI( void * funcP, fddOpType op){
+		indexedFdd<L,U> * newFdd;
+		
+		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
+			newFdd = new indexedFdd<L,U>(*context);
+		}else{
+			newFdd = new indexedFdd<L,U>(*context, size, dataAlloc);
+		}
+		
+		return (indexedFdd<L,U> *) _map(funcP, op, newFdd);
+	}
+
+	template <typename K, typename T> 
+	template <typename U> 
+	fdd<U> * iFddCore<K,T>::map( void * funcP, fddOpType op){
+		fdd<U> * newFdd;
+
+		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
+			newFdd = new fdd<U>(*context);
+		}else{
+			newFdd = new fdd<U>(*context, size, dataAlloc);
+		}
+		
+		return (fdd<U> *) _map(funcP, op, newFdd);
 	}
 
 	template <typename K, typename T> 
@@ -456,14 +483,14 @@ namespace faster{
 	}
 
 	template <typename K, typename T> 
-	std::unordered_map<T, int> iFddCore<K,T>::calculateKeyMap(std::unordered_map<T, std::tuple<size_t, int, size_t>> count){ 
+	std::unordered_map<K, int> iFddCore<K,T>::calculateKeyMap(std::unordered_map<K, std::tuple<size_t, int, size_t>> count){ 
 		size_t size = this->size;
-		std::unordered_map<T, int> keyMap;
+		std::unordered_map<K, int> kMap;
 		size_t numProcs = context->numProcs();
 		std::vector<size_t> keyAlloc(numProcs,0);
 		std::vector<size_t> procBudget = context->getAllocation(size);
 
-		keyMap.reserve(count.size());
+		kMap.reserve(count.size());
 
 		//std::cerr << "      [ Budget: ";
 		//for ( int i = 1; i < numProcs; ++i)
@@ -471,26 +498,26 @@ namespace faster{
 		//std::cerr << "= " << size << "\n";
 
 		for (auto it = count.begin(); it != count.end(); it++){
-			T key = it->first;
+			K key = it->first;
 			size_t kCount = std::get<0>(it->second);
 			int preffered = std::get<1>(it->second);
 
 			if(keyAlloc[preffered] < procBudget[preffered]){
-				keyMap[key] = preffered;
+				kMap[key] = preffered;
 				keyAlloc [preffered] += kCount;
 				count.erase(key);
 			}
 		}
 
 		for (auto it = count.begin(); it != count.end(); it++){
-			T key = it->first;
+			K key = it->first;
 			size_t kCount = std::get<0>(it->second);
 			int preffered = 1 + rand() % (numProcs - 1);
 
 			while(keyAlloc[preffered] >= procBudget[preffered]){
 				preffered = 1 + rand() % (numProcs - 1);
 			}
-			keyMap[key] = preffered;
+			kMap[key] = preffered;
 			keyAlloc [preffered] += kCount;
 		}
 		std::cerr << "      [ Alloc: ";
@@ -504,7 +531,7 @@ namespace faster{
 		//std::cerr << "\n";
 
 		
-		return keyMap;
+		return kMap;
 	}
 
 	template <typename K, typename T> 

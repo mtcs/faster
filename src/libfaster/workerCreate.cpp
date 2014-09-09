@@ -57,8 +57,9 @@ void faster::worker::readFDDFile(unsigned long int id, std::string &filename, si
 		inFile.seekg(offset-1, inFile.beg);
 		c = inFile.get();
 		// If the other process doesn't have this line, get it!
+		std::getline( inFile, line ); 
 		if ( c == '\n' ) {
-			std::getline( inFile, line ); 
+			//std::cerr << "(" << line << ")\n";
 			newFdd->insert(0, &line, 0);
 		}
 	}
@@ -66,6 +67,8 @@ void faster::worker::readFDDFile(unsigned long int id, std::string &filename, si
 	// Start reading lines
 	while( size_t(inFile.tellg()) < (offset + size) ){
 		std::getline( inFile, line ); 
+
+		//std::cerr << "[" << line << "]\n";
 
 		newFdd->insert(0, &line, 0);
 	}

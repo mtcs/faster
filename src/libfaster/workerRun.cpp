@@ -101,7 +101,7 @@ void faster::worker::run(){
 			case MSG_READFDDFILE:
 				std::cerr << "    R:ReadFddFile " ;
 				comm->recvReadFDDFile(id, name, size, offset);
-				std::cerr << "ID:" << id <<" F:" << name<< "(offset:" << offset << ")";
+				std::cerr << "ID:" << id <<" F:" << name << "(offset:" << offset << ")";
 				readFDDFile(id, name, size, offset);
 				std::cerr << ".\n";
 				break;

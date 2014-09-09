@@ -8,6 +8,7 @@ set (faster_VERSION_MINOR 1)
 add_definitions(-O0)
 add_definitions(-ggdb)
 add_definitions(-g3)
+#add_definitions(-fomit-frame-pointer)
 #add_definitions(-pg)
 
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
