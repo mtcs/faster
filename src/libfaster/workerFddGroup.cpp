@@ -25,49 +25,49 @@ std::unordered_map<K, std::pair<void*, size_t>> findKeyInterval(std::vector<K> &
 	K * lastKey = &keys[0];
 	int baseSize = wfdd->baseSize();
 
-	std::cerr << "    findKeyInterval " << fddSize << "\n";
+	//std::cerr << "    findKeyInterval " << fddSize << "\n";
 
 	keyLocations.reserve(ukeys.size());
 	keyLocations[ukeys[pos]] = std::make_pair( &data[0], 1 );
 	kCount = 1;
 
-	for ( int i = 0; i < ukeys.size(); ++i){
-		std::cerr << ukeys[i] << " ";
-	}
-	std::cerr << "\n";
+	//for ( int i = 0; i < ukeys.size(); ++i){
+		//std::cerr << ukeys[i] << " ";
+	//}
+	//std::cerr << "\n";
 
 	if(ukeys.size() == 1) 
 		return keyLocations;
 	
 
-	std::cerr << "0 \033[0;31m0\033[0m";
-	std::cerr << keys[0] << " ";
+	//std::cerr << "0 \033[0;31m0\033[0m";
+	//std::cerr << keys[0] << " ";
 	for ( size_t i = 1; i < fddSize; ++i){
 		if (*lastKey == keys[i]){
 			kCount++;
 		}else{
-			std::cerr << "(" << kCount << ") ";
+			//std::cerr << "(" << kCount << ") ";
 			keyLocations[ukeys[pos]].second = kCount;
 			// Find next key
 			while(ukeys[pos] != keys[i]){
 				if (pos < ukeys.size()){
 					//TODO INSERT NOT PRESENT ITENS...
-					std::cerr << "(S" << ukeys[pos]<< ") ";
+					//std::cerr << "(S" << ukeys[pos]<< ") ";
 					pos ++;
 				}else
 					return keyLocations;
 			}
-			std::cerr << "(I" << ukeys[pos]<< ") ";
+			//std::cerr << "(I" << ukeys[pos]<< ") ";
 			keyLocations[ukeys[pos]] = std::make_pair(&data[baseSize*i], 1);
 			kCount = 1;
 			lastKey = &keys[i];
 		}
-		std::cerr << i << " \033[0;31m" << keys[i] << "\033[0m ";
+		//std::cerr << i << " \033[0;31m" << keys[i] << "\033[0m ";
 	}
-	std::cerr << "(" << kCount << ") \n";
+	//std::cerr << "(" << kCount << ") \n";
 	keyLocations[ukeys[pos]].second = kCount;
-	std::cerr << "(" << ukeys[pos] << "=" << kCount << ")\n";
-	std::cerr << "    DONE\n";
+	//std::cerr << "(" << ukeys[pos] << "=" << kCount << ")\n";
+	//std::cerr << "    DONE\n";
 
 	return keyLocations;
 }
@@ -290,15 +290,15 @@ void faster::workerFddGroup<K>::flatMapByKeyI(workerFddBase * dest, void * mapBy
 
 	for (int i = 0; i < members.size(); ++i){
 		keyLocations[i] = findKeyInterval(uKeys, members[i]);
-		for ( auto it = keyLocations[i].begin(); it != keyLocations[i].end(); it++)
-			std::cerr << it->first << "-" << it->second.second << " ";
+		//for ( auto it = keyLocations[i].begin(); it != keyLocations[i].end(); it++)
+			//std::cerr << it->first << "-" << it->second.second << " ";
 		//std::cerr << "\n    \033[0;34m" << i << " " << "\033[0m - ";
 		//for (int j = 0; j < members[i]->getSize(); ++j){
 			//std::cerr  << ((K*)members[i]->getKeys())[j] << ":" << ((int*) members[i]->getData())[j] << " ";
 		//}
-		std::cerr << "\n";
+		//std::cerr << "\n";
 	}
-		std::cerr << "\n";
+	//std::cerr << "\n";
 
 	if ( members.size() <3 ){  
 		//#pragma omp parallel 
@@ -349,7 +349,7 @@ void faster::workerFddGroup<K>::flatMapByKeyI(workerFddBase * dest, void * mapBy
 
 	}
 	dest->insertl(&resultList);
-	std::cerr << "END ";
+	//std::cerr << "END ";
 }		
 
 template <typename K>
@@ -360,12 +360,12 @@ void faster::workerFddGroup<K>::_apply(void * func, fddOpType op, workerFddBase 
 		case OP_MapByKey:
 			//mapByKey<U, T0, T1, T2>(dest, func);
 			mapByKey<U>(dest, func);
-			std::cerr << "MapByKey ";
+			//std::cerr << "MapByKey ";
 			break;
 		case OP_FlatMapByKey:
 			//mapByKey<U, T0, T1, T2>(dest, func);
 			flatMapByKey<U>(dest, func);
-			std::cerr << "MapByKey ";
+			//std::cerr << "MapByKey ";
 			break;
 	}
 }
@@ -378,12 +378,12 @@ void faster::workerFddGroup<K>::_applyI(void * func, fddOpType op, workerFddBase
 		case OP_MapByKey:
 			//mapByKeyI<L,U, T0, T1, T2>(dest, func);
 			mapByKeyI<L,U>(dest, func);
-			std::cerr << "MapByKeyI ";
+			//std::cerr << "MapByKeyI ";
 			break;
 		case OP_FlatMapByKey:
 			//mapByKeyI<L,U, T0, T1, T2>(dest, func);
 			flatMapByKeyI<L,U>(dest, func);
-			std::cerr << "MapByKeyI ";
+			//std::cerr << "MapByKeyI ";
 			break;
 	}
 }
@@ -397,7 +397,7 @@ void faster::workerFddGroup<K>::_applyReduce(void * func UNUSED, fddOpType op UN
 	switch (op){
 		case OP_UpdateByKey:
 			updateByKey(func);
-			std::cerr << "Update ";
+			//std::cerr << "Update ";
 			break;
 		/*case OP_Reduce:
 			r = reduce( ( reduceGFunctionP<T> ) func);
@@ -593,22 +593,22 @@ inline void faster::workerFddGroup<K>::apply(void * func, fddOpType op, workerFd
 
 template <typename K>
 void faster::workerFddGroup<K>::cogroup(fastComm *comm){
-	std::cerr << "\n    Cogroup\n";
+	//std::cerr << "\n    Cogroup\n";
 	unsigned long tid = 0;
 
-	std::cerr << "      RecvKeyMap\n";
+	//std::cerr << "      RecvKeyMap\n";
 	comm->recvKeyMap(tid, keyMap);
 
 	uKeys.reserve(keyMap.size());
 
-	std::cerr << "        My Keys: ";
+	//std::cerr << "        My Keys: ";
 	for( auto it = keyMap.begin(); it != keyMap.end(); it++ ){
 		if ( it->second == comm->getProcId() ){
 			uKeys.insert(uKeys.end(), it->first);
-			std::cerr << it->first << " ";
+			//std::cerr << it->first << " ";
 		}
 	}
-	std::cerr << "\n";
+	//std::cerr << "\n";
 
 	uKeys.shrink_to_fit();
 
@@ -617,7 +617,7 @@ void faster::workerFddGroup<K>::cogroup(fastComm *comm){
 	for ( int i = 1; i < members.size(); ++i){
 		members[i]->exchangeDataByKey(comm, &keyMap);
 	}
-	std::cerr << "    Done\n";
+	//std::cerr << "    Done\n";
 }
 
 template <typename K>
@@ -647,7 +647,7 @@ void faster::workerFddGroup<K>::preapply(unsigned long int id, void * func, fddO
 	if (op & (OP_GENERICMAP | OP_GENERICREDUCE | OP_GENERICUPDATE)){
 		apply(func, op, dest, buffer);
 
-		std::cerr << "         RSIZE:" << size_t(dest->getSize());
+		//std::cerr << "         RSIZE:" << size_t(dest->getSize());
 		buffer << size_t(dest->getSize());
 	}else{
 		if (op == OP_CoGroup){
@@ -657,13 +657,13 @@ void faster::workerFddGroup<K>::preapply(unsigned long int id, void * func, fddO
 	auto end = system_clock::now();
 
 	auto duration = duration_cast<milliseconds>(end - start);
-	std::cerr << "      ET:" << duration.count() << "\n";
+	std::cerr << "      ET:" << duration.count();
 
 	buffer.writePos(duration.count(), durationP);
 	buffer.writePos(buffer.size() - headerSize, rSizeP);
 
 	comm->sendTaskResult();
-	std::cerr << "      DONE\n";
+	//std::cerr << "      DONE\n";
 }
 
 

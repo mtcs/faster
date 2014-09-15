@@ -68,7 +68,7 @@ void faster::worker::readFDDFile(unsigned long int id, std::string &filename, si
 	while( size_t(inFile.tellg()) < (offset + size) ){
 		std::getline( inFile, line ); 
 
-		std::cerr << line << "\n";
+		//std::cerr << line << "\n";
 		//std::cerr << "[" << line << "]\n";
 
 		newFdd->insert(0, &line, 0);

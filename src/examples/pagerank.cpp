@@ -13,7 +13,7 @@ pair<int,vector<int>> toAList(string & input){
 	long int lastPos = -1;
 	list<pair<size_t,size_t>> pos;
 
-	cerr << input << '\n';
+	//cerr << input << '\n';
 
 
 	for ( size_t i = 0; i < input.size(); ++i ){
@@ -52,6 +52,9 @@ pair<int, double> createPR(const int & key, vector<int> & s){
 
 //list<pair<int, double>> givePageRank(const int & key, vector<int> * s, size_t nn, double * pr, size_t npr){
 list<pair<int, double>> givePageRank(const int & key, void * sP, size_t nn, void * prP, size_t npr){
+	if (nn == 0){
+		std::cerr << "[" << key << "]";
+	}
 	auto s = * (vector<int>*) sP;
 	auto pr = * (double*) prP;
 	list<pair<int,double>> msgList;
@@ -120,7 +123,7 @@ int main(int argc, char ** argv){
 	cout << "Sorting" << '\n';
 	sort(result.begin(), result.end(), [](const pair<int,double> a, const pair<int,double> b){ return a.first < b.first; });
 
-	cout << "DONE! S:" << result.size() << '\n';
+	cout << "Done in "<< i << " iterations! S:" << result.size() << '\n';
 	for ( auto it = result.begin(); it != result.end(); it++){
 		std::cout << it->first << " " << it->second << "\n";
 	}
