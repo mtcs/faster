@@ -333,7 +333,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 		buffer[i].advance( sizeof(size_t) );
 	}
 
-	//std::cerr << "        [ Del: \033[0;31m";
+	std::cerr << "        [ Del: \033[0;31m";
 	// Insert Data that dont belong to me in the message
 	for (int i = 0; i < size; ++i){
 		K key = keys[i];
@@ -345,10 +345,10 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 		dataSize[owner]++;
 		deleted[i] = true;
 		//std::cerr << i << ":" << key << ">" << owner << "  ";
-		//std::cerr << i << " ";
 		//std::cerr << i << ":" << (size_t) data[i] << " ";
+		std::cerr << key << " ";
 	}
-	//std::cerr << "\033[0m- ";
+	std::cerr << "\033[0m- ";
 
 	// Include the data size in the message header
 	for (int i = 1; i < (comm->getNumProcs()); ++i){
@@ -356,15 +356,15 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 			continue;
 		buffer[i].writePos(dataSize[i], 0);
 		comm->sendGroupByKeyData(i);
-		//std::cerr << dataSize[i] << ">" << i << "  ";
+		std::cerr << dataSize[i] << ">" << i << "  ";
 	}
-	//std::cerr << " ) \n";
+	std::cerr << " ) \n";
 
 	std::cerr << "      Recv data In-place\n";
 	// Recv all keys I own in-place
 	pos = 0;
 	for (int i = 1; i < (comm->getNumProcs() - 1); ++i){
-		//std::cerr << "        [ Insert:";
+		std::cerr << "        [ Insert:";
 		int rSize;
 		size_t numItems;
 		fastCommBuffer rb(0);
@@ -372,7 +372,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 		rb.setBuffer(rData, rSize);
 
 		rb >> numItems;
-		//std::cerr << "\033[0;32m"<< numItems << "\033[0m - ";
+		std::cerr << "\033[0;32m"<< numItems << "\033[0m - ";
 
 		for (size_t i = 0; i < numItems; ++i){
 			// Find a empty space in the local data
@@ -386,31 +386,33 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 				//std::cerr << "( GROW: "<< localData->getSize() << " ) ";
 			}
 			rb >> keys[pos] >> data[pos];
+			std::cerr << keys[pos] << " ";
 			//std::cerr << pos << ":" << keys[pos] << " ";
 			//std::cerr << keys[pos] << ":" << data[pos] << " ";
 			pos++;
 		}
-		//std::cerr << " ]\n";
+		std::cerr << " ]\n";
 	}
 
 	// If there are elements that are still sparse in the memory
 	if( pos < size ){
-		std::cerr << "        Shrink\n";
-		//std::cerr << "        [ Shrink:";
+		//std::cerr << "        Shrink\n";
+		std::cerr << "        [ Shrink:";
 		// Bring them forward and correct size
 		for (size_t i = (pos); i < size; ++i){
 			// Found sparse a item
-			//std::cerr << " " << i;
-			if ( ( ! deleted[i] ) && (i > pos) ){
-				keys[pos] = keys[i];
-				data[pos] = data[i];
+			std::cerr << " " << i;
+			if ( ! deleted[i] ) {
+				if (i > pos) {
+					keys[pos] = keys[i];
+					data[pos] = data[i];
+				}
+				std::cerr << ">" << pos;
 				pos++;
 			}
-			//if ( ! deleted[i] ) 
-				//std::cerr << ">" << pos;
 		}
 		localData->setSize(pos);
-		//std::cerr << " ]\n" ;
+		std::cerr << " ]\n" ;
 	}
 	std::cerr << "        (new size: " << localData->getSize() << ")\n";
 	

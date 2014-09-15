@@ -56,7 +56,7 @@ namespace faster{
 			void updateByKey(void * mapByKeyFunc);
 
 			void exchangeDataByKey(fastComm *comm UNUSED, void * keyMap UNUSED){};
-			void coGroup(fastComm *comm);
+			void cogroup(fastComm *comm);
 
 		public:
 			workerFddGroup(unsigned long int id, fddType keyT, std::vector<workerFddBase*> & members);

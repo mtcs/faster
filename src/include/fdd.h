@@ -25,7 +25,9 @@ namespace faster{
 
 			// -------------- Core FDD Functions --------------- //
 
-			fddCore() {}
+			fddCore() {
+				cached = false;
+			}
 
 			fddCore(fastContext & c);
 
@@ -38,6 +40,14 @@ namespace faster{
 			indexedFdd<L,U> * mapI( void * funcP, fddOpType op);
 			template <typename U> 
 			fdd<U> * map( void * funcP, fddOpType op);
+
+		public:
+
+			void discard(){
+				context->discardFDD(id);
+			}
+			void setKeyMap(void * keyMap UNUSED) {}
+			void setGroupedByKey(bool gbk UNUSED) {}
 	};
 
 	// Driver side FDD
@@ -171,6 +181,10 @@ namespace faster{
 			/*void * _collect( ) override{
 				return fddCore<T>::context->collectFDD(this);
 			}*/
+			fdd<T> * cache(){
+				this->cached = true;
+				return this;
+			}
 
 	};
 
@@ -295,11 +309,16 @@ namespace faster{
 			/*void * _collect( ) override{
 				return fddCore<T>::context->collectFDD(this);
 			}*/
+			fdd<T*> * cache(){
+				this->cached = true;
+				return this;
+			}
 
 	};
 
 	template <typename T>
 	fddCore<T>::fddCore(fastContext & c){
+		cached = false;
 		context = &c;
 	}
 
@@ -334,8 +353,11 @@ namespace faster{
 		}
 		if ( (op & 0xff) & (OP_FlatMap) ) 
 			newFdd->setSize(newSize);
-		std::cerr << "  Done\n";
 
+		if (!cached)
+			this->discard();
+
+		std::cerr << "  Done\n";
 		return newFdd;
 	}
 

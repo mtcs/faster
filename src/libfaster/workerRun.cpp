@@ -55,11 +55,11 @@ void faster::worker::run(){
 				std::cerr << ".\n";
 				break;
 
-			case MSG_DESTROYFDD:
+			case MSG_DISCARDFDD:
 				std::cerr << "    R:DestroyFdd ";
-				comm->recvDestroyFDD(id);
+				comm->recvDiscardFDD(id);
 				std::cerr << "ID:" << id << " ";
-				destroyFDD(id);
+				discardFDD(id);
 				std::cerr << ".\n";
 				break;
 

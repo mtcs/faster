@@ -36,12 +36,14 @@ namespace faster{
 			iFddCore() {
 				_kType = decodeType(typeid(K).hash_code());
 				groupedByKey = false;
+				cached = false;
 			}
 			
 			// Create a empty fdd
 			iFddCore(fastContext &c) {
 				_kType = decodeType(typeid(K).hash_code());
 				groupedByKey = false;
+				cached = false;
 				context = &c;
 			}
 
@@ -49,6 +51,7 @@ namespace faster{
 			iFddCore(fastContext &c, size_t s, const std::vector<size_t> & dataAlloc) {
 				_kType = decodeType(typeid(K).hash_code());
 				groupedByKey = false;
+				cached = false;
 				context = &c;
 				this->size = s;
 				this->dataAlloc = dataAlloc;
@@ -88,6 +91,16 @@ namespace faster{
 
 			indexedFdd<K,T> * groupByKey();
 
+			void discard(){
+				context->discardFDD(id);
+			}
+
+			void setKeyMap(void * keyMap) {
+				this->keyMap = * ( std::unordered_map<K, int> * ) keyMap;
+			}
+			void setGroupedByKey(bool gbk) {
+				groupedByKey = gbk;
+			}
 
 	};
 
@@ -239,6 +252,11 @@ namespace faster{
 				this->context->collectFDD(data, this);
 				return data;
 			}
+
+			indexedFdd<K,T> * cache(){
+				this->cached = true;
+				return this;
+			}
 	};
 
 	template <typename K, typename T> 
@@ -388,6 +406,11 @@ namespace faster{
 				this->context->collectFDD(data, this);
 				return data;
 			}
+			
+			indexedFdd<K,T*> * cache(){
+				this->cached = true;
+				return this;
+			}
 
 	};
 
@@ -415,6 +438,9 @@ namespace faster{
 		}
 		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) ) 
 			newFdd->setSize(newSize);
+
+		if (!cached)
+			this->discard();
 
 		std::cerr << "  Done\n";
 		return newFdd;

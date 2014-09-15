@@ -244,8 +244,8 @@ std::vector<size_t> faster::fastContext::getAllocation(size_t size){
 	return scheduler->getAllocation(size);
 }
 
-void faster::fastContext::destroyFDD(unsigned long int id){
-	comm->sendDestroyFDD(id);
+void faster::fastContext::discardFDD(unsigned long int id){
+	comm->sendDiscardFDD(id);
 }
 
 

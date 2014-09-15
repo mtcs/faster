@@ -12,13 +12,14 @@ faster::worker::worker(fastComm * c, void ** ft){
 	funcTable = ft;
 	comm = c;
 	finished = false;
+	fddList.reserve(50);
 }
 
 faster::worker::~worker(){
 }
 
 
-void faster::worker::destroyFDD(unsigned long int id){
+void faster::worker::discardFDD(unsigned long int id){
 	delete fddList[id];
 	fddList[id] = NULL;
 }

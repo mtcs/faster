@@ -2,7 +2,7 @@
 #include "workerFddBase.h"
 #include "workerFddModule.h"
 
-void faster::destroyWorkerDL(faster::workerFddBase * fdd){
+void faster::discardWorkerDL(faster::workerFddBase * fdd){
 	delete fdd;
 }
 

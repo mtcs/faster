@@ -208,7 +208,7 @@ namespace faster{
 
 			std::vector<size_t> getAllocation(size_t size);
 
-			void destroyFDD(unsigned long int id);
+			void discardFDD(unsigned long int id);
 
 	};
 

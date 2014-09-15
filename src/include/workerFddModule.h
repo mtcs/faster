@@ -7,7 +7,7 @@ namespace faster{
 	// C-stile Dynamic loaded functions
 	extern "C"{
 		workerFddBase * newWorkerSDL(unsigned long int id, fddType type, size_t size);
-		void destroyWorkerDL(workerFddBase * fdd);
+		void discardWorkerDL(workerFddBase * fdd);
 
 		fddType getTypeDL(workerFddBase * fdd);
 		fddType getKeyTypeDL(workerFddBase * fdd);

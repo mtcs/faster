@@ -23,7 +23,7 @@ namespace faster{
 	#define MSG_CREATEFDD 		0x0002
 	#define MSG_CREATEIFDD 		0x0003
 	#define MSG_CREATEIFDD 		0x0004
-	#define MSG_DESTROYFDD 		0x0005
+	#define MSG_DISCARDFDD 		0x0005
 	#define MSG_FDDSETDATAID 	0x0006
 	#define MSG_FDDSETDATA 		0x0007
 	#define MSG_FDDSET2DDATAID 	0x0008
@@ -58,7 +58,7 @@ namespace faster{
 		MSG_CREATEFDD 	,
 		MSG_CREATEIFDD 	,
 		MSG_CREATEGFDD 	,
-		MSG_DESTROYFDD 	,
+		MSG_DISCARDFDD 	,
 		MSG_FDDSETDATAID ,
 		MSG_FDDSETDATA 	,
 		MSG_FDDSET2DDATAID ,
@@ -187,8 +187,8 @@ namespace faster{
 		void sendCreateFDDGroup(unsigned long int id, fddType keyType, std::vector<unsigned long int> & members);
 		void recvCreateFDDGroup(unsigned long int & id, fddType & keyType, std::vector<unsigned long int> & members);
 
-		void sendDestroyFDD(unsigned long int id);
-		void recvDestroyFDD(unsigned long int &id);
+		void sendDiscardFDD(unsigned long int id);
+		void recvDiscardFDD(unsigned long int &id);
 
 		// Set Data
 		template <typename T>

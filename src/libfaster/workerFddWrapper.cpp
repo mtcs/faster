@@ -106,7 +106,7 @@ void faster::workerFdd::loadSymbols(){
 	std::cerr << "[Locating Symbols (" << hAssign[type] << "," << khAssign[keyType] << ") ";
 	std::cerr.flush();
 	loadSym(NewWorkerSDL	, "newWorkerSDL");
-	loadSym(DestroyWorkerDL	, "destroyWorkerDL");
+	loadSym(DiscardWorkerDL	, "discardWorkerDL");
                                       
 	loadSym(GetTypeDL	, "getTypeDL");
 	loadSym(GetKeyTypeDL	, "getKeyTypeDL");
@@ -175,7 +175,7 @@ faster::workerFdd::workerFdd(unsigned long int id, fddType kt, fddType t) : work
 
 
 faster::workerFdd::~workerFdd(){
-	void * funcP =  funcTable[hAssign[type]] [khAssign[keyType]] [DestroyWorkerDL];
+	void * funcP =  funcTable[hAssign[type]] [khAssign[keyType]] [DiscardWorkerDL];
 	((void (*) (workerFddBase *)) funcP)(_fdd);
 }
 

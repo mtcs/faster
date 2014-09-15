@@ -138,6 +138,14 @@ namespace faster{
 				return (fdd<To> *) map<To>((void*) funcP, OP_FlatMapByKey);
 			}
 
+			void discard(){
+				for ( int i = 0; i < members.size(); ++i){
+					members[i]->discard();
+				}
+			}
+			void setKeyMap(void * keyMap UNUSED) {}
+			void setGroupedByKey(bool gbk UNUSED) {}
+		
 	};
 
 	template <typename K>
@@ -164,6 +172,12 @@ namespace faster{
 		}
 		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
 			newFdd->setSize(fddSize);
+
+		for ( int i = 0; i < members.size(); ++i){
+			if (!members[i]->isCached()){
+				members[i]->discard();
+			}
+		}
 
 		std::cerr << "  Done\n";
 		return newFdd;
@@ -216,10 +230,16 @@ namespace faster{
 
 		context->sendKeyMap(tid, keyMap);
 
+		for (size_t i = 1; i < members.size(); ++i){
+			members[i]->setKeyMap(&keyMap);
+			members[i]->setGroupedByKey(true);
+		}
+
 		for (size_t i = 1; i < context->numProcs(); ++i){
 			result = context->recvTaskResult(tid, sid, rSize);
 		}
 	}
+
 
 }
 

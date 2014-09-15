@@ -179,15 +179,15 @@ void faster::fastComm::recvCreateFDDGroup(unsigned long int & id, fddType & keyT
 	}
 }
 
-void faster::fastComm::sendDestroyFDD(unsigned long int id){
+void faster::fastComm::sendDiscardFDD(unsigned long int id){
 	for (int i = 1; i < numProcs; ++i){
-		MPI_Isend( &id, sizeof(long unsigned int), MPI_BYTE, i, MSG_DESTROYFDD, MPI_COMM_WORLD, &req[i-1]);
+		MPI_Isend( &id, sizeof(long unsigned int), MPI_BYTE, i, MSG_DISCARDFDD, MPI_COMM_WORLD, &req[i-1]);
 	}
 
 	//MPI_Waitall( numProcs - 1, req, status);
 }
-void faster::fastComm::recvDestroyFDD(unsigned long int &id){
-	MPI_Recv(&id, sizeof(long unsigned int), MPI_BYTE, 0, MSG_DESTROYFDD, MPI_COMM_WORLD, status);	
+void faster::fastComm::recvDiscardFDD(unsigned long int &id){
+	MPI_Recv(&id, sizeof(long unsigned int), MPI_BYTE, 0, MSG_DISCARDFDD, MPI_COMM_WORLD, status);	
 }
 
 size_t faster::fastComm::getSize(  std::string * data, size_t * ds UNUSED, size_t s ){

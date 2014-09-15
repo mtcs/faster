@@ -59,7 +59,7 @@ namespace faster{
 	typedef enum : char {
 		NewWorkerDL,
 		NewWorkerSDL,
-		DestroyWorkerDL,
+		DiscardWorkerDL,
 
 		GetTypeDL,
 		GetKeyTypeDL,

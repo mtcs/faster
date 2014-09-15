@@ -25,33 +25,49 @@ std::unordered_map<K, std::pair<void*, size_t>> findKeyInterval(std::vector<K> &
 	K * lastKey = &keys[0];
 	int baseSize = wfdd->baseSize();
 
-	//std::cerr << "    findKeyInterval \n";
+	std::cerr << "    findKeyInterval " << fddSize << "\n";
 
 	keyLocations.reserve(ukeys.size());
 	keyLocations[ukeys[pos]] = std::make_pair( &data[0], 1 );
 	kCount = 1;
 
+	for ( int i = 0; i < ukeys.size(); ++i){
+		std::cerr << ukeys[i] << " ";
+	}
+	std::cerr << "\n";
+
 	if(ukeys.size() == 1) 
 		return keyLocations;
+	
 
-	//std::cerr << "    |\033[0;34m[0]\033[0m";
+	std::cerr << "0 \033[0;31m0\033[0m";
+	std::cerr << keys[0] << " ";
 	for ( size_t i = 1; i < fddSize; ++i){
-		//std::cerr << keys[i - 1] << ":" << (int) data[baseSize*(i-1)] << " ";
 		if (*lastKey == keys[i]){
 			kCount++;
-			continue;
 		}else{
-			//std::cerr << "(" << kCount << ") |\033[0;34m[" << i <<"]\033[0m";
+			std::cerr << "(" << kCount << ") ";
 			keyLocations[ukeys[pos]].second = kCount;
-			pos ++;
-			keyLocations[ukeys[pos]] = std::make_pair(&data[baseSize*i],1);
+			// Find next key
+			while(ukeys[pos] != keys[i]){
+				if (pos < ukeys.size()){
+					//TODO INSERT NOT PRESENT ITENS...
+					std::cerr << "(S" << ukeys[pos]<< ") ";
+					pos ++;
+				}else
+					return keyLocations;
+			}
+			std::cerr << "(I" << ukeys[pos]<< ") ";
+			keyLocations[ukeys[pos]] = std::make_pair(&data[baseSize*i], 1);
 			kCount = 1;
+			lastKey = &keys[i];
 		}
-		lastKey = &keys[i];
+		std::cerr << i << " \033[0;31m" << keys[i] << "\033[0m ";
 	}
-	//std::cerr << "(" << kCount << ") |";
+	std::cerr << "(" << kCount << ") \n";
 	keyLocations[ukeys[pos]].second = kCount;
-	//std::cerr << "    DONE\n";
+	std::cerr << "(" << ukeys[pos] << "=" << kCount << ")\n";
+	std::cerr << "    DONE\n";
 
 	return keyLocations;
 }
@@ -228,7 +244,7 @@ void faster::workerFddGroup<K>::flatMapByKey(workerFddBase * dest, void * mapByK
 					pResultList.insert(pResultList.end(), r.begin(), r.end());
 			}
 
-			#pragma omp master
+			#pragma omp critical
 			resultList.insert(resultList.end(), pResultList.begin(), pResultList.end());
 		}
 	}else{
@@ -254,7 +270,7 @@ void faster::workerFddGroup<K>::flatMapByKey(workerFddBase * dest, void * mapByK
 
 			}
 
-			#pragma omp master
+			#pragma omp critical
 			resultList.insert(resultList.end(), pResultList.begin(), pResultList.end());
 		}
 	}
@@ -274,17 +290,18 @@ void faster::workerFddGroup<K>::flatMapByKeyI(workerFddBase * dest, void * mapBy
 
 	for (int i = 0; i < members.size(); ++i){
 		keyLocations[i] = findKeyInterval(uKeys, members[i]);
-		//for ( auto it = keyLocations[i].begin(); it != keyLocations[i].end(); it++)
-			//std::cerr << it->first << ":" << it->second.second << " ";
+		for ( auto it = keyLocations[i].begin(); it != keyLocations[i].end(); it++)
+			std::cerr << it->first << "-" << it->second.second << " ";
 		//std::cerr << "\n    \033[0;34m" << i << " " << "\033[0m - ";
 		//for (int j = 0; j < members[i]->getSize(); ++j){
 			//std::cerr  << ((K*)members[i]->getKeys())[j] << ":" << ((int*) members[i]->getData())[j] << " ";
 		//}
-		//std::cerr << "\n";
+		std::cerr << "\n";
 	}
+		std::cerr << "\n";
 
 	if ( members.size() <3 ){  
-		#pragma omp parallel 
+		//#pragma omp parallel 
 		{
 			std::list<std::pair<L,U>> pResultList;
 
@@ -297,6 +314,7 @@ void faster::workerFddGroup<K>::flatMapByKeyI(workerFddBase * dest, void * mapBy
 					( key, 
 					  location0.first, location0.second, 
 					  location1.first, location1.second );
+
 				if (r.size() > 0)
 					pResultList.insert(pResultList.end(), r.begin(), r.end());
 			}
@@ -574,7 +592,7 @@ inline void faster::workerFddGroup<K>::apply(void * func, fddOpType op, workerFd
 }
 
 template <typename K>
-void faster::workerFddGroup<K>::coGroup(fastComm *comm){
+void faster::workerFddGroup<K>::cogroup(fastComm *comm){
 	std::cerr << "\n    Cogroup\n";
 	unsigned long tid = 0;
 
@@ -633,7 +651,7 @@ void faster::workerFddGroup<K>::preapply(unsigned long int id, void * func, fddO
 		buffer << size_t(dest->getSize());
 	}else{
 		if (op == OP_CoGroup){
-			coGroup(comm);
+			cogroup(comm);
 		}
 	}
 	auto end = system_clock::now();

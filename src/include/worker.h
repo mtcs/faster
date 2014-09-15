@@ -39,7 +39,7 @@ namespace faster{
 			void createIFDD (unsigned long int id, fddType kType, fddType tType, size_t size);
 			void createFDDGroup(unsigned long int id, fddType kType, std::vector<unsigned long int> & members);
 			
-			void destroyFDD(unsigned long int id);
+			void discardFDD(unsigned long int id);
 			
 			// 1D Data
 			void setFDDData(unsigned long int id, void * data, size_t size);
