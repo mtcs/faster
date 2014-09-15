@@ -52,9 +52,6 @@ pair<int, double> createPR(const int & key, vector<int> & s){
 
 //list<pair<int, double>> givePageRank(const int & key, vector<int> * s, size_t nn, double * pr, size_t npr){
 list<pair<int, double>> givePageRank(const int & key, void * sP, size_t nn, void * prP, size_t npr){
-	if (( sP == NULL ) || ( nn == 0)) {
-		cerr << "!!!! "<< key << " #" << nn << "!!!! \n"; 
-	}
 	auto s = * (vector<int>*) sP;
 	auto pr = * (double*) prP;
 	list<pair<int,double>> msgList;
