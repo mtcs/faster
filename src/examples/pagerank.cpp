@@ -90,7 +90,6 @@ double sum( double & a, double & b){
 
 int main(int argc, char ** argv){
 	// Init Faster Framework
-	cout << "Init FastLib" << '\n';
 	fastContext fc(argc, argv);
 	fc.registerFunction((void*) &toAList);
 	fc.registerFunction((void*) &createPR);

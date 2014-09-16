@@ -285,7 +285,7 @@ void faster::fastComm::recvReadFDDFile(unsigned long int &id, std::string & file
 	//buffer[0] >> id >> size >> offset >> filenameSize;
 	//buffer[0].read(filename, filenameSize);
 	bufferRecv[0] >> id >> size >> offset >> filename;
-	std::cerr << filename << "\n"; 
+	//std::cerr << filename << "\n"; 
 }
 
 
