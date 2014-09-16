@@ -596,7 +596,7 @@ void test(fastContext & fc){
 
 int main(int argc UNUSED, char ** argv UNUSED){
 
-	fastContext fc("local");
+	fastContext fc(argc,argv);
 
 	fc.registerFunction((void*) &map1SS<int,float>);
 	fc.registerFunction((void*) &map1SP<int,float>);
