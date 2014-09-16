@@ -23,8 +23,8 @@ faster::fastScheduler::~fastScheduler(){
 void faster::fastScheduler::resetProcessWeights(){
 	currentWeights = std::vector<double>( numProcs, 1/(double)(numProcs-1) );
 	currentWeights[0] = 0;
-	currentWeights[1] += currentWeights[2]/2;
-	currentWeights[2] /= 2;
+	//currentWeights[1] += currentWeights[2]/2;
+	//currentWeights[2] /= 2;
 }
 bool faster::fastScheduler::dataMigrationNeeded(){
 	return ( _dataMigrationNeeded && ( taskList.size() > 1 ) );

@@ -48,6 +48,7 @@ T & faster::indexedFddStorageCore<K,T>::operator[](size_t ref){
 
 template <class K, class T> 
 void faster::indexedFddStorageCore<K,T>::sortByKey(){
+	std::cerr << "SORT (" << size << ") ";
 	std::vector<size_t> p(size,0);
 	std::vector<size_t> rp(size);
 	std::vector<bool> sorted(size, false);

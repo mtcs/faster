@@ -55,9 +55,13 @@ void faster::fastCommBuffer::advance(size_t pos){
 
 void faster::fastCommBuffer::grow(size_t s){
 	if (_allocatedSize < s){
-		delete [] _data;
+		//std::cerr << "(GROW BUFFER: "<< _allocatedSize<< " > ";
 		_allocatedSize = std::max(size_t(1.5*_allocatedSize), s + _allocatedSize);
-		_data = new char[_allocatedSize];
+		char * newdata = new char[_allocatedSize];
+		memcpy(newdata, _data, _size );
+		delete [] _data;
+		_data = newdata;
+		//std::cerr << _allocatedSize<< ")";
 	}
 }
 

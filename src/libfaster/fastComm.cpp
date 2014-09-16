@@ -225,21 +225,21 @@ void faster::fastComm::recvDataUltra(unsigned long int &id, int src, void *& key
 	bufferRecv[0].reset();
 	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, src, tagID, MPI_COMM_WORLD, status);	
 	bufferRecv[0] >> id >> size;
-		std::cerr << ".";
+		//std::cerr << ".";
 
 	// Receive the size of every line to be received
 	if (tagDataSize)
 		recvDataUltraPlus(src, (void*&) lineSizes, rSize, tagDataSize, bufferRecv[2]);
-		std::cerr << ".";
+		//std::cerr << ".";
 
 	// Receive Keys
 	if (tagKeys)
 		recvDataUltraPlus(src, keys, rSize, tagKeys, bufferRecv[1]);
-		std::cerr << ".";
+		//std::cerr << ".";
 
 	
 	recvDataUltraPlus(src, data, rSize, tagData, bufferRecv[0]);
-	std::cerr << ".";
+	//std::cerr << ".";
 }
 
 
@@ -303,6 +303,7 @@ void faster::fastComm::recvFDDInfo(size_t &size, int & src){
 void faster::fastComm::sendGroupByKeyData(int i){
 	MPI_Isend( buffer[i].data(), buffer[i].size(), MPI_BYTE, i, MSG_GROUPBYKEYDATA, MPI_COMM_WORLD, &req[i-1]);
 }
+
 void * faster::fastComm::recvGroupByKeyData(int & size){
 	void * data;
 	

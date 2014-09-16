@@ -356,7 +356,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 			continue;
 		buffer[i].writePos(dataSize[i], 0);
 		comm->sendGroupByKeyData(i);
-		//std::cerr << dataSize[i] << ">" << i << "  ";
+		//std::cerr << "\033[0;31m"<< dataSize[i] << " \033[0m> " << i << "  ";
 	}
 	//std::cerr << " ) \n";
 
@@ -364,7 +364,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 	// Recv all keys I own in-place
 	pos = 0;
 	for (int i = 1; i < (comm->getNumProcs() - 1); ++i){
-		//std::cerr << "        [ Insert:";
+		//std::cerr << "        [ Insert: ";
 		int rSize;
 		size_t numItems;
 		fastCommBuffer rb(0);
@@ -385,6 +385,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 				keys = localData->getKeys();
 				//std::cerr << "( GROW: "<< localData->getSize() << " ) ";
 			}
+			//std::cerr << i << " ";
 			rb >> keys[pos] >> data[pos];
 			//std::cerr << keys[pos] << " ";
 			//std::cerr << pos << ":" << keys[pos] << " ";
@@ -423,7 +424,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 }
 template <typename K, typename T>
 void faster::workerIFddCore<K,T>::groupByKey(fastComm *comm){
-	std::cerr << "\n    GroupByKey\n";
+	//std::cerr << "\n    GroupByKey\n";
 	size_t numMyKeys = 0;
 	unsigned long tid = 0;
 	std::unordered_map<K, int> keyMap;
@@ -488,7 +489,7 @@ void faster::workerIFddCore<K, T>::preapply(long unsigned int id, void * func, f
 	auto end = system_clock::now();
 
 	auto duration = duration_cast<milliseconds>(end - start);
-	std::cerr << " ET:" << duration.count() << " ";
+	//std::cerr << " ET:" << duration.count() << " ";
 
 	buffer.writePos(duration.count(), durationP);
 	buffer.writePos(buffer.size() - headerSize, rSizeP);

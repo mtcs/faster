@@ -136,7 +136,7 @@ void faster::_workerIFdd<K,T>::mapByKey (workerFddBase * dest, ImapByKeyIFunctio
 	auto keyLocations = findKeyInterval(ik, d, s, nk);
 
 	//std::cerr << "START " << id << " " << s << "  ";
-	std::cerr << "NK: " << nk << "\n";
+	//std::cerr << "NK: " << nk << "\n";
 
 	#pragma omp parallel for 
 	for (int i = 0; i < keyLocations.size(); ++i){
@@ -405,23 +405,23 @@ void faster::_workerIFdd<K,T>::_applyI(void * func, fddOpType op, workerFddBase 
 	switch (op){
 		case OP_Map:
 			map<L,U>(dest, (ImapIFunctionP<K,T,L,U>) func);
-			std::cerr << "Map ";
+			//std::cerr << "Map ";
 			break;
 		case OP_MapByKey:
 			mapByKey<L,U>(dest, (ImapByKeyIFunctionP<K,T,L,U>) func);
-			std::cerr << "MapByKey ";
+			//std::cerr << "MapByKey ";
 			break;
 		case OP_BulkMap:
 			bulkMap<L,U>(dest, ( IbulkMapIFunctionP<K,T,L,U> ) func);
-			std::cerr << "BulkMap ";
+			//std::cerr << "BulkMap ";
 			break;
 		case OP_FlatMap:
 			flatMap<L,U>(dest, ( IflatMapIFunctionP<K,T,L,U> ) func);
-			std::cerr << "FlatMap ";
+			//std::cerr << "FlatMap ";
 			break;
 		case OP_BulkFlatMap:
 			bulkFlatMap<L,U>(dest, ( IbulkFlatMapIFunctionP<K,T,L,U> ) func);
-			std::cerr << "BulkFlatMap ";
+			//std::cerr << "BulkFlatMap ";
 			break;
 	}
 }
@@ -433,23 +433,23 @@ void faster::_workerIFdd<K,T>::_applyIP(void * func, fddOpType op, workerFddBase
 	switch (op){
 		case OP_Map:
 			map<L,U>(dest, (IPmapIFunctionP<K,T,L,U>) func);
-			std::cerr << "Map ";
+			//std::cerr << "Map ";
 			break;
 		case OP_MapByKey:
 			mapByKey<L,U>(dest, (IPmapByKeyIFunctionP<K,T,L,U>) func);
-			std::cerr << "MapByKey ";
+			//std::cerr << "MapByKey ";
 			break;
 		case OP_BulkMap:
 			bulkMap<L,U>(dest, ( IPbulkMapIFunctionP<K,T,L,U> ) func);
-			std::cerr << "BulkMap ";
+			//std::cerr << "BulkMap ";
 			break;
 		case OP_FlatMap:
 			flatMap<L,U>(dest, ( IPflatMapIFunctionP<K,T,L,U> ) func);
-			std::cerr << "FlatMap ";
+			//std::cerr << "FlatMap ";
 			break;
 		case OP_BulkFlatMap:
 			bulkFlatMap<L,U>(dest, ( IPbulkFlatMapIFunctionP<K,T,L,U> ) func);
-			std::cerr << "BulkFlatMap ";
+			//std::cerr << "BulkFlatMap ";
 			break;
 	}
 }
@@ -460,23 +460,23 @@ void faster::_workerIFdd<K,T>::_apply(void * func, fddOpType op, workerFddBase *
 	switch (op){
 		case OP_Map:
 			map<U>(dest, (mapIFunctionP<K,T,U>) func);
-			std::cerr << "Map ";
+			//std::cerr << "Map ";
 			break;
 		case OP_MapByKey:
 			mapByKey<U>(dest, (mapByKeyIFunctionP<K,T,U>) func);
-			std::cerr << "MapByKey ";
+			//std::cerr << "MapByKey ";
 			break;
 		case OP_BulkMap:
 			bulkMap<U>(dest, ( bulkMapIFunctionP<K,T,U> ) func);
-			std::cerr << "BulkMap ";
+			//std::cerr << "BulkMap ";
 			break;
 		case OP_FlatMap:
 			flatMap<U>(dest, ( flatMapIFunctionP<K,T,U> ) func);
-			std::cerr << "FlatMap ";
+			//std::cerr << "FlatMap ";
 			break;
 		case OP_BulkFlatMap:
 			bulkFlatMap<U>(dest, ( bulkFlatMapIFunctionP<K,T,U> ) func);
-			std::cerr << "BulkFlatMap ";
+			//std::cerr << "BulkFlatMap ";
 			break;
 	}
 }
@@ -488,23 +488,23 @@ void faster::_workerIFdd<K,T>::_applyP(void * func, fddOpType op, workerFddBase 
 	switch (op){
 		case OP_Map:
 			map<U>(dest, (PmapIFunctionP<K,T,U>) func);
-			std::cerr << "Map ";
+			//std::cerr << "Map ";
 			break;
 		case OP_MapByKey:
 			mapByKey<U>(dest, (PmapByKeyIFunctionP<K,T,U>) func);
-			std::cerr << "MapByKey ";
+			//std::cerr << "MapByKey ";
 			break;
 		case OP_BulkMap:
 			bulkMap<U>(dest, ( PbulkMapIFunctionP<K,T,U> ) func);
-			std::cerr << "BulkMap ";
+			//std::cerr << "BulkMap ";
 			break;
 		case OP_FlatMap:
 			flatMap<U>(dest, ( PflatMapIFunctionP<K,T,U> ) func);
-			std::cerr << "FlatMap ";
+			//std::cerr << "FlatMap ";
 			break;
 		case OP_BulkFlatMap:
 			bulkFlatMap<U>(dest, ( PbulkFlatMapIFunctionP<K,T,U> ) func);
-			std::cerr << "BulkFlatMap ";
+			//std::cerr << "BulkFlatMap ";
 			break;
 	}
 }

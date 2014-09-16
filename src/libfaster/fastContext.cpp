@@ -18,7 +18,7 @@ faster::fastContext::fastContext(const fastSettings & s, int & argc, char **& ar
 
 faster::fastContext::~fastContext(){ 
 	// Tell workers to go home!
-	std::cerr << "    S:FINISH! ";
+	//std::cerr << "    S:FINISH! ";
 	comm->sendFinish();
 
 	// Clean process
@@ -61,7 +61,7 @@ int faster::fastContext::findFunc(void * funcP){
 
 unsigned long int faster::fastContext::_createFDD(fddBase * ref, fddType type, const std::vector<size_t> * dataAlloc){
 	
-	std::cerr << "    Create FDD\n";
+	//std::cerr << "    Create FDD\n";
 	for (int i = 1; i < comm->numProcs; ++i){
 		/*size_t dataPerProc = size / (comm->numProcs - 1);
 		int rem = size % (comm->numProcs -1);
@@ -71,26 +71,26 @@ unsigned long int faster::fastContext::_createFDD(fddBase * ref, fddType type, c
 
 		std::cerr << "    S:CreateFdd ID:" << numFDDs << " T:" << type << " S:" << dataPerProc << '\n';// */
 		if (dataAlloc){
-			std::cerr << "    S:CreateFdd ID:" << numFDDs << " T:" << type << " S:" << (*dataAlloc)[i] ;
+			//std::cerr << "    S:CreateFdd ID:" << numFDDs << " T:" << type << " S:" << (*dataAlloc)[i] ;
 			comm->sendCreateFDD(numFDDs, type, (*dataAlloc)[i], i);
-			std::cerr << ".\n";
+			//std::cerr << ".\n";
 		}else{
-			std::cerr << "    S:CreateFdd ID:" << numFDDs << " T:" << type << " S: ?";
+			//std::cerr << "    S:CreateFdd ID:" << numFDDs << " T:" << type << " S: ?";
 			comm->sendCreateFDD(numFDDs, type, 0, i);
-			std::cerr << ".\n";
+			//std::cerr << ".\n";
 		}
 
 	}
 	fddList.insert(fddList.begin(), ref);
 	comm->waitForReq(comm->numProcs - 1);
-	std::cerr << "    Done\n";
+	//std::cerr << "    Done\n";
 	
 	return numFDDs++;
 }
 
 unsigned long int faster::fastContext::_createIFDD(fddBase * ref, fddType kType, fddType tType, const std::vector<size_t> * dataAlloc){
 
-	std::cerr << "    Create FDD\n";
+	//std::cerr << "    Create FDD\n";
 	for (int i = 1; i < comm->numProcs; ++i){
 		/*size_t dataPerProc = size / (comm->numProcs - 1);
 		int rem = size % (comm->numProcs -1);
@@ -100,18 +100,18 @@ unsigned long int faster::fastContext::_createIFDD(fddBase * ref, fddType kType,
 
 		std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:" << dataPerProc <<'\n';// */
 		if (dataAlloc){
-			std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:" << (*dataAlloc)[i];
+			//std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:" << (*dataAlloc)[i];
 			comm->sendCreateIFDD(numFDDs, kType, tType, (*dataAlloc)[i], i);
-			std::cerr << ".\n";
+			//std::cerr << ".\n";
 		}else{
-			std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:? ";
+			//std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:? ";
 			comm->sendCreateIFDD(numFDDs, kType, tType, 0, i);
-			std::cerr << ".\n";
+			//std::cerr << ".\n";
 		}
 	}
 	fddList.insert(fddList.begin(), ref);
 	comm->waitForReq(comm->numProcs - 1);
-	std::cerr << "    Done\n";
+	//std::cerr << "    Done\n";
 
 	return numFDDs++;
 }
@@ -154,7 +154,7 @@ unsigned long int faster::fastContext::createFddGroup(fddBase * ref, std::vector
 
 	comm->sendCreateFDDGroup( numFDDs, kType,  members);
 
-	std::cerr << "    S:CreateFddGroup ID:" << numFDDs << '\n';
+	//std::cerr << "    S:CreateFddGroup ID:" << numFDDs << '\n';
 
 	fddList.insert(fddList.begin(), ref);
 	return numFDDs++;
@@ -187,9 +187,9 @@ unsigned long int faster::fastContext::readFDD(fddBase * ref, const char * fileN
 		offset += dataAlloc[i];
 	}
 
-	std::cerr << "    S:ReadFdd";
+	//std::cerr << "    S:ReadFdd";
 	comm->waitForReq(comm->numProcs - 1);
-	std::cerr << '\n';
+	//std::cerr << '\n';
 	
 	return numFDDs++;
 }
@@ -202,11 +202,11 @@ void faster::fastContext::getFDDInfo(size_t & s, std::vector<size_t> & dataAlloc
 		size_t size;
 		int src;
 
-		std::cerr << "    R:GetFDDInfo ";
+		//std::cerr << "    R:GetFDDInfo ";
 		comm->recvFDDInfo(size, src);
 		dataAlloc[src] = size;
 
-		std::cerr << "S:" << size << "\n";
+		//std::cerr << "S:" << size << "\n";
 		s += size;
 	}
 }
@@ -222,7 +222,7 @@ unsigned long int faster::fastContext::enqueueTask(fddOpType opT, unsigned long 
 
 	// TODO do this later on a shceduler?
 	comm->sendTask(*newTask);
-	std::cerr << "    S:Task ID:" << newTask->id << " FDD:" << idSrc << " F:" << funcId << '\n';
+	//std::cerr << "    S:Task ID:" << newTask->id << " FDD:" << idSrc << " F:" << funcId << '\n';
 
 	return newTask->id;
 }
@@ -235,7 +235,7 @@ void * faster::fastContext::recvTaskResult(unsigned long int &id, unsigned long 
 	int proc;
 
 	void * result = comm->recvTaskResult(id, sid, proc, size, time);
-	std::cerr << "    R:TaskResult P:" << proc << " ID:" << id << '\n';
+	//std::cerr << "    R:TaskResult P:" << proc << " ID:" << id << '\n';
 
 	//taskList[id]->workersFinished++;
 	scheduler->taskProgress(id, sid, time);
