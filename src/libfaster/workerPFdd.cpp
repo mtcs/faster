@@ -288,8 +288,8 @@ std::pair<T*,size_t>  faster::_workerFdd<T*>::reduce (PreducePFunctionP<T> reduc
 		T * a, * b;
 		size_t aSize, bSize;
 
-		#pragma omp master
-		std::cerr << tN << "(" << nT << ")";
+		//#pragma omp master
+		//std::cerr << tN << "(" << nT << ")";
 
 		#pragma omp for 
 		for (int i = nT; i < s; ++i){
@@ -338,19 +338,19 @@ void faster::_workerFdd<T*>::_apply(void * func, fddOpType op, workerFddBase * d
 	switch (op){
 		case OP_Map:
 			map(dest, (mapPFunctionP<T,U>) func);
-			std::cerr << "Map";
+			//std::cerr << "Map";
 			break;
 		case OP_BulkMap:
 			bulkMap(dest, ( bulkMapPFunctionP<T,U> ) func);
-			std::cerr << "BulkMap ";
+			//std::cerr << "BulkMap ";
 			break;
 		case OP_FlatMap:
 			flatMap(dest, ( flatMapPFunctionP<T,U> ) func);
-			std::cerr << "FlatMap ";
+			//std::cerr << "FlatMap ";
 			break;
 		case OP_BulkFlatMap:
 			bulkFlatMap(dest, ( bulkFlatMapPFunctionP<T,U> ) func);
-			std::cerr << "BulkFlatMap ";
+			//std::cerr << "BulkFlatMap ";
 			break;
 	}
 }
@@ -362,19 +362,19 @@ void faster::_workerFdd<T*>::_applyP(void * func, fddOpType op, workerFddBase * 
 	switch (op){
 		case OP_Map:
 			map(dest, (PmapPFunctionP<T,U>) func);
-			std::cerr << "Map";
+			//std::cerr << "Map";
 			break;
 		case OP_BulkMap:
 			bulkMap(dest, ( PbulkMapPFunctionP<T,U> ) func);
-			std::cerr << "BulkMap ";
+			//std::cerr << "BulkMap ";
 			break;
 		case OP_FlatMap:
 			flatMap(dest, ( PflatMapPFunctionP<T,U> ) func);
-			std::cerr << "FlatMap ";
+			//std::cerr << "FlatMap ";
 			break;
 		case OP_BulkFlatMap:
 			bulkFlatMap(dest, ( PbulkFlatMapPFunctionP<T,U> ) func);
-			std::cerr << "BulkFlatMap ";
+			//std::cerr << "BulkFlatMap ";
 			break;
 	}
 }
@@ -385,19 +385,19 @@ void faster::_workerFdd<T*>::_applyI(void * func, fddOpType op, workerFddBase * 
 	switch (op){
 		case OP_Map:
 			map(dest, (ImapPFunctionP<T,L,U>) func);
-			std::cerr << "Map";
+			//std::cerr << "Map";
 			break;
 		case OP_BulkMap:
 			bulkMap(dest, ( IbulkMapPFunctionP<T,L,U> ) func);
-			std::cerr << "BulkMap ";
+			//std::cerr << "BulkMap ";
 			break;
 		case OP_FlatMap:
 			flatMap(dest, ( IflatMapPFunctionP<T,L,U> ) func);
-			std::cerr << "FlatMap ";
+			//std::cerr << "FlatMap ";
 			break;
 		case OP_BulkFlatMap:
 			bulkFlatMap(dest, ( IbulkFlatMapPFunctionP<T,L,U> ) func);
-			std::cerr << "BulkFlatMap ";
+			//std::cerr << "BulkFlatMap ";
 			break;
 	}
 }
@@ -409,19 +409,19 @@ void faster::_workerFdd<T*>::_applyIP(void * func, fddOpType op, workerFddBase *
 	switch (op){
 		case OP_Map:
 			map(dest, (IPmapPFunctionP<T,L,U>) func);
-			std::cerr << "Map";
+			//std::cerr << "Map";
 			break;
 		case OP_BulkMap:
 			bulkMap(dest, ( IPbulkMapPFunctionP<T,L,U> ) func);
-			std::cerr << "BulkMap ";
+			//std::cerr << "BulkMap ";
 			break;
 		case OP_FlatMap:
 			flatMap(dest, ( IPflatMapPFunctionP<T,L,U> ) func);
-			std::cerr << "FlatMap ";
+			//std::cerr << "FlatMap ";
 			break;
 		case OP_BulkFlatMap:
 			bulkFlatMap(dest, ( IPbulkFlatMapPFunctionP<T,L,U> ) func);
-			std::cerr << "BulkFlatMap ";
+			//std::cerr << "BulkFlatMap ";
 			break;
 	}
 }
@@ -432,11 +432,11 @@ void faster::_workerFdd<T*>::_applyReduce(void * func, fddOpType op, fastCommBuf
 	switch (op){
 		case OP_Reduce:
 			r = reduce(( PreducePFunctionP<T> ) func);
-			std::cerr << "Reduce " ;
+			//std::cerr << "Reduce " ;
 			break;
 		case OP_BulkReduce:
 			r = bulkReduce(( PbulkReducePFunctionP<T> ) func);
-			std::cerr << "BulkReduce ";
+			//std::cerr << "BulkReduce ";
 			break;
 	}
 	buffer.write(r.first, r.second);

@@ -657,7 +657,7 @@ void faster::workerFddGroup<K>::preapply(unsigned long int id, void * func, fddO
 	auto end = system_clock::now();
 
 	auto duration = duration_cast<milliseconds>(end - start);
-	std::cerr << "      ET:" << duration.count();
+	//std::cerr << "      ET:" << duration.count();
 
 	buffer.writePos(duration.count(), durationP);
 	buffer.writePos(buffer.size() - headerSize, rSizeP);

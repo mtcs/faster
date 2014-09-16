@@ -6,7 +6,7 @@
 #include "worker.h"
 
 void faster::worker::createFDD (unsigned long int id, fddType type, size_t size){
-	std::cerr << "createFDD ";
+	//std::cerr << "createFDD ";
 	workerFddBase * newFdd;
 	/*switch (type){
 		case Null: break;
@@ -77,7 +77,7 @@ void faster::worker::readFDDFile(unsigned long int id, std::string &filename, si
 
 	newFdd->shrink();
 
-	std::cerr << "    S:FDDInfo ";
+	//std::cerr << "    S:FDDInfo ";
 	comm->sendFDDInfo(newFdd->getSize());
 
 }

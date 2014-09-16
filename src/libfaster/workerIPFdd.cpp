@@ -79,11 +79,11 @@ void faster::_workerIFdd<K,T*>::applyIndependent(void * func, fddOpType op, fast
 	switch (op){
 		case OP_Reduce:
 			r = reduce(( IPreduceIPFunctionP<K,T> ) func);
-			std::cerr << "Reduce " ;
+			//std::cerr << "Reduce " ;
 			break;
 		case OP_BulkReduce:
 			r = bulkReduce(( IPbulkReduceIPFunctionP<K,T> ) func);
-			std::cerr << "BulkReduce ";
+			//std::cerr << "BulkReduce ";
 			break;
 	}
 	

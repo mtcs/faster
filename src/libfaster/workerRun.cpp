@@ -6,7 +6,7 @@
 #include "worker.h"
 
 void faster::worker::run(){
-	std::cerr << "  Worker Working..." << '\n';
+	//std::cerr << "  Worker Working..." << '\n';
 	while (! finished ){
 		int tag;
 		fastTask task;
@@ -78,7 +78,7 @@ void faster::worker::run(){
 				//std::cerr << "ID:" << id << " S:" << size << " ";
 				setFDDData(id, data, lineSizes, size);
 				//delete [] data2D;
-				std::cerr << ".\n";
+				//std::cerr << ".\n";
 				break;
 
 			case MSG_FDDSETIDATAID:
@@ -127,7 +127,7 @@ void faster::worker::run(){
 				break;
 		}
 	}
-	std::cerr << "  DONE" << '\n';
+	std::cerr << "  Worker " << comm->getProcId() << " DONE" << '\n';
 }
 
 
