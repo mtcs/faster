@@ -29,21 +29,13 @@ namespace faster{
 		friend class fastContext;
 		public:
 
-			fastSettings(const std::string & m){ 
-				master = m;
+			fastSettings() { }
+
+			fastSettings(const fastSettings & s UNUSED){
 			}
-			fastSettings() : fastSettings("local"){ }
-
-			fastSettings(const fastSettings & s){
-				master = s.master;
-			}
-
-			std::string getMaster() const{ return master; } 
-
 
 		private:
 
-		std::string master;
 	};
 
 	// General context
@@ -58,8 +50,8 @@ namespace faster{
 		friend class worker;
 
 		public:
-			fastContext( std::string m): fastContext(fastSettings(m)){}
-			fastContext( const fastSettings & s);
+			fastContext( int & argc, char **& argv): fastContext(fastSettings(), argc, argv){}
+			fastContext( const fastSettings & s, int & argc, char **& argv);
 			~fastContext();
 
 			void registerFunction(void * funcP);

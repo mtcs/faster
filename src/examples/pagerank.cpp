@@ -91,7 +91,7 @@ double sum( double & a, double & b){
 int main(int argc, char ** argv){
 	// Init Faster Framework
 	cout << "Init FastLib" << '\n';
-	fastContext fc("local");
+	fastContext fc(argc, argv);
 	fc.registerFunction((void*) &toAList);
 	fc.registerFunction((void*) &createPR);
 	fc.registerFunction((void*) &givePageRank);
@@ -101,7 +101,7 @@ int main(int argc, char ** argv){
 
 
 	cout << "Import Data" << '\n';
-	auto data = new fdd<string>(fc, "../res/graph100.al");
+	auto data = new fdd<string>(fc, argv[1]);
 	auto structure = data->map<int, vector<int>>(&toAList)->cache();
 
 	cout << "Init Pagerank" << '\n';

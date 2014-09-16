@@ -19,7 +19,7 @@ int reduce1(int &a, int &b){
 int main(int argc, char ** argv){
 	// Init Faster Framework
 	cout << "Init FastLib" << '\n';
-	fastContext fc("local");
+	fastContext fc(argc,argv);
 	fc.registerFunction((void*) &map1);
 	fc.registerFunction((void*) &reduce1);
 

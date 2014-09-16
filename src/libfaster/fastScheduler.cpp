@@ -11,8 +11,7 @@
 faster::fastScheduler::fastScheduler(unsigned int numProcs){
 	this->numProcs = numProcs;
 	numTasks = 0;
-	currentWeights = std::vector<double>( numProcs, 1/(double)(numProcs-1) );
-	currentWeights[0] = 0;
+	resetProcessWeights();
 	_dataMigrationNeeded = false;
 }
 faster::fastScheduler::~fastScheduler(){
@@ -21,6 +20,12 @@ faster::fastScheduler::~fastScheduler(){
 	taskList.clear();
 }
 
+void faster::fastScheduler::resetProcessWeights(){
+	currentWeights = std::vector<double>( numProcs, 1/(double)(numProcs-1) );
+	currentWeights[0] = 0;
+	currentWeights[1] += currentWeights[2]/2;
+	currentWeights[2] /= 2;
+}
 bool faster::fastScheduler::dataMigrationNeeded(){
 	return ( _dataMigrationNeeded && ( taskList.size() > 1 ) );
 }
@@ -106,7 +111,7 @@ void faster::fastScheduler::updateWeights(){
 		fastTask * lastTask = taskList.back();
 		std::vector<double> rate(numProcs, 0);
 
-		std::cerr << "      [ Exec Time: ";
+		std::cerr << "      [ Exec.Times: ";
 		for( i = 1; i < numProcs; ++i){
 			std::cerr << lastTask->times[i] << " ";
 			rate[i] = lastTask->allocation[i]/(double)lastTask->times[i];
@@ -123,9 +128,7 @@ void faster::fastScheduler::updateWeights(){
 				currentWeights[i] =  rate[i] / powersum;
 			}
 		else
-			for( i = 1; i < numProcs; ++i){
-				currentWeights[i] =  1/(double)(numProcs-1);
-			}
+			resetProcessWeights();
 		currentWeights[0] = 0;
 	}
 }

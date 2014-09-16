@@ -20,6 +20,7 @@ namespace faster{
 
 			void updateWeights();
 			double * getNewAllocation();
+			void resetProcessWeights();
 		public:
 			fastScheduler(unsigned int numProcs);
 			~fastScheduler();

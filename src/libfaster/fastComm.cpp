@@ -7,9 +7,8 @@ bool faster::fastComm::isDriver(){
 	return (procId == 0);
 }
 
-faster::fastComm::fastComm(const std::string UNUSED master){
-	//MPI_Init (&argc, &argv);
-	MPI_Init (0, NULL);
+faster::fastComm::fastComm(int & argc, char **& argv){
+	MPI_Init (&argc, &argv);
 	MPI_Comm_size (MPI_COMM_WORLD, &numProcs);
 	MPI_Comm_rank (MPI_COMM_WORLD, &procId);
 	

@@ -149,7 +149,7 @@ namespace faster{
 		fastCommBuffer resultBuffer;
 		public:
 
-		fastComm(const std::string master);
+		fastComm(int & argc, char **& argv);
 		~fastComm();
 
 		int getProcId(){ return procId; }

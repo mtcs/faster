@@ -5,10 +5,10 @@
 #include "misc.h"
 
 // Create a context with local as master
-faster::fastContext::fastContext(const fastSettings & s){
+faster::fastContext::fastContext(const fastSettings & s, int & argc, char **& argv){
 
 	settings = new fastSettings(s);
-	comm = new fastComm( s.getMaster() );
+	comm = new fastComm(argc, argv );
 	scheduler = new fastScheduler( comm->numProcs );
 	numFDDs = 0;
 	//numTasks = 0;
@@ -174,14 +174,17 @@ unsigned long int faster::fastContext::readFDD(fddBase * ref, const char * fileN
 	//send read fdd n. numFdds from file fileName
 	size_t fileSize = findFileSize(fileName);
 	size_t offset = 0;
+ 	std::vector<size_t> dataAlloc = getAllocation(fileSize);
 
 	for (int i = 1; i < comm->numProcs; ++i){
-		size_t dataPerProc = fileSize / (comm->numProcs - 1);
-		int rem = fileSize % (comm->numProcs -1);
-		if (i <= rem)
-			dataPerProc += 1;
-		comm->sendReadFDDFile(ref->getId(), std::string(fileName), dataPerProc, offset, i);
-		offset += dataPerProc;
+		//size_t dataPerProc = fileSize / (comm->numProcs - 1);
+		//int rem = fileSize % (comm->numProcs -1);
+		//if (i <= rem)
+			//dataPerProc += 1;
+		//comm->sendReadFDDFile(ref->getId(), std::string(fileName), dataPerProc, offset, i);
+		//offset += dataPerProc;
+		comm->sendReadFDDFile(ref->getId(), std::string(fileName), dataAlloc[i], offset, i);
+		offset += dataAlloc[i];
 	}
 
 	std::cerr << "    S:ReadFdd";

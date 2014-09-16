@@ -68,7 +68,7 @@ void reduce1(int *& out, size_t & oSize, int *a, size_t sizeA, int *b, size_t si
 int main(int argc, char ** argv){
 	// Init Faster Framework
 	cout << "Init FastLib" << '\n';
-	fastContext fc("local");
+	fastContext fc(argc,argv);
 
 	fc.registerFunction((void*) &map1);
 	fc.registerFunction((void*) &reduce1);
