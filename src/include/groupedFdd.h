@@ -150,7 +150,7 @@ namespace faster{
 
 	template <typename K>
 	fddBase * groupedFdd<K>::_map (void * funcP, fddOpType op, fddBase * newFdd){
-		std::cerr << "  Map\n";
+		std::cerr << "  Map ";
 		size_t result;
 		size_t rSize;
 		size_t fddSize;
@@ -179,7 +179,7 @@ namespace faster{
 			}
 		}
 
-		std::cerr << "  Done\n";
+		std::cerr << "\n";
 		return newFdd;
 	}
 	template <typename K>

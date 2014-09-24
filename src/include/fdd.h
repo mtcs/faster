@@ -334,7 +334,7 @@ namespace faster{
 		size_t result;
 		size_t rSize;
 		unsigned long int tid, sid;
-		std::cerr << "  Map\n";
+		std::cerr << "  Map ";
 
 		unsigned long int newFddId = newFdd->getId();
 
@@ -357,7 +357,7 @@ namespace faster{
 		if (!cached)
 			this->discard();
 
-		std::cerr << "  Done\n";
+		std::cerr << "\n";
 		return newFdd;
 	}
 
@@ -429,7 +429,7 @@ namespace faster{
 
 	template <typename T>
 	T fdd<T>::reduce( void * funcP, fddOpType op){
-		std::cerr << "  Reduce\n";
+		std::cerr << "  Reduce ";
 		//T fddCore<T>::template reduce( int funcId, fddOpType op){
 		T result;
 		unsigned long int tid, sid;
@@ -458,7 +458,7 @@ namespace faster{
 		delete [] partResult;
 		delete [] rSize;
 
-		std::cerr << "  Done\n";
+		std::cerr << "\n";
 		return result;
 	}
 
@@ -500,7 +500,7 @@ namespace faster{
 
 	template <typename T>
 	std::vector <T> fdd<T*>::reduceP(void * funcP, fddOpType op){
-		std::cerr << "  Reduce\n";
+		std::cerr << "  Reduce";
 		//T fddCore<T>::template reduce( int funcId, fddOpType op){
 		// Decode function pointer
 		int funcId = this->context->findFunc(funcP);
@@ -519,14 +519,13 @@ namespace faster{
 			partrSize[i] /= sizeof(T);
 		}
 
-		std::cerr << "\n ";
 
 		// Finish applying reduces
 		std::vector<T> vResult = finishPReduces(partResult, partrSize, funcId, op);
 
 		delete [] partResult;
 		delete [] partrSize;
-		std::cerr << "  Done\n";
+		std::cerr << " \n";
 		return vResult;
 	}
 

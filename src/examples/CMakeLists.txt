@@ -5,9 +5,9 @@ project (faster-examples)
 set (faster_VERSION_MAJOR 0)
 set (faster_VERSION_MINOR 1)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg  -std=c++11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg  -std=c++11")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ")
 
 find_package(OpenMP)
 if(OPENMP_FOUND)

@@ -502,7 +502,7 @@ namespace faster{
 			bufferRecv[0].reset();
 			MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, i, MSG_COLLECTDATA, MPI_COMM_WORLD, status);	
 			bufferRecv[0] >> id >> size;
-			std::cerr << "[" << id << ":" << size<< "] " ;
+			//std::cerr << "[" << id << ":" << size<< "] " ;
 			for (int j = 0; j < size; ++j){
 				decodeCollect(ret[count]);
 				count ++;

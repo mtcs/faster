@@ -8,9 +8,9 @@ set (faster_VERSION_MINOR 1)
 add_definitions(-O3)
 add_definitions(-ggdb)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg  -std=c++11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg -Wall -Wextra -std=c++11")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=c++11")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ")
 
 find_package(OpenMP)
 if(OPENMP_FOUND)

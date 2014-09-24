@@ -13,35 +13,25 @@ pair<int,vector<int>> toAList(string & input){
 	long int lastPos = -1;
 	list<pair<size_t,size_t>> pos;
 
-	//cerr << input << '\n';
-
 
 	for ( size_t i = 0; i < input.size(); ++i ){
 		if (input[i] == ' '){
 			if ((i-lastPos) > 1){
 				pos.push_back(make_pair(lastPos+1, i));
-				//cerr <<  "P";
 			}
-			//cerr << " ";
 			lastPos = i;
 		}
-		//else{cerr << input[i];}
 	}
-				//cerr <<  "P";
 	pos.push_back(make_pair(lastPos+1, input.size()));
-	//cerr << '\n';
 	vector<int> v(pos.size()-1);
 
 	auto it = pos.begin();
 	int key = atoi(input.substr(it->first,it->second).data());
 	it++;
-	//cerr << key << " ";
 	for ( size_t i = 0; i < (pos.size()-1) ; ++i){
 		v[i] = atoi(input.substr(it->first,it->second).data());
 		it++;
-		//cerr << v[i] << ",";
 	}
-	//cerr << '\n';
 
 	return make_pair(key,v);
 }
@@ -52,9 +42,6 @@ pair<int, double> createPR(const int & key, vector<int> & s){
 
 //list<pair<int, double>> givePageRank(const int & key, vector<int> * s, size_t nn, double * pr, size_t npr){
 list<pair<int, double>> givePageRank(const int & key, void * sP, size_t nn, void * prP, size_t npr){
-	if (nn == 0){
-		std::cerr << "[" << key << "]";
-	}
 	auto s = * (vector<int>*) sP;
 	auto pr = * (double*) prP;
 	list<pair<int,double>> msgList;
@@ -79,7 +66,7 @@ double getNewPR(const int & key, void * prVP, size_t npr, void * contribVP, size
 	}
 	pr = (1 - dumpingFactor) + dumpingFactor * sum;
 
-	return oldPR - pr;
+	return abs(oldPR - pr);
 }
 
 double sum( double & a, double & b){
@@ -99,30 +86,30 @@ int main(int argc, char ** argv){
 	fc.startWorkers();
 
 
-	cout << "Import Data" << '\n';
+	cerr << "Import Data" << '\n';
 	auto data = new fdd<string>(fc, argv[1]);
 	auto structure = data->map<int, vector<int>>(&toAList)->cache();
 
-	cout << "Init Pagerank" << '\n';
+	cerr << "Init Pagerank" << '\n';
 	auto pr = structure->map<int, double>(&createPR)->cache();
 	auto iterationData = structure->cogroup(pr);
 	double error = 1;
 
-	cout << "Process Data" << '\n';
+	cerr << "Process Data" << '\n';
 	int i = 0;
-	while(error > 0.0001){
-		cout << " Iteration " << i++ << '\n';
+	while( error >= 0.01){
+		cerr << "Iteration " << i++ << '\n';
 		auto contribs = iterationData->flatMapByKey(&givePageRank);
-		error = pr->cogroup(contribs)->mapByKey(&getNewPR)->reduce(&sum)/structure->getSize();
-		cout << "  Error " << error << '\n';
+		error = pr->cogroup(contribs)->mapByKey(&getNewPR)->reduce(&sum) / structure->getSize();
+		cerr << "Error " << error << '\n';
 		//contribs.discard();
 	}
 	auto result = pr->collect();
 
-	cout << "Sorting" << '\n';
+	cerr << "Sorting" << '\n';
 	sort(result.begin(), result.end(), [](const pair<int,double> a, const pair<int,double> b){ return a.first < b.first; });
 
-	cout << "Done in "<< i << " iterations! S:" << result.size() << '\n';
+	cerr << "PageRank in " << structure->getSize() << " node graph in "<< i << " iterations! S:" << result.size() << " (error: " << error <<  ") \n";
 	for ( auto it = result.begin(); it != result.end(); it++){
 		std::cout << it->first << " " << it->second << "\n";
 	}

@@ -143,8 +143,9 @@ double * faster::fastScheduler::getNewAllocation(){
 		auto &t = taskList.back()->times;
 		double m = mean(t);
 		double sd = stdDev(t, m);
-		std::cerr << "      [ Time mean:" << m << " VC:" << sd/m << " ]\n";
-		if ( (m > 1) && ( sd/m > 1 ) ){
+		if ( m > 800 )
+			std::cerr << "      [ Av. Exec. Time:" << m << " VC:" << sd/m << " ]";
+		if ( (m > 300) && ( sd/m > 1 ) ){
 			_dataMigrationNeeded = true;
 		}
 	}
@@ -159,12 +160,12 @@ double * faster::fastScheduler::getNewAllocation(){
 		updateWeights();
 
 	r[0] = 0;
-	std::cerr << "      [ Processes Weights: ";
+	//std::cerr << "      [ Processes Weights: ";
 	for( size_t i = 1; i < numProcs; ++i){
 		r[i] = currentWeights[i];
-		std::cerr << r[i] << " ";
+		//std::cerr << r[i] << " ";
 	}
-	std::cerr << "]\n";
+	//std::cerr << "]\n";
 
 
 	return r;

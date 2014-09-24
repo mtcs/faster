@@ -75,14 +75,14 @@ namespace faster{
 			//}
 			template<typename U> 
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1){
-				std::cerr << "  Cogroup\n";
+				std::cerr << "  Cogroup ";
 				this->groupByKey();
 				return new groupedFdd<K>(context, this, fdd1, keyMap);
 			}
 
 			template<typename U, typename V> 
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1, iFddCore<K,V> * fdd2){
-				std::cerr << "  Cogroup\n";
+				std::cerr << "  Cogroup ";
 				this->groupByKey();
 				return new groupedFdd<K>(context, this, fdd1, fdd2, keyMap);
 			}
@@ -417,7 +417,7 @@ namespace faster{
 
 	template <typename K, typename T> 
 	fddBase * iFddCore<K,T>::_map( void * funcP, fddOpType op, fddBase * newFdd){
-		std::cerr << "  Map\n";
+		std::cerr << "  Map ";
 		size_t result;
 		size_t rSize;
 		unsigned long int tid, sid;
@@ -442,7 +442,7 @@ namespace faster{
 		if (!cached)
 			this->discard();
 
-		std::cerr << "  Done\n";
+		std::cerr << "\n";
 		return newFdd;
 	}
 	template <typename K, typename T> 
@@ -475,7 +475,7 @@ namespace faster{
 
 	template <typename K, typename T> 
 	std::unordered_map<K,size_t> iFddCore<K,T>::countByKey(){
-		std::cerr << "  Count By Key\n";
+		std::cerr << "  Count By Key";
 		fastCommBuffer decoder(0);
 		void * result;
 		size_t rSize;
@@ -504,7 +504,7 @@ namespace faster{
 			}
 		}
 
-		std::cerr << "  Done\n";
+		std::cerr << "\n";
 		return count;
 	}
 
@@ -546,15 +546,15 @@ namespace faster{
 			kMap[key] = preffered;
 			keyAlloc [preffered] += kCount;
 		}
-		std::cerr << "      [ Alloc: ";
+		/*std::cerr << "      [ Alloc: ";
 		for ( int i = 1; i < numProcs; ++i)
 			std::cerr << keyAlloc[i] << " ";
 		std::cerr << "\n";
-		//std::cerr << "      [ Map: ";
-		//for (auto it = keyMap.begin(); it != keyMap.end(); it++){
-			//std::cerr << it->first << ":" << it->second << "  ";
-		//}
-		//std::cerr << "\n";
+		std::cerr << "      [ Map: ";
+		for (auto it = kMap.begin(); it != kMap.end(); it++){
+		      std::cerr << it->first << ":" << it->second << "  ";
+		}
+		std::cerr << " ]\n"; */ 
 
 		
 		return kMap;
@@ -569,7 +569,7 @@ namespace faster{
 		// Key -> totalKeycount, maxowner, ownerCount
 
 		if (! groupedByKey){
-			std::cerr << "  Group By Key\n";
+			std::cerr << "  Group By Key";
 			auto * count = new std::unordered_map<K, std::tuple<size_t, int, size_t>>(this->size);
 
 			context->enqueueTask(OP_CountByKey, id, this->size);
@@ -618,7 +618,7 @@ namespace faster{
 			}
 			groupedByKey = true;
 		}
-		std::cerr << "  Done\n";
+		std::cerr << "\n";
 		return (indexedFdd<K,T> *)this;
 	}
 
@@ -668,7 +668,7 @@ namespace faster{
 
 	template <typename K, typename T> 
 	std::pair <K,T> indexedFdd<K,T>::reduce( void * funcP, fddOpType op){
-		std::cerr << "  Reduce\n";
+		std::cerr << "  Reduce ";
 		std::pair <K,T> result;
 		int funcId = this->context->findFunc(funcP);
 		char ** partResult = new char*[this->context->numProcs() - 1];
@@ -694,7 +694,7 @@ namespace faster{
 		delete [] partResult;
 		delete [] rSize;
 
-		std::cerr << "  Done\n";
+		std::cerr << "\n";
 		return result;
 	}
 
@@ -751,7 +751,7 @@ namespace faster{
 
 	template <typename K, typename T> 
 	std::tuple <K,T,size_t> indexedFdd<K,T*>::reduceP( void * funcP, fddOpType op){
-		std::cerr << "  Reduce\n";
+		std::cerr << "  Reduce ";
 		std::tuple <K,T,size_t> result;
 		unsigned long int tid, sid;
 		int funcId = this->context->findFunc(funcP);
@@ -774,7 +774,7 @@ namespace faster{
 		delete [] partResult;
 		delete [] rSize;
 
-		std::cerr << "  Done\n";
+		std::cerr << "\n";
 		return result;
 	}	
 

@@ -101,14 +101,14 @@ namespace faster{
 
 			template <typename Z, typename FDD> 
 			void collectFDD(Z & ret, FDD * fddP){
-				std::cerr << "    S:SendCollect " ;
+				//std::cerr << "    S:SendCollect " ;
 				
 				comm->sendCollect(fddP->getId());
-				std::cerr << "ID:" << fddP->getId() << " ";
+				//std::cerr << "ID:" << fddP->getId() << " ";
 
 				comm->recvFDDDataCollect(ret);
 				
-				std::cerr << ".\n";
+				//std::cerr << ".\n";
 			}
 
 

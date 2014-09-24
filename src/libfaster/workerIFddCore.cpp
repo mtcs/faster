@@ -379,7 +379,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 			while ( (pos < deleted.size() ) && ( ! deleted[pos] ) )
 				pos++;
 			// Make sure it is not out of bounds, if it is, grow local data to fit new data
-			if(pos == deleted.size()){
+			if( pos >= localData->getSize() ){
 				localData->setSize(localData->getSize() + numItems - i);
 				data = localData->getData();
 				keys = localData->getKeys();
@@ -396,11 +396,11 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 	}
 
 	// If there are elements that are still sparse in the memory
-	if( pos < size ){
+	if( pos < localData->getSize() ){
 		//std::cerr << "        Shrink\n";
 		//std::cerr << "        [ Shrink:";
 		// Bring them forward and correct size
-		for (size_t i = (pos); i < size; ++i){
+		for (size_t i = (pos); i < localData->getSize(); ++i){
 			// Found sparse a item
 			//std::cerr << " " << i;
 			if ( ! deleted[i] ) {

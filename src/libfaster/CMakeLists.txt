@@ -30,7 +30,7 @@ link_directories(${MPI_CXX_LIBRARIES})
 #include_directories("/usr/include/openmpi/")
 set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
 
-set (EXTRA_LIBS ${EXTRA_LIBS} efence)
+#set (EXTRA_LIBS ${EXTRA_LIBS} efence)
 
 #set (MODULES ${MODULES} fdd.cpp ) # Pure templates now
 #set (MODULES ${MODULES} indexedFdd.cpp ) # Pure templates now
