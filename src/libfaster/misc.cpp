@@ -38,3 +38,38 @@ faster::fddType faster::decodeType(size_t code){
 		return Custom;
 	return Null;
 }
+
+
+const std::string faster::decodeOptype(fddOpType op){
+	if (op & OP_GENERICMAP){
+		switch(op){
+			case OP_Map: 		return "Map        ";
+			case OP_BulkMap: 	return "BulkMap    ";
+			case OP_FlatMap: 	return "FlatMap    ";
+			case OP_BulkFlatMap: 	return "BulkFlatMap";
+			case OP_MapByKey: 	return "MapByKey   ";
+			case OP_FlatMapByKey:	return "FlatMapByKey";
+		}
+	}
+	if (op & OP_GENERICREDUCE){
+		switch(op){
+			case OP_Reduce: 	return "Reduce     ";
+			case OP_BulkReduce: 	return "BulkReduce ";
+		}
+	}
+	if (op & OP_GENERICUPDATE){
+		switch(op){
+			case OP_UpdateByKey: 	return "UpdateByKey";
+			case OP_BulkUpdateByKey:return "BulkUpdateByKey";
+		}
+	}
+	if (op & OP_GENERICMISC){
+		switch(op){
+			case OP_CountByKey: 	return "CountByKey ";
+			case OP_GroupByKey: 	return "GroupByKey ";
+			case OP_CoGroup: 	return "Cogroup    ";
+			case OP_Calibrate: 	return "Calibrate  ";
+		}
+	}
+	return "       ";
+}

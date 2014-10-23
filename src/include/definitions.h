@@ -55,6 +55,7 @@ namespace faster{
 	#define OP_CountByKey		0x0401
 	#define OP_GroupByKey		0x0402
 	#define OP_CoGroup		0x0404
+	#define OP_Calibrate		0x0408
 
 	typedef enum : char {
 		NewWorkerDL,
@@ -200,6 +201,7 @@ namespace faster{
 	template <typename K, typename T, typename U>
 	using PmapIFunctionP = std::pair<U, size_t> (*) (const K & inKey, T & input);
 
+	/*
 	template <typename K, typename T, typename L, typename U>
 	using ImapByKeyIFunctionP = std::pair<L,U> (*) (const K & inKey, T * input, size_t size);
 	template <typename K, typename T, typename U>
@@ -208,6 +210,15 @@ namespace faster{
 	using IPmapByKeyIFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, T * input, size_t size);
 	template <typename K, typename T, typename U>
 	using PmapByKeyIFunctionP = std::pair<U, size_t> (*) (const K & inKey, T * input, size_t size);
+	*/
+	template <typename K, typename T, typename L, typename U>
+	using ImapByKeyIFunctionP = std::pair<L,U> (*) (const K & inKey, std::list<T *> * input);
+	template <typename K, typename T, typename U>
+	using mapByKeyIFunctionP = U (*) (const K & inKey, std::list <T *> * input);
+	template <typename K, typename T, typename L, typename U>
+	using IPmapByKeyIFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, std::list <T *> * input);
+	template <typename K, typename T, typename U>
+	using PmapByKeyIFunctionP = std::pair<U, size_t> (*) (const K & inKey, std::list <T *> * input);
 
 	template <typename K, typename T, typename L, typename U>
 	using IbulkMapIFunctionP = void (*) (L * outKey, U * output, K * inKey, T * input, size_t size);
@@ -258,13 +269,13 @@ namespace faster{
 	using  PmapIPFunctionP = std::pair<U, size_t> (*) (K inKey, T * input, size_t size);
 
 	template <typename K, typename T, typename L, typename U>
-	using ImapByKeyIPFunctionP = std::pair<L,U> (*) (const K & inKey, T ** input, size_t * dataSizes, size_t size);
+	using ImapByKeyIPFunctionP = std::pair<L,U> (*) (const K & inKey, std::list<std::pair<T*,size_t>>);
 	template <typename K, typename T, typename U>
-	using  mapByKeyIPFunctionP = U (*) (const K & inKey, T ** input, size_t * dataSizes, size_t size);
+	using  mapByKeyIPFunctionP = U (*) (const K & inKey, std::list<std::pair<T*,size_t>>);
 	template <typename K, typename T, typename L, typename U>
-	using IPmapByKeyIPFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, T ** input, size_t * dataSizes, size_t size);
+	using IPmapByKeyIPFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, std::list<std::pair<T*,size_t>>);
 	template <typename K, typename T, typename U>
-	using  PmapByKeyIPFunctionP = std::pair<U, size_t> (*) (const K & inKey, T ** input, size_t * dataSizes, size_t size);
+	using  PmapByKeyIPFunctionP = std::pair<U, size_t> (*) (const K & inKey, std::list<std::pair<T*,size_t>>);
 
 	template <typename K, typename T, typename L, typename U>
 	using IbulkMapIPFunctionP = void (*) (L * outKey, U * output, K * inKey, T ** input, size_t * inputDataSizes, size_t size);
@@ -309,12 +320,46 @@ namespace faster{
 
 	// --------------- Grouped FDDs -------------//
 
+	template <typename K>
+	using updateByKeyG2FunctionP = void (*) (const K & key, std::list<void*> * a, std::list<void*> * b);
 
 	template <typename K>
+	using updateByKeyG3FunctionP = void (*) (const K & key, std::list<void*> * a, std::list<void*> * b, std::list<void*> * c);
+
+
+	template <typename K, typename To>
+	using mapByKeyG2FunctionP = To (*) (const K & key, std::list<void*> * a, std::list<void*> * b);
+
+	template <typename K, typename To>
+	using mapByKeyG3FunctionP = To (*) (const K & key, std::list<void*> * a, std::list<void*> * b, std::list<void*> * c);
+
+	template <typename K, typename Ko, typename To>
+	using ImapByKeyG2FunctionP = std::pair<Ko,To> (*) (const K & key, std::list<void*> * a, std::list<void*> * b);
+
+	template <typename K, typename Ko, typename To>
+	using ImapByKeyG3FunctionP = std::pair<Ko,To> (*) (const K & key, std::list<void*> * a, std::list<void*> * b, std::list<void*> * c);
+
+
+	template <typename K, typename To>
+	using flatMapByKeyG2FunctionP = std::list<To> (*) (const K & key, std::list<void*> * a, std::list<void*> * b);
+
+	template <typename K, typename To>
+	using flatMapByKeyG3FunctionP = std::list<To> (*) (const K & key, std::list<void*> * a, std::list<void*> * b, std::list<void*> * c);
+
+	template <typename K, typename Ko, typename To>
+	using IflatMapByKeyG2FunctionP = std::list<std::pair<Ko,To>> (*) (const K & key, std::list<void*> * a, std::list<void*> * b);
+
+	template <typename K, typename Ko, typename To>
+	using IflatMapByKeyG3FunctionP = std::list<std::pair<Ko,To>> (*) (const K & key, std::list<void*> * a, std::list<void*> * b, std::list<void*> * c);
+
+
+
+
+	/*template <typename K>
 	using updateByKeyG2FunctionP = void (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB);
 
 	template <typename K>
-	using updateByKeyG3FunctionP = void (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB, void * c, size_t sizeC);
+	using updateByKeyG3FunctionP = void (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB, void * c, size_t sizeC);*/
 
 	/*template <typename K, typename T, typename U, typename To>
 	using mapByKeyG2FunctionP = To (*) (const K & key, T * a, size_t sizeA, U * b, size_t sizeB);
@@ -328,7 +373,7 @@ namespace faster{
 	template <typename K, typename T, typename U, typename V, typename Ko, typename To>
 	using ImapByKeyG3FunctionP = std::pair<Ko,To> (*) (const K & key, T * a, size_t sizeA, U * b, size_t sizeB, V * c, size_t sizeC);// */
 
-	template <typename K, typename To>
+	/*template <typename K, typename To>
 	using mapByKeyG2FunctionP = To (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB);
 
 	template <typename K, typename To>
@@ -351,7 +396,7 @@ namespace faster{
 	using IflatMapByKeyG2FunctionP = std::list<std::pair<Ko,To>> (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB);
 
 	template <typename K, typename Ko, typename To>
-	using IflatMapByKeyG3FunctionP = std::list<std::pair<Ko,To>> (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB, void * c, size_t sizeC);
+	using IflatMapByKeyG3FunctionP = std::list<std::pair<Ko,To>> (*) (const K & key, void * a, size_t sizeA, void * b, size_t sizeB, void * c, size_t sizeC);*/
 
 
 	/*template <typename K, typename To>
@@ -373,6 +418,7 @@ namespace faster{
 
 	//template <typename K>
 	//using PPCountKeyMapT = std::unordered_map<K, std::pair<size_t, std::list<int>> > ;
+
 
 
 }

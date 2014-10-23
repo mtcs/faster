@@ -24,6 +24,7 @@ namespace faster{
 	class workerIFddCore : public workerFddBase{
 		protected:
 			indexedFddStorage <K,T> * localData;
+			std::vector<K> uKeys;
 			bool groupedByKey;
 
 			// ByKey Functions

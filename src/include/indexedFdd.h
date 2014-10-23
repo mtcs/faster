@@ -75,14 +75,14 @@ namespace faster{
 			//}
 			template<typename U> 
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1){
-				std::cerr << "  Cogroup ";
+				//std::cerr << "  Cogroup ";
 				this->groupByKey();
 				return new groupedFdd<K>(context, this, fdd1, keyMap);
 			}
 
 			template<typename U, typename V> 
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1, iFddCore<K,V> * fdd2){
-				std::cerr << "  Cogroup ";
+				//std::cerr << "  Cogroup ";
 				this->groupByKey();
 				return new groupedFdd<K>(context, this, fdd1, fdd2, keyMap);
 			}
@@ -247,7 +247,7 @@ namespace faster{
 			// --------------- FDD Builtin functions ------------- // 
 			// Collect a FDD
 			std::vector<std::pair<K,T>> collect( ){
-				std::cerr << " \033[0;31mSIZE: " << this->size << "\033[0m";
+				//std::cerr << " \033[0;31mSIZE: " << this->size << "\033[0m";
 				std::vector<std::pair<K,T>> data(this->size);
 				this->context->collectFDD(data, this);
 				return data;
@@ -417,8 +417,7 @@ namespace faster{
 
 	template <typename K, typename T> 
 	fddBase * iFddCore<K,T>::_map( void * funcP, fddOpType op, fddBase * newFdd){
-		std::cerr << "  Map ";
-		size_t result;
+		//std::cerr << "  Map ";
 		size_t rSize;
 		unsigned long int tid, sid;
 
@@ -428,13 +427,15 @@ namespace faster{
 		int funcId = context->findFunc(funcP);
 
 		// Send task
+		auto start = system_clock::now();
 		context->enqueueTask(op, id, newFddId, funcId, this->size);
 
 		// Receive results
+		auto result = context->recvTaskResult(tid, sid, start);
+
 		size_t newSize = 0;
 		for (int i = 1; i < context->numProcs(); ++i){
-			result = * (size_t*) context->recvTaskResult(tid, sid, rSize);
-			newSize += result;
+			if (result[i].second > 0) newSize += * (size_t*) result[i].first;
 		}
 		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) ) 
 			newFdd->setSize(newSize);
@@ -442,7 +443,7 @@ namespace faster{
 		if (!cached)
 			this->discard();
 
-		std::cerr << "\n";
+		//std::cerr << "\n";
 		return newFdd;
 	}
 	template <typename K, typename T> 
@@ -475,22 +476,22 @@ namespace faster{
 
 	template <typename K, typename T> 
 	std::unordered_map<K,size_t> iFddCore<K,T>::countByKey(){
-		std::cerr << "  Count By Key";
+		//std::cerr << "  Count By Key";
 		fastCommBuffer decoder(0);
-		void * result;
 		size_t rSize;
 		unsigned long int tid, sid;
 		std::unordered_map<K,size_t> count;
 
-
+		auto start = system_clock::now();
 		context->enqueueTask(OP_CountByKey, id, this->size);
+
+		auto result = context->recvTaskResult(tid, sid, start);
 
 		for (int i = 1; i < context->numProcs(); ++i){
 
 			K key;
 			size_t kCount, numKeys;
-			result = context->recvTaskResult(tid, sid, rSize);
-			decoder.setBuffer(result, rSize);
+			decoder.setBuffer(result[i].first, result[i].second);
 			decoder >> numKeys;
 
 			for ( size_t i = 0; i < numKeys; ++i ) {
@@ -504,7 +505,7 @@ namespace faster{
 			}
 		}
 
-		std::cerr << "\n";
+		//std::cerr << "\n";
 		return count;
 	}
 
@@ -512,6 +513,7 @@ namespace faster{
 	std::unordered_map<K, int> iFddCore<K,T>::calculateKeyMap(std::unordered_map<K, std::tuple<size_t, int, size_t>> count){ 
 		size_t size = this->size;
 		std::unordered_map<K, int> kMap;
+		std::unordered_map<K, bool> done;
 		size_t numProcs = context->numProcs();
 		std::vector<size_t> keyAlloc(numProcs,0);
 		std::vector<size_t> procBudget = context->getAllocation(size);
@@ -531,20 +533,26 @@ namespace faster{
 			if(keyAlloc[preffered] < procBudget[preffered]){
 				kMap[key] = preffered;
 				keyAlloc [preffered] += kCount;
-				count.erase(key);
+				//count.erase(key);
+				done[key] = true;
+			}else{
+				done[key] = false;
 			}
+			
 		}
 
 		for (auto it = count.begin(); it != count.end(); it++){
 			K key = it->first;
-			size_t kCount = std::get<0>(it->second);
-			int preffered = 1 + rand() % (numProcs - 1);
+			if (! done[key]){
+				size_t kCount = std::get<0>(it->second);
+				int preffered = 1 + rand() % (numProcs - 1);
 
-			while(keyAlloc[preffered] >= procBudget[preffered]){
-				preffered = 1 + rand() % (numProcs - 1);
+				while(keyAlloc[preffered] >= procBudget[preffered]){
+					preffered = 1 + rand() % (numProcs - 1);
+				}
+				kMap[key] = preffered;
+				keyAlloc [preffered] += kCount;
 			}
-			kMap[key] = preffered;
-			keyAlloc [preffered] += kCount;
 		}
 		/*std::cerr << "      [ Alloc: ";
 		for ( int i = 1; i < numProcs; ++i)
@@ -563,24 +571,26 @@ namespace faster{
 	template <typename K, typename T> 
 	indexedFdd<K,T> * iFddCore<K,T>::groupByKey(){
 		fastCommBuffer decoder(0);
-		void * result;
 		size_t rSize;
 		unsigned long int tid, sid;
 		// Key -> totalKeycount, maxowner, ownerCount
 
 		if (! groupedByKey){
-			std::cerr << "  Group By Key";
-			auto * count = new std::unordered_map<K, std::tuple<size_t, int, size_t>>(this->size);
+			//std::cerr << "  GroupByKey ";
+			auto * count = new std::unordered_map< K, std::tuple<size_t, int, size_t> >;
+			count->reserve(this->size);
 
+			auto start = system_clock::now();
 			context->enqueueTask(OP_CountByKey, id, this->size);
+
+			auto result = context->recvTaskResult(tid, sid, start);
 
 			// Get a count by key with majority owner consideration
 			for (int i = 1; i < context->numProcs(); ++i){
 				K key;
 				size_t kCount, numKeys;
 
-				result = context->recvTaskResult(tid, sid, rSize);
-				decoder.setBuffer(result, rSize);
+				decoder.setBuffer(result[i].first, result[i].second);
 				decoder >> numKeys;
 
 				for ( size_t i = 0; i < numKeys; ++i ) {
@@ -613,12 +623,10 @@ namespace faster{
 			unsigned long int tid = context->enqueueTask(OP_GroupByKey, id, this->size);
 			context->sendKeyMap(tid, keyMap);
 
-			for (int i = 1; i < context->numProcs(); ++i){
-				result = context->recvTaskResult(tid, sid, rSize);
-			}
+			result = context->recvTaskResult(tid, sid, start);
 			groupedByKey = true;
 		}
-		std::cerr << "\n";
+		//std::cerr << ". ";
 		return (indexedFdd<K,T> *)this;
 	}
 
@@ -668,7 +676,7 @@ namespace faster{
 
 	template <typename K, typename T> 
 	std::pair <K,T> indexedFdd<K,T>::reduce( void * funcP, fddOpType op){
-		std::cerr << "  Reduce ";
+		//std::cerr << "  Reduce ";
 		std::pair <K,T> result;
 		int funcId = this->context->findFunc(funcP);
 		char ** partResult = new char*[this->context->numProcs() - 1];
@@ -676,25 +684,24 @@ namespace faster{
 		unsigned long int tid, sid;
 
 		// Send task
+		auto start = system_clock::now();
 		unsigned long int reduceTaskId = this->context->enqueueTask(op, this->id, 0, funcId, this->size);
 
 		// Receive results
+		auto resultV = this->context->recvTaskResult(tid, sid, start);
+
 		for (int i = 0; i < (this->context->numProcs() - 1); ++i){
-			char * pr = (char*) this->context->recvTaskResult(tid, sid, rSize[i]);
-			partResult[i] = new char [rSize[i]];
-			memcpy(partResult[i], pr, rSize[i]);
+			partResult[i] = (char*) resultV[i + 1].first;
+			rSize[i] = resultV[i + 1].second;
 		}
 
 		// Finish applying reduces
 		result = finishReduces(partResult, rSize, funcId, op);
 
-		for (int i = 0; i < (this->context->numProcs() - 1); ++i){
-			delete [] partResult[i];
-		}
 		delete [] partResult;
 		delete [] rSize;
 
-		std::cerr << "\n";
+		//std::cerr << "\n";
 		return result;
 	}
 
@@ -751,30 +758,32 @@ namespace faster{
 
 	template <typename K, typename T> 
 	std::tuple <K,T,size_t> indexedFdd<K,T*>::reduceP( void * funcP, fddOpType op){
-		std::cerr << "  Reduce ";
+		//std::cerr << "  Reduce ";
 		std::tuple <K,T,size_t> result;
 		unsigned long int tid, sid;
 		int funcId = this->context->findFunc(funcP);
 		char ** partResult = new char *[this->context->numProcs() - 1];
-		size_t * rSize = new size_t[this->context->numProcs() - 1];
+		size_t * partrSize = new size_t[this->context->numProcs() - 1];
 
 		// Send task
+		auto start = system_clock::now();
 		unsigned long int reduceTaskId = this->context->enqueueTask(op, this->id, 0, funcId, this->size);
 
 		// Receive results
+		auto resultV = this->context->recvTaskResult(tid, sid, start);
+
 		for (int i = 0; i < (this->context->numProcs() - 1); ++i){
-			char * pr = (char*) this->context->recvTaskResult(tid, sid, rSize[i]);
-			partResult[i] = new char [rSize[i]];
-			memcpy(partResult[i], pr, rSize[i]);
+			partResult[i] = (T*) resultV[i+1].first;
+			partrSize[i] = resultV[i+1].second /= sizeof(T);
 		}
 
 		// Finish applying reduces
-		result = finishReducesP(partResult, rSize, funcId, op);
+		result = finishReducesP(partResult, partrSize, funcId, op);
 
 		delete [] partResult;
-		delete [] rSize;
+		delete [] partrSize;
 
-		std::cerr << "\n";
+		//std::cerr << "\n";
 		return result;
 	}	
 

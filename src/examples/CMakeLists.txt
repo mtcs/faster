@@ -29,7 +29,7 @@ set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
 include_directories ("${PROJECT_SOURCE_DIR}/../libfaster")
 set (EXTRA_LIBS ${EXTRA_LIBS} faster)
 
-set (EXTRA_LIBS ${EXTRA_LIBS} efence)
+#set (EXTRA_LIBS ${EXTRA_LIBS} efence)
 
 add_executable(fexample-int fexample-int.cpp)
 add_executable(fexample-indexed fexample-indexed.cpp)

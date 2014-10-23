@@ -3,13 +3,12 @@
 
 
 #include <vector>
-#include <string>
 #include <cstring>
 #include <iostream>
 #include <tuple>
 
 namespace faster {
-	const int BUFFER_INITIAL_SIZE = 1*1024*1024;
+	const int BUFFER_INITIAL_SIZE = 512*1024;
 
 	class fastCommBuffer{
 		private:
@@ -17,6 +16,7 @@ namespace faster {
 			size_t _size;
 			size_t _allocatedSize;
 			bool _ownData;
+
 		public:
 			fastCommBuffer();
 			fastCommBuffer(size_t s);
@@ -40,13 +40,24 @@ namespace faster {
 			template <typename T>
 			void write(T &v, size_t s){
 				grow(_size + s);
-				memcpy( &_data[_size], &v, s );
+				std::memcpy( &_data[_size], &v, s );
+				
+				//char * p = (char*) &v;
+				//for ( size_t i = 0; i < s; i++){
+					//_data[_size + i] = p[i];
+				//}
+
 				_size += s;
 			}
 			template <typename T>
 			void writePos(const T &v, size_t s, size_t pos){
 				grow(pos + s);
-				memcpy( &_data[pos], (char*) &v, s );
+				std::memcpy( &_data[pos], (char*) &v, s );
+				//char * p = (char*) &v;
+				//for ( size_t i = 0; i < s; i++){
+					//_data[_size + i] = p[i];
+				//}
+
 				if(_size < pos+s)
 					_size += pos+s;
 			}
@@ -56,13 +67,22 @@ namespace faster {
 			}
 
 			template <typename T>
-			void write(T * v, size_t s){
-				grow(_size + s);
-				memcpy( &_data[_size], v, s );
+			inline void writeSafe(T * v, size_t s){
+				std::memcpy( &_data[_size], v, s );
+				//char * p = (char*) &v;
+				//for ( size_t i = 0; i < s; i++){
+				//	_data[_size + i] = p[i];
+				//}
+
 				_size += s;
 			}
+			template <typename T>
+			inline void write(T * v, size_t s){
+				grow(_size + s);
+				writeSafe(v, s);
+			}
 			/*void write(void * v, size_t s){
-				memcpy( &_data[_size], v, s );
+				std::memcpy( &_data[_size], v, s );
 				_size += s;
 			}// */
 
@@ -70,14 +90,18 @@ namespace faster {
 			void write(T v){
 				write( v, sizeof(T) );
 			}
-			void write(std::string v){
-				write( v.size() );
-				write( v.data(), v.size() );
+			void write(std::string i){
+				size_t s = i.length();
+				grow(_size + sizeof(size_t) + s );
+				writeSafe( &s, sizeof(size_t) );
+				writeSafe( i.data(), s );
 			}
 			template <typename T>
 			void write(std::vector<T> v){
-				write( v.size() );
-				write( v.data(), v.size()*sizeof(T) );
+				size_t s = v.size();
+				grow(_size + sizeof(size_t) + s * sizeof(T));
+				writeSafe( &s, sizeof(size_t) );
+				writeSafe( v.data(), s * sizeof(T) );
 			}
 			template <typename K, typename T>
 			void write(std::pair<K,T> p){
@@ -94,12 +118,20 @@ namespace faster {
 			// READ Data
 			template <typename T>
 			void read(T & v, size_t s){
-				memcpy(&v, &_data[_size], s );
+				std::memcpy(&v, &_data[_size], s );
+				//char * p = (char*) &v;
+				//for ( size_t i = 0; i < s; i++){
+					//p[i] = _data[_size + i];
+				//}
 				_size += s;
 			}
 			template <typename T>
 			void read(T * v, size_t s){
-				memcpy(v, &_data[_size], s );
+				std::memcpy(v, &_data[_size], s );
+				//char * p = (char*) &v;
+				//for ( size_t i = 0; i < s; i++){
+					//p[i] = _data[_size + i];
+				//}
 				_size += s;
 			}
 			template <typename T>

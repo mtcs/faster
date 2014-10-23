@@ -145,7 +145,7 @@ namespace faster{
 
 		fastCommBuffer * buffer;
 		fastCommBuffer * buffer3;
-		fastCommBuffer  bufferRecv[3];
+		fastCommBuffer * bufferRecv;
 		fastCommBuffer resultBuffer;
 		public:
 
@@ -176,7 +176,7 @@ namespace faster{
 
 		//void sendTaskResult(unsigned long int id, void * res, size_t size, double time);
 		void sendTaskResult();
-		void * recvTaskResult(unsigned long int &tid, unsigned long int & sid, int &proc, size_t &size, size_t & time);
+		void * recvTaskResult(unsigned long int &tid, unsigned long int & sid, size_t &size, size_t & time);
 
 		// FDD Creation / Destruction
 		void sendCreateFDD(unsigned long int id,  fddType type, size_t size, int dest);
@@ -423,7 +423,7 @@ namespace faster{
 
 		buffer[0].grow(16 + getSize(data, NULL, size));
 
-		for( int i = 0; i < size; ++i ){
+		for( size_t i = 0; i < size; ++i ){
 			buffer[0] << data[i];
 		}
 
@@ -437,7 +437,7 @@ namespace faster{
 
 		buffer[0].grow(16 + (size*sizeof(size_t)) + getSize(data, dataSizes, size));
 
-		for( int i = 0; i < size; ++i ){
+		for( size_t i = 0; i < size; ++i ){
 			buffer[0] << dataSizes[i];
 			buffer[0].write(data[i], dataSizes[i]*sizeof(T));
 		}
@@ -452,7 +452,7 @@ namespace faster{
 
 		buffer[0].grow(16 + getSize(keys, NULL, size) + getSize(data, NULL, size));
 
-		for( int i = 0; i < size; ++i ){
+		for( size_t i = 0; i < size; ++i ){
 			buffer[0] << keys[i] << data[i];
 		}
 
@@ -466,7 +466,7 @@ namespace faster{
 
 		buffer[0].grow(16 + getSize(keys, NULL, size) + (size*sizeof(size_t)) + getSize(data, dataSizes, size));
 
-		for( int i = 0; i < size; ++i ){
+		for( size_t i = 0; i < size; ++i ){
 			buffer[0] << keys[i] << dataSizes[i];
 			buffer[0].write(data[i], dataSizes[i]*sizeof(T));
 		}
@@ -503,7 +503,7 @@ namespace faster{
 			MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, i, MSG_COLLECTDATA, MPI_COMM_WORLD, status);	
 			bufferRecv[0] >> id >> size;
 			//std::cerr << "[" << id << ":" << size<< "] " ;
-			for (int j = 0; j < size; ++j){
+			for (size_t j = 0; j < size; ++j){
 				decodeCollect(ret[count]);
 				count ++;
 			}
@@ -543,7 +543,7 @@ namespace faster{
 		// Allocate map with pre-known size
 		keyMap.reserve(size);
 
-		for ( int i = 0; i < size; ++i){
+		for ( size_t i = 0; i < size; ++i){
 			K key;
 			int count;
 			bufferRecv[0] >> key >> count;

@@ -19,7 +19,7 @@ void faster::_workerIFdd<K,T*>::map (workerFddBase * dest, ImapIPFunctionP<K,T,L
 	//std::cerr << "START " << id << " " << s << "  ";
 
 	#pragma omp parallel for 
-	for (int i = 0; i < s; ++i){
+	for (size_t i = 0; i < s; ++i){
 		std::pair<L,U> r = mapFunc(ik[i], d[i], ls[i]);
 		ok[i] = r.first;
 		od[i] = r.second;
@@ -39,7 +39,7 @@ void faster::_workerIFdd<K,T*>::map (workerFddBase * dest, IPmapIPFunctionP<K,T,
 	//std::cerr << "START " << id << " " << s << "  ";
 
 	#pragma omp parallel for 
-	for (int i = 0; i < s; ++i){
+	for (size_t i = 0; i < s; ++i){
 		std::tuple<L,U,size_t> r = mapFunc(ik[i], d[i], ls[i]);
 		ok[i] = std::get<0>(r);
 		od[i] = std::get<1>(r);
@@ -59,7 +59,7 @@ void faster::_workerIFdd<K,T*>::map (workerFddBase * dest, mapIPFunctionP<K,T,U>
 	//std::cerr << "START " << id << " " << s << "  ";
 
 	#pragma omp parallel for 
-	for (int i = 0; i < s; ++i){
+	for (size_t i = 0; i < s; ++i){
 		od[i] = mapFunc(ik[i], d[i], ls[i]);
 	}
 	//std::cerr << "END ";
@@ -76,7 +76,7 @@ void faster::_workerIFdd<K,T*>::map (workerFddBase * dest, PmapIPFunctionP<K,T,U
 	//std::cerr << "START " << id << " " << s << "  ";
 
 	#pragma omp parallel for 
-	for (int i = 0; i < s; ++i){
+	for (size_t i = 0; i < s; ++i){
 		std::pair<U,size_t> r = mapFunc(ik[i], d[i], ls[i]);
 		od[i] = r.first;
 		dls[i] = r.second;
@@ -139,7 +139,7 @@ void faster::_workerIFdd<K,T*>::flatMap(workerFddBase * dest,  IflatMapIPFunctio
 	{
 		std::list<std::pair<L,U>> partResultList;
 		#pragma omp for 
-		for (int i = 0; i < s; ++i){
+		for (size_t i = 0; i < s; ++i){
 			std::list<std::pair<L,U>> r = flatMapFunc(d[i], this->localData->getLineSizes()[i]);
 
 			partResultList.insert(partResultList.end(), r.begin(), r.end() );
@@ -162,7 +162,7 @@ void faster::_workerIFdd<K,T*>::flatMap(workerFddBase * dest,  IPflatMapIPFuncti
 	{
 		std::list<std::tuple<L, U, size_t>> partResultList;
 		#pragma omp for 
-		for (int i = 0; i < s; ++i){
+		for (size_t i = 0; i < s; ++i){
 			std::list<std::tuple<L, U, size_t>>r = flatMapFunc(d[i], this->localData->getLineSizes()[i]);
 
 			partResultList.insert(partResultList.end(), r.begin(), r.end() );
@@ -185,7 +185,7 @@ void faster::_workerIFdd<K,T*>::flatMap(workerFddBase * dest,  flatMapIPFunction
 	{
 		std::list<U> partResultList;
 		#pragma omp for 
-		for (int i = 0; i < s; ++i){
+		for (size_t i = 0; i < s; ++i){
 			std::list<U> r = flatMapFunc(d[i], this->localData->getLineSizes()[i]);
 
 			partResultList.insert(partResultList.end(), r.begin(), r.end() );
@@ -208,7 +208,7 @@ void faster::_workerIFdd<K,T*>::flatMap(workerFddBase * dest,  PflatMapIPFunctio
 	{
 		std::list<std::pair<U, size_t>> partResultList;
 		#pragma omp for 
-		for (int i = 0; i < s; ++i){
+		for (size_t i = 0; i < s; ++i){
 			std::list<std::pair<U, size_t>>r = flatMapFunc(d[i], this->localData->getLineSizes()[i]);
 
 			partResultList.insert(partResultList.end(), r.begin(), r.end() );

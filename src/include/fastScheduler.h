@@ -18,6 +18,8 @@ namespace faster{
 			std::vector<double> currentWeights;
 			bool _dataMigrationNeeded;
 
+			size_t infoPos;
+
 			void updateWeights();
 			double * getNewAllocation();
 			void resetProcessWeights();
@@ -29,6 +31,14 @@ namespace faster{
 			fastTask * enqueueTask(fddOpType opT, unsigned long int id, size_t size);
 			
 			void taskProgress(unsigned long int id, unsigned long int pid, size_t time);
+			void taskFinished(unsigned long int id, size_t time);
+
+			void setCalibration(std::vector<size_t> time);
+			
+			void printTaskInfo();
+			void printTaskInfo(size_t task);
+			void printHeader();
+			void updateTaskInfo();
 
 			bool dataMigrationNeeded();
 			std::vector<std::list< std::pair<int,long int> >> getDataMigrationInfo();

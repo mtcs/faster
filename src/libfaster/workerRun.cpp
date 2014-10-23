@@ -127,7 +127,7 @@ void faster::worker::run(){
 				break;
 		}
 	}
-	std::cerr << "  Worker " << comm->getProcId() << " DONE" << '\n';
+	//std::cerr << "  Worker " << comm->getProcId() << " DONE" << '\n';
 }
 
 

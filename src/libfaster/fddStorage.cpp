@@ -109,11 +109,11 @@ template <class T>
 void faster::fddStorage<T*>::setData( T ** data, size_t * ls, size_t s){
 	grow(s);
 	#pragma omp parallel for
-	for ( int i = 0; i < s; ++i){
+	for ( size_t i = 0; i < s; ++i){
 		lineSizes[i] = ls[i];
 		
 		this->localData[i] = new  T [lineSizes[i]];
-		for ( int j = 0; j < lineSizes[i]; ++j){
+		for ( size_t j = 0; j < lineSizes[i]; ++j){
 			this->localData[i][j] =  data[i][j];
 		}
 	}
@@ -140,7 +140,7 @@ void faster::fddStorage<T*>::setDataRaw( void * data, size_t * ls, size_t s){
 
 	buffer.setBuffer(data, s);
 
-	for ( int i = 0; i < s; ++i){
+	for ( size_t i = 0; i < s; ++i){
 		lineSizes[i] = ls[i];
 
 		this->localData[i] = new  T [lineSizes[i]];
@@ -222,7 +222,7 @@ void faster::fddStorage<T*>::grow(size_t toSize){
 			//memcpy(newStorage, localData, this->size * sizeof( T* ) );
 			//memcpy(newLineSizes, lineSizes, this->size * sizeof( size_t ) );
 			#pragma omp parallel for
-			for ( int i = 0; i < this->size; ++i){
+			for ( size_t i = 0; i < this->size; ++i){
 				newStorage[i] =  this->localData[i];
 				newLineSizes[i] = lineSizes[i];
 			}

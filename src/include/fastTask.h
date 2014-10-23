@@ -19,6 +19,7 @@ namespace faster{
 			size_t resultSize;
 			size_t workersFinished;
 			std::vector<size_t> times;
+			size_t duration;
 			double * allocation;
 
 	};

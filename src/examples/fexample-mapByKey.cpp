@@ -6,13 +6,23 @@
 using namespace std;
 using namespace faster;
 
-pair<int,int> mapByKey1(const int & key, int * input, size_t size){
+/*pair<int,int> mapByKey1(const int & key, int * input, size_t size){
 	pair<int,int> result (key, 0);
 
 	for ( size_t i = 0; i < size; ++i){
 		result.second += input[i];
 	}
 	result.second /= size;
+
+	return result;
+}// */
+pair<int,int> mapByKey1(const int & key, list<int *> * input){
+	pair<int,int> result (key, 0);
+
+	for ( auto it = input->begin(); it != input->end() ; it++ ){
+		result.second += **it;
+	}
+	result.second /= input->size();
 
 	return result;
 }
@@ -53,9 +63,11 @@ int main(int argc, char ** argv){
 
 	cout << "Key Histogram\n";
 	printHistogram(data.countByKey());
+	fc.updateInfo();
 
 	cout << "Process Data" << '\n';
 	vector<pair<int,int>> result = data.groupByKey()->mapByKey(&mapByKey1)->collect();
+	fc.updateInfo();
 
 	cout << "DONE!" << '\n';
 

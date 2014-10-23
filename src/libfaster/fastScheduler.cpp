@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <utility>
+#include <stdio.h>
 
 #include "fastScheduler.h"
 #include "fastTask.h"
@@ -13,6 +14,7 @@ faster::fastScheduler::fastScheduler(unsigned int numProcs){
 	numTasks = 0;
 	resetProcessWeights();
 	_dataMigrationNeeded = false;
+	infoPos = 0;
 }
 faster::fastScheduler::~fastScheduler(){
 	for ( auto it = taskList.begin(); it != taskList.end() ; it++ )
@@ -143,8 +145,8 @@ double * faster::fastScheduler::getNewAllocation(){
 		auto &t = taskList.back()->times;
 		double m = mean(t);
 		double sd = stdDev(t, m);
-		if ( m > 800 )
-			std::cerr << "      [ Av. Exec. Time:" << m << " VC:" << sd/m << " ]";
+		//if ( m > 800 )
+			//std::cerr << "      [ Av. Exec. Time:" << m << " VC:" << sd/m << " ]";
 		if ( (m > 300) && ( sd/m > 1 ) ){
 			_dataMigrationNeeded = true;
 		}
@@ -181,6 +183,7 @@ faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned lo
 	newTask->functionId = funcId;
 	newTask->workersFinished = 0;
 	newTask->allocation = getNewAllocation();
+	newTask->duration = 0;
 	newTask->times = std::vector<size_t>(numProcs, 0);
 
 	taskList.insert(taskList.end(), newTask);
@@ -188,13 +191,105 @@ faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned lo
 	return newTask;
 }
 
-faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned long int id, size_t size){
-	return enqueueTask(opT, id, 0, -1, size);
+faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned long int sid, size_t size){
+	return enqueueTask(opT, sid, 0, -1, size);
 }
 
-void faster::fastScheduler::taskProgress(unsigned long int id, unsigned long int pid, size_t time){
-	taskList[id]->workersFinished++;
-	taskList[id]->times[pid] = time;
+void faster::fastScheduler::taskProgress(unsigned long int tid, unsigned long int pid, size_t time){
+	#pragma omp atomic
+	taskList[tid]->workersFinished++;
+
+	taskList[tid]->times[pid] = time;
 }
 
+void faster::fastScheduler::taskFinished(unsigned long int tid, size_t time){
+	taskList[tid]->duration = time;
+}
+
+void faster::fastScheduler::setCalibration(std::vector<size_t> time){
+	size_t sum = 0;
+
+	for ( size_t i = 1; i < time.size(); ++i){
+		sum += time[i];
+	}
+	
+	std::vector<double> rate(numProcs, 0);
+
+	for ( size_t i = 1; i < time.size(); ++i){
+		rate[i] = (double) sum / time[i];
+		//rate[i] = (double) sum / (time[i]*log(time[i]));
+	}
+
+	double powersum = 0;
+	for( size_t i = 1; i < numProcs; ++i){
+		powersum += rate[i] ;
+	}
+
+	for ( size_t i = 1; i < time.size(); ++i){
+		currentWeights[i] = rate[i] / powersum;
+	}
+}
+
+void faster::fastScheduler::printTaskInfo(size_t taskID){
+	auto task = taskList[taskID];
+	std::vector<size_t> t = task->times;
+	t.erase(t.begin());
+	double m = mean(t);
+	double sd = stdDev(t, m);
+
+
+	std::cerr << "\033[1;34m" ;
+	fprintf(stderr, "%2ld ", task->id);
+	std::cerr << decodeOptype(task->operationType) << "\t";
+
+	std::cerr << "\033[0m" ;
+	fprintf(stderr, "%2d %2ld %2ld ", task->functionId, task->srcFDD, task->destFDD );
+
+	std::cerr << "| \033[1;31m" ;
+	fprintf(stderr, "%5ld %6.1lf %3.1lf ", task->duration, m, sd/m);
+
+	std::cerr << "\033[0m| " ;
+
+	for ( auto it2 = t.begin() ; it2 != t.end(); it2++){
+		fprintf(stderr, "%5ld ", *it2);
+	}
+
+	std::cerr << "\n";
+}
+void faster::fastScheduler::printHeader(){
+	std::cerr << "\033[1;34mTask\033[0m ID# Func Src Dest Size | \033[1;31mDuration Avg_Processing_Time Dur_CV \033[0m| Individual_Times\n";
+}
+
+void faster::fastScheduler::printTaskInfo(){
+
+	double cvsum = 0;
+	size_t mm = 0;
+	int count = 0;
+
+	printHeader();
+
+	//for ( auto it = taskList.begin(); it != taskList.end(); it++){
+	for ( size_t i = 0; i < taskList.size(); ++i ){
+		std::vector<size_t> t = (taskList[i])->times;
+		t.erase(t.begin());
+		double m = mean(t);
+		double sd = stdDev(t, m);
+	
+		mm += m;
+		if( m > 100 ){
+			cvsum += sd/m;
+			count++;
+		}
+
+		printTaskInfo(i);
+	}
+	std::cerr << "\n av_Time:" << mm/taskList.size() << " av_CV:" << cvsum/count << "\n";
+}
+
+
+void faster::fastScheduler::updateTaskInfo(){
+	while (  infoPos < taskList.size() ){
+		printTaskInfo(infoPos++);
+	}
+}
 

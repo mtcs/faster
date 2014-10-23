@@ -75,7 +75,7 @@ bool verify(std::vector<T*> &a, std::vector<std::pair<U*,size_t>> &b, std::vecto
 		if ( ds[i] != b[i].second )
 			return false;
 
-		for (int j = 0; j < ds[i]; ++j){
+		for (size_t j = 0; j < ds[i]; ++j){
 			U * p = b[i].first;
 
 			if ( U(a[i][j]) != p[j] ) {
@@ -95,7 +95,7 @@ bool verify(std::vector<T*> &a, std::vector<U> &b, std::vector<size_t> & ds){
 		if ( ds[i] != b[i].size() )
 			return false;
 
-		for (int j = 0; j < ds[i]; ++j){
+		for (size_t j = 0; j < ds[i]; ++j){
 			if ( a[i][j] != b[i][j] ) {
 				return false;
 			}
@@ -131,7 +131,7 @@ bool verify(std::vector<K> & k, std::vector<T*> & a, std::vector<size_t> & ds, s
 			return false;
 		}
 
-		for (int j = 0; j < ds[i]; ++j){
+		for (size_t j = 0; j < ds[i]; ++j){
 			if (U(a[i][j]) != p[j]) {
 				return false;
 			}

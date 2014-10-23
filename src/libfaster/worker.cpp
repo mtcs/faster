@@ -1,6 +1,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <chrono>
 
 #include "fastComm.h"
 #include "fastCommBuffer.h"
@@ -65,13 +66,67 @@ void faster::worker::setFDDIData(unsigned long int id, void * keys, void * data,
 }*/
 
 
+void faster::worker::calibrate(){
+	using std::chrono::system_clock;
+	using std::chrono::duration_cast;
+	using std::chrono::milliseconds;
 
+	fastCommBuffer &buffer = comm->getResultBuffer();
+	const int TESTVECSIZE = 1000000;
+	char ret = 0;
+
+	buffer.reset();
+	buffer << size_t(0);
+
+	auto start = system_clock::now();
+	auto end = system_clock::now();
+	
+	#pragma omp parallel 
+	{
+		std::vector<double> v(TESTVECSIZE, 0);
+		double a;
+
+
+		#pragma omp master
+		start = system_clock::now();
+
+		#pragma omp barrier
+
+		#pragma omp for schedule(static,100)
+		for ( size_t i = 0; i < 1000000; ++i){
+			for ( size_t j = 1; j < 5; ++j){
+				a += i + j;
+				a -= i - j;
+				a *= i * j;
+				a /= 1 + i / j;
+			}
+			a += v[ size_t( i * 20011 ) % TESTVECSIZE  ];
+			v [ size_t( i * 4099 ) % TESTVECSIZE ] = a;
+		}
+
+		#pragma omp master
+		end = system_clock::now();
+	}
+	auto duration = duration_cast<milliseconds>(end - start);
+
+	buffer << size_t(duration.count());
+	buffer << size_t(1);
+	buffer << ret;
+
+	comm->sendTaskResult();
+}
 
 void faster::worker::solve(fastTask &task){
+
+	if (task.operationType == OP_Calibrate){
+		calibrate();
+		return;
+	}
+
 	workerFddBase * src = fddList[task.srcFDD];
 	workerFddBase * dest = NULL;
 
-	if (src == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
+	if (src == NULL) { std::cerr << "\nERROR: Could not find FDD " << task.srcFDD << " !"; exit(201); }
 
 	if ( task.operationType & OP_GENERICMAP)
 		dest = fddList[task.destFDD];
@@ -85,7 +140,7 @@ void faster::worker::solve(fastTask &task){
 void faster::worker::collect(unsigned long int id){
 	workerFddBase * fdd = fddList[id];
 
-	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
+	if (fdd == NULL) { std::cerr << "\nERROR: Could not find FDD " << id << " !"; exit(202); }
 
 	fdd->collect(comm);
 }

@@ -16,7 +16,6 @@ namespace faster {
 		protected:
 			T * localData;
 			K * localKeys;
-			size_t numKeys;
 		public:
 			indexedFddStorageCore();
 			indexedFddStorageCore(size_t s);
@@ -26,8 +25,6 @@ namespace faster {
 			T * getData();
 			K * getKeys();
 			void setSize(size_t s UNUSED) {};
-			size_t getNumKeys() { return numKeys; };
-			void setNumKeys(size_t n) { numKeys = n; };
 
 			T & operator[](size_t ref);
 

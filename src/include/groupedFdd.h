@@ -139,7 +139,7 @@ namespace faster{
 			}
 
 			void discard(){
-				for ( int i = 0; i < members.size(); ++i){
+				for ( size_t i = 0; i < members.size(); ++i){
 					members[i]->discard();
 				}
 			}
@@ -150,8 +150,7 @@ namespace faster{
 
 	template <typename K>
 	fddBase * groupedFdd<K>::_map (void * funcP, fddOpType op, fddBase * newFdd){
-		std::cerr << "  Map ";
-		size_t result;
+		//std::cerr << "  Map ";
 		size_t rSize;
 		size_t fddSize;
 		unsigned long int tid, sid;
@@ -161,25 +160,27 @@ namespace faster{
 		int funcId = context->findFunc(funcP);
 
 		// Send task
+		auto start = system_clock::now();
 		context->enqueueTask(op, id, newFddId, funcId, this->size);
 
 		// Receive results
+		auto result = context->recvTaskResult(tid, sid, start);
+			
 		fddSize = 0;
 		for (int i = 1; i < context->numProcs(); ++i){
-			result = * (size_t*) context->recvTaskResult(tid, sid, rSize);
 			if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
-				fddSize += result;
+				fddSize += * (size_t*) result[i].first;
 		}
 		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
 			newFdd->setSize(fddSize);
 
-		for ( int i = 0; i < members.size(); ++i){
+		for ( size_t i = 0; i < members.size(); ++i){
 			if (!members[i]->isCached()){
 				members[i]->discard();
 			}
 		}
 
-		std::cerr << "\n";
+		//std::cerr << "\n";
 		return newFdd;
 	}
 	template <typename K>
@@ -223,8 +224,10 @@ namespace faster{
 
 	template <typename K>
 	void groupedFdd<K>::cogroup(std::unordered_map<K, int> & keyMap){
+		using std::chrono::system_clock;
+
+		auto start = system_clock::now();
 		unsigned long int tid = context->enqueueTask(OP_CoGroup, id, this->size);
-		void * result;
 		size_t rSize;
 		unsigned long int sid;
 
@@ -235,9 +238,7 @@ namespace faster{
 			members[i]->setGroupedByKey(true);
 		}
 
-		for (size_t i = 1; i < context->numProcs(); ++i){
-			result = context->recvTaskResult(tid, sid, rSize);
-		}
+		auto result = context->recvTaskResult(tid, sid, start);
 	}
 
 

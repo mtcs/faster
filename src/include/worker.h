@@ -57,6 +57,8 @@ namespace faster{
 			void solve(fastTask & task);
 
 			void collect(unsigned long int id);
+
+			void calibrate();
 	};
 } 
 #endif

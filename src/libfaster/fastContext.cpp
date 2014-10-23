@@ -1,3 +1,4 @@
+#include <chrono>
 #include <fstream>
 
 #include "worker.h"
@@ -50,6 +51,32 @@ void faster::fastContext::startWorkers(){
 
 }
 
+void faster::fastContext::calibrate(){
+	using std::chrono::system_clock;
+	using std::chrono::duration_cast;
+	using std::chrono::milliseconds;
+
+	unsigned long int rid;
+	unsigned long int sid = 0;
+	size_t size;
+	std::vector<size_t> time(comm->numProcs, 0);
+
+	auto start = system_clock::now();
+	unsigned long int tid = enqueueTask(OP_Calibrate, 0, 1000);
+
+	for (int i = 1; i < comm->numProcs; ++i){
+		size_t t = 0;
+		void * result UNUSED = comm->recvTaskResult(rid, sid, size, t);
+		time[sid] = t;
+		scheduler->taskProgress(tid, sid, t);
+	}
+
+	auto duration = duration_cast<milliseconds>(system_clock::now() - start);
+	scheduler->taskFinished(tid, duration.count());
+
+	scheduler->setCalibration(time);
+}
+
 int faster::fastContext::findFunc(void * funcP){
 	//std::cerr << "  Find Function " << funcP ;
 	for( size_t i = 0; i < funcTable.size(); ++i){
@@ -63,13 +90,6 @@ unsigned long int faster::fastContext::_createFDD(fddBase * ref, fddType type, c
 	
 	//std::cerr << "    Create FDD\n";
 	for (int i = 1; i < comm->numProcs; ++i){
-		/*size_t dataPerProc = size / (comm->numProcs - 1);
-		int rem = size % (comm->numProcs -1);
-		if (i <= rem)
-			dataPerProc += 1;
-		comm->sendCreateFDD(numFDDs, type, dataPerProc, i);
-
-		std::cerr << "    S:CreateFdd ID:" << numFDDs << " T:" << type << " S:" << dataPerProc << '\n';// */
 		if (dataAlloc){
 			//std::cerr << "    S:CreateFdd ID:" << numFDDs << " T:" << type << " S:" << (*dataAlloc)[i] ;
 			comm->sendCreateFDD(numFDDs, type, (*dataAlloc)[i], i);
@@ -230,15 +250,32 @@ unsigned long int faster::fastContext::enqueueTask(fddOpType opT, unsigned long 
 	return enqueueTask(opT, id, 0, -1, size);
 }
 
-void * faster::fastContext::recvTaskResult(unsigned long int &id, unsigned long int &sid, size_t & size){
-	size_t time;
-	int proc;
+std::vector< std::pair<void *, size_t> > faster::fastContext::recvTaskResult(unsigned long int &tid, unsigned long int &sid, system_clock::time_point & start){
+	using std::chrono::duration_cast;
+	using std::chrono::milliseconds;
 
-	void * result = comm->recvTaskResult(id, sid, proc, size, time);
-	//std::cerr << "    R:TaskResult P:" << proc << " ID:" << id << '\n';
+	std::vector< std::pair<void*, size_t> > result ( comm->numProcs );
+	//std::cerr << "    R:TaskResult \n";
+
+	start =	system_clock::now();
+	for ( int  i = 1; i < comm->numProcs; i++ ){
+		size_t time;
+		size_t size;
+
+		void * r = comm->recvTaskResult(tid, sid, size, time);
+		result[sid].first = r;
+		result[sid].second = size;
+		//std::cerr << "        P: " << sid << "\n";
+
+		scheduler->taskProgress(tid, sid, time);
+	}
+	comm->waitForReq(comm->numProcs - 1);
+
+	auto duration = duration_cast<milliseconds>(system_clock::now() - start);
+	scheduler->taskFinished(tid, duration.count());
+
 
 	//taskList[id]->workersFinished++;
-	scheduler->taskProgress(id, sid, time);
 
 	return result;
 }
@@ -249,6 +286,17 @@ std::vector<size_t> faster::fastContext::getAllocation(size_t size){
 
 void faster::fastContext::discardFDD(unsigned long int id){
 	comm->sendDiscardFDD(id);
+}
+
+void faster::fastContext::updateInfo(){
+	scheduler->updateTaskInfo();
+}
+void faster::fastContext::printHeader(){
+	scheduler->printHeader();
+}
+void faster::fastContext::printInfo(){
+	//comm->getHostnames();
+	scheduler->printTaskInfo();
 }
 
 

@@ -6,7 +6,7 @@
 using namespace std;
 using namespace faster;
 
-pair<int,int> mapByKey1(const int & key, void * aP, size_t sizeA, void * bP, size_t sizeB){
+/*pair<int,int> mapByKey1(const int & key, void * aP, size_t sizeA, void * bP, size_t sizeB){
 	int * a = (int*) aP;
 	int * b = (int*) bP;
 	double sum = 0;
@@ -21,6 +21,27 @@ pair<int,int> mapByKey1(const int & key, void * aP, size_t sizeA, void * bP, siz
 	for ( size_t i = 0; i < sizeB; ++i){
 		cout << b[i] << " ";
 		sum += (double) b[i]/sizeB;
+	}
+	result.second = sum/2;
+	cout << "\n";
+
+	return result;
+}*/
+pair<int,int> mapByKey1(const int & key, list<void*> * al, list<void*> * bl){
+	double sum = 0;
+	pair<int,int> result (key, 0);
+	cout << "\033[0;31m";
+	cout << key << "\033[0m -  "; cout.flush();
+
+	for ( auto it = al->begin(); it != al->end(); it++){
+		int a = *(int*) *it;
+		cout << a << " ";
+		sum += (double) a/al->size();
+	}
+	for ( auto it = bl->begin(); it != bl->end(); it++){
+		int b = *(int*) *it;
+		cout << b << " ";
+		sum += (double) b/bl->size();
 	}
 	result.second = sum/2;
 	cout << "\n";

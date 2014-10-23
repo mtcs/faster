@@ -12,11 +12,13 @@
 
 namespace faster{
 	fddType decodeType(size_t typeCode);
+	
+	const std::string decodeOptype(fddOpType op);
 
 	template < typename T >
 	double mean(std::vector<T> v){
 		T sum = 0;
-		for ( int i = 0; i < v.size(); ++i)
+		for ( size_t i = 0; i < v.size(); ++i)
 			sum += v[i];
 
 		return sum/(double)(v.size());
@@ -24,7 +26,7 @@ namespace faster{
 	template < typename T >
 	double stdDev(std::vector<T> v, double mean){
 		double sum = 0;
-		for ( int i = 0; i < v.size(); ++i)
+		for ( size_t i = 0; i < v.size(); ++i)
 			sum += pow(v[i] - (double) mean, 2);
 
 		return ( sqrt( sum/(v.size() - 1) ) );

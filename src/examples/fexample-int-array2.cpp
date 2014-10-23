@@ -81,10 +81,10 @@ int main(int argc, char ** argv){
 
 	// Create a random adjacency matrix
 	for ( size_t i = 0; i < NUMITEMS; ++i ){
-		rawdata[i] = new int[i];
 		
 		// Random number of edges
 		dataSizes[i] = rand() % 100;
+		rawdata[i] = new int[dataSizes[i]];
 
 		// First array position contains the vertex index
 		rawdata[i][0] = i;

@@ -45,10 +45,9 @@ T & faster::indexedFddStorageCore<K,T>::operator[](size_t ref){
 	return localData[ref]; 
 }
 
-
 template <class K, class T> 
 void faster::indexedFddStorageCore<K,T>::sortByKey(){
-	//std::cerr << "SORT (" << size << ") ";
+	//std::cerr << "        SortByKey";
 	std::vector<size_t> p(size,0);
 	std::vector<size_t> rp(size);
 	std::vector<bool> sorted(size, false);
@@ -157,11 +156,11 @@ template <class K, class T>
 void faster::indexedFddStorage<K,T*>::setData( K * keys, T ** data, size_t * ls, size_t s){
 	grow(s);
 	#pragma omp parallel for
-	for ( int i = 0; i < s; ++i){
+	for ( size_t i = 0; i < s; ++i){
 		lineSizes[i] = ls[i];
 
 		this->localData[i] = new  T [lineSizes[i]];
-		for ( int j = 0; j < lineSizes[i]; ++j){
+		for ( size_t j = 0; j < lineSizes[i]; ++j){
 			this->localData[i][j] =  ((T *) data[i])[j];
 		}
 		this->localKeys[i] = keys[i];
@@ -192,7 +191,7 @@ void faster::indexedFddStorage<K,T*>::setDataRaw( void * keys, void * data, size
 	buffer.setBuffer(data, s);
 	buffer2.setBuffer(keys, s);
 
-	for ( int i = 0; i < s; ++i){
+	for ( size_t i = 0; i < s; ++i){
 		lineSizes[i] = ls[i];
 
 		this->localData[i] = new  T [lineSizes[i]];
@@ -286,7 +285,7 @@ void faster::indexedFddStorage<K,T*>::grow(size_t toSize){
 			//memcpy(newStorage, localData, this->size * sizeof( T* ) );
 			//memcpy(newLineSizes, lineSizes, this->size * sizeof( size_t ) );
 			#pragma omp parallel for
-			for ( int i = 0; i < this->size; ++i){
+			for ( size_t i = 0; i < this->size; ++i){
 				newStorage[i] =  this->localData[i];
 				newLineSizes[i] = lineSizes[i];
 				newKeys[i] = this->localKeys[i];
