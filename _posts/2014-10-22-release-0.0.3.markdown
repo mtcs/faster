@@ -1,6 +1,6 @@
 ---
 layout: release
-title:  "Faster 0.0.2 Alpha"
+title:  "Faster 0.0.3 Alpha"
 date:   2014-10-22 12:50:00
 docLink: "https://github.com/mtcs/faster/wiki"
 tag: "0.0.3-alpha"
