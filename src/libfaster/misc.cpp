@@ -60,7 +60,7 @@ const std::string faster::decodeOptype(fddOpType op){
 	if (op & OP_GENERICUPDATE){
 		switch(op){
 			case OP_UpdateByKey: 	return "UpdateByKey";
-			case OP_BulkUpdateByKey:return "BulkUpdateByKey";
+			case OP_BulkUpdate:	return "BulkUpdate ";
 		}
 	}
 	if (op & OP_GENERICMISC){

@@ -58,6 +58,8 @@ namespace faster{
 			~fastContext();
 
 			void registerFunction(void * funcP);
+			template <class T>
+			void registerGlobal(T * varP);
 
 			void startWorkers();
 
@@ -74,6 +76,7 @@ namespace faster{
 			fastSettings * settings;
 			std::vector< fddBase * > fddList;
 			std::vector<void*> funcTable;
+			std::vector< std::pair<void*, size_t> > globalTable;
 			fastComm * comm;
 			fastScheduler * scheduler;
 
@@ -210,8 +213,16 @@ namespace faster{
 
 	};
 
+	template <class T>
+	void fastContext::registerGlobal(T * varP){
+		std::pair<void*, size_t> globalReg ;
+		globalReg.first = varP;
+		globalReg.second = sizeof(T);
+		globalTable.insert( globalTable.end(), globalReg );
+	}
+	
 	template <typename K>
-	void faster::fastContext::sendKeyMap(unsigned long tid, std::unordered_map<K, int> & keyMap){
+	void fastContext::sendKeyMap(unsigned long tid, std::unordered_map<K, int> & keyMap){
 		comm->sendKeyMap(tid, keyMap);
 	}
 

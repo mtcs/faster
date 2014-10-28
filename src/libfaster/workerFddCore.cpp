@@ -100,7 +100,6 @@ void faster::workerFddCore<T>::preapply(long unsigned int id, void * func, fddOp
 		if (dest) buffer << size_t(localData->getSize());
 	}
 	auto end = system_clock::now();
-
 	auto duration = duration_cast<milliseconds>(end - start);
 	//std::cerr << " ET:" << duration.count() << " ";
 

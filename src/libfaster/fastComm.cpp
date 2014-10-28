@@ -54,6 +54,12 @@ void faster::fastComm::sendTask(fastTask &task){
 
 	buffer[0] << task.id << task.operationType << task.srcFDD << task.destFDD << task.functionId;
 
+	buffer[0] << size_t(task.globals.size());
+	for ( size_t i = 0; i < task.globals.size(); i++){
+		buffer[0] << size_t(task.globals[i].second);
+		buffer[0].write(task.globals[i].first, task.globals[i].second);
+	}
+
 	for (int i = 1; i < numProcs; ++i){
 		MPI_Isend(buffer[0].data(), buffer[0].size(), MPI_BYTE, i, MSG_TASK, MPI_COMM_WORLD, &req[i-1]);
 	}
@@ -62,13 +68,26 @@ void faster::fastComm::sendTask(fastTask &task){
 
 void faster::fastComm::recvTask(fastTask & task){
 	MPI_Status stat;
+	size_t numGlobals = 0;
 
 	bufferRecv[0].reset();
-
 
 	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_TASK, MPI_COMM_WORLD, &stat);	
 	
 	bufferRecv[0] >> task.id >> task.operationType >> task.srcFDD >> task.destFDD >> task.functionId;
+
+	bufferRecv[0] >> numGlobals;
+	for ( size_t i = 0; i < numGlobals; i++){
+		size_t varSize = 0;
+		char * var;
+		
+		bufferRecv[0] >> varSize;
+
+		var = new char[varSize]();
+		bufferRecv[0].read(var, varSize);
+
+		task.globals.insert(task.globals.end(), std::make_pair(var, varSize));
+	}
 }
 
 //void faster::fastComm::sendTaskResult(unsigned long int id, void * res, size_t size, double time){

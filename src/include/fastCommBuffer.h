@@ -136,7 +136,7 @@ namespace faster {
 			}
 			template <typename T>
 			void read(T & v){
-				read( v, sizeof(T) );
+				read( &v, sizeof(T) );
 			}
 			template <typename T>
 			void readVec(std::vector<T> & v, size_t s){

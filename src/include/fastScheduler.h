@@ -27,8 +27,8 @@ namespace faster{
 			fastScheduler(unsigned int numProcs);
 			~fastScheduler();
 			
-			fastTask * enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size);
-			fastTask * enqueueTask(fddOpType opT, unsigned long int id, size_t size);
+			fastTask * enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size, std::vector< std::pair<void*, size_t> > & globalTable);
+			fastTask * enqueueTask(fddOpType opT, unsigned long int id, size_t size, std::vector< std::pair<void*, size_t> > & globalTable);
 			
 			void taskProgress(unsigned long int id, unsigned long int pid, size_t time);
 			void taskFinished(unsigned long int id, size_t time);
@@ -41,7 +41,7 @@ namespace faster{
 			void updateTaskInfo();
 
 			bool dataMigrationNeeded();
-			std::vector<std::list< std::pair<int,long int> >> getDataMigrationInfo();
+			std::vector<std::deque< std::pair<int,long int> >> getDataMigrationInfo();
 			std::vector<size_t> getAllocation(size_t size);
 
 	};

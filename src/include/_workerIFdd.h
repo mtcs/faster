@@ -6,6 +6,7 @@
 #include <omp.h>
 #include <set>
 #include <unordered_map>
+#include <iostream>
 
 #include "workerFddBase.h"
 
@@ -30,9 +31,9 @@ namespace faster{
 			// ByKey Functions
 			K * distributeOwnership(fastComm * comm, K * uKeys, size_t cSize);
 			void sendPartKeyCount(fastComm *comm);
-			std::unordered_map<K, size_t> recvPartKeyMaxCount(fastComm *comm, std::unordered_map<K, std::pair<size_t, std::list<int>> > & keyPPMaxCount);
+			std::unordered_map<K, size_t> recvPartKeyMaxCount(fastComm *comm, std::unordered_map<K, std::pair<size_t, std::deque<int>> > & keyPPMaxCount);
 			std::unordered_map<K, size_t> recvPartKeyCount(fastComm *comm);
-			std::unordered_map<K, size_t> distributedMaxKeyCount(fastComm *comm, std::unordered_map<K, std::pair<size_t, std::list<int>> > & keyPPMaxCount);
+			std::unordered_map<K, size_t> distributedMaxKeyCount(fastComm *comm, std::unordered_map<K, std::pair<size_t, std::deque<int>> > & keyPPMaxCount);
 
 		public:
 			workerIFddCore(unsigned int ident, fddType kt, fddType t);
@@ -153,7 +154,8 @@ namespace faster{
 		public:
 			_workerIFdd(unsigned int ident, fddType kt, fddType t) : workerIFddCore<K,T>(ident, kt, t) {}
 			_workerIFdd(unsigned int ident, fddType kt, fddType t, size_t size) : workerIFddCore<K,T>(ident, kt, t, size) {}
-			~_workerIFdd(){}
+			~_workerIFdd(){
+			}
 
 			// For known types
 			void setData(K * keys, T * data, size_t size) ;
@@ -176,7 +178,7 @@ namespace faster{
 			void insertl(void * in);
 
 			void insert(K & key, T & in);
-			void insert(std::list< std::pair<K, T> > & in);
+			void insert(std::deque< std::pair<K, T> > & in);
 
 
 			// Apply task functions to FDDs
@@ -288,7 +290,7 @@ namespace faster{
 			void insertl(void * in);
 
 			void insert(K & key, T* & in, size_t s);
-			void insert(std::list< std::tuple<K, T*, size_t> > & in);
+			void insert(std::deque< std::tuple<K, T*, size_t> > & in);
 
 
 			// Apply task functions to FDDs

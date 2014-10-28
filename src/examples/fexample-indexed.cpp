@@ -14,7 +14,7 @@ pair<int,int> map1(const int & key, int & input){
 }
 
 
-pair<int,int> reduce1(int keyA, int &a, int keyB, int &b){
+pair<int,int> reduce1(const int & keyA, int &a, const int & keyB, int &b){
 	pair<int,int> result ((keyA + keyB), (a+b));
 
 	return result;

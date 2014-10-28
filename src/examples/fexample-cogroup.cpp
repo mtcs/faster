@@ -27,7 +27,7 @@ using namespace faster;
 
 	return result;
 }*/
-pair<int,int> mapByKey1(const int & key, list<void*> * al, list<void*> * bl){
+pair<int,int> mapByKey1(const int & key, deque<void*> * al, deque<void*> * bl){
 	double sum = 0;
 	pair<int,int> result (key, 0);
 	cout << "\033[0;31m";

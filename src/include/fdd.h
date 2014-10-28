@@ -407,6 +407,9 @@ namespace faster{
 			for (int i = 1; i < (this->context->numProcs() - 1); ++i){
 				T pr;
 
+				std::cerr << "      Reduce Result Size:" << pSize[i] << "\n";
+				if (pSize[i] == 0) std::cerr << "UNEXPECTED ERROR!!!!";
+
 				buffer.setBuffer(partResult[i], pSize[i]);
 				buffer >> pr;
 
@@ -460,6 +463,9 @@ namespace faster{
 
 		delete [] partResult;
 		delete [] rSize;
+
+		if (!this->cached)
+			this->discard();
 
 		//std::cerr << "\n";
 		return result;
@@ -531,6 +537,9 @@ namespace faster{
 
 		delete [] partResult;
 		delete [] partrSize;
+
+		if (!this->cached)
+			this->discard();
 
 		return vResult;
 	}

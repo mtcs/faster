@@ -39,7 +39,7 @@ void faster::fastContext::startWorkers(){
 	// Create a Worker context and exit after finished
 	if ( ! comm->isDriver() ){
 		// Start worker role
-		worker worker(comm, funcTable.data());
+		worker worker(comm, funcTable.data(), globalTable);
 
 		worker.run();
 
@@ -70,6 +70,7 @@ void faster::fastContext::calibrate(){
 		time[sid] = t;
 		scheduler->taskProgress(tid, sid, t);
 	}
+	comm->waitForReq(comm->numProcs - 1);
 
 	auto duration = duration_cast<milliseconds>(system_clock::now() - start);
 	scheduler->taskFinished(tid, duration.count());
@@ -85,6 +86,7 @@ int faster::fastContext::findFunc(void * funcP){
 	}
 	return -1;
 }
+
 
 unsigned long int faster::fastContext::_createFDD(fddBase * ref, fddType type, const std::vector<size_t> * dataAlloc){
 	
@@ -233,7 +235,7 @@ void faster::fastContext::getFDDInfo(size_t & s, std::vector<size_t> & dataAlloc
 
 
 unsigned long int faster::fastContext::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size){
-	fastTask * newTask = scheduler->enqueueTask(opT, idSrc, idRes, funcId, size);
+	fastTask * newTask = scheduler->enqueueTask(opT, idSrc, idRes, funcId, size, globalTable);
 
 	if(scheduler->dataMigrationNeeded()){
 		//comm->migrateData(scheduler->getDataMigrationInfo());

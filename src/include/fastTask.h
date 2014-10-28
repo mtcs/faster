@@ -21,6 +21,7 @@ namespace faster{
 			std::vector<size_t> times;
 			size_t duration;
 			double * allocation;
+			std::vector< std::pair<void*, size_t> > globals;
 
 	};
 }

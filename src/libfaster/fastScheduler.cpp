@@ -17,8 +17,12 @@ faster::fastScheduler::fastScheduler(unsigned int numProcs){
 	infoPos = 0;
 }
 faster::fastScheduler::~fastScheduler(){
-	for ( auto it = taskList.begin(); it != taskList.end() ; it++ )
+	for ( auto it = taskList.begin(); it != taskList.end() ; it++ ){
+		for (size_t i = 0; i < (*it)->globals.size(); i++){
+			delete [] (char*) (*it)->globals[i].first;
+		}
 		delete (*it);
+	}
 	taskList.clear();
 }
 
@@ -32,8 +36,8 @@ bool faster::fastScheduler::dataMigrationNeeded(){
 	return ( _dataMigrationNeeded && ( taskList.size() > 1 ) );
 }
 
-std::vector<std::list< std::pair<int,long int> >> faster::fastScheduler::getDataMigrationInfo(){
-	std::vector<std::list< std::pair<int,long int> >> r (numProcs, std::list<std::pair<int,long int>>());
+std::vector<std::deque< std::pair<int,long int> >> faster::fastScheduler::getDataMigrationInfo(){
+	std::vector<std::deque< std::pair<int,long int> >> r (numProcs, std::deque<std::pair<int,long int>>());
 	if (taskList.size() > 1){
 		std::vector<std::pair<int,long int>> delta(numProcs,std::pair<int,size_t>(0,0));
 		unsigned int i, j;
@@ -173,7 +177,7 @@ double * faster::fastScheduler::getNewAllocation(){
 	return r;
 }
 
-faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size){
+faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size, std::vector< std::pair<void*, size_t> > & globalTable){
 	fastTask * newTask = new fastTask();
 	newTask->id = numTasks++;
 	newTask->srcFDD = idSrc;
@@ -185,18 +189,24 @@ faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned lo
 	newTask->allocation = getNewAllocation();
 	newTask->duration = 0;
 	newTask->times = std::vector<size_t>(numProcs, 0);
+	for ( size_t i = 0; i < globalTable.size(); i++){
+		void * var = new char[globalTable[i].second];
+
+		std::memcpy(var, globalTable[i].first, globalTable[i].second);
+
+		newTask->globals.insert(newTask->globals.end(), std::make_pair(var, globalTable[i].second) );
+	}
 
 	taskList.insert(taskList.end(), newTask);
 
 	return newTask;
 }
 
-faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned long int sid, size_t size){
-	return enqueueTask(opT, sid, 0, -1, size);
+faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned long int sid, size_t size, std::vector< std::pair<void*, size_t> > & globalTable){
+	return enqueueTask(opT, sid, 0, -1, size, globalTable );
 }
 
 void faster::fastScheduler::taskProgress(unsigned long int tid, unsigned long int pid, size_t time){
-	#pragma omp atomic
 	taskList[tid]->workersFinished++;
 
 	taskList[tid]->times[pid] = time;
@@ -257,7 +267,7 @@ void faster::fastScheduler::printTaskInfo(size_t taskID){
 	std::cerr << "\n";
 }
 void faster::fastScheduler::printHeader(){
-	std::cerr << "\033[1;34mTask\033[0m ID# Func Src Dest Size | \033[1;31mDuration Avg_Processing_Time Dur_CV \033[0m| Individual_Times\n";
+	std::cerr << "\033[1;34mID# Task\033[0m Func Src Dest | \033[1;31mDuration(ms) Avg_Proc_Time PT_CV \033[0m| Individual_Processing_Times\n";
 }
 
 void faster::fastScheduler::printTaskInfo(){

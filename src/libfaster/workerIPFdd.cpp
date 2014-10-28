@@ -118,7 +118,7 @@ void faster::_workerIFdd<K,T*>::insert(void * k, void * in, size_t s){
 }
 template <typename K, typename T>
 void faster::_workerIFdd<K,T*>::insertl(void * in){ 
-	insert( *(std::list<std::tuple<K,T*, size_t>>*) in);
+	insert( *(std::deque<std::tuple<K,T*, size_t>>*) in);
 }
 
 
@@ -130,8 +130,8 @@ void faster::_workerIFdd<K,T*>::insert(K & key, T* & in, size_t s){
 }
 
 template <typename K, typename T>
-void faster::_workerIFdd<K,T*>::insert(std::list< std::tuple<K, T*, size_t> > & in){ 
-	typename std::list< std::tuple<K, T*, size_t> >::iterator it;
+void faster::_workerIFdd<K,T*>::insert(std::deque< std::tuple<K, T*, size_t> > & in){ 
+	typename std::deque< std::tuple<K, T*, size_t> >::iterator it;
 
 	if (this->localData->getSize() < in.size())
 		this->localData->grow(in.size());

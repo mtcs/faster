@@ -13,9 +13,11 @@ using std::chrono::system_clock;
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 
+size_t numNodes = 0;
+
 pair<int,vector<int>> toAList(string & input){
 	long int lastPos = -1;
-	list<pair<size_t,size_t>> pos;
+	deque<pair<size_t,size_t>> pos;
 
 
 	for ( size_t i = 0; i < input.size(); ++i ){
@@ -44,11 +46,11 @@ pair<int, double> createPR(const int & key, vector<int> & s){
 	return make_pair(key, 1);
 }
 
-//list<pair<int, double>> givePageRank(const int & key, vector<int> * s, size_t nn, double * pr, size_t npr){
-/*list<pair<int, double>> givePageRank(const int & key, void * sP, size_t nn, void * prP, size_t npr){
+//deque<pair<int, double>> givePageRank(const int & key, vector<int> * s, size_t nn, double * pr, size_t npr){
+/*deque<pair<int, double>> givePageRank(const int & key, void * sP, size_t nn, void * prP, size_t npr){
 	auto s = * (vector<int>*) sP;
 	auto pr = * (double*) prP;
-	list<pair<int,double>> msgList;
+	deque<pair<int,double>> msgList;
 
 	for ( size_t i = 0; i < s.size(); ++i){
 		msgList.push_back(make_pair(s[i], dumpingFactor*pr/s.size()));
@@ -56,10 +58,10 @@ pair<int, double> createPR(const int & key, vector<int> & s){
 	
 	return msgList;
 }*/
-list<pair<int, double>> givePageRank(const int & key, list<void *> * sl, list<void *> * prl){
+deque<pair<int, double>> givePageRank(const int & key, deque<void *> * sl, deque<void *> * prl){
 	auto & s = * (vector<int>*) * sl->begin();
 	auto & pr = * (double*) * prl->begin();
-	list<pair<int,double>> msgList;
+	deque<pair<int,double>> msgList;
 	double contrib = dumpingFactor * pr / s.size();
 
 
@@ -69,7 +71,7 @@ list<pair<int, double>> givePageRank(const int & key, list<void *> * sl, list<vo
 	
 	return msgList;
 }
-pair<int, double> combine(const int & key, list<double *> * prl){
+pair<int, double> combine(const int & key, deque<double *> * prl){
 	pair<int,double> r;
 
 	r.first = key;
@@ -97,7 +99,7 @@ pair<int, double> combine(const int & key, list<double *> * prl){
 
 	return abs(oldPR - pr);
 }*/
-double getNewPR(const int & key, list<void *> * prL, list<void *> * contribL){
+double getNewPR(const int & key, deque<void *> * prL, deque<void *> * contribL){
 	//cerr << key << " ";
 	double & pr = * (double*) * prL->begin();
 	double oldPR = pr;
@@ -115,6 +117,7 @@ double getNewPR(const int & key, list<void *> * prL, list<void *> * contribL){
 }
 
 double maxError( double & a, double & b){
+	cerr << max (a,b) << " ";
 	return max(a,b);
 }
 
@@ -132,8 +135,10 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &combine);
 	fc.registerFunction((void*) &getNewPR);
 	fc.registerFunction((void*) &maxError);
+	fc.registerGlobal(&numNodes);
 	fc.startWorkers();
 
+	fc.printHeader();
 
 	if ( (argc > 2) && (argv[2][0] == '1') ){
 		cerr << "Calibrate Performance\n";
@@ -147,6 +152,8 @@ int main(int argc, char ** argv){
 	cerr << "Convert to Adjacency List\n";
 	auto structure = data->map<int, vector<int>>(&toAList)->cache();
 	fc.updateInfo();
+
+	numNodes = structure->getSize();
 
 	cerr << "Init Pagerank\n";
 	auto pr = structure->map<int, double>(&createPR)->cache();
@@ -164,11 +171,9 @@ int main(int argc, char ** argv){
 		auto combContribs = contribs->mapByKey(&combine);
 		fc.updateInfo();
 
-		error = pr->cogroup(combContribs)->mapByKey(&getNewPR)->reduce(&maxError);
-		//error = pr->cogroup(contribs)->mapByKey(&getNewPR)->reduce(&maxError);
 		cerr << contribs->getSize() << " (" << combContribs->getSize() << ") messages. Error " << error << '\n';
-		//cerr << contribs->getSize() << " messages. Error " << error << '\n';
 
+		error = pr->cogroup(combContribs)->mapByKey(&getNewPR)->reduce(&maxError);
 		fc.updateInfo();
 	}
 	auto result = pr->collect();
@@ -179,12 +184,12 @@ int main(int argc, char ** argv){
 	sort(result.begin(), result.end(), [](const pair<int,double> a, const pair<int,double> b){ return a.first < b.first; });
 
 	cerr << "PageRank in " << structure->getSize() << " node graph in "<< i << " iterations! In " << duration.count() << "ms (error: " << error <<  ") \n";
-	//for ( auto it = result.begin(); it != result.end(); it++){
-		//printf("%d %.8f\n", it->first, it->second);
-	//}
+	for ( auto it = result.begin(); it != result.end(); it++){
+		printf("%d %.8f\n", it->first, it->second);
+	}
 	
-	cerr << "PRESS ENTER TO CONTINUE\n";
-	cin.get();
+	//cerr << "PRESS ENTER TO CONTINUE\n";
+	//cin.get();
 
 	return 0;
 }

@@ -3,9 +3,13 @@
 
 
 //#include "indexedFdd.h"
+#include "misc.h"
 #include "fastContext.h"
 
 namespace faster{
+
+	template <class K, class T> 
+	class iFddCore ; 
 
 	template <class K, class T> 
 	class indexedFdd ; 
@@ -96,6 +100,17 @@ namespace faster{
 				return this;
 			}
 
+			// BulkUpdateByKey
+			groupedFdd<K> * bulkUpdate( bulkUpdateG2FunctionP<K> funcP){
+				update((void*) funcP, OP_BulkUpdate);
+				return this;
+			}
+
+			groupedFdd<K> * bulkUpdate( bulkUpdateG3FunctionP<K> funcP){
+				update((void*) funcP, OP_BulkUpdate);
+				return this;
+			}
+
 
 			// MapByKey
 			template <typename Ko, typename To> 
@@ -103,7 +118,7 @@ namespace faster{
 				return (indexedFdd<Ko,To> *) mapI<Ko,To>((void*) funcP, OP_MapByKey);
 			}
 
-			template <typename V, typename Ko, typename To> 
+			template <typename Ko, typename To> 
 			indexedFdd<Ko,To> * mapByKey( ImapByKeyG3FunctionP<K,Ko,To> funcP){
 				return (indexedFdd<Ko,To> *) mapI<Ko,To>((void*) funcP, OP_MapByKey);
 			}
@@ -112,7 +127,7 @@ namespace faster{
 				return (fdd<To> *) map<To>((void*) funcP, OP_MapByKey);
 			}
 
-			template <typename V, typename To> 
+			template <typename To> 
 			fdd<To> * mapByKey( mapByKeyG3FunctionP<K,To> funcP){
 				return (fdd<To> *) map<To>((void*) funcP, OP_MapByKey);
 			}
@@ -124,7 +139,7 @@ namespace faster{
 				return (indexedFdd<Ko,To> *) mapI<Ko,To>((void*) funcP, OP_FlatMapByKey);
 			}
 
-			template <typename V, typename Ko, typename To> 
+			template <typename Ko, typename To> 
 			indexedFdd<Ko,To> * flatMapByKey( IflatMapByKeyG3FunctionP<K,Ko,To> funcP){
 				return (indexedFdd<Ko,To> *) mapI<Ko,To>((void*) funcP, OP_FlatMapByKey);
 			}
@@ -133,7 +148,7 @@ namespace faster{
 				return (fdd<To> *) map<To>((void*) funcP, OP_FlatMapByKey);
 			}
 
-			template <typename V, typename To> 
+			template <typename To> 
 			fdd<To> * flatMapByKey( flatMapByKeyG3FunctionP<K,To> funcP){
 				return (fdd<To> *) map<To>((void*) funcP, OP_FlatMapByKey);
 			}
@@ -143,6 +158,27 @@ namespace faster{
 					members[i]->discard();
 				}
 			}
+
+
+			// Bulk Flat Map
+			template <typename Ko, typename To> 
+			indexedFdd<Ko,To> * bulkFlatMap( IbulkFlatMapG2FunctionP<K, Ko,To> funcP ){
+				return mapI<Ko,To>((void*) funcP, OP_BulkFlatMap);
+			}
+			template <typename Ko, typename To> 
+			indexedFdd<Ko,To> * bulkFlatMap( IbulkFlatMapG3FunctionP<K, Ko,To> funcP ){
+				return mapI<Ko,To>((void*) funcP, OP_BulkFlatMap);
+			}
+			template <typename To> 
+			fdd<To> * bulkFlatMap( bulkFlatMapG2FunctionP<K, To> funcP ){
+				return map<To>((void*) funcP, OP_BulkFlatMap);
+			}
+			template <typename To> 
+			fdd<To> * bulkFlatMap( bulkFlatMapG3FunctionP<K, To> funcP ){
+				return map<To>((void*) funcP, OP_BulkFlatMap);
+			}
+
+
 			void setKeyMap(void * keyMap UNUSED) {}
 			void setGroupedByKey(bool gbk UNUSED) {}
 		
@@ -175,7 +211,7 @@ namespace faster{
 			newFdd->setSize(fddSize);
 
 		for ( size_t i = 0; i < members.size(); ++i){
-			if (!members[i]->isCached()){
+			if ( ! members[i]->isCached() ){
 				members[i]->discard();
 			}
 		}

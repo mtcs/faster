@@ -1,4 +1,5 @@
 #include <chrono>
+#include <iostream>
 
 #include "_workerIFdd.h"
 #include "fastComm.h"
@@ -180,7 +181,7 @@ CountKeyMapT<K> faster::workerIFddCore<K,T>::recvPartKeyMaxCount(fastComm *comm,
 	CountKeyMapT<K> keyCount;
 	for ( size_t i = 0; i < (comm->getNumProcs() - 2); ++i){
 		// Recv a process count for the key that I own
-		std::list<std::pair<K,size_t>> countList = comm->recvMyKeyCount<K>(src);
+		std::deque<std::pair<K,size_t>> countList = comm->recvMyKeyCount<K>(src);
 
 		// Verify if it is the process with most keys
 		for ( auto it = countList.begin(); it != countList.end(); it++){
@@ -216,7 +217,7 @@ CountKeyMapT<K> faster::workerIFddCore<K,T>::recvPartKeyCount(fastComm *comm){
 	CountKeyMapT<K> keyCount;
 	for ( size_t i = 0; i < (comm->getNumProcs() - 2); ++i){
 		// Recv a process count for the key that I own
-		std::list<std::pair<K,size_t>> countList = comm->recvMyKeyCount<K>(src);
+		std::deque<std::pair<K,size_t>> countList = comm->recvMyKeyCount<K>(src);
 
 		// Verify if it is the process with most keys
 		for ( auto it = countList.begin(); it != countList.end(); it++){

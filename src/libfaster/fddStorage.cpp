@@ -22,9 +22,7 @@ faster::fddStorageCore<T>::fddStorageCore(size_t s){
 }
 template <class T> 
 faster::fddStorageCore<T>::~fddStorageCore(){
-	if (localData != NULL){
-		delete [] localData;
-	}
+	delete [] localData;
 }
 
 template <class T> 

@@ -111,15 +111,15 @@ template <typename U>
 void faster::_workerFdd<T>::flatMap(workerFddBase * dest,  flatMapFunctionP<T,U> flatMapFunc ){
 	T * d = this->localData->getData();
 	size_t s = this->localData->getSize();
-	std::list<U> resultList;
+	std::deque<U> resultList;
 
 	#pragma omp parallel 
 	{
-		std::list<U> partResultList;
+		std::deque<U> partResultList;
 
 		#pragma omp for 
 		for ( size_t i = 0; i < s; ++i){
-			std::list<U> r = flatMapFunc(d[i]);
+			std::deque<U> r = flatMapFunc(d[i]);
 
 			partResultList.insert(partResultList.end(), r.begin(), r.end());
 		}
@@ -135,15 +135,15 @@ template <typename U>
 void faster::_workerFdd<T>::flatMap(workerFddBase * dest,  PflatMapFunctionP<T,U> flatMapFunc ){
 	T * d = this->localData->getData();
 	size_t s = this->localData->getSize();
-	std::list< std::pair<U, size_t> > resultList;
+	std::deque< std::pair<U, size_t> > resultList;
 
 	#pragma omp parallel 
 	{
-		std::list<std::pair<U, size_t>> partResultList;
+		std::deque<std::pair<U, size_t>> partResultList;
 
 		#pragma omp for 
 		for ( size_t i = 0; i < s; ++i){
-			std::list<std::pair<U, size_t>> r = flatMapFunc(d[i]);
+			std::deque<std::pair<U, size_t>> r = flatMapFunc(d[i]);
 
 			partResultList.insert(partResultList.end(), r.begin(), r.end());
 		}
@@ -159,15 +159,15 @@ template <typename L, typename U>
 void faster::_workerFdd<T>::flatMap(workerFddBase * dest,  IflatMapFunctionP<T,L,U> flatMapFunc ){
 	T * d = this->localData->getData();
 	size_t s = this->localData->getSize();
-	std::list<std::pair<L,U>> resultList;
+	std::deque<std::pair<L,U>> resultList;
 
 	#pragma omp parallel 
 	{
-		std::list<std::pair<L,U>> partResultList;
+		std::deque<std::pair<L,U>> partResultList;
 
 		#pragma omp for 
 		for ( size_t i = 0; i < s; ++i){
-			std::list<std::pair<L,U>> r = flatMapFunc(d[i]);
+			std::deque<std::pair<L,U>> r = flatMapFunc(d[i]);
 
 			partResultList.insert(partResultList.end(), r.begin(), r.end());
 		}
@@ -183,15 +183,15 @@ template <typename L, typename U>
 void faster::_workerFdd<T>::flatMap(workerFddBase * dest,  IPflatMapFunctionP<T,L,U> flatMapFunc ){
 	T * d = this->localData->getData();
 	size_t s = this->localData->getSize();
-	std::list< std::tuple<L, U, size_t> > resultList;
+	std::deque< std::tuple<L, U, size_t> > resultList;
 
 	#pragma omp parallel 
 	{
-		std::list<std::tuple<L, U, size_t>> partResultList;
+		std::deque<std::tuple<L, U, size_t>> partResultList;
 
 		#pragma omp for 
 		for ( size_t i = 0; i < s; ++i){
-			std::list<std::tuple<L, U, size_t>> r = flatMapFunc(d[i]);
+			std::deque<std::tuple<L, U, size_t>> r = flatMapFunc(d[i]);
 
 			partResultList.insert(partResultList.end(), r.begin(), r.end());
 		}
@@ -279,7 +279,7 @@ T faster::_workerFdd<T>::reduce (reduceFunctionP<T> reduceFunc){
 		}
 	}
 	//std::cerr << "END";
-	//std::cerr << "END (RESULT:" << result << ")";
+	//std::cerr << "END (RESULT:" << result << ")\n";
 	return result;
 }
 
@@ -470,7 +470,7 @@ void faster::_workerFdd<T>::insert(void * k UNUSED, void * in, size_t s UNUSED){
 }
 template <typename T>
 void faster::_workerFdd<T>::insertl(void * in){ 
-	insert(* (std::list<T> *) in);
+	insert(* (std::deque<T> *) in);
 }
 
 
@@ -480,8 +480,8 @@ void faster::_workerFdd<T>::insert(T & in){
 }
 // TODO CHANGE THIS !!!! MAK THE LIST ITERATION INSIDE THE STORAGE
 template <typename T>
-void faster::_workerFdd<T>::insert(std::list<T> & in){ 
-	typename std::list<T>::iterator it;
+void faster::_workerFdd<T>::insert(std::deque<T> & in){ 
+	typename std::deque<T>::iterator it;
 
 	if (this->localData->getSize() < in.size())
 		this->localData->grow(in.size());

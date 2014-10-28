@@ -28,8 +28,8 @@ std::unordered_map<char, void *> faster::workerFdd::funcTable[3][7];
 
 
 void * faster::workerFdd::load(const std::string libraryName){
-	std::cerr << "[Loading " << libraryName << " ";
-	auto start = system_clock::now();
+	//std::cerr << "[Loading " << libraryName << " ";
+	//auto start = system_clock::now();
 	
 	void * hdlr = dlopen(libraryName.data(), RTLD_LAZY);
 	//void * hdlr = dlopen(libraryName.data(), RTLD_NOW);
@@ -38,7 +38,7 @@ void * faster::workerFdd::load(const std::string libraryName){
 		std::cerr << "\n\033[5m\033[91mERROR! \033[0m\033[38;5;202m"<< dlerror() << "\033[0m " << std::endl;
 		exit(-1);
 	}
-	std::cerr << duration_cast<milliseconds>(system_clock::now() - start).count() << "ms]  ";
+	//std::cerr << duration_cast<milliseconds>(system_clock::now() - start).count() << "ms]  ";
 
 	return hdlr;
 }

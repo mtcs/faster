@@ -1,10 +1,14 @@
 #include <list>
 #include <iostream>
+#include <chrono>
 
 
 #include "_workerIFdd.h"
 #include "indexedFddStorageExtern.cpp"
 
+	using std::chrono::system_clock;
+	using std::chrono::duration_cast;
+	using std::chrono::milliseconds;
 
 // --------- MAP
 template <typename K, typename T>
@@ -121,8 +125,8 @@ std::vector< std::tuple<K, T*, size_t>> findKeyInterval(K * keys, T * data, size
 	return keyLocations;
 }// */
 /*template <typename K, typename T>
-const std::unordered_map< K, std::list<T*>> findKeyInterval(std::vector<K> & ukeys, K * keys, T * data, size_t fddSize){
-	std::unordered_map<K, std::list<T*>> keyLocations;
+const std::unordered_map< K, std::deque<T*>> findKeyInterval(std::vector<K> & ukeys, K * keys, T * data, size_t fddSize){
+	std::unordered_map<K, std::deque<T*>> keyLocations;
 	std::unordered_map<K, omp_lock_t> locks;
 
 	std::cerr << "FindKeyInterval ";
@@ -157,7 +161,7 @@ const std::unordered_map< K, std::list<T*>> findKeyInterval(std::vector<K> & uke
 
 	for ( size_t i = 0; i < ukeys.size(); ++i){
 		K key = ukeys[i];
-		keyLocations[key] = std::list<T*>();
+		keyLocations[key] = std::deque<T*>();
 		locks[key] = {};
 	}
 
@@ -199,16 +203,20 @@ const std::unordered_map< K, std::list<T*>> findKeyInterval(std::vector<K> & uke
 	return keyLocations;
 } // */
 template <typename K, typename T>
-std::vector< std::list<T*>* > findKeyInterval(std::vector<K> & ukeys, K * keys, T * data, size_t fddSize){
-	std::unordered_map<K, std::list<T*>*> keyLocations;
-	bool generateUK = (ukeys.size() == 0) ;
+std::vector< std::deque<T*>* > findKeyInterval(std::vector<K> & ukeys, K * keys, T * data, size_t fddSize){
+	//auto start = system_clock::now();
+
+	std::unordered_map<K, std::deque<T*>*> keyLocations(fddSize);
+	bool generateUK = (ukeys.size() == 0);
 	size_t numKeys = 0;
 
-	if (generateUK){
-		ukeys.reserve(fddSize);
-	}
+	//std::cerr << "IFDDDependent ";
 
-	keyLocations.reserve( fddSize );
+	if (generateUK){
+		//std::cerr << "genUK ";
+		ukeys.resize(fddSize);
+	}
+	//auto t0 =  duration_cast<milliseconds>(system_clock::now() - start).count();
 
 	for ( size_t i = 0; i < fddSize; i++){
 		K & key = keys[i];
@@ -216,32 +224,37 @@ std::vector< std::list<T*>* > findKeyInterval(std::vector<K> & ukeys, K * keys, 
 		auto l = keyLocations.find(key);
 
 		if ( l == keyLocations.end() ) {
-			auto dl = new std::list<T*>();
+			auto dl = new std::deque<T*>();
 
 			dl->push_back(d);
-			keyLocations[key] = dl;
+
+			keyLocations.insert ( {key, dl} );
 
 			if (generateUK){
-				ukeys.insert(ukeys.end(), key);
+				ukeys[numKeys++] = key;
 			}
 		}else{
 			l->second->push_back(d);
 		}
 	}
+	//auto t1 =  duration_cast<milliseconds>(system_clock::now() - start).count();
 
 	if (generateUK){
-		ukeys.shrink_to_fit();
+		ukeys.resize(numKeys);
 	}
+	//auto t2 =  duration_cast<milliseconds>(system_clock::now() - start).count();
+	//std::cerr << " T0:" << t0 << " T1:" << t1 << " T2:" << t2 << "\n";
+	
+	//exit(231);
 
-
-	std::vector< std::list<T*>* > keyLocationsV(ukeys.size(), NULL);
+	std::vector< std::deque<T*>* > keyLocationsV(ukeys.size(), NULL);
 
 	for ( size_t i = 0; i < ukeys.size(); i++ ){
 		K & key = ukeys[i];
 		auto l = keyLocations.find(key);
 
 		if ( l == keyLocations.end() ){
-			keyLocationsV[i] = new std::list<T*>();
+			keyLocationsV[i] = new std::deque<T*>();
 		}else{
 			keyLocationsV[i] = l->second;
 			l->second = NULL;
@@ -254,6 +267,7 @@ std::vector< std::list<T*>* > findKeyInterval(std::vector<K> & ukeys, K * keys, 
 			delete it->second;
 		}
 	}
+	//std::cerr << "T1:" << t1 << " TOT:" << duration_cast<milliseconds>(system_clock::now() - start).count() << "\n";
 
 	return keyLocationsV;
 }
@@ -411,15 +425,15 @@ void faster::_workerIFdd<K,T>::flatMap(workerFddBase * dest,  IflatMapIFunctionP
 	T * d = this->localData->getData();
 	size_t s = this->localData->getSize();
 	K * ik = (K*) this->localData->getKeys();
-	std::list<std::pair<L,U>> resultList;
+	std::deque<std::pair<L,U>> resultList;
 
 	#pragma omp parallel 
 	{
-		std::list<std::pair<L,U>> partResultList;
+		std::deque<std::pair<L,U>> partResultList;
 
 		#pragma omp for 
 		for (size_t i = 0; i < s; ++i){
-			std::list<std::pair<L,U>> r = flatMapFunc(ik[i], d[i]);
+			std::deque<std::pair<L,U>> r = flatMapFunc(ik[i], d[i]);
 
 			partResultList.insert(partResultList.end(), r.begin(), r.end());
 		}
@@ -436,15 +450,15 @@ void faster::_workerIFdd<K,T>::flatMap(workerFddBase * dest,  IPflatMapIFunction
 	T * d = this->localData->getData();
 	size_t s = this->localData->getSize();
 	K * ik = (K*) this->localData->getKeys();
-	std::list< std::tuple<L, U, size_t> > resultList;
+	std::deque< std::tuple<L, U, size_t> > resultList;
 
 	#pragma omp parallel 
 	{
-		std::list<std::tuple<L, U, size_t>> partResultList;
+		std::deque<std::tuple<L, U, size_t>> partResultList;
 
 		#pragma omp for 
 		for (size_t i = 0; i < s; ++i){
-			std::list<std::tuple<L, U, size_t>> r = flatMapFunc(ik[i], d[i]);
+			std::deque<std::tuple<L, U, size_t>> r = flatMapFunc(ik[i], d[i]);
 
 			partResultList.insert(partResultList.end(), r.begin(), r.end());
 		}
@@ -461,15 +475,15 @@ void faster::_workerIFdd<K,T>::flatMap(workerFddBase * dest,  flatMapIFunctionP<
 	T * d = this->localData->getData();
 	size_t s = this->localData->getSize();
 	K * ik = (K*) this->localData->getKeys();
-	std::list<U> resultList;
+	std::deque<U> resultList;
 
 	#pragma omp parallel 
 	{
-		std::list<U> partResultList;
+		std::deque<U> partResultList;
 
 		#pragma omp for 
 		for (size_t i = 0; i < s; ++i){
-			std::list<U> r = flatMapFunc(ik[i], d[i]);
+			std::deque<U> r = flatMapFunc(ik[i], d[i]);
 
 			partResultList.insert(partResultList.end(), r.begin(), r.end());
 		}
@@ -486,15 +500,15 @@ void faster::_workerIFdd<K,T>::flatMap(workerFddBase * dest,  PflatMapIFunctionP
 	T * d = this->localData->getData();
 	size_t s = this->localData->getSize();
 	K * ik = (K*) this->localData->getKeys();
-	std::list< std::pair<U, size_t> > resultList;
+	std::deque< std::pair<U, size_t> > resultList;
 
 	#pragma omp parallel 
 	{
-		std::list<std::pair<U, size_t>> partResultList;
+		std::deque<std::pair<U, size_t>> partResultList;
 
 		#pragma omp for 
 		for (size_t i = 0; i < s; ++i){
-			std::list<std::pair<U, size_t>> r = flatMapFunc(ik[i], d[i]);
+			std::deque<std::pair<U, size_t>> r = flatMapFunc(ik[i], d[i]);
 
 			partResultList.insert(partResultList.end(), r.begin(), r.end());
 		}

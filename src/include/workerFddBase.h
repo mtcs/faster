@@ -20,7 +20,7 @@ namespace faster{
 		public:
 			workerFddBase() ;
 			workerFddBase(unsigned int ident, fddType t);
-			virtual ~workerFddBase() ;
+			virtual ~workerFddBase() = 0;
 
 			virtual fddType getType() = 0;
 			virtual fddType getKeyType() = 0;

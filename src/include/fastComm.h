@@ -280,7 +280,7 @@ namespace faster{
 		void recvAllKeyOwnership(K * keys);
 		void sendMyKeyCount(int dest, size_t numKeys);
 		template <typename K>
-		typename std::list<std::pair<K,size_t>>  recvMyKeyCount(int & src);
+		typename std::deque<std::pair<K,size_t>>  recvMyKeyCount(int & src);
 		template <typename K>
 		void sendCountByKey(std::unordered_map<K,size_t> & count);
 		template <typename K>

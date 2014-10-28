@@ -4,6 +4,7 @@
 #include <list>
 #include <omp.h>
 #include <unordered_map>
+#include <iostream>
 
 #include "workerFddBase.h"
 
@@ -134,7 +135,8 @@ namespace faster {
 
 			_workerFdd(unsigned int ident, fddType t) : workerFddCore<T>(ident, t) {}
 			_workerFdd(unsigned int ident, fddType t, size_t size) : workerFddCore<T>(ident, t, size) {}
-			~_workerFdd(){}
+			~_workerFdd(){
+			}
 
 			// For known types
 			void setData(T * data, size_t size) ;
@@ -161,8 +163,8 @@ namespace faster {
 
 			void insert(T & in);
 			void insert(T * in UNUSED, size_t s UNUSED){}
-			void insert(std::list<T> & in);
-			void insert(std::list<std::pair<T*,size_t>> & in UNUSED){}
+			void insert(std::deque<T> & in);
+			void insert(std::deque<std::pair<T*,size_t>> & in UNUSED){}
 
 			// Apply task functions to FDDs
 			void apply(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer);
@@ -261,8 +263,8 @@ namespace faster {
 
 			void insert(T & in);
 			void insert(T* & in, size_t s);
-			void insert(std::list<T> & in);
-			void insert(std::list< std::pair<T*, size_t> > & in);
+			void insert(std::deque<T> & in);
+			void insert(std::deque< std::pair<T*, size_t> > & in);
 
 			// Apply task functions to FDDs
 			void apply(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer);

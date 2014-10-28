@@ -81,8 +81,8 @@ namespace faster {
 
 			//void insert(T & in);
 			//void insert(T & in, size_t s);
-			//void insert(std::list<T> & in);
-			//void insert(std::list< std::pair<T, size_t> > & in);
+			//void insert(std::deque<T> & in);
+			//void insert(std::deque< std::pair<T, size_t> > & in);
 
 			// Apply task functions to FDDs
 			void apply(void * func UNUSED, fddOpType op UNUSED, workerFddBase * dest UNUSED, fastCommBuffer & comm UNUSED){}

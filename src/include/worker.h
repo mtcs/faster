@@ -26,8 +26,9 @@ namespace faster{
 			bool finished;
 			char * buffer;
 			void ** funcTable;
+			std::vector< std::pair<void*, size_t> > * globalTable;
 
-			worker(fastComm * c, void ** ft);
+			worker(fastComm * c, void ** ft, std::vector< std::pair<void*, size_t> > & globalTable);
 			~worker();
 
 			void run();
@@ -54,6 +55,7 @@ namespace faster{
 			
 			void readFDDFile(unsigned long int id, std::string &filename, size_t size, size_t offset);
 
+			void updateGlobals(fastTask &task);
 			void solve(fastTask & task);
 
 			void collect(unsigned long int id);

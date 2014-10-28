@@ -6,12 +6,12 @@
 using namespace std;
 using namespace faster;
 
-/*list<pair<int,int>> mapByKey1(const int & key, void * aP, size_t sizeA, void * bP, size_t sizeB){
+/*deque<pair<int,int>> mapByKey1(const int & key, void * aP, size_t sizeA, void * bP, size_t sizeB){
 	int * a = (int*) aP;
 	int * b = (int*) bP;
 	double sum = 0;
 	pair<int,int> result (key, 0);
-	list<pair<int,int>> resultl;
+	deque<pair<int,int>> resultl;
 
 	cout << "\033[0;31m";
 	cout << key << "\033[0m -  "; cout.flush();
@@ -32,10 +32,10 @@ using namespace faster;
 	return resultl;
 }*/
 
-list<pair<int,int>> mapByKey1(const int & key, list<void *> * al, list<void *> * bl){
+deque<pair<int,int>> mapByKey1(const int & key, deque<void *> * al, deque<void *> * bl){
 	double sum = 0;
 	pair<int,int> result (key, 0);
-	list<pair<int,int>> resultl;
+	deque<pair<int,int>> resultl;
 
 	cout << "\033[0;31m";
 	cout << key << "\033[0m -  "; cout.flush();

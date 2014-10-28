@@ -8,12 +8,13 @@
 #include "workerFdd.h"
 #include "worker.h"
 
-faster::worker::worker(fastComm * c, void ** ft){
+faster::worker::worker(fastComm * c, void ** ft, std::vector< std::pair<void*, size_t> > & globalTable){
 	std::cerr << "  Starting Worker " << c->getProcId() << '\n';
 	funcTable = ft;
 	comm = c;
 	finished = false;
-	fddList.reserve(50);
+	fddList.reserve(1024);
+	this->globalTable = &globalTable;
 }
 
 faster::worker::~worker(){
@@ -116,7 +117,15 @@ void faster::worker::calibrate(){
 	comm->sendTaskResult();
 }
 
+void faster::worker::updateGlobals(fastTask &task){
+	for ( size_t i = 0; i < task.globals.size(); i++){
+		std::memcpy((*globalTable)[i].first, task.globals[i].first, task.globals[i].second);
+	}
+}
+
 void faster::worker::solve(fastTask &task){
+
+	updateGlobals(task);
 
 	if (task.operationType == OP_Calibrate){
 		calibrate();

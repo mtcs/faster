@@ -25,7 +25,7 @@ void faster::worker::run(){
 
 		switch(tag){
 			case MSG_TASK:
-				//std::cerr << "    R:Task ";
+				//std::cerr << "    R:Task \n";
 				comm->recvTask(task);
 				//std::cerr << "ID:" << task.id << " FDD:" << task.srcFDD  << " F:" << task.functionId << " ";
 				solve(task); 
@@ -33,7 +33,7 @@ void faster::worker::run(){
 				break;
 
 			case MSG_CREATEFDD:
-				//std::cerr << "    R:CreateFdd";
+				//std::cerr << "    R:CreateFdd\n";
 				comm->recvCreateFDD(id, tType, size);
 				//std::cerr << " ID:" << id << " T:" << (int) tType << " S:" << size << " ";
 				createFDD(id, tType, size);
@@ -41,14 +41,14 @@ void faster::worker::run(){
 				break;
 
 			case MSG_CREATEIFDD:
-				//std::cerr << "    R:CreateIFdd ";
+				//std::cerr << "    R:CreateIFdd \n";
 				comm->recvCreateIFDD(id, kType, tType, size);
 				//std::cerr << "ID:" << id << " K:" << (int) kType << " T:" << (int) tType << " S:" << size << " ";
 				createIFDD(id, kType, tType, size);
 				//std::cerr << ".\n";
 				break;
 			case MSG_CREATEGFDD:
-				//std::cerr << "    R:CreateFDDGroup ";
+				//std::cerr << "    R:CreateFDDGroup \n";
 				comm->recvCreateFDDGroup(id, kType, idV);
 				//std::cerr << "ID:" << id << " K:" << (int) kType << " NumMembers:" << (int) idV.size() << " ";
 				createFDDGroup(id, kType, idV );
@@ -123,7 +123,7 @@ void faster::worker::run(){
 				//std::cerr << ".\n";
 				break;
 			default:
-				std::cerr << "    R:ERROR UNRECOGNIZED MESSAGE!!!!! ";
+				std::cerr << "    R:ERROR UNRECOGNIZED MESSAGE!!!!! " << tag << " ";
 				break;
 		}
 	}

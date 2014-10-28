@@ -577,7 +577,7 @@ namespace faster{
 
 		if (! groupedByKey){
 			//std::cerr << "  GroupByKey ";
-			auto * count = new std::unordered_map< K, std::tuple<size_t, int, size_t> >;
+			auto * count = new std::unordered_map< K, std::tuple<size_t, int, size_t> >();
 			count->reserve(this->size);
 
 			auto start = system_clock::now();
@@ -589,6 +589,8 @@ namespace faster{
 			for (int i = 1; i < context->numProcs(); ++i){
 				K key;
 				size_t kCount, numKeys;
+
+				if (result[i].second == 0) continue;
 
 				decoder.setBuffer(result[i].first, result[i].second);
 				decoder >> numKeys;
@@ -701,6 +703,10 @@ namespace faster{
 		delete [] partResult;
 		delete [] rSize;
 
+		if (!this->cached)
+			this->discard();
+
+
 		//std::cerr << "\n";
 		return result;
 	}
@@ -782,6 +788,9 @@ namespace faster{
 
 		delete [] partResult;
 		delete [] partrSize;
+
+		if (!this->cached)
+			this->discard();
 
 		//std::cerr << "\n";
 		return result;

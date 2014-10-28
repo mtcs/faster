@@ -1,11 +1,16 @@
 #include <chrono>
 #include <omp.h>
 #include <algorithm>
+#include <chrono>
 
 #include "workerFddGroup.h"
 #include "workerFdd.h"
 #include "fastComm.h"
 #include "indexedFddStorageExtern.cpp"
+
+	using std::chrono::system_clock;
+	using std::chrono::duration_cast;
+	using std::chrono::milliseconds;
 
 template <typename K>
 faster::workerFddGroup<K>::workerFddGroup(unsigned long int id, fddType keyT, std::vector< workerFddBase* > & members): workerFddBase(id, Null){
@@ -74,8 +79,8 @@ std::unordered_map<K, std::pair<void*, size_t>> findKeyInterval(std::vector<K> &
 
 
 /*template <typename K>
-const std::unordered_map<K, std::list<void*>> findKeyInterval(std::vector<K> & ukeys, faster::workerFddBase * wfdd){
-	std::unordered_map<K, std::list<void*>> keyLocations;
+const std::unordered_map<K, std::deque<void*>> findKeyInterval(std::vector<K> & ukeys, faster::workerFddBase * wfdd){
+	std::unordered_map<K, std::deque<void*>> keyLocations;
 	std::unordered_map<K, omp_lock_t> locks;
 	char * data = (char*) wfdd->getData();
 	K * keys = (K *) wfdd->getKeys();
@@ -87,7 +92,7 @@ const std::unordered_map<K, std::list<void*>> findKeyInterval(std::vector<K> & u
 
 	for ( size_t i = 0; i < ukeys.size(); ++i){
 		K & key = ukeys[i];
-		keyLocations[key] = std::list<void*>();
+		keyLocations[key] = std::deque<void*>();
 		locks[key] = {};
 	}
 
@@ -109,7 +114,7 @@ const std::unordered_map<K, std::list<void*>> findKeyInterval(std::vector<K> & u
 			omp_set_lock(&lock->second);
 
 			//if ( l == keyLocations.end() ){
-				//keyLocations[key] = std::list<void*>();
+				//keyLocations[key] = std::deque<void*>();
 				//keyLocations[key].push_back(d);
 			//}else{
 				l->second.push_back(d);
@@ -128,19 +133,21 @@ const std::unordered_map<K, std::list<void*>> findKeyInterval(std::vector<K> & u
 }// */
 
 template <typename K>
-std::vector< std::list<void*>* > findKeyInterval(std::vector<K> & ukeys, faster::workerFddBase * wfdd){
-	std::unordered_map<K, std::list<void*>*> keyLocations;
+std::vector< std::deque<void*>* > findKeyInterval(std::vector<K> & ukeys, faster::workerFddBase * wfdd){
+	//auto start = system_clock::now();
+
+	std::unordered_map<K, std::deque<void*>*> keyLocations(wfdd->getSize());
 	bool generateUK = (ukeys.size() == 0) ;
 	char * data = (char*) wfdd->getData();
 	K * keys = (K *) wfdd->getKeys();
 	size_t fddSize = wfdd->getSize();
 	int baseSize = wfdd->baseSize();
+	size_t numKeys = 0;
 
 	if (generateUK){
-		ukeys.reserve(fddSize);
+		//std::cerr << "genUK ";
+		ukeys.resize(fddSize);
 	}
-
-	keyLocations.reserve(fddSize);
 
 	for ( size_t i = 0; i < fddSize; ++i){
 		K & key = keys[i];
@@ -148,13 +155,13 @@ std::vector< std::list<void*>* > findKeyInterval(std::vector<K> & ukeys, faster:
 		auto l = keyLocations.find(key);
 
 		if ( l == keyLocations.end() ){
-			auto dl = new std::list<void*>();
-
+			auto dl = new std::deque<void*>();
 			dl->push_back(d);
-			keyLocations[key] = dl;
+
+			keyLocations.insert( {key, dl});
 
 			if (generateUK){
-				ukeys.insert(ukeys.end(), key);
+				ukeys[numKeys++] = key;
 			}
 		}else{
 			l->second->push_back(d);
@@ -162,17 +169,18 @@ std::vector< std::list<void*>* > findKeyInterval(std::vector<K> & ukeys, faster:
 	}
 
 	if (generateUK){
-		ukeys.shrink_to_fit();
+		ukeys.resize(numKeys);
 	}
+	//auto t1 =  duration_cast<milliseconds>(system_clock::now() - start).count();
 
-	std::vector<std::list<void*>*> keyLocationsV(ukeys.size(), NULL);
+	std::vector<std::deque<void*>*> keyLocationsV(ukeys.size(), NULL);
 
 	for ( size_t i = 0; i < ukeys.size() ; ++i){
 		K & key = ukeys[i];
 		auto l = keyLocations.find(key);
 
 		if ( l == keyLocations.end() ){
-			keyLocationsV[i] = new std::list<void*>();
+			keyLocationsV[i] = new std::deque<void*>();
 		}else{
 			keyLocationsV[i] = l->second;
 			l->second = NULL;
@@ -185,16 +193,17 @@ std::vector< std::list<void*>* > findKeyInterval(std::vector<K> & ukeys, faster:
 			delete it->second;
 		}
 	}
+	//std::cerr << "T1:" << t1 << " TOT:" << duration_cast<milliseconds>(system_clock::now() - start).count() << "\n";
 
 
 	return keyLocationsV;
 }
 
 template <typename K>
-void faster::workerFddGroup<K>::updateByKey(void * mapByKeyFunc){
+void faster::workerFddGroup<K>::updateByKey(void * func){
 
 	//std::unordered_map<K, std::pair<void*, size_t>> keyLocations[3];
-	std::vector< std::list<void*>* > keyLocations[3];
+	std::vector< std::deque<void*>* > keyLocations[3];
 
 	for ( size_t i = 0; i < members.size(); ++i){
 		keyLocations[i] = findKeyInterval(uKeys, members[i]);
@@ -203,7 +212,7 @@ void faster::workerFddGroup<K>::updateByKey(void * mapByKeyFunc){
 	if ( members.size() < 3 ){  
 		#pragma omp parallel for 
 		for ( size_t i = 0; i < uKeys.size(); ++i){
-			((updateByKeyG2FunctionP<K>) mapByKeyFunc) 
+			((updateByKeyG2FunctionP<K>) func) 
 				(uKeys[i], 
 				 (keyLocations[0][i]),
 				 (keyLocations[1][i]));
@@ -214,7 +223,7 @@ void faster::workerFddGroup<K>::updateByKey(void * mapByKeyFunc){
 	}else{
 		#pragma omp parallel for 
 		for ( size_t i = 0; i < uKeys.size(); ++i){
-			((updateByKeyG3FunctionP<K>) mapByKeyFunc) 
+			((updateByKeyG3FunctionP<K>) func) 
 				(uKeys[i], 
 				 (keyLocations[0][i]), 
 				 (keyLocations[1][i]), 
@@ -227,14 +236,32 @@ void faster::workerFddGroup<K>::updateByKey(void * mapByKeyFunc){
 	}
 }
 
+template <typename K>
+void faster::workerFddGroup<K>::bulkUpdate(void * func){
+	if ( members.size() < 3 ){  
+		((bulkUpdateG2FunctionP<K>) func) 
+			(
+			 (K*) members[0]->getKeys(), members[0]->getData(), members[0]->getSize(),
+			 (K*) members[1]->getKeys(), members[1]->getData(), members[1]->getSize()
+			);
+	}else{
+		((bulkUpdateG3FunctionP<K>) func) 
+			(
+			 (K*) members[0]->getKeys(), members[0]->getData(), members[0]->getSize(),
+			 (K*) members[1]->getKeys(), members[1]->getData(), members[1]->getSize(),
+			 (K*) members[2]->getKeys(), members[2]->getData(), members[2]->getSize()
+			);
+	}
+}
+
 
 template <typename K>
 //template <typename U, typename T0, typename T1, typename T2>
 template <typename U>
-void faster::workerFddGroup<K>::mapByKey(workerFddBase * dest, void * mapByKeyFunc){
+void faster::workerFddGroup<K>::mapByKey(workerFddBase * dest, void * func){
 	//std::unordered_map<K, std::pair<void*, size_t>> keyLocations[3];
-	std::vector< std::list<void*>* > keyLocations[3];
-	std::list<void*> emptyList;
+	std::vector< std::deque<void*>* > keyLocations[3];
+	std::deque<void*> emptyList;
 	
 	//std::cerr << "START " << id << " " << s << "  ";
 
@@ -247,7 +274,7 @@ void faster::workerFddGroup<K>::mapByKey(workerFddBase * dest, void * mapByKeyFu
 	if ( members.size() < 3 ){  
 		#pragma omp parallel for 
 		for ( size_t i = 0; i < uKeys.size(); ++i){
-			od[i] = ((mapByKeyG2FunctionP<K,U>) mapByKeyFunc)
+			od[i] = ((mapByKeyG2FunctionP<K,U>) func)
 				( uKeys[i], 
 				  (keyLocations[0][i]),
 				  (keyLocations[1][i]));
@@ -258,7 +285,7 @@ void faster::workerFddGroup<K>::mapByKey(workerFddBase * dest, void * mapByKeyFu
 	}else{
 		#pragma omp parallel for 
 		for ( size_t i = 0; i < uKeys.size(); ++i){
-			od[i] = ((mapByKeyG3FunctionP<K,U>) mapByKeyFunc)
+			od[i] = ((mapByKeyG3FunctionP<K,U>) func)
 				( uKeys[i], 
 				  (keyLocations[0][i]), 
 				  (keyLocations[1][i]), 
@@ -275,10 +302,10 @@ void faster::workerFddGroup<K>::mapByKey(workerFddBase * dest, void * mapByKeyFu
 template <typename K>
 //template <typename L, typename U, typename T0, typename T1, typename T2>
 template <typename L, typename U>
-void faster::workerFddGroup<K>::mapByKeyI(workerFddBase * dest, void * mapByKeyFunc){
+void faster::workerFddGroup<K>::mapByKeyI(workerFddBase * dest, void * func){
 	std::pair<L,U> r;
 	//std::unordered_map<K, std::pair<void*, size_t>> keyLocations[3];
-	std::vector< std::list<void*>* > keyLocations[3];
+	std::vector< std::deque<void*>* > keyLocations[3];
 
 	//std::cerr << "START " << id << " S:" << uKeys.size() << " \n";
 
@@ -294,7 +321,7 @@ void faster::workerFddGroup<K>::mapByKeyI(workerFddBase * dest, void * mapByKeyF
 	if ( members.size() <3 ){  
 		#pragma omp parallel for 
 		for ( size_t i = 0; i < uKeys.size(); ++i){
-			r = ( (ImapByKeyG2FunctionP<K,L,U>) mapByKeyFunc) 
+			r = ( (ImapByKeyG2FunctionP<K,L,U>) func) 
 				( uKeys[i], 
 				  (keyLocations[0][i]), 
 				  (keyLocations[1][i]) );
@@ -305,7 +332,7 @@ void faster::workerFddGroup<K>::mapByKeyI(workerFddBase * dest, void * mapByKeyF
 	}else{
 		#pragma omp parallel for 
 		for ( size_t i = 0; i < uKeys.size(); ++i){
-			r = ( (ImapByKeyG3FunctionP<K,L,U>) mapByKeyFunc )
+			r = ( (ImapByKeyG3FunctionP<K,L,U>) func )
 				( uKeys[i], 
 				(keyLocations[0][i]), 
 				(keyLocations[1][i]), 
@@ -326,10 +353,10 @@ void faster::workerFddGroup<K>::mapByKeyI(workerFddBase * dest, void * mapByKeyF
 template <typename K>
 //template <typename U, typename T0, typename T1, typename T2>
 template <typename U>
-void faster::workerFddGroup<K>::flatMapByKey(workerFddBase * dest, void * mapByKeyFunc){
+void faster::workerFddGroup<K>::flatMapByKey(workerFddBase * dest, void * func){
 	//std::unordered_map<K, std::pair<void*, size_t>> keyLocations[3];
-	std::vector< std::list<void*>* > keyLocations[3];
-	std::list<U> resultList;
+	std::vector< std::deque<void*>* > keyLocations[3];
+	std::deque<U> resultList;
 
 	for ( size_t i = 0; i < members.size(); ++i){
 		keyLocations[i] = findKeyInterval(uKeys, members[i]);
@@ -338,11 +365,11 @@ void faster::workerFddGroup<K>::flatMapByKey(workerFddBase * dest, void * mapByK
 	if ( members.size() < 3 ){  
 		#pragma omp parallel 
 		{
-			std::list<U> pResultList;
+			std::deque<U> pResultList;
 
 			#pragma omp for 
 			for ( size_t i = 0; i < uKeys.size(); ++i){
-				std::list<U> r = ((flatMapByKeyG2FunctionP<K,U>) mapByKeyFunc)
+				std::deque<U> r = ((flatMapByKeyG2FunctionP<K,U>) func)
 					( uKeys[i], 
 					(keyLocations[0][i]), 
 					(keyLocations[1][i]) );
@@ -360,11 +387,11 @@ void faster::workerFddGroup<K>::flatMapByKey(workerFddBase * dest, void * mapByK
 	}else{
 		#pragma omp parallel 
 		{
-			std::list<U> pResultList;
+			std::deque<U> pResultList;
 
 			#pragma omp for 
 			for ( size_t i = 0; i < uKeys.size(); ++i){
-				std::list<U> r = ((flatMapByKeyG3FunctionP<K,U>) mapByKeyFunc)
+				std::deque<U> r = ((flatMapByKeyG3FunctionP<K,U>) func)
 					( uKeys[i], 
 					(keyLocations[0][i]), 
 					(keyLocations[1][i]), 
@@ -390,10 +417,10 @@ void faster::workerFddGroup<K>::flatMapByKey(workerFddBase * dest, void * mapByK
 template <typename K>
 //template <typename L, typename U, typename T0, typename T1, typename T2>
 template <typename L, typename U>
-void faster::workerFddGroup<K>::flatMapByKeyI(workerFddBase * dest, void * mapByKeyFunc){
+void faster::workerFddGroup<K>::flatMapByKeyI(workerFddBase * dest, void * func){
 	//std::unordered_map<K, std::pair<void*, size_t>> keyLocations[3];
-	std::vector< std::list<void*>* > keyLocations[3];
-	std::list<std::pair<L,U>> resultList;
+	std::vector< std::deque<void*>* > keyLocations[3];
+	std::deque<std::pair<L,U>> resultList;
 
 	//std::cerr << "START " << id << " S:" << uKeys.size() << " \n";
 
@@ -413,11 +440,11 @@ void faster::workerFddGroup<K>::flatMapByKeyI(workerFddBase * dest, void * mapBy
 	if ( members.size() <3 ){  
 		#pragma omp parallel 
 		{
-			std::list<std::pair<L,U>> pResultList;
+			std::deque<std::pair<L,U>> pResultList;
 
 			#pragma omp  for 
 			for ( size_t i = 0; i < uKeys.size(); ++i){
-				std::list<std::pair<L,U>> r = ( (IflatMapByKeyG2FunctionP<K,L,U>) mapByKeyFunc) 
+				std::deque<std::pair<L,U>> r = ( (IflatMapByKeyG2FunctionP<K,L,U>) func) 
 					( uKeys[i], 
 					(keyLocations[0][i]), 
 					(keyLocations[1][i]) );
@@ -435,11 +462,11 @@ void faster::workerFddGroup<K>::flatMapByKeyI(workerFddBase * dest, void * mapBy
 	}else{
 		#pragma omp parallel 
 		{
-			std::list<std::pair<L,U>> pResultList;
+			std::deque<std::pair<L,U>> pResultList;
 
 			#pragma omp  for 
 			for ( size_t i = 0; i < uKeys.size(); ++i){
-				std::list<std::pair<L,U>> r = ( (IflatMapByKeyG3FunctionP<K,L,U>) mapByKeyFunc )
+				std::deque<std::pair<L,U>> r = ( (IflatMapByKeyG3FunctionP<K,L,U>) func )
 					( uKeys[i], 
 					(keyLocations[0][i]), 
 					(keyLocations[1][i]), 
@@ -465,6 +492,52 @@ void faster::workerFddGroup<K>::flatMapByKeyI(workerFddBase * dest, void * mapBy
 }		
 
 template <typename K>
+template <typename U>
+void faster::workerFddGroup<K>::bulkFlatMap(workerFddBase * dest, void * func){
+	std::deque<U> resultList;
+	
+	if ( members.size() < 3 ){  
+		resultList = ( (bulkFlatMapG2FunctionP<K,U>) func ) 
+			(
+			 (K*) members[0]->getKeys(), members[0]->getData(), members[0]->getSize(),
+			 (K*) members[1]->getKeys(), members[1]->getData(), members[1]->getSize()
+			);
+	}else{
+		resultList = ( (bulkFlatMapG3FunctionP<K,U>) func ) 
+			(
+			 (K*) members[0]->getKeys(), members[0]->getData(), members[0]->getSize(),
+			 (K*) members[1]->getKeys(), members[1]->getData(), members[1]->getSize(),
+			 (K*) members[2]->getKeys(), members[2]->getData(), members[2]->getSize()
+			);
+	}
+
+	dest->insertl(&resultList);
+}
+
+template <typename K>
+template <typename L, typename U>
+void faster::workerFddGroup<K>::bulkFlatMapI(workerFddBase * dest, void * func){
+	std::deque<std::pair<L,U>> resultList;
+	
+	if ( members.size() < 3 ){  
+		resultList = ( (IbulkFlatMapG2FunctionP<K,L,U>) func ) 
+			(
+			 (K*) members[0]->getKeys(), members[0]->getData(), members[0]->getSize(),
+			 (K*) members[1]->getKeys(), members[1]->getData(), members[1]->getSize()
+			);
+	}else{
+		resultList = ( (IbulkFlatMapG3FunctionP<K,L,U>) func ) 
+			(
+			 (K*) members[0]->getKeys(), members[0]->getData(), members[0]->getSize(),
+			 (K*) members[1]->getKeys(), members[1]->getData(), members[1]->getSize(),
+			 (K*) members[2]->getKeys(), members[2]->getData(), members[2]->getSize()
+			);
+	}
+
+	dest->insertl(&resultList);
+}
+
+template <typename K>
 //template <typename U, typename T0, typename T1, typename T2>
 template <typename U>
 void faster::workerFddGroup<K>::_apply(void * func, fddOpType op, workerFddBase * dest){ 
@@ -477,6 +550,11 @@ void faster::workerFddGroup<K>::_apply(void * func, fddOpType op, workerFddBase 
 		case OP_FlatMapByKey:
 			//mapByKey<U, T0, T1, T2>(dest, func);
 			flatMapByKey<U>(dest, func);
+			//std::cerr << "MapByKey ";
+			break;
+		case OP_BulkFlatMap:
+			//mapByKey<U, T0, T1, T2>(dest, func);
+			bulkFlatMap<U>(dest, func);
 			//std::cerr << "MapByKey ";
 			break;
 	}
@@ -497,6 +575,11 @@ void faster::workerFddGroup<K>::_applyI(void * func, fddOpType op, workerFddBase
 			flatMapByKeyI<L,U>(dest, func);
 			//std::cerr << "MapByKeyI ";
 			break;
+		case OP_BulkFlatMap:
+			//mapByKeyI<L,U, T0, T1, T2>(dest, func);
+			bulkFlatMapI<L,U>(dest, func);
+			//std::cerr << "MapByKeyI ";
+			break;
 	}
 }
 
@@ -509,6 +592,10 @@ void faster::workerFddGroup<K>::_applyReduce(void * func UNUSED, fddOpType op UN
 	switch (op){
 		case OP_UpdateByKey:
 			updateByKey(func);
+			//std::cerr << "Update ";
+			break;
+		case OP_BulkUpdate:
+			bulkUpdate(func);
 			//std::cerr << "Update ";
 			break;
 		/*case OP_Reduce:
