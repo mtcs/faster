@@ -159,7 +159,7 @@ namespace faster{
 
 		bool isDriver();
 
-		void probeMsgs(int & tag);
+		void probeMsgs(int & tag, int & src);
 		void waitForReq(int numReqs);
 
 		template <typename T>

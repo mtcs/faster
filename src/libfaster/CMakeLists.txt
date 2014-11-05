@@ -30,7 +30,6 @@ link_directories(${MPI_CXX_LIBRARIES})
 #include_directories("/usr/include/openmpi/")
 set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
 
-#set (EXTRA_LIBS ${EXTRA_LIBS} efence)
 
 #set (MODULES ${MODULES} fdd.cpp ) # Pure templates now
 #set (MODULES ${MODULES} indexedFdd.cpp ) # Pure templates now
@@ -107,14 +106,14 @@ add_library(fasterWorkerFddCore SHARED workerFddCore.cpp fddStorage.cpp )
 set ( COMMDLLIBS fasterWorkerFddCore )
 
 add_library(fasterWorkerIFddCore SHARED workerIFddCore.cpp indexedFddStorage.cpp workerIFdd.cpp )
-add_library(fasterWorkerIPFddCore SHARED workerIFddCore.cpp indexedFddStorage.cpp workerIPFdd.cpp )
+#add_library(fasterWorkerIPFddCore SHARED workerIFddCore.cpp indexedFddStorage.cpp workerIPFdd.cpp )
 set ( ICOMMDLLIBS fasterWorkerIFddCore )
-set ( IPCOMMDLLIBS fasterWorkerIPFddCore )
+#set ( IPCOMMDLLIBS fasterWorkerIPFddCore )
 
 # Dynamic LOADED libs
 add_library(fasterWorkerSFdd MODULE workerSFdd.cpp)
 add_library(fasterWorkerCFdd MODULE workerCFdd.cpp)
-add_library(fasterWorkerPFdd MODULE workerPFdd.cpp)
+#add_library(fasterWorkerPFdd MODULE workerPFdd.cpp)
 
 add_library(fasterWorkerIFddInstance0  MODULE workerIFddInstance0.cpp )
 add_library(fasterWorkerIFddInstance1  MODULE workerIFddInstance1.cpp )
@@ -129,12 +128,12 @@ add_library(fasterWorkerIFddInstance9  MODULE workerIFddInstance9.cpp )
 add_library(fasterWorkerIFddInstance10 MODULE workerIFddInstance10.cpp )
 add_library(fasterWorkerIFddInstance11 MODULE workerIFddInstance11.cpp )
 
-add_library(fasterWorkerIPFddInstance0 MODULE workerIPFddInstance0.cpp )
-add_library(fasterWorkerIPFddInstance1 MODULE workerIPFddInstance1.cpp )
-add_library(fasterWorkerIPFddInstance2 MODULE workerIPFddInstance2.cpp )
-add_library(fasterWorkerIPFddInstance3 MODULE workerIPFddInstance3.cpp )
-add_library(fasterWorkerIPFddInstance4 MODULE workerIPFddInstance4.cpp )
-add_library(fasterWorkerIPFddInstance5 MODULE workerIPFddInstance5.cpp )
+#add_library(fasterWorkerIPFddInstance0 MODULE workerIPFddInstance0.cpp )
+#add_library(fasterWorkerIPFddInstance1 MODULE workerIPFddInstance1.cpp )
+#add_library(fasterWorkerIPFddInstance2 MODULE workerIPFddInstance2.cpp )
+#add_library(fasterWorkerIPFddInstance3 MODULE workerIPFddInstance3.cpp )
+#add_library(fasterWorkerIPFddInstance4 MODULE workerIPFddInstance4.cpp )
+#add_library(fasterWorkerIPFddInstance5 MODULE workerIPFddInstance5.cpp )
 
 # Interface lib
 add_library(faster SHARED ${MODULES})
@@ -144,7 +143,7 @@ add_library(faster SHARED ${MODULES})
 
 target_link_libraries(fasterWorkerSFdd ${COMMDLLIBS} ${COMMDLIBS})
 target_link_libraries(fasterWorkerCFdd ${COMMDLLIBS} ${COMMDLIBS})
-target_link_libraries(fasterWorkerPFdd ${COMMDLLIBS} ${COMMDLIBS})
+#target_link_libraries(fasterWorkerPFdd ${COMMDLLIBS} ${COMMDLIBS})
 
 target_link_libraries(fasterWorkerIFddInstance0   ${ICOMMDLLIBS} ${COMMDLIBS})
 target_link_libraries(fasterWorkerIFddInstance1   ${ICOMMDLLIBS} ${COMMDLIBS})
@@ -159,18 +158,18 @@ target_link_libraries(fasterWorkerIFddInstance9   ${ICOMMDLLIBS} ${COMMDLIBS})
 target_link_libraries(fasterWorkerIFddInstance10  ${ICOMMDLLIBS} ${COMMDLIBS})
 target_link_libraries(fasterWorkerIFddInstance11  ${ICOMMDLLIBS} ${COMMDLIBS})
 
-target_link_libraries(fasterWorkerIPFddInstance0  ${IPCOMMDLLIBS} ${COMMDLIBS})
-target_link_libraries(fasterWorkerIPFddInstance1  ${IPCOMMDLLIBS} ${COMMDLIBS})
-target_link_libraries(fasterWorkerIPFddInstance2  ${IPCOMMDLLIBS} ${COMMDLIBS})
-target_link_libraries(fasterWorkerIPFddInstance3  ${IPCOMMDLLIBS} ${COMMDLIBS})
-target_link_libraries(fasterWorkerIPFddInstance4  ${IPCOMMDLLIBS} ${COMMDLIBS})
-target_link_libraries(fasterWorkerIPFddInstance5  ${IPCOMMDLLIBS} ${COMMDLIBS})
+#target_link_libraries(fasterWorkerIPFddInstance0  ${IPCOMMDLLIBS} ${COMMDLIBS})
+#target_link_libraries(fasterWorkerIPFddInstance1  ${IPCOMMDLLIBS} ${COMMDLIBS})
+#target_link_libraries(fasterWorkerIPFddInstance2  ${IPCOMMDLLIBS} ${COMMDLIBS})
+#target_link_libraries(fasterWorkerIPFddInstance3  ${IPCOMMDLLIBS} ${COMMDLIBS})
+#target_link_libraries(fasterWorkerIPFddInstance4  ${IPCOMMDLLIBS} ${COMMDLIBS})
+#target_link_libraries(fasterWorkerIPFddInstance5  ${IPCOMMDLLIBS} ${COMMDLIBS})
 
 target_link_libraries (faster ${EXTRA_LIBS} ${COMMDLIBS})
 
 cotire(fasterWorkerSFdd)
 cotire(fasterWorkerCFdd)
-cotire(fasterWorkerPFdd)
+#cotire(fasterWorkerPFdd)
 
 cotire(fasterWorkerIFddInstance0 )
 cotire(fasterWorkerIFddInstance1 )
@@ -185,12 +184,12 @@ cotire(fasterWorkerIFddInstance9 )
 cotire(fasterWorkerIFddInstance10)
 cotire(fasterWorkerIFddInstance11)
 
-cotire(fasterWorkerIPFddInstance0)
-cotire(fasterWorkerIPFddInstance1)
-cotire(fasterWorkerIPFddInstance2)
-cotire(fasterWorkerIPFddInstance3)
-cotire(fasterWorkerIPFddInstance4)
-cotire(fasterWorkerIPFddInstance5)
+#cotire(fasterWorkerIPFddInstance0)
+#cotire(fasterWorkerIPFddInstance1)
+#cotire(fasterWorkerIPFddInstance2)
+#cotire(fasterWorkerIPFddInstance3)
+#cotire(fasterWorkerIPFddInstance4)
+#cotire(fasterWorkerIPFddInstance5)
 
 cotire(faster)
 

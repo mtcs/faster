@@ -112,15 +112,9 @@ unsigned long int faster::fastContext::_createFDD(fddBase * ref, fddType type, c
 
 unsigned long int faster::fastContext::_createIFDD(fddBase * ref, fddType kType, fddType tType, const std::vector<size_t> * dataAlloc){
 
-	//std::cerr << "    Create FDD\n";
+	//std::cerr << "    Create IFDD\n";
 	for (int i = 1; i < comm->numProcs; ++i){
-		/*size_t dataPerProc = size / (comm->numProcs - 1);
-		int rem = size % (comm->numProcs -1);
-		if (i <= rem)
-			dataPerProc += 1;
-		comm->sendCreateIFDD(numFDDs, kType, tType, dataPerProc, i);
-
-		std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:" << dataPerProc <<'\n';// */
+		//std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:" << dataPerProc <<'\n';
 		if (dataAlloc){
 			//std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:" << (*dataAlloc)[i];
 			comm->sendCreateIFDD(numFDDs, kType, tType, (*dataAlloc)[i], i);

@@ -1,6 +1,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <unistd.h>
 
 #include "fastComm.h"
 #include "worker.h"
@@ -9,6 +10,7 @@ void faster::worker::run(){
 	//std::cerr << "  Worker Working..." << '\n';
 	while (! finished ){
 		int tag;
+		int msgSrc;
 		fastTask task;
 		unsigned long int id;
 		fddType tType, kType;
@@ -21,7 +23,7 @@ void faster::worker::run(){
 		std::vector<unsigned long int> idV;
 
 		// Wait for a message to arrive
-		comm->probeMsgs(tag);
+		comm->probeMsgs(tag, msgSrc);
 
 		switch(tag){
 			case MSG_TASK:
@@ -56,7 +58,7 @@ void faster::worker::run(){
 				break;
 
 			case MSG_DISCARDFDD:
-				//std::cerr << "    R:DestroyFdd ";
+				//std::cerr << "    R:DestroyFdd\n";
 				comm->recvDiscardFDD(id);
 				//std::cerr << "ID:" << id << " ";
 				discardFDD(id);
@@ -64,7 +66,7 @@ void faster::worker::run(){
 				break;
 
 			case MSG_FDDSETDATAID:
-				//std::cerr << "    R:SetFddData ";
+				//std::cerr << "    R:SetFddData\n";
 				comm->recvFDDSetData(id, data, size);
 				//std::cerr << "ID:" << id << " S:" << size << " ";
 				setFDDData(id, data, size);
@@ -82,7 +84,7 @@ void faster::worker::run(){
 				break;
 
 			case MSG_FDDSETIDATAID:
-				//std::cerr << "    R:SetFddIData ";
+				//std::cerr << "    R:SetFddIData \n";
 				comm->recvFDDSetIData(id, keys, data, size);
 				//std::cerr << "ID:" << id << " S:" << size << " ";
 				setFDDIData(id, keys, data, size);
@@ -99,7 +101,7 @@ void faster::worker::run(){
 				break;
 
 			case MSG_READFDDFILE:
-				//std::cerr << "    R:ReadFddFile " ;
+				//std::cerr << "    R:ReadFddFile \n" ;
 				comm->recvReadFDDFile(id, name, size, offset);
 				//std::cerr << "ID:" << id <<" F:" << name << "(offset:" << offset << ")";
 				readFDDFile(id, name, size, offset);
@@ -107,7 +109,7 @@ void faster::worker::run(){
 				break;
 
 			case MSG_COLLECT:
-				//std::cerr << "    R:Collect ";
+				//std::cerr << "    R:Collect \n";
 				comm->recvCollect(id);
 				//std::cerr << "ID:" << id << " ";
 				//getFDDData(id, data, size);
@@ -123,7 +125,8 @@ void faster::worker::run(){
 				//std::cerr << ".\n";
 				break;
 			default:
-				std::cerr << "    R:ERROR UNRECOGNIZED MESSAGE!!!!! " << tag << " ";
+				std::cerr << "    \033[1;31mR:ERROR UNRECOGNIZED MESSAGE " << tag << " from " << msgSrc << "!!!!!!!!\033[0m\n";
+				//usleep(500000);
 				break;
 		}
 	}

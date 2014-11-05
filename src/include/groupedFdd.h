@@ -187,8 +187,6 @@ namespace faster{
 	template <typename K>
 	fddBase * groupedFdd<K>::_map (void * funcP, fddOpType op, fddBase * newFdd){
 		//std::cerr << "  Map ";
-		size_t rSize;
-		size_t fddSize;
 		unsigned long int tid, sid;
 		unsigned long int newFddId = newFdd->getId();
 
@@ -202,13 +200,14 @@ namespace faster{
 		// Receive results
 		auto result = context->recvTaskResult(tid, sid, start);
 			
-		fddSize = 0;
-		for (int i = 1; i < context->numProcs(); ++i){
-			if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
-				fddSize += * (size_t*) result[i].first;
-		}
-		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) )
+		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
+			size_t fddSize = 0;
+
+			for (int i = 1; i < context->numProcs(); ++i){
+				if (result[i].second > 0) fddSize += * (size_t*) result[i].first;
+			}
 			newFdd->setSize(fddSize);
+		}
 
 		for ( size_t i = 0; i < members.size(); ++i){
 			if ( ! members[i]->isCached() ){
@@ -248,12 +247,16 @@ namespace faster{
 
 	template <typename K>
 	groupedFdd<K> * groupedFdd<K>::update(void * funcP, fddOpType op){
+		auto start = system_clock::now();
+		unsigned long int sid;
 
 		// Decode function pointer
 		int funcId = context->findFunc(funcP);
 
 		// Send task
 		unsigned long int tid = context->enqueueTask(op, this->id, 0, funcId, this->size);
+
+		auto result = context->recvTaskResult(tid, sid, start);
 
 		return this;
 	}
@@ -263,9 +266,9 @@ namespace faster{
 		using std::chrono::system_clock;
 
 		auto start = system_clock::now();
-		unsigned long int tid = context->enqueueTask(OP_CoGroup, id, this->size);
-		size_t rSize;
 		unsigned long int sid;
+
+		unsigned long int tid = context->enqueueTask(OP_CoGroup, id, this->size);
 
 		context->sendKeyMap(tid, keyMap);
 

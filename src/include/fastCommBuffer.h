@@ -63,7 +63,7 @@ namespace faster {
 			}
 			template <typename T>
 			void writePos(const T &v, size_t pos){
-				writePos(v, sizeof(v), pos);
+				writePos(v, sizeof(T), pos);
 			}
 
 			template <typename T>
@@ -160,11 +160,8 @@ namespace faster {
 			}
 			template <typename K, typename T>
 			void read(std::pair<K,T> & p){
-				K k;
-				T t;
-				read(k);
-				read(t);
-				p = std::make_pair (k,t);
+				read(p.first);
+				read(p.second);
 			}
 			template <typename K, typename T>
 			void read(std::tuple<K,T, size_t> & t){

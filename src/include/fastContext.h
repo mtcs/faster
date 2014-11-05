@@ -32,12 +32,19 @@ namespace faster{
 		friend class fastContext;
 		public:
 
-			fastSettings() { }
+			fastSettings() { 
+				_allowDataBalancing = false;
+			}
 
 			fastSettings(const fastSettings & s UNUSED){
 			}
 
+			void allowDataBalancing(){
+				_allowDataBalancing = true;
+			}
+
 		private:
+			bool _allowDataBalancing;
 
 	};
 

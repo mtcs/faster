@@ -75,14 +75,12 @@ namespace faster{
 			//}
 			template<typename U> 
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1){
-				//std::cerr << "  Cogroup ";
 				this->groupByKey();
 				return new groupedFdd<K>(context, this, fdd1, keyMap);
 			}
 
 			template<typename U, typename V> 
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1, iFddCore<K,V> * fdd2){
-				//std::cerr << "  Cogroup ";
 				this->groupByKey();
 				return new groupedFdd<K>(context, this, fdd1, fdd2, keyMap);
 			}
@@ -126,7 +124,7 @@ namespace faster{
 				this->_tType = decodeType(typeid(T).hash_code());
 				this->id = c.createIFDD(this, typeid(K).hash_code(), typeid(T).hash_code(), dataAlloc);
 			}
-			indexedFdd(fastContext &c, size_t s) : iFddCore<K,T>(c, s, c.getAllocation(s)) { }
+			indexedFdd(fastContext &c, size_t s) : indexedFdd(c, s, c.getAllocation(s)) { }
 
 			// Create a fdd from a array in memory
 			indexedFdd(fastContext &c, K * keys, T * data, size_t size) : indexedFdd(c, size){
@@ -277,9 +275,9 @@ namespace faster{
 			// Create a empty fdd with a pre allocated size
 			indexedFdd(fastContext &c, size_t s, const std::vector<size_t> & dataAlloc) : iFddCore<K,T *>(c, s, dataAlloc){ 
 				this->_tType = POINTER | decodeType(typeid(T).hash_code());
-				this->id = c.createIPFDD(this, typeid(K).hash_code(), typeid(T).hash_code(), s);
+				this->id = c.createIPFDD(this, typeid(K).hash_code(), typeid(T).hash_code(), c.getAllocation(s));
 			}
-			indexedFdd(fastContext &c, size_t s) : iFddCore<K,T *>(c, s, c.getAllocation(s)) {
+			indexedFdd(fastContext &c, size_t s) : indexedFdd(c, s, c.getAllocation(s)) {
 			}
 
 			// Create a fdd from a array in memory
@@ -418,9 +416,7 @@ namespace faster{
 	template <typename K, typename T> 
 	fddBase * iFddCore<K,T>::_map( void * funcP, fddOpType op, fddBase * newFdd){
 		//std::cerr << "  Map ";
-		size_t rSize;
 		unsigned long int tid, sid;
-
 		unsigned long int newFddId = newFdd->getId();
 
 		// Decode function pointer
@@ -433,12 +429,15 @@ namespace faster{
 		// Receive results
 		auto result = context->recvTaskResult(tid, sid, start);
 
-		size_t newSize = 0;
-		for (int i = 1; i < context->numProcs(); ++i){
-			if (result[i].second > 0) newSize += * (size_t*) result[i].first;
-		}
-		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) ) 
+		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) ) {
+			size_t newSize = 0;
+
+			for (int i = 1; i < context->numProcs(); ++i){
+				if (result[i].second > 0) newSize += * (size_t*) result[i].first;
+			}
+
 			newFdd->setSize(newSize);
+		}
 
 		if (!cached)
 			this->discard();
@@ -478,7 +477,6 @@ namespace faster{
 	std::unordered_map<K,size_t> iFddCore<K,T>::countByKey(){
 		//std::cerr << "  Count By Key";
 		fastCommBuffer decoder(0);
-		size_t rSize;
 		unsigned long int tid, sid;
 		std::unordered_map<K,size_t> count;
 
@@ -571,7 +569,6 @@ namespace faster{
 	template <typename K, typename T> 
 	indexedFdd<K,T> * iFddCore<K,T>::groupByKey(){
 		fastCommBuffer decoder(0);
-		size_t rSize;
 		unsigned long int tid, sid;
 		// Key -> totalKeycount, maxowner, ownerCount
 
@@ -647,6 +644,7 @@ namespace faster{
 			for (int i = 1; i < (this->context->numProcs() - 1); ++i){
 				std::pair <K,T> pr;
 
+				//std::cerr << "   BUFFER: " << size_t(buffer.pos()) << " " << buffer.size() << "\n";
 				buffer.setBuffer(partResult[i], pSize[i]);
 				buffer >> pr;
 
@@ -670,6 +668,9 @@ namespace faster{
 			}
 
 			result = bulkReduceFunc(keys, vals, this->context->numProcs() - 1);
+
+			delete [] vals;
+			delete [] keys;
 			// TODO do bulkreduce	
 		}
 
@@ -678,7 +679,7 @@ namespace faster{
 
 	template <typename K, typename T> 
 	std::pair <K,T> indexedFdd<K,T>::reduce( void * funcP, fddOpType op){
-		//std::cerr << "  Reduce ";
+		//std::cerr << "  Reduce \n";
 		std::pair <K,T> result;
 		int funcId = this->context->findFunc(funcP);
 		char ** partResult = new char*[this->context->numProcs() - 1];
@@ -687,7 +688,7 @@ namespace faster{
 
 		// Send task
 		auto start = system_clock::now();
-		unsigned long int reduceTaskId = this->context->enqueueTask(op, this->id, 0, funcId, this->size);
+		unsigned long int reduceTaskId UNUSED = this->context->enqueueTask(op, this->id, 0, funcId, this->size);
 
 		// Receive results
 		auto resultV = this->context->recvTaskResult(tid, sid, start);

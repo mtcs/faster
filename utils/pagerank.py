@@ -8,6 +8,7 @@ if ( len(sys.argv) < 2 ) :
 g = open ( sys.argv[1], 'r')
 resolution = 1 if (len(sys.argv) < 3) else float(sys.argv[2])
 dumping = 0.85 if (len(sys.argv) < 4) else float(sys.argv[3])
+verbose = 0 if (len(sys.argv) < 5) else int(sys.argv[4])
 
 G = {}
 
@@ -27,7 +28,7 @@ for node, neighbs in G.items():
 
 iteration = 0
 while ( error > resolution) :
-    print ( "Iteration:", iteration, file = sys.stderr, end = " ")
+    print ( "Iteration:", iteration, file = sys.stderr, end = "\n")
     iteration += 1
 
     for node in G.keys(): 
@@ -46,6 +47,12 @@ while ( error > resolution) :
     print ( "Error: %9.5f" % error, file = sys.stderr)
 
     newpr, pr = pr, newpr
+
+    if ( verbose ) :
+        for node in sorted(G.keys()): 
+            #print ( "{}:{:.8f}  ".format(node, pr[node]), file = sys.stderr )
+            print ( "{:.2f}".format(pr[node]), file = sys.stderr , end = ' ')
+
 
 for node in sorted(G.keys()): 
     print ("{} {:.8f}".format(node, pr[node]))

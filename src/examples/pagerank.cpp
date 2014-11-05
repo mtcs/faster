@@ -42,7 +42,7 @@ pair<int,vector<int>> toAList(string & input){
 	return make_pair(key,v);
 }
 
-pair<int, double> createPR(const int & key, vector<int> & s){
+pair<int, double> createPR(const int & key, vector<int> & s UNUSED){
 	return make_pair(key, 1);
 }
 
@@ -58,7 +58,7 @@ pair<int, double> createPR(const int & key, vector<int> & s){
 	
 	return msgList;
 }*/
-deque<pair<int, double>> givePageRank(const int & key, deque<void *> * sl, deque<void *> * prl){
+deque<pair<int, double>> givePageRank(const int & key UNUSED, deque<void *> * sl, deque<void *> * prl){
 	auto & s = * (vector<int>*) * sl->begin();
 	auto & pr = * (double*) * prl->begin();
 	deque<pair<int,double>> msgList;
@@ -99,7 +99,7 @@ pair<int, double> combine(const int & key, deque<double *> * prl){
 
 	return abs(oldPR - pr);
 }*/
-double getNewPR(const int & key, deque<void *> * prL, deque<void *> * contribL){
+double getNewPR(const int & key UNUSED, deque<void *> * prL, deque<void *> * contribL){
 	//cerr << key << " ";
 	double & pr = * (double*) * prL->begin();
 	double oldPR = pr;
@@ -117,7 +117,6 @@ double getNewPR(const int & key, deque<void *> * prL, deque<void *> * contribL){
 }
 
 double maxError( double & a, double & b){
-	cerr << max (a,b) << " ";
 	return max(a,b);
 }
 
@@ -164,17 +163,18 @@ int main(int argc, char ** argv){
 	cerr << "Process Data\n";
 	int i = 0;
 	while( error >= 1){
-		cerr << "Iteration " << i++ << "\n" ;
+		cerr << "\033[1;32mIteration " << i++ << "\033[0m\n" ;
 		auto contribs = iterationData->flatMapByKey(&givePageRank);
 		fc.updateInfo();
 
 		auto combContribs = contribs->mapByKey(&combine);
 		fc.updateInfo();
 
-		cerr << contribs->getSize() << " (" << combContribs->getSize() << ") messages. Error " << error << '\n';
+		cerr << "  " << contribs->getSize() << " (" << combContribs->getSize() << ") messages.\n";
 
 		error = pr->cogroup(combContribs)->mapByKey(&getNewPR)->reduce(&maxError);
 		fc.updateInfo();
+		cerr << "  Error " << error << '\n';
 	}
 	auto result = pr->collect();
 

@@ -97,14 +97,16 @@ void faster::workerFddCore<T>::preapply(long unsigned int id, void * func, fddOp
 	auto start = system_clock::now();
 	if (op & (OP_GENERICMAP | OP_GENERICREDUCE)){
 		this->apply(func, op, dest, buffer);
-		if (dest) buffer << size_t(localData->getSize());
+
+		//if (dest) buffer << size_t(localData->getSize());
+		if (dest) buffer << size_t(dest->getSize());
 	}
 	auto end = system_clock::now();
 	auto duration = duration_cast<milliseconds>(end - start);
 	//std::cerr << " ET:" << duration.count() << " ";
 
-	buffer.writePos(duration.count(), durationP);
-	buffer.writePos(buffer.size() - headerSize, rSizeP);
+	buffer.writePos(size_t(duration.count()), durationP);
+	buffer.writePos(size_t(buffer.size() - headerSize), rSizeP);
 
 	comm->sendTaskResult();
 

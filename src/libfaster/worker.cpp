@@ -85,7 +85,7 @@ void faster::worker::calibrate(){
 	#pragma omp parallel 
 	{
 		std::vector<double> v(TESTVECSIZE, 0);
-		double a;
+		double a = 0;
 
 
 		#pragma omp master

@@ -332,7 +332,6 @@ namespace faster{
 
 	template <typename T> 
 	fddBase * fddCore<T>::_map( void * funcP, fddOpType op, fddBase * newFdd){
-		size_t rSize;
 		unsigned long int tid, sid;
 		//std::cerr << "  Map ";
 
@@ -349,12 +348,12 @@ namespace faster{
 		// Receive results
 		auto result = context->recvTaskResult(tid, sid, start);
 
-		size_t newSize = 0;
-		for (int i = 1; i < context->numProcs(); ++i){
-			if (result[i].second > 0) newSize += * (size_t *) result[i].first;
-		}
-
 		if ( (op & 0xff) & (OP_FlatMap) ) {
+			size_t newSize = 0;
+			for (int i = 1; i < context->numProcs(); ++i){
+				if (result[i].second > 0) newSize += * (size_t *) result[i].first;
+			}
+
 			newFdd->setSize(newSize);
 		}
 
@@ -407,7 +406,7 @@ namespace faster{
 			for (int i = 1; i < (this->context->numProcs() - 1); ++i){
 				T pr;
 
-				std::cerr << "      Reduce Result Size:" << pSize[i] << "\n";
+				//std::cerr << "      Reduce Result Size:" << pSize[i] << "\n";
 				if (pSize[i] == 0) std::cerr << "UNEXPECTED ERROR!!!!";
 
 				buffer.setBuffer(partResult[i], pSize[i]);

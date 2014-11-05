@@ -18,24 +18,27 @@ std::pair<K,T> faster::_workerIFdd<K,T>::reduce (IreduceIFunctionP<K,T> reduceFu
 	#pragma omp parallel 
 	{
 		int nT = omp_get_num_threads();
-		int tN = omp_get_thread_num();
-		std::pair<K,T> partResult (ik[tN], d[tN] );
+		size_t tN = omp_get_thread_num();
+		std::pair<K,T> partResult = {};
+
+		if ( tN < s ) {
+			partResult = {ik[tN], d[tN] };
+		}
 
 		#pragma omp for 
-		for (int i = nT; i < s; ++i){
+		for (size_t i = nT; i < s; ++i){
 			partResult = reduceFunc(partResult.first, partResult.second, ik[i], d[i]);
 		}
 		#pragma omp master
 		result = partResult;
-		
+
 		#pragma omp barrier
-		
-		#pragma omp critical
-		if (omp_get_thread_num() != 0){
+
+		if ( (omp_get_thread_num() != 0) && ( tN < s ) ){
+			#pragma omp critical
 			result = reduceFunc(result.first, result.second, partResult.first, partResult.second);
 		}
 	}
-	//std::cerr << "END (RESULT: [" << result.first << "] " << result.second << ")";
 	return result;
 }
 
@@ -54,11 +57,11 @@ void faster::_workerIFdd<K,T>::applyIndependent(void * func, fddOpType op, fastC
 
 	switch (op){
 		case OP_Reduce:
-			//std::cerr << "Reduce ";
+			//std::cerr << "        Reduce IFDD\n";
 			r = reduce( ( IreduceIFunctionP<K,T> ) func);
 			break;
 		case OP_BulkReduce:
-			//std::cerr << "BulkReduce ";
+			//std::cerr << "        BulkReduce IFDD\n";
 			r = bulkReduce( ( IbulkReduceIFunctionP<K,T> ) func);
 			break;
 	}

@@ -26,14 +26,6 @@ faster::fddType faster::decodeType(size_t code){
 		return FloatV;
 	if ( code == typeid(std::vector<double>).hash_code())
 		return DoubleV;
-	/*if ( code == typeid(int *).hash_code() )
-		return IntP;
-	if ( code == typeid(long int *).hash_code())
-		return LongIntP;
-	if ( code == typeid(float *).hash_code())
-		return FloatP;
-	if ( code == typeid(double *).hash_code())
-		return DoubleP; // */
 	if ( code == typeid(void *).hash_code())
 		return Custom;
 	return Null;
@@ -71,5 +63,5 @@ const std::string faster::decodeOptype(fddOpType op){
 			case OP_Calibrate: 	return "Calibrate  ";
 		}
 	}
-	return "       ";
+	return "           ";
 }
