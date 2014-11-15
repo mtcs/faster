@@ -12,11 +12,11 @@ __Features:__
 * High level distributed computing framework.
 * Implemented in C++ for speed. 
 * Optimized for heterogeneous clusters with a dynamic balancing of data blocks.
-* Functional ideology similar to Apache Spark(map, reduce, flatMap, groupByKey, coGroup etc).
+* Functional ideology similar to Apache Spark(map, reduce, flatMap, groupByKey, cogroup etc).
 * Built-in bulk functions (bulkMap, bulkReduce etc).
-* Minimal memmory 
+* Minimal memmory usage.
 * OpenMP parallelization.
-* MPI message passing (?).
+* MPI message passing.
 * Easy to use with Cuda/OpenCL.
 
 
