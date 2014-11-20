@@ -65,3 +65,36 @@ const std::string faster::decodeOptype(fddOpType op){
 	}
 	return "           ";
 }
+const std::string faster::decodeOptypeAb(fddOpType op){
+	if (op & OP_GENERICMAP){
+		switch(op){
+			case OP_Map: 		return "M  ";
+			case OP_BulkMap: 	return "BM ";
+			case OP_FlatMap: 	return "FM ";
+			case OP_BulkFlatMap: 	return "BFM";
+			case OP_MapByKey: 	return "MBK";
+			case OP_FlatMapByKey:	return "FMK";
+		}
+	}
+	if (op & OP_GENERICREDUCE){
+		switch(op){
+			case OP_Reduce: 	return "R  ";
+			case OP_BulkReduce: 	return "BR ";
+		}
+	}
+	if (op & OP_GENERICUPDATE){
+		switch(op){
+			case OP_UpdateByKey: 	return "UBK";
+			case OP_BulkUpdate:	return "BU ";
+		}
+	}
+	if (op & OP_GENERICMISC){
+		switch(op){
+			case OP_CountByKey: 	return "CBK";
+			case OP_GroupByKey: 	return "GBK";
+			case OP_CoGroup: 	return "CG ";
+			case OP_Calibrate: 	return "CL ";
+		}
+	}
+	return "           ";
+}

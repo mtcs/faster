@@ -195,9 +195,7 @@ void faster::fddStorage<T>::grow(size_t toSize){
 		T * newStorage = new T [toSize];
 
 		if (this->size >0) 
-			#pragma omp parallel for
-			for ( size_t i = 0; i < this->size; ++i)
-				newStorage[i] = this->localData[i];
+			std::move(this->localData, this->localData + this->size, newStorage);
 			//memcpy(newStorage, localData, size * sizeof( T ) );
 
 		delete [] this->localData;
@@ -217,13 +215,10 @@ void faster::fddStorage<T*>::grow(size_t toSize){
 		T ** newStorage = new T* [toSize];
 
 		if (this->size > 0){
+			std::move(this->localData, this->localData + this->size, newStorage);
+			std::move(this->lineSizes, this->lineSizes + this->size, newLineSizes);
 			//memcpy(newStorage, localData, this->size * sizeof( T* ) );
 			//memcpy(newLineSizes, lineSizes, this->size * sizeof( size_t ) );
-			#pragma omp parallel for
-			for ( size_t i = 0; i < this->size; ++i){
-				newStorage[i] =  this->localData[i];
-				newLineSizes[i] = lineSizes[i];
-			}
 		}
 
 		delete [] this->localData;
@@ -246,8 +241,7 @@ void faster::fddStorage<T>::shrink(){
 	if ( (this->size > 0) && (this->allocSize > this->size) ){
 		T * newStorage = new T [this->size];
 
-		for ( size_t i = 0; i < this->size; ++i)
-			newStorage[i] = this->localData[i];
+		std::move(this->localData, this->localData + this->size, newStorage);
 
 		delete [] this->localData;
 
@@ -261,10 +255,8 @@ void faster::fddStorage<T*>::shrink(){
 		T ** newStorage = new T* [this->size];
 		size_t * newLineSizes = new size_t[this->size];
 
-		for ( size_t i = 0; i < this->size; ++i){
-			newStorage[i] = this->localData[i];
-			newLineSizes[i] = lineSizes[i];
-		}
+		std::move(this->localData, this->localData + this->size, newStorage);
+		std::move(this->lineSizes, this->lineSizes + this->size, newLineSizes);
 		//memcpy(newStorage, localData, size * sizeof( T ) );
 
 		delete [] this->localData;

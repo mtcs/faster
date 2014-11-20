@@ -46,18 +46,6 @@ pair<int, double> createPR(const int & key, vector<int> & s UNUSED){
 	return make_pair(key, 1);
 }
 
-//deque<pair<int, double>> givePageRank(const int & key, vector<int> * s, size_t nn, double * pr, size_t npr){
-/*deque<pair<int, double>> givePageRank(const int & key, void * sP, size_t nn, void * prP, size_t npr){
-	auto s = * (vector<int>*) sP;
-	auto pr = * (double*) prP;
-	deque<pair<int,double>> msgList;
-
-	for ( size_t i = 0; i < s.size(); ++i){
-		msgList.push_back(make_pair(s[i], dumpingFactor*pr/s.size()));
-	}
-	
-	return msgList;
-}*/
 deque<pair<int, double>> givePageRank(const int & key UNUSED, deque<void *> * sl, deque<void *> * prl){
 	auto & s = * (vector<int>*) * sl->begin();
 	auto & pr = * (double*) * prl->begin();
@@ -71,7 +59,7 @@ deque<pair<int, double>> givePageRank(const int & key UNUSED, deque<void *> * sl
 	
 	return msgList;
 }
-pair<int, double> combine(const int & key, deque<double *> * prl){
+pair<int, double> combine(const int & key, vector<double *> * prl){
 	pair<int,double> r;
 
 	r.first = key;
@@ -84,21 +72,6 @@ pair<int, double> combine(const int & key, deque<double *> * prl){
 	return r;
 }
 
-/*double getNewPR(const int & key, void * prVP, size_t npr, void * contribVP, size_t numContribs){
-	//cerr << key << " ";
-	double & pr = * (double*) prVP;
-	double * contrib = (double*) contribVP;
-	double oldPR = pr;
-	double sum = 0;
-
-
-	for ( size_t i = 0; i < numContribs; ++i){
-		sum += contrib[i];
-	}
-	pr = (1 - dumpingFactor) + dumpingFactor * sum;
-
-	return abs(oldPR - pr);
-}*/
 double getNewPR(const int & key UNUSED, deque<void *> * prL, deque<void *> * contribL){
 	//cerr << key << " ";
 	double & pr = * (double*) * prL->begin();
@@ -128,12 +101,12 @@ int main(int argc, char ** argv){
 	auto start = system_clock::now();
 
 	fastContext fc(argc, argv);
-	fc.registerFunction((void*) &toAList);
-	fc.registerFunction((void*) &createPR);
-	fc.registerFunction((void*) &givePageRank);
-	fc.registerFunction((void*) &combine);
-	fc.registerFunction((void*) &getNewPR);
-	fc.registerFunction((void*) &maxError);
+	fc.registerFunction((void*) &toAList, "toAList");
+	fc.registerFunction((void*) &createPR, "createPR");
+	fc.registerFunction((void*) &givePageRank, "givePageRank");
+	fc.registerFunction((void*) &combine, "combine");
+	fc.registerFunction((void*) &getNewPR, "getNewPR");
+	fc.registerFunction((void*) &maxError, "maxError");
 	fc.registerGlobal(&numNodes);
 	fc.startWorkers();
 
@@ -164,6 +137,7 @@ int main(int argc, char ** argv){
 	int i = 0;
 	while( error >= 1){
 		cerr << "\033[1;32mIteration " << i++ << "\033[0m\n" ;
+		auto start2 = system_clock::now();
 		auto contribs = iterationData->flatMapByKey(&givePageRank);
 		fc.updateInfo();
 
@@ -174,7 +148,7 @@ int main(int argc, char ** argv){
 
 		error = pr->cogroup(combContribs)->mapByKey(&getNewPR)->reduce(&maxError);
 		fc.updateInfo();
-		cerr << "  Error " << error << '\n';
+		cerr << "  Error " << error << " time:" << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 	}
 	auto result = pr->collect();
 

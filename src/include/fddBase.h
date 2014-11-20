@@ -26,7 +26,9 @@ namespace faster{
 			bool isCached(){ return cached; }
 
 			virtual void discard() = 0;
+			virtual void * getKeyMap(void) = 0;
 			virtual void setKeyMap(void * keyMap) = 0;
+			virtual bool isGroupedByKey() = 0;
 			virtual void setGroupedByKey(bool gbk) = 0;
 
 			//virtual void * _collect() = 0;

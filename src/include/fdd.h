@@ -47,7 +47,9 @@ namespace faster{
 			void discard(){
 				context->discardFDD(id);
 			}
+			void * getKeyMap() { return NULL; }
 			void setKeyMap(void * keyMap UNUSED) {}
+			bool isGroupedByKey() { return false; }
 			void setGroupedByKey(bool gbk UNUSED) {}
 	};
 
@@ -345,10 +347,11 @@ namespace faster{
 		auto start = system_clock::now();
 		context->enqueueTask(op, id, newFddId, funcId, this->size);
 
+
 		// Receive results
 		auto result = context->recvTaskResult(tid, sid, start);
 
-		if ( (op & 0xff) & (OP_FlatMap) ) {
+		if ( (op & 0xff) & (OP_FlatMap | OP_BulkFlatMap) ) {
 			size_t newSize = 0;
 			for (int i = 1; i < context->numProcs(); ++i){
 				if (result[i].second > 0) newSize += * (size_t *) result[i].first;
@@ -357,8 +360,9 @@ namespace faster{
 			newFdd->setSize(newSize);
 		}
 
-		if (!cached)
+		if (!cached){
 			this->discard();
+		}
 
 		//std::cerr << "\n";
 		return newFdd;

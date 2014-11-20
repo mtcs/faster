@@ -119,7 +119,7 @@ void faster::worker::run(){
 				break;
 
 			case MSG_FINISH:
-				//std::cerr << "    R:FINISH ";
+				//std::cerr << "    R:FINISH \n";
 				comm->recvFinish();
 				finished = true;
 				//std::cerr << ".\n";

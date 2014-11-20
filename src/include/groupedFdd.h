@@ -63,7 +63,7 @@ namespace faster{
 					context = c;
 					members.reserve(4);
 			}
-			fddBase * _map (void * funcP, fddOpType op, fddBase * newFdd);
+			fddBase * _map (void * funcP, fddOpType op, fddBase * newFdd, system_clock::time_point & start);
 			template <typename To> 
 			fdd<To> * map(void * funcP, fddOpType op);
 			template <typename Ko, typename To> 
@@ -71,22 +71,22 @@ namespace faster{
 
 			groupedFdd<K> * update(void * funcP, fddOpType op);
 
-			void cogroup(std::unordered_map<K, int> & keyMap);
+			void cogroup(std::unordered_map<K, int> & keyMap, system_clock::time_point & start);
 		public:
 			template <typename T, typename U> 
-			groupedFdd(fastContext * c, iFddCore<K,T> * fdd0, iFddCore<K,U> * fdd1, std::unordered_map<K, int> & keyMap) : groupedFdd(c) { 
+			groupedFdd(fastContext * c, iFddCore<K,T> * fdd0, iFddCore<K,U> * fdd1, std::unordered_map<K, int> & keyMap, system_clock::time_point & start) : groupedFdd(c) { 
 				members.insert(members.end(), fdd0);
 				members.insert(members.end(), fdd1);
 				id = context->createFddGroup(this, members); 
-				cogroup(keyMap);
+				cogroup(keyMap, start);
 			}
 			template <typename T, typename U, typename V> 
-			groupedFdd(fastContext * c, iFddCore<K,T> * fdd0, iFddCore<K,U> * fdd1,  iFddCore<K,V> * fdd2, std::unordered_map<K, int> & keyMap) : groupedFdd(c){
+			groupedFdd(fastContext * c, iFddCore<K,T> * fdd0, iFddCore<K,U> * fdd1,  iFddCore<K,V> * fdd2, std::unordered_map<K, int> & keyMap, system_clock::time_point & start) : groupedFdd(c){
 				members.insert(members.end(), fdd0);
 				members.insert(members.end(), fdd1);
 				members.insert(members.end(), fdd2);
 				id = context->createFddGroup(this, members); 
-				cogroup(keyMap);
+				cogroup(keyMap, start);
 			}
 
 			// UpdateByKey
@@ -179,13 +179,15 @@ namespace faster{
 			}
 
 
+			void * getKeyMap() { return NULL; }
 			void setKeyMap(void * keyMap UNUSED) {}
+			bool isGroupedByKey() { return false; }
 			void setGroupedByKey(bool gbk UNUSED) {}
 		
 	};
 
 	template <typename K>
-	fddBase * groupedFdd<K>::_map (void * funcP, fddOpType op, fddBase * newFdd){
+	fddBase * groupedFdd<K>::_map (void * funcP, fddOpType op, fddBase * newFdd, system_clock::time_point & start){
 		//std::cerr << "  Map ";
 		unsigned long int tid, sid;
 		unsigned long int newFddId = newFdd->getId();
@@ -194,7 +196,6 @@ namespace faster{
 		int funcId = context->findFunc(funcP);
 
 		// Send task
-		auto start = system_clock::now();
 		context->enqueueTask(op, id, newFddId, funcId, this->size);
 
 		// Receive results
@@ -222,6 +223,7 @@ namespace faster{
 	template <typename To> 
 	fdd<To> * groupedFdd<K>::map (void * funcP, fddOpType op){
 		fdd<To> * newFdd;
+		auto start = system_clock::now();
 
 		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
 			newFdd = new fdd<To>(*context);
@@ -229,12 +231,13 @@ namespace faster{
 			newFdd = new fdd<To>(*context, size);
 		}
 
-		return (fdd<To> *) _map(funcP, op, newFdd);
+		return (fdd<To> *) _map(funcP, op, newFdd, start);
 	}
 	template <typename K>
 	template <typename Ko, typename To> 
 	indexedFdd<Ko,To> * groupedFdd<K>::mapI(void * funcP, fddOpType op){
 		indexedFdd<Ko,To> * newFdd;
+		auto start = system_clock::now();
 
 		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
 			newFdd = new indexedFdd<Ko,To>(*context);
@@ -242,7 +245,7 @@ namespace faster{
 			newFdd = new indexedFdd<Ko,To>(*context, size);
 		}
 
-		return (indexedFdd<Ko,To> *) _map(funcP, op, newFdd);
+		return (indexedFdd<Ko,To> *) _map(funcP, op, newFdd, start);
 	}
 
 	template <typename K>
@@ -262,20 +265,30 @@ namespace faster{
 	}
 
 	template <typename K>
-	void groupedFdd<K>::cogroup(std::unordered_map<K, int> & keyMap){
+	void groupedFdd<K>::cogroup(std::unordered_map<K, int> & keyMap, system_clock::time_point & start){
 		using std::chrono::system_clock;
+		std::vector<bool> exchangeData (members.size()-1, true);
 
-		auto start = system_clock::now();
 		unsigned long int sid;
+
+		for (size_t i = 1; i < members.size(); ++i){
+			if ( members[i]->isGroupedByKey() ){
+				auto km = members[i]->getKeyMap();
+				if ( *(std::unordered_map<K, int>*)km != keyMap ){
+					members[i]->setKeyMap(&keyMap);
+				}else{
+					exchangeData[i-1] = false;
+				}
+			}else{
+				members[i]->setKeyMap(&keyMap);
+				members[i]->setGroupedByKey(true);
+			}
+		}
 
 		unsigned long int tid = context->enqueueTask(OP_CoGroup, id, this->size);
 
-		context->sendKeyMap(tid, keyMap);
+		context->sendCogroupData(tid, keyMap, exchangeData);
 
-		for (size_t i = 1; i < members.size(); ++i){
-			members[i]->setKeyMap(&keyMap);
-			members[i]->setGroupedByKey(true);
-		}
 
 		auto result = context->recvTaskResult(tid, sid, start);
 	}

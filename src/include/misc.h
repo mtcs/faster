@@ -14,6 +14,7 @@ namespace faster{
 	fddType decodeType(size_t typeCode);
 	
 	const std::string decodeOptype(fddOpType op);
+	const std::string decodeOptypeAb(fddOpType op);
 
 	template < typename T >
 	double mean(std::vector<T> v){

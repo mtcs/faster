@@ -213,13 +213,13 @@ namespace faster{
 	using PmapByKeyIFunctionP = std::pair<U, size_t> (*) (const K & inKey, T * input, size_t size);
 	*/
 	template <typename K, typename T, typename L, typename U>
-	using ImapByKeyIFunctionP = std::pair<L,U> (*) (const K & inKey, std::deque<T *> * input);
+	using ImapByKeyIFunctionP = std::pair<L,U> (*) (const K & inKey, std::vector<T *> * input);
 	template <typename K, typename T, typename U>
-	using mapByKeyIFunctionP = U (*) (const K & inKey, std::deque <T *> * input);
+	using mapByKeyIFunctionP = U (*) (const K & inKey, std::vector <T *> * input);
 	template <typename K, typename T, typename L, typename U>
-	using IPmapByKeyIFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, std::deque <T *> * input);
+	using IPmapByKeyIFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, std::vector <T *> * input);
 	template <typename K, typename T, typename U>
-	using PmapByKeyIFunctionP = std::pair<U, size_t> (*) (const K & inKey, std::deque <T *> * input);
+	using PmapByKeyIFunctionP = std::pair<U, size_t> (*) (const K & inKey, std::vector <T *> * input);
 
 	template <typename K, typename T, typename L, typename U>
 	using IbulkMapIFunctionP = void (*) (L * outKey, U * output, K * inKey, T * input, size_t size);
@@ -270,13 +270,13 @@ namespace faster{
 	using  PmapIPFunctionP = std::pair<U, size_t> (*) (K inKey, T * input, size_t size);
 
 	template <typename K, typename T, typename L, typename U>
-	using ImapByKeyIPFunctionP = std::pair<L,U> (*) (const K & inKey, std::deque<std::pair<T*,size_t>>);
+	using ImapByKeyIPFunctionP = std::pair<L,U> (*) (const K & inKey, std::vector<std::pair<T*,size_t>>);
 	template <typename K, typename T, typename U>
-	using  mapByKeyIPFunctionP = U (*) (const K & inKey, std::deque<std::pair<T*,size_t>>);
+	using  mapByKeyIPFunctionP = U (*) (const K & inKey, std::vector<std::pair<T*,size_t>>);
 	template <typename K, typename T, typename L, typename U>
-	using IPmapByKeyIPFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, std::deque<std::pair<T*,size_t>>);
+	using IPmapByKeyIPFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, std::vector<std::pair<T*,size_t>>);
 	template <typename K, typename T, typename U>
-	using  PmapByKeyIPFunctionP = std::pair<U, size_t> (*) (const K & inKey, std::deque<std::pair<T*,size_t>>);
+	using  PmapByKeyIPFunctionP = std::pair<U, size_t> (*) (const K & inKey, std::vector<std::pair<T*,size_t>>);
 
 	template <typename K, typename T, typename L, typename U>
 	using IbulkMapIPFunctionP = void (*) (L * outKey, U * output, K * inKey, T ** input, size_t * inputDataSizes, size_t size);

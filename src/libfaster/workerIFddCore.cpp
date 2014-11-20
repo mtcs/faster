@@ -110,13 +110,21 @@ void faster::workerIFddCore<K,T>::countByKey(fastComm *comm){
 
 }
 
+//void p(double & v){
+	//fprintf(stderr, "%.2lf ", v); 
+//}
+
+//template <typename T>
+//void p(T & v UNUSED){
+//}
+
 template <typename K, typename T>
 void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMapP){
 	//using std::chrono::system_clock;
 	//using std::chrono::duration_cast;
 	//using std::chrono::milliseconds;
 
-	//std::cerr << "      Exchange Data By Key\n";
+	//std::cerr << "      Exchange Data By Key";
 	K * keys = localData->getKeys();
 	T * data = localData->getData();
 	size_t size = localData->getSize();
@@ -155,7 +163,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 		buffer[i] << numSend ;
 	}
 
-	//std::cerr << "        [ Del: \033[0;31m";
+	//std::cerr << "\n        [ Del: \033[0;31m";
 	// Insert Data that dont belong to me in the message
 	for ( size_t i = 0; i < size; ++i){
 		K key = keys[i];
@@ -163,14 +171,12 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 		if (owner == comm->getProcId()){
 			continue;
 		}
-		if (owner >= comm->getNumProcs()){
-			std::cerr << "ERROR: Unexpected internal behaviour! " << owner << " > " << comm->getNumProcs() << "\n"; 
-			exit(223);
-		}
-		buffer[owner] << key << data[i];
+		buffer[owner] << key <<  data[i];
 		dataSize[owner]++;
 		deleted[i] = true;
 		dirty = true;
+		//std::cerr << key << ":";
+		//p(data[i]);
 		//std::cerr << i << ":" << key << ">" << owner << "  ";
 		//std::cerr << i << ":" << (size_t) data[i] << " ";
 		//std::cerr << key << " ";
@@ -193,7 +199,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 	//Ti[1] = duration_cast<milliseconds>(system_clock::now() - start).count();
 	//start = system_clock::now();
 
-	//std::cerr << "      Recv data In-place\n";
+	//std::cerr << "\n      Recv data In-place\n";
 	// Recv all keys I own in-place
 	pos = 0;
 	for ( int i = 1; i < (comm->getNumProcs() - 1); ++i){
@@ -218,7 +224,8 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 				keys = localData->getKeys();
 				//std::cerr << "( GROW: "<< localData->getSize() << " ) ";
 			}
-			//std::cerr << i << " ";
+			//std::cerr << keys[pos] << ":";
+			//p(data[pos]);
 			rb >> keys[pos] >> data[pos];
 			pos++;
 		}
@@ -254,7 +261,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 	//Ti[3] = duration_cast<milliseconds>(system_clock::now() - start).count();
 	//start = system_clock::now();
 
-	//std::cerr << "\n";
+	//std::cerr << ".\n";
 }
 
 template <typename K, typename T>

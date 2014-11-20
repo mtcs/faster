@@ -543,9 +543,13 @@ template <typename K>
 void faster::workerFddGroup<K>::cogroup(fastComm *comm){
 	//std::cerr << "        Cogroup\n";
 	unsigned long tid = 0;
+	std::vector<bool> group(members.size()-1, false);
+	//auto start = system_clock::now();
 
 	//std::cerr << "      RecvKeyMap\n";
-	comm->recvKeyMap(tid, keyMap);
+	comm->recvCogroupData(tid, keyMap, group);
+	//std::cerr << "      Cogroup T0:" << duration_cast<milliseconds>(system_clock::now() - start).count() << " ";
+	//start = system_clock::now();
 
 	uKeys.reserve(keyMap.size());
 
@@ -556,6 +560,8 @@ void faster::workerFddGroup<K>::cogroup(fastComm *comm){
 			//std::cerr << it->first << " ";
 		}
 	}
+	//std::cerr << "T1:" << duration_cast<milliseconds>(system_clock::now() - start).count() << " ";
+	//start = system_clock::now();
 	//std::cerr << "\n";
 
 	//uKeys.shrink_to_fit();
@@ -564,9 +570,14 @@ void faster::workerFddGroup<K>::cogroup(fastComm *comm){
 
 	//std::cerr << "        Exchange Data By Key\n";
 	for ( size_t i = 1; i < members.size(); ++i){
-		members[i]->exchangeDataByKey(comm, &keyMap);
+		if ( group[i-1] ){
+			members[i]->exchangeDataByKey(comm, &keyMap);
+			//std::cerr << " REGROUP " << i << "\n";
+		//std::cerr << "Tx:" << duration_cast<milliseconds>(system_clock::now() - start).count() << " ";
+		//start = system_clock::now();
+		}
 	}
-	//std::cerr << "    Done\n";
+	//std::cerr << "\n";
 }
 
 template <typename K>

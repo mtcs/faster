@@ -37,6 +37,8 @@ set (EXTRA_LIBS ${EXTRA_LIBS} faster)
 #set (EXTRA_LIBS ${EXTRA_LIBS} efence)
 
 add_executable(ftest ftest.cpp)
+add_executable(latency latency.cpp)
 
 target_link_libraries (ftest  ${EXTRA_LIBS})
+target_link_libraries (latency  ${EXTRA_LIBS})
 

@@ -140,16 +140,15 @@ faster::indexedFddStorage<K,T*>::~indexedFddStorage(){
 
 
 
-
 template <class K, class T> 
 void faster::indexedFddStorage<K,T>::setData(K * keys, T * data, size_t s){
 	grow(s);
 	this->size = s;
 
-	for ( size_t i = 0; i < s; ++i){
-		this->localData[i] = data[i];
-		this->localKeys[i] = keys[i];
-	}
+	std::copy(data, data + s, this->localData);
+	std::copy(keys, keys + s, this->localKeys);
+	//this->localData = data;
+	//this->localKeys = keys;
 }
 
 template <class K, class T> 
@@ -246,19 +245,29 @@ size_t * faster::indexedFddStorage<K,T*>::getLineSizes(){
 template <class K, class T> 
 void faster::indexedFddStorage<K,T>::grow(size_t toSize){
 	if (this->allocSize < toSize){
-		if ((this->allocSize * 2) > toSize){
-			toSize = this->allocSize * 2;
-		}
+		//if ((this->allocSize * 2) > toSize){
+			//toSize = this->allocSize * 2;
+		//}
 
 		T * newStorage = new T [toSize];
 		K * newKeys = new K [toSize];
 
-		if (this->size >0) {
-			#pragma omp parallel for
-			for ( size_t i = 0; i < this->size; ++i){
-				newStorage[i] = this->localData[i];
-				newKeys[i] = this->localKeys[i];
+		if (this->size > 0) {
+			//#pragma omp parallel 
+			{
+				//#pragma omp task
+				std::move(this->localData, this->localData + this->size, newStorage);
+				//std::copy(this->localData, this->localData + this->size, newStorage);
+
+				//#pragma omp task
+				std::move(this->localKeys, this->localKeys + this->size, newKeys);
+				//std::copy(this->localKeys, this->localKeys + this->size, newKeys);
 			}
+			//#pragma omp parallel for
+			//for ( size_t i = 0; i < this->size; ++i){
+				//newStorage[i] = this->localData[i];
+				//newKeys[i] = this->localKeys[i];
+			//}
 			//memcpy(newStorage, localData, size * sizeof( T ) );
 		}
 

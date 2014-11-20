@@ -62,7 +62,7 @@ namespace faster{
 			std::unordered_map<K, int> calculateKeyMap(std::unordered_map<K, std::tuple<size_t, int, size_t>> count);
 
 			// -------------- Core FDD Functions --------------- //
-			fddBase * _map( void * funcP, fddOpType op, fddBase * newFdd);
+			fddBase * _map( void * funcP, fddOpType op, fddBase * newFdd, system_clock::time_point & start);
 			template <typename U> 
 			fdd<U> * map( void * funcP, fddOpType op);
 			template <typename L, typename U> 
@@ -75,14 +75,20 @@ namespace faster{
 			//}
 			template<typename U> 
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1){
+				auto start = system_clock::now();
+
 				this->groupByKey();
-				return new groupedFdd<K>(context, this, fdd1, keyMap);
+
+				return new groupedFdd<K>(context, this, fdd1, keyMap, start);
 			}
 
 			template<typename U, typename V> 
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1, iFddCore<K,V> * fdd2){
+				auto start = system_clock::now();
+
 				this->groupByKey();
-				return new groupedFdd<K>(context, this, fdd1, fdd2, keyMap);
+
+				return new groupedFdd<K>(context, this, fdd1, fdd2, keyMap, start);
 			}
 
 			std::unordered_map<K, size_t> countByKey();
@@ -91,10 +97,17 @@ namespace faster{
 
 			void discard(){
 				context->discardFDD(id);
+				keyMap.clear();
 			}
 
+			void * getKeyMap(void) {
+				return &this->keyMap;
+			}
 			void setKeyMap(void * keyMap) {
 				this->keyMap = * ( std::unordered_map<K, int> * ) keyMap;
+			}
+			bool isGroupedByKey() { 
+				return groupedByKey; 
 			}
 			void setGroupedByKey(bool gbk) {
 				groupedByKey = gbk;
@@ -414,7 +427,7 @@ namespace faster{
 
 
 	template <typename K, typename T> 
-	fddBase * iFddCore<K,T>::_map( void * funcP, fddOpType op, fddBase * newFdd){
+	fddBase * iFddCore<K,T>::_map( void * funcP, fddOpType op, fddBase * newFdd, system_clock::time_point & start){
 		//std::cerr << "  Map ";
 		unsigned long int tid, sid;
 		unsigned long int newFddId = newFdd->getId();
@@ -423,13 +436,12 @@ namespace faster{
 		int funcId = context->findFunc(funcP);
 
 		// Send task
-		auto start = system_clock::now();
 		context->enqueueTask(op, id, newFddId, funcId, this->size);
 
 		// Receive results
 		auto result = context->recvTaskResult(tid, sid, start);
 
-		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap) ) {
+		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ) {
 			size_t newSize = 0;
 
 			for (int i = 1; i < context->numProcs(); ++i){
@@ -449,6 +461,7 @@ namespace faster{
 	template <typename L, typename U> 
 	indexedFdd<L,U> * iFddCore<K,T>::mapI( void * funcP, fddOpType op){
 		indexedFdd<L,U> * newFdd;
+		auto start = system_clock::now();
 		
 		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
 			newFdd = new indexedFdd<L,U>(*context);
@@ -456,13 +469,14 @@ namespace faster{
 			newFdd = new indexedFdd<L,U>(*context, size, dataAlloc);
 		}
 		
-		return (indexedFdd<L,U> *) _map(funcP, op, newFdd);
+		return (indexedFdd<L,U> *) _map(funcP, op, newFdd, start);
 	}
 
 	template <typename K, typename T> 
 	template <typename U> 
 	fdd<U> * iFddCore<K,T>::map( void * funcP, fddOpType op){
 		fdd<U> * newFdd;
+		auto start = system_clock::now();
 
 		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
 			newFdd = new fdd<U>(*context);
@@ -470,7 +484,7 @@ namespace faster{
 			newFdd = new fdd<U>(*context, size, dataAlloc);
 		}
 		
-		return (fdd<U> *) _map(funcP, op, newFdd);
+		return (fdd<U> *) _map(funcP, op, newFdd, start);
 	}
 
 	template <typename K, typename T> 
@@ -656,7 +670,7 @@ namespace faster{
 			K * keys = new K[this->context->numProcs() - 1];
 
 			#pragma omp parallel for
-			for (int i = 1; i < (this->context->numProcs() - 1); ++i){
+			for (int i = 0; i < (this->context->numProcs() - 1); ++i){
 				fastCommBuffer buffer(0);
 				std::pair <K,T> pr;
 
@@ -765,6 +779,7 @@ namespace faster{
 
 	template <typename K, typename T> 
 	std::tuple <K,T,size_t> indexedFdd<K,T*>::reduceP( void * funcP, fddOpType op){
+		auto start = system_clock::now();
 		//std::cerr << "  Reduce ";
 		std::tuple <K,T,size_t> result;
 		unsigned long int tid, sid;
@@ -773,7 +788,6 @@ namespace faster{
 		size_t * partrSize = new size_t[this->context->numProcs() - 1];
 
 		// Send task
-		auto start = system_clock::now();
 		unsigned long int reduceTaskId = this->context->enqueueTask(op, this->id, 0, funcId, this->size);
 
 		// Receive results

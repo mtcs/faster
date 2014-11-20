@@ -8,6 +8,7 @@
 #include <tuple>
 #include <math.h>
 #include <chrono>
+#include <string>
 
 #include "definitions.h"
 #include "fddBase.h"
@@ -65,6 +66,7 @@ namespace faster{
 			~fastContext();
 
 			void registerFunction(void * funcP);
+			void registerFunction(void * funcP, const std::string name);
 			template <class T>
 			void registerGlobal(T * varP);
 
@@ -83,6 +85,7 @@ namespace faster{
 			fastSettings * settings;
 			std::vector< fddBase * > fddList;
 			std::vector<void*> funcTable;
+			std::vector<std::string> funcName;
 			std::vector< std::pair<void*, size_t> > globalTable;
 			fastComm * comm;
 			fastScheduler * scheduler;
@@ -117,6 +120,8 @@ namespace faster{
 
 			template <typename K>
 			void sendKeyMap(unsigned long id, std::unordered_map<K, int> & keyMap);
+			template <typename K>
+			void sendCogroupData(unsigned long id, std::unordered_map<K, int> & keyMap, std::vector<bool> & flags);
 					
 
 			template <typename Z, typename FDD> 
@@ -231,6 +236,10 @@ namespace faster{
 	template <typename K>
 	void fastContext::sendKeyMap(unsigned long tid, std::unordered_map<K, int> & keyMap){
 		comm->sendKeyMap(tid, keyMap);
+	}
+	template <typename K>
+	void fastContext::sendCogroupData(unsigned long tid, std::unordered_map<K, int> & keyMap, std::vector<bool>  &flags){
+		comm->sendCogroupData(tid, keyMap, flags);
 	}
 
 

@@ -4,16 +4,18 @@
 #include <algorithm>
 #include <utility>
 #include <stdio.h>
+#include <iomanip>
 
 #include "fastScheduler.h"
 #include "fastTask.h"
 #include "misc.h"
 
-faster::fastScheduler::fastScheduler(unsigned int numProcs){
+faster::fastScheduler::fastScheduler(unsigned int numProcs, std::vector<std::string> * funcName){
 	this->numProcs = numProcs;
 	numTasks = 0;
 	resetProcessWeights();
 	_dataMigrationNeeded = false;
+	this->funcName = funcName;
 	infoPos = 0;
 }
 faster::fastScheduler::~fastScheduler(){
@@ -248,14 +250,19 @@ void faster::fastScheduler::printTaskInfo(size_t taskID){
 	double sd = stdDev(t, m);
 
 
-	std::cerr << "\033[1;34m" ;
+	std::cerr << "\033[1;34m " ;
 	fprintf(stderr, "%2ld ", task->id);
-	std::cerr << decodeOptype(task->operationType) << "\t";
+	if ((task->operationType & (OP_GENERICREDUCE | OP_GENERICMAP | OP_GENERICUPDATE) ) && ((*funcName)[task->functionId].size() > 0)){
+		std::cerr << decodeOptypeAb(task->operationType) << " " ;
+		std::cerr << std::setw(9) << (*funcName)[task->functionId] << "\t";
+	}else{
+		std::cerr << std::setw(15) << decodeOptype(task->operationType) << "\t";
+	}
 
-	std::cerr << "\033[0m" ;
+	std::cerr << "\033[0m " ;
 	fprintf(stderr, "%2d %2ld %2ld ", task->functionId, task->srcFDD, task->destFDD );
 
-	std::cerr << "| \033[1;31m" ;
+	std::cerr << "| \033[1;31m " ;
 	fprintf(stderr, "%5ld %6.1lf %3.1lf ", task->duration, m, sd/m);
 
 	std::cerr << "\033[0m| " ;

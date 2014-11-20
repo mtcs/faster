@@ -16,6 +16,7 @@ namespace faster{
 			unsigned long int numTasks;
 			std::vector<fastTask *> taskList;
 			std::vector<double> currentWeights;
+			std::vector<std::string> * funcName;
 			bool _dataMigrationNeeded;
 
 			size_t infoPos;
@@ -24,7 +25,7 @@ namespace faster{
 			double * getNewAllocation();
 			void resetProcessWeights();
 		public:
-			fastScheduler(unsigned int numProcs);
+			fastScheduler(unsigned int numProcs, std::vector<std::string> * funcName);
 			~fastScheduler();
 			
 			fastTask * enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size, std::vector< std::pair<void*, size_t> > & globalTable);

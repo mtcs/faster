@@ -7,6 +7,10 @@ using namespace faster;
 
 const double dumpingFactor = 0.85;
 
+using std::chrono::system_clock;
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+
 size_t numNodes = 0;
 
 pair<int,vector<int>> toAList(string & input){
@@ -54,35 +58,39 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 	vector<double> newPR(numPresNodes);
 
 
-	if ( (numPresNodes != nPR) || ( nPR != nErrors ) ) exit(111);
-	#pragma omp parallel
+	if ( (numPresNodes != nPR) || ( nPR != nErrors ) ) { 
+		cerr << "Internal unknown error!!!!";
+		exit(11);
+	}
+
+	//#pragma omp parallel
 	{
-		#pragma omp for
+	//	#pragma omp for
 		for ( size_t i = 0; i < numPresNodes; ++i){
 			present[keys[i]] = true;
 			prLocation[prKeys[i]] = i;
 			newPR[i] = (1 - dumpingFactor);
 		}
 
-		#pragma omp for
+		//#pragma omp for
 		for ( size_t i = 0; i < numPresNodes; ++i){
 			double contrib = dumpingFactor * pr[prLocation[keys[i]]] / adjList[i].size();
 			for ( size_t j = 0; j < adjList[i].size(); ++j){
 				auto target = adjList[i][j];
 
 				if ( present[target] ){
-					#pragma omp atomic
+					//#pragma omp atomic
 					newPR[ prLocation[target] ] += contrib;
 				}else{
 					auto p = make_pair(adjList[i][j], contrib);
 
-					#pragma omp critical
+					//#pragma omp critical
 					msgList.push_back(p);
 				}
 			}
 		}
 
-		#pragma omp for
+		//#pragma omp for
 		for ( size_t i = 0; i < numPresNodes; ++i){
 			errors[i] = newPR[i] - pr[i];
 			pr[i] = newPR[i];
@@ -92,16 +100,45 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 	return msgList;
 }
 
-pair<int, double> combine(const int & key, deque<double *> * prl){
-	pair<int,double> r;
+//pair<int, double> combine(const int & key, deque<double *> * prl){
+void combine(int *& outKeys, double *& outPr, size_t & nOut, int * contKey, double * prCont, size_t numCont){
+	vector<double> outMsgVec(numNodes, 0);
+	size_t numOutMsgs = 0;
 
-	r.first = key;
-		
-	for ( auto it = prl->begin(); it != prl->end(); it++){
-		r.second += **it;
+	//#pragma omp for
+	for ( size_t i = 0; i < numCont; i++){
+		double contrib = prCont[i];
+		//if ( outMsgVec[contKey[i]] == 0 ) numOutMsgs++;
+		//#pragma omp atomic
+		outMsgVec[contKey[i]] += contrib;
 	}
 
-	return r;
+	//#pragma omp for
+	for ( size_t i = 0; i < numNodes; i++){
+		if ( outMsgVec[i] > 0 ){
+			//#pragma omp atomic
+			numOutMsgs ++;
+		}
+	}
+	
+	outKeys = new int[numOutMsgs];
+	outPr = new double[numOutMsgs];
+	nOut = numOutMsgs;
+
+	size_t pos = 0;
+	//#pragma omp parallel for
+	for ( size_t i = 0; i < numNodes; i++){
+		if ( outMsgVec[i] > 0 ){
+			size_t myPos;
+			
+			//#pragma omp atomic capture
+			myPos = pos++;
+
+			outKeys[myPos] = i;
+			outPr[myPos] = outMsgVec[i];
+		}
+	}
+
 }
 
 void getNewPR(int * prKeys, void * prVP, size_t npr, int * contKeys, void * contribVP, size_t numContribs, int * eKeys UNUSED, void * errorVP, size_t nErrors UNUSED){
@@ -112,25 +149,28 @@ void getNewPR(int * prKeys, void * prVP, size_t npr, int * contKeys, void * cont
 	vector<double> newPr(npr, 0);
 	vector<size_t> prLocation(numNodes+1);
 
-	if ( npr != nErrors ) exit(111);
+	if ( npr != nErrors ) {
+		cerr << "Internal unknown error!!!!!!";
+		exit(11);
+	}
 	
-	#pragma omp parallel
+	//#pragma omp parallel
 	{
-		#pragma omp for
+		//#pragma omp for
 		for ( size_t i = 0; i < npr; ++i ){
 			prLocation[prKeys[i]] = i;
 			//eLocation[eKeys[i]] = i;
 		}
-		#pragma omp for
+		//#pragma omp for
 		for ( size_t i = 0; i < numContribs; ++i){
 			auto target = contKeys[i];
 			size_t targetPrLoc = prLocation[target];
 
-			#pragma omp atomic
+			//#pragma omp atomic
 			newPr[targetPrLoc] += contrib[i];
 		}
 
-		#pragma omp for
+		//#pragma omp for
 		for ( size_t i = 0; i < npr; ++i ){
 			// Output PR error
 			error[i] = abs(error[i] + newPr[i]);
@@ -151,14 +191,17 @@ pair<int,double> maxError(const int & ka, double & a, const int & kb, double & b
 
 int main(int argc, char ** argv){
 	// Init Faster Framework
+
+	auto start = system_clock::now();
+
 	fastContext fc(argc, argv);
-	fc.registerFunction((void*) &toAList);
-	fc.registerFunction((void*) &createPR);
-	fc.registerFunction((void*) &createErrors);
-	fc.registerFunction((void*) &givePageRank);
-	fc.registerFunction((void*) &combine);
-	fc.registerFunction((void*) &getNewPR);
-	fc.registerFunction((void*) &maxError);
+	fc.registerFunction((void*) &toAList, "toAList");
+	fc.registerFunction((void*) &createPR, "createPR");
+	fc.registerFunction((void*) &createErrors, "createErrors");
+	fc.registerFunction((void*) &givePageRank, "givePageRank");
+	fc.registerFunction((void*) &combine, "combine");
+	fc.registerFunction((void*) &getNewPR, "getNewPR");
+	fc.registerFunction((void*) &maxError, "maxError");
 	fc.registerGlobal(&numNodes);
 	fc.startWorkers();
 
@@ -187,25 +230,28 @@ int main(int argc, char ** argv){
 	int i = 0;
 	while( error >= 1){
 		cerr << "\033[1;32mIteration " << i++ << "\033[0m\n";
+		auto start2 = system_clock::now();
 		auto contribs = iterationData->bulkFlatMap(&givePageRank);
 		fc.updateInfo();
 
-		auto combContribs = contribs->mapByKey(&combine);
+		auto combContribs = contribs->bulkFlatMap(&combine);
 		fc.updateInfo();
 		cerr << contribs->getSize() << " (" << combContribs->getSize() << ") messages. \n";
 
 		pr->cogroup(combContribs, errors)->bulkUpdate(&getNewPR);
 		error = errors->reduce(&maxError).second;
 		fc.updateInfo();
-		cerr << "Error " << error << '\n';
+		cerr << "  Error " << error << " time:" << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 
 	}
 	auto result = pr->collect();
 
+	auto duration = duration_cast<milliseconds>(system_clock::now() - start);
+
 	cerr << "Sorting" << '\n';
 	sort(result.begin(), result.end(), [](const pair<int,double> a, const pair<int,double> b){ return a.first < b.first; });
 
-	cerr << "PageRank in " << structure->getSize() << " node graph in "<< i << " iterations! S:" << result.size() << " (error: " << error <<  ") \n";
+	cerr << "PageRank in " << structure->getSize() << " node graph in "<< i << " iterations! In " << duration.count() << "ms (error: " << error <<  ") \n";
 	for ( auto it = result.begin(); it != result.end(); it++){
 		printf("%d %.8f\n", it->first, it->second);
 	}

@@ -52,12 +52,11 @@ void faster::fastComm::waitForReq(int numReqs){
 
 void faster::fastComm::sendTask(fastTask &task){
 	buffer[0].reset();
-
 	buffer[0].grow(48 + 8*task.globals.size() );
 
 	buffer[0] << task.id << task.operationType << task.srcFDD << task.destFDD << task.functionId;
-
 	buffer[0] << size_t(task.globals.size());
+
 	for ( size_t i = 0; i < task.globals.size(); i++){
 		buffer[0] << size_t(task.globals[i].second);
 		buffer[0].write(task.globals[i].first, task.globals[i].second);
@@ -133,10 +132,11 @@ void faster::fastComm::sendCreateFDD(unsigned long int id, fddType type, size_t 
 
 void faster::fastComm::recvCreateFDD(unsigned long int &id, fddType &type, size_t &size){
 	//char t;
+	MPI_Status stat;
 
 	bufferRecv[0].reset();
 
-	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_CREATEFDD, MPI_COMM_WORLD, status);	
+	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_CREATEFDD, MPI_COMM_WORLD, &stat);	
 
 	//bufferRecv[0] >> id >> t >> size;
 	//type = decodeFDDType(t);
@@ -162,10 +162,11 @@ void faster::fastComm::sendCreateIFDD(unsigned long int id, fddType kType,  fddT
 
 void faster::fastComm::recvCreateIFDD(unsigned long int &id, fddType &kType, fddType &tType,  size_t &size){
 	//char t;
+	MPI_Status stat;
 
 	bufferRecv[0].reset();
 
-	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_CREATEIFDD, MPI_COMM_WORLD, status);	
+	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_CREATEIFDD, MPI_COMM_WORLD, &stat);	
 
 	//bufferRecv[0] >> id >> t >> size;
 	//type = decodeFDDType(t);
@@ -189,9 +190,10 @@ void faster::fastComm::sendCreateFDDGroup(unsigned long int id, fddType keyType,
 }
 void faster::fastComm::recvCreateFDDGroup(unsigned long int & id, fddType & keyType, std::vector<unsigned long int> & idV){
 	size_t numMembers;
+	MPI_Status stat;
 	bufferRecv[0].reset();
 
-	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_CREATEGFDD, MPI_COMM_WORLD, status);	
+	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_CREATEGFDD, MPI_COMM_WORLD, &stat);	
 
 	bufferRecv[0] >> id >> keyType >> numMembers;
 
@@ -210,7 +212,8 @@ void faster::fastComm::sendDiscardFDD(unsigned long int id){
 	//MPI_Waitall( numProcs - 1, req, status);
 }
 void faster::fastComm::recvDiscardFDD(unsigned long int &id){
-	MPI_Recv(&id, sizeof(long unsigned int), MPI_BYTE, 0, MSG_DISCARDFDD, MPI_COMM_WORLD, status);	
+	MPI_Status stat;
+	MPI_Recv(&id, sizeof(long unsigned int), MPI_BYTE, 0, MSG_DISCARDFDD, MPI_COMM_WORLD, &stat);	
 }
 
 size_t faster::fastComm::getSize(  std::string * data, size_t * ds UNUSED, size_t s ){
@@ -233,11 +236,12 @@ void faster::fastComm::sendDataUltraPlus(int dest, std::string * data, size_t * 
 }
 
 void faster::fastComm::recvDataUltraPlus(int src, void *& data, int & size, int tag, fastCommBuffer & b){
-	MPI_Probe(src, tag, MPI_COMM_WORLD, status);
-	MPI_Get_count(status, MPI_BYTE, &size);
+	MPI_Status stat;
+	MPI_Probe(src, tag, MPI_COMM_WORLD, &stat);
+	MPI_Get_count(&stat, MPI_BYTE, &size);
 	b.grow(size);
 	b.reset();
-	MPI_Recv(b.data(), b.free(), MPI_BYTE, src, tag, MPI_COMM_WORLD, status);	
+	MPI_Recv(b.data(), b.free(), MPI_BYTE, src, tag, MPI_COMM_WORLD, &stat);	
 	data = b.data();
 }
 
@@ -301,15 +305,16 @@ void faster::fastComm::sendReadFDDFile(unsigned long int id, std::string filenam
 }
 
 void faster::fastComm::recvReadFDDFile(unsigned long int &id, std::string & filename, size_t &size, size_t & offset){
+	MPI_Status stat;
 	//size_t filenameSize;
 	int msgSize = 0;
 
 	bufferRecv[0].reset();
-	MPI_Probe(0, MSG_READFDDFILE, MPI_COMM_WORLD, status);
-	MPI_Get_count(status, MPI_BYTE, &msgSize);
+	MPI_Probe(0, MSG_READFDDFILE, MPI_COMM_WORLD, &stat);
+	MPI_Get_count(&stat, MPI_BYTE, &msgSize);
 	bufferRecv[0].grow(msgSize);
 
-	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_READFDDFILE, MPI_COMM_WORLD, status);	
+	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_READFDDFILE, MPI_COMM_WORLD, &stat);	
 	//buffer[0] >> id >> size >> offset >> filenameSize;
 	//buffer[0].read(filename, filenameSize);
 	bufferRecv[0] >> id >> size >> offset >> filename;
@@ -352,11 +357,12 @@ void faster::fastComm::sendCollect(unsigned long int id){
 		MPI_Isend( &id, sizeof(long unsigned int), MPI_BYTE, i, MSG_COLLECT, MPI_COMM_WORLD, &req[i-1]);
 	}
 
-	//MPI_Waitall( numProcs - 1, req, status);
+	MPI_Waitall( numProcs - 1, req, status);
 }
 
 void faster::fastComm::recvCollect(unsigned long int &id){
-	MPI_Recv(&id, sizeof(long unsigned int), MPI_BYTE, 0, MSG_COLLECT, MPI_COMM_WORLD, status);	
+	MPI_Status stat;
+	MPI_Recv(&id, sizeof(long unsigned int), MPI_BYTE, 0, MSG_COLLECT, MPI_COMM_WORLD, &stat);	
 }
 
 void faster::fastComm::sendFinish(){
@@ -367,7 +373,8 @@ void faster::fastComm::sendFinish(){
 	MPI_Waitall( numProcs - 1, req, status);
 }
 void faster::fastComm::recvFinish(){
-	MPI_Recv(bufferRecv[0].data(), 1, MPI_BYTE, 0, MSG_FINISH, MPI_COMM_WORLD, status);	
+	MPI_Status stat;
+	MPI_Recv(bufferRecv[0].data(), 1, MPI_BYTE, 0, MSG_FINISH, MPI_COMM_WORLD, &stat);	
 }
 
 

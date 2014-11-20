@@ -10,7 +10,7 @@ faster::fastContext::fastContext(const fastSettings & s, int & argc, char **& ar
 
 	settings = new fastSettings(s);
 	comm = new fastComm(argc, argv );
-	scheduler = new fastScheduler( comm->numProcs );
+	scheduler = new fastScheduler( comm->numProcs, & funcName);
 	numFDDs = 0;
 	//numTasks = 0;
 
@@ -30,9 +30,13 @@ faster::fastContext::~fastContext(){
 }
 
 void faster::fastContext::registerFunction(void * funcP){
-	//std::cerr << "  Register " << funcP ;
 	funcTable.insert(funcTable.end(), funcP);
-	//std::cerr << ".\n";
+	funcName.insert(funcName.end(), "");
+}
+
+void faster::fastContext::registerFunction(void * funcP, std::string name){
+	funcTable.insert(funcTable.end(), funcP);
+	funcName.insert(funcName.end(), name);
 }
 
 void faster::fastContext::startWorkers(){
@@ -231,10 +235,10 @@ void faster::fastContext::getFDDInfo(size_t & s, std::vector<size_t> & dataAlloc
 unsigned long int faster::fastContext::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size){
 	fastTask * newTask = scheduler->enqueueTask(opT, idSrc, idRes, funcId, size, globalTable);
 
-	if(scheduler->dataMigrationNeeded()){
+	//if(scheduler->dataMigrationNeeded()){
 		//comm->migrateData(scheduler->getDataMigrationInfo());
-		scheduler->getDataMigrationInfo();
-	}
+	//	scheduler->getDataMigrationInfo();
+	//}
 
 	// TODO do this later on a shceduler?
 	comm->sendTask(*newTask);

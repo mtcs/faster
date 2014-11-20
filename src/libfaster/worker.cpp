@@ -94,7 +94,7 @@ void faster::worker::calibrate(){
 		#pragma omp barrier
 
 		#pragma omp for schedule(static,100)
-		for ( size_t i = 0; i < 1000000; ++i){
+		for ( size_t i = 0; i < 4000000; ++i){
 			for ( size_t j = 1; j < 5; ++j){
 				a += i + j;
 				a -= i - j;
@@ -124,7 +124,6 @@ void faster::worker::updateGlobals(fastTask &task){
 }
 
 void faster::worker::solve(fastTask &task){
-
 	updateGlobals(task);
 
 	if (task.operationType == OP_Calibrate){
