@@ -7,6 +7,8 @@
 #include <iostream>
 #include <tuple>
 
+#include "misc.h"
+
 namespace faster {
 	const int BUFFER_INITIAL_SIZE = 512*1024;
 
@@ -61,7 +63,7 @@ namespace faster {
 				//}
 
 				if(_size < pos+s)
-					_size += pos+s;
+					_size = pos+s;
 			}
 			template <typename T>
 			void writePos(const T &v, size_t pos){
@@ -117,6 +119,10 @@ namespace faster {
 				write(std::get<1>(t));
 				write(std::get<2>(t));
 			}
+			void write(procstat &s);
+			void writePos(procstat &s, size_t pos);
+			void read(procstat &s);
+			void advance(procstat &s);
 		
 			// READ Data
 			template <typename T>

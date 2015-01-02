@@ -4,6 +4,7 @@
 
 #include <vector>
 #include "definitions.h"
+#include "misc.h"
 
 
 namespace faster{
@@ -21,6 +22,7 @@ namespace faster{
 			std::vector<size_t> times;
 			size_t duration;
 			double * allocation;
+			std::vector<procstat> procstats;
 			std::vector< std::pair<void*, size_t> > globals;
 
 	};

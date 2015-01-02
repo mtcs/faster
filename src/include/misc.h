@@ -11,6 +11,16 @@
 #include "definitions.h"
 
 namespace faster{
+
+	class procstat{
+		public:
+			double ram;
+			long unsigned utime;
+			long unsigned stime;
+	};
+
+	procstat getProcStat();
+
 	fddType decodeType(size_t typeCode);
 	
 	const std::string decodeOptype(fddOpType op);
@@ -24,6 +34,16 @@ namespace faster{
 
 		return sum/(double)(v.size());
 	}
+
+	template < typename T >
+	double max(std::vector<T> v){
+		T m = v[0];
+		for ( size_t i = 1; i < v.size(); ++i)
+			m = std::max( m, v[i] );
+
+		return m;
+	}
+
 	template < typename T >
 	double stdDev(std::vector<T> v, double mean){
 		double sum = 0;

@@ -78,3 +78,27 @@ void faster::fastCommBuffer::print(){
 	}
 }
 
+void faster::fastCommBuffer::read(procstat &s){
+	read(s.ram);
+	read(s.utime);
+	read(s.stime);
+}
+
+void faster::fastCommBuffer::write(procstat &s){
+	write(s.ram);
+	write(s.utime);
+	write(s.stime);
+}
+
+void faster::fastCommBuffer::writePos(procstat &s, size_t pos){
+	size_t save = _size;
+	_size = pos;
+	write(s);
+	_size = save;
+}
+
+void faster::fastCommBuffer::advance(procstat &s){
+	advance (sizeof(s.ram));
+	advance (sizeof(s.utime));
+	advance (sizeof(s.stime));
+}

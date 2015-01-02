@@ -6,6 +6,10 @@
 #include <stdio.h>
 #include <iomanip>
 
+// Get RAM
+#include "sys/types.h"
+#include "sys/sysinfo.h"
+
 #include "fastScheduler.h"
 #include "fastTask.h"
 #include "misc.h"
@@ -191,6 +195,8 @@ faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned lo
 	newTask->allocation = getNewAllocation();
 	newTask->duration = 0;
 	newTask->times = std::vector<size_t>(numProcs, 0);
+	newTask->procstats = std::vector<procstat>(numProcs);
+
 	for ( size_t i = 0; i < globalTable.size(); i++){
 		void * var = new char[globalTable[i].second];
 
@@ -208,14 +214,15 @@ faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned lo
 	return enqueueTask(opT, sid, 0, -1, size, globalTable );
 }
 
-void faster::fastScheduler::taskProgress(unsigned long int tid, unsigned long int pid, size_t time){
+void faster::fastScheduler::taskProgress(unsigned long int tid, unsigned long int pid, size_t time, procstat & stat){
 	taskList[tid]->workersFinished++;
-
 	taskList[tid]->times[pid] = time;
+	taskList[tid]->procstats[pid] = stat;
 }
 
 void faster::fastScheduler::taskFinished(unsigned long int tid, size_t time){
 	taskList[tid]->duration = time;
+	taskList[tid]->procstats[0] = getProcStat();
 }
 
 void faster::fastScheduler::setCalibration(std::vector<size_t> time){
@@ -242,6 +249,21 @@ void faster::fastScheduler::setCalibration(std::vector<size_t> time){
 	}
 }
 
+void faster::fastScheduler::printProcstats(fastTask * task){
+	double mram=0, mutime=0, mstime=0;
+	for ( size_t i = 1; i < task->procstats.size(); i++ ){
+		mram += task->procstats[i].ram;
+		mutime += task->procstats[i].utime;
+		mstime += task->procstats[i].stime;
+	}
+	mram /= task->procstats.size()-1;
+	mutime /= task->procstats.size()-1;
+	mstime /= task->procstats.size()-1;
+
+	fprintf(stderr, "%4.1lf %3.1lf %3.1lf ", mram, mutime, mstime);
+	
+}
+
 void faster::fastScheduler::printTaskInfo(size_t taskID){
 	auto task = taskList[taskID];
 	std::vector<size_t> t = task->times;
@@ -266,15 +288,17 @@ void faster::fastScheduler::printTaskInfo(size_t taskID){
 	fprintf(stderr, "%5ld %6.1lf %3.1lf ", task->duration, m, sd/m);
 
 	std::cerr << "\033[0m| " ;
+	printProcstats(task);
+	std::cerr << "| " ;
 
-	for ( auto it2 = t.begin() ; it2 != t.end(); it2++){
-		fprintf(stderr, "%5ld ", *it2);
-	}
+	//for ( auto it2 = t.begin() ; it2 != t.end(); it2++){
+		//fprintf(stderr, "%5ld ", *it2);
+	//}
 
 	std::cerr << "\n";
 }
 void faster::fastScheduler::printHeader(){
-	std::cerr << "\033[1;34mID# Task\033[0m Func Src Dest | \033[1;31mDuration(ms) Avg_Proc_Time PT_CV \033[0m| Individual_Processing_Times\n";
+	std::cerr << "\033[1;34mID# Task\033[0m Func Src Dest | \033[1;31mDuration(ms) Avg_Proc_Time PT_CV \033[0m | RAM | Individual_Processing_Times\n";
 }
 
 void faster::fastScheduler::printTaskInfo(){

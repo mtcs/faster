@@ -1,5 +1,36 @@
+#include <fstream>
+#include <sstream>
 #include <iostream>
+#include <cstring>
+#include <unistd.h>
+#include <sys/times.h>
+#include <omp.h>
+
 #include "misc.h"
+
+faster::procstat faster::getProcStat(){
+	std::string dump;
+	procstat stat;
+
+	struct tms tms0;
+
+	times(&tms0);
+
+	stat.utime = tms0.tms_utime;
+	stat.stime = tms0.tms_stime;
+
+	std::ifstream statmFile("/proc/self/statm", std::ifstream::in);
+	if( statmFile.good() ){
+		statmFile >> dump;
+		statmFile >> stat.ram;
+		stat.ram *= (double)sysconf(_SC_PAGESIZE) / (1024 * 1024);
+	}
+	statmFile.close();
+
+	//std::cerr << "      getProcStat: " << stat.ram << " " << stat.utime << " " << stat.stime << "\n";
+
+	return stat;
+}
 
 faster::fddType faster::decodeType(size_t code){
 	if ( code == typeid(char).hash_code() )

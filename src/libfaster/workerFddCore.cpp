@@ -4,6 +4,7 @@
 #include "fastComm.h"
 #include "fastCommBuffer.h"
 #include "fddStorageExtern.cpp"
+#include "misc.h"
 
 
 template <typename T>
@@ -80,7 +81,9 @@ void faster::workerFddCore<T>::preapply(long unsigned int id, void * func, fddOp
 	fastCommBuffer &buffer = comm->getResultBuffer();
 	size_t durationP;
 	size_t rSizeP;
+	size_t rStatP;
 	size_t headerSize;
+	procstat s;
 
 	buffer.reset();
 	buffer << id;
@@ -91,6 +94,9 @@ void faster::workerFddCore<T>::preapply(long unsigned int id, void * func, fddOp
 
 	rSizeP = buffer.size();
 	buffer.advance(sizeof(size_t));
+
+	rStatP = buffer.size();
+	buffer.advance(s);
 
 	headerSize = buffer.size();
 
@@ -107,6 +113,7 @@ void faster::workerFddCore<T>::preapply(long unsigned int id, void * func, fddOp
 
 	buffer.writePos(size_t(duration.count()), durationP);
 	buffer.writePos(size_t(buffer.size() - headerSize), rSizeP);
+	buffer.writePos(getProcStat(), rStatP);
 
 	comm->sendTaskResult();
 

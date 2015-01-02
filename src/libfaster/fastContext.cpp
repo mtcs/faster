@@ -70,9 +70,10 @@ void faster::fastContext::calibrate(){
 
 	for (int i = 1; i < comm->numProcs; ++i){
 		size_t t = 0;
-		void * result UNUSED = comm->recvTaskResult(rid, sid, size, t);
+		procstat stat;
+		void * result UNUSED = comm->recvTaskResult(rid, sid, size, t, stat);
 		time[sid] = t;
-		scheduler->taskProgress(tid, sid, t);
+		scheduler->taskProgress(tid, sid, t, stat);
 	}
 	comm->waitForReq(comm->numProcs - 1);
 
@@ -261,13 +262,14 @@ std::vector< std::pair<void *, size_t> > faster::fastContext::recvTaskResult(uns
 	for ( int  i = 1; i < comm->numProcs; i++ ){
 		size_t time;
 		size_t size;
+		procstat stat;
 
-		void * r = comm->recvTaskResult(tid, sid, size, time);
+		void * r = comm->recvTaskResult(tid, sid, size, time, stat);
 		result[sid].first = r;
 		result[sid].second = size;
 		//std::cerr << "        P: " << sid << "\n";
 
-		scheduler->taskProgress(tid, sid, time);
+		scheduler->taskProgress(tid, sid, time, stat);
 	}
 	comm->waitForReq(comm->numProcs - 1);
 

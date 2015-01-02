@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "definitions.h"
+#include "misc.h"
 
 namespace faster{
 	class fastTask;
@@ -31,11 +32,12 @@ namespace faster{
 			fastTask * enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size, std::vector< std::pair<void*, size_t> > & globalTable);
 			fastTask * enqueueTask(fddOpType opT, unsigned long int id, size_t size, std::vector< std::pair<void*, size_t> > & globalTable);
 			
-			void taskProgress(unsigned long int id, unsigned long int pid, size_t time);
+			void taskProgress(unsigned long int id, unsigned long int pid, size_t time, procstat & stat);
 			void taskFinished(unsigned long int id, size_t time);
 
 			void setCalibration(std::vector<size_t> time);
 			
+			void printProcstats(fastTask * task);
 			void printTaskInfo();
 			void printTaskInfo(size_t task);
 			void printHeader();

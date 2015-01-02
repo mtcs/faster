@@ -110,7 +110,7 @@ void faster::fastComm::sendTaskResult(){
 	MPI_Send(resultBuffer.data(), resultBuffer.size() , MPI_BYTE, 0, MSG_TASKRESULT, MPI_COMM_WORLD);
 }
 
-void * faster::fastComm::recvTaskResult(unsigned long int & id, unsigned long int & sid, size_t & size, size_t & time){
+void * faster::fastComm::recvTaskResult(unsigned long int & id, unsigned long int & sid, size_t & size, size_t & time, procstat & stat){
 	int rsize;
 
 	MPI_Probe(MPI_ANY_SOURCE, MSG_TASKRESULT, MPI_COMM_WORLD, status);
@@ -123,7 +123,7 @@ void * faster::fastComm::recvTaskResult(unsigned long int & id, unsigned long in
 
 	MPI_Irecv(bufferRecv[sid].data(), bufferRecv[sid].free(), MPI_BYTE, sid, MSG_TASKRESULT, MPI_COMM_WORLD, &req[sid-1]);	
 	
-	bufferRecv[sid] >> id >> time >> size;
+	bufferRecv[sid] >> id >> time >> size >> stat;
 
 	return bufferRecv[sid].pos();
 }

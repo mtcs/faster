@@ -8,6 +8,7 @@
 
 #include "definitions.h"
 #include "fastCommBuffer.h" 
+#include "misc.h"
 
 namespace faster{
 	class fastComm;
@@ -180,7 +181,7 @@ namespace faster{
 
 		//void sendTaskResult(unsigned long int id, void * res, size_t size, double time);
 		void sendTaskResult();
-		void * recvTaskResult(unsigned long int &tid, unsigned long int & sid, size_t &size, size_t & time);
+		void * recvTaskResult(unsigned long int &tid, unsigned long int & sid, size_t &size, size_t & time, procstat & stat);
 
 		// FDD Creation / Destruction
 		void sendCreateFDD(unsigned long int id,  fddType type, size_t size, int dest);

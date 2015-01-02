@@ -7,6 +7,7 @@
 #include "workerFdd.h"
 #include "fastComm.h"
 #include "indexedFddStorageExtern.cpp"
+#include "misc.h"
 
 	using std::chrono::system_clock;
 	using std::chrono::duration_cast;
@@ -586,8 +587,10 @@ void faster::workerFddGroup<K>::preapply(unsigned long int id, void * func, fddO
 	fastCommBuffer &buffer = comm->getResultBuffer();
 	size_t durationP;
 	size_t rSizeP;
+	size_t rStatP;
 	size_t headerSize;
 	size_t ret = 0;
+	procstat s;
 
 	buffer.reset();
 	buffer << id;
@@ -598,6 +601,9 @@ void faster::workerFddGroup<K>::preapply(unsigned long int id, void * func, fddO
 
 	rSizeP = buffer.size();
 	buffer.advance(sizeof(size_t));
+
+	rStatP = buffer.size();
+	buffer.advance(s);
 
 	headerSize = buffer.size();
 
@@ -619,6 +625,7 @@ void faster::workerFddGroup<K>::preapply(unsigned long int id, void * func, fddO
 
 	buffer.writePos(size_t(duration.count()), durationP);
 	buffer.writePos(size_t(buffer.size() - headerSize), rSizeP);
+	buffer.writePos(getProcStat(), rStatP);
 
 	comm->sendTaskResult();
 }

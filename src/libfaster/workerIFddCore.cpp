@@ -3,6 +3,7 @@
 
 #include "_workerIFdd.h"
 #include "fastComm.h"
+#include "misc.h"
 #include "indexedFddStorageExtern.cpp"
 
 using namespace faster;
@@ -329,8 +330,10 @@ void faster::workerIFddCore<K, T>::preapply(long unsigned int id, void * func, f
 	fastCommBuffer &buffer = comm->getResultBuffer();
 	size_t durationP;
 	size_t rSizeP;
+	size_t rStatP;
 	size_t headerSize;
 	char ret = 0;
+	procstat s;
 
 	buffer.reset();
 	buffer << id;
@@ -341,6 +344,9 @@ void faster::workerIFddCore<K, T>::preapply(long unsigned int id, void * func, f
 
 	rSizeP = buffer.size();
 	buffer.advance(sizeof(size_t));
+
+	rStatP = buffer.size();
+	buffer.advance(s);
 
 	headerSize = buffer.size();
 
@@ -365,6 +371,7 @@ void faster::workerIFddCore<K, T>::preapply(long unsigned int id, void * func, f
 
 	buffer.writePos(size_t(duration.count()), durationP);
 	buffer.writePos(size_t(buffer.size() - headerSize), rSizeP);
+	buffer.writePos(getProcStat(), rStatP);
 
 	comm->sendTaskResult();
 
