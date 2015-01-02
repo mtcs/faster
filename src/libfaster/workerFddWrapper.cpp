@@ -147,6 +147,7 @@ void faster::workerFdd::loadSymbols(){
                                       
 	loadSym(CollectDL	, "collectDL");
 	loadSym(ExchangeDataByKeyDL, "exchangeDataByKeyDL");
+	loadSym(GetKeyLocationDL, "getKeyLocationsDL");
 
 	//std::cerr << duration_cast<milliseconds>(system_clock::now() - start).count() << "ms]  ";
 }
@@ -323,6 +324,10 @@ void faster::workerFdd::collect(fastComm * comm){
 void faster::workerFdd::exchangeDataByKey(fastComm *comm, void * keyMap){
 	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [ExchangeDataByKeyDL];
 	((void (*)(workerFddBase *, fastComm *, void*)) funcP)(_fdd, comm, keyMap);
+}
+std::vector< std::vector<void*> > * faster::workerFdd::getKeyLocations() {
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GetKeyLocationDL];
+	return ((std::vector< std::vector<void*> > * (*) (workerFddBase *)) funcP)(_fdd); 
 }
 
 

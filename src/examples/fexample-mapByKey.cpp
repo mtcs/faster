@@ -16,13 +16,13 @@ using namespace faster;
 
 	return result;
 }// */
-pair<int,int> mapByKey1(const int & key, vector<int *> * input){
+pair<int,int> mapByKey1(const int & key, vector<int *> & input){
 	pair<int,int> result (key, 0);
 
-	for ( auto it = input->begin(); it != input->end() ; it++ ){
+	for ( auto it = input.begin(); it != input.end() ; it++ ){
 		result.second += **it;
 	}
-	result.second /= input->size();
+	result.second /= input.size();
 
 	return result;
 }

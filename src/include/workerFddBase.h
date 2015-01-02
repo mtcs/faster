@@ -57,6 +57,7 @@ namespace faster{
 
 			virtual void collect(fastComm * comm) = 0;
 			virtual void exchangeDataByKey(fastComm *comm, void * keyMap) = 0;
+			virtual std::vector< std::vector<void*> > * getKeyLocations() = 0;
 	};
 }
 

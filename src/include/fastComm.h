@@ -121,6 +121,9 @@ namespace faster{
 		MPI_Request * req3;
 		MPI_Request * req4;
 
+		MPI_Group slaveGroup;
+		MPI_Comm slaveComm;
+
 		commMode mode;
 		int numProcs;
 		int procId;
@@ -161,6 +164,7 @@ namespace faster{
 
 		void probeMsgs(int & tag, int & src);
 		void waitForReq(int numReqs);
+		void join();
 
 		template <typename T>
 		size_t getSize(  T * data UNUSED, size_t * ds UNUSED, size_t s );
@@ -532,7 +536,7 @@ namespace faster{
 
 		for ( int i = 1; i < (numProcs); ++i)
 			MPI_Isend(buffer[0].data(), buffer[0].size(), MPI_BYTE, i, MSG_KEYMAP, MPI_COMM_WORLD, &req[i-1]);
-		MPI_Waitall( numProcs - 1, req, MPI_STATUSES_IGNORE);
+		MPI_Waitall( numProcs - 1, req, status);
 	}
 	template <typename K>
 	void faster::fastComm::recvKeyMap(unsigned long tid, std::unordered_map<K, int> & keyMap){
@@ -576,7 +580,7 @@ namespace faster{
 
 		for ( int i = 1; i < (numProcs); ++i)
 			MPI_Isend(buffer[0].data(), buffer[0].size(), MPI_BYTE, i, MSG_KEYMAP, MPI_COMM_WORLD, &req[i-1]);
-		MPI_Waitall( numProcs - 1, req, MPI_STATUSES_IGNORE);
+		MPI_Waitall( numProcs - 1, req, status);
 	}
 	template <typename K>
 	void faster::fastComm::recvCogroupData(unsigned long tid, std::unordered_map<K, int> & keyMap, std::vector<bool> & flags){
@@ -606,6 +610,7 @@ namespace faster{
 
 		int numFlags = 0;
 		bufferRecv[0] >> numFlags;
+		flags.resize(numFlags);
 
 		for ( int i = 0; i < numFlags; i++ ){
 			char flag;

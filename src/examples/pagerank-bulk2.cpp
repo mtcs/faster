@@ -52,6 +52,7 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 	auto pr = (double*) prP;
 	auto errors = (double*) errorsP;
 	deque<pair<int,double>> msgList;
+	vector<double> guivePR(numNodes);
 
 	vector<size_t> prLocation(numNodes+1);
 	vector<bool> present(numNodes+1, false);
@@ -65,14 +66,18 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 
 	//#pragma omp parallel
 	{
-	//	#pragma omp for
+		//#pragma omp for
 		for ( size_t i = 0; i < numPresNodes; ++i){
 			present[keys[i]] = true;
 			prLocation[prKeys[i]] = i;
 			newPR[i] = (1 - dumpingFactor);
 		}
+		//#pragma omp for schedule(static,1000)
+		for ( size_t i = 0; i < numNodes; ++i){
+			guivePR[i] = 0;
+		}
 
-		//#pragma omp for
+		//#pragma omp for schedule(dynamic, 1000)
 		for ( size_t i = 0; i < numPresNodes; ++i){
 			double contrib = dumpingFactor * pr[prLocation[keys[i]]] / adjList[i].size();
 			for ( size_t j = 0; j < adjList[i].size(); ++j){
@@ -82,14 +87,23 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 					//#pragma omp atomic
 					newPR[ prLocation[target] ] += contrib;
 				}else{
-					auto p = make_pair(adjList[i][j], contrib);
-
-					//#pragma omp critical
-					msgList.push_back(p);
+					//#pragma omp atomic
+					guivePR[target] += contrib;
 				}
 			}
 		}
+		// Generate messages
+		//#pragma omp for
+		for ( size_t i = 0; i < numNodes; ++i){
+			if ( guivePR[i] != 0 ){
+				auto p = make_pair(i, guivePR[i]);
 
+				//#pragma omp critical
+				msgList.push_back(p);
+			}
+		}
+
+		// Calculate Page Rank Error
 		//#pragma omp for
 		for ( size_t i = 0; i < numPresNodes; ++i){
 			errors[i] = newPR[i] - pr[i];
@@ -98,47 +112,6 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 	}
 
 	return msgList;
-}
-
-//pair<int, double> combine(const int & key, deque<double *> * prl){
-void combine(int *& outKeys, double *& outPr, size_t & nOut, int * contKey, double * prCont, size_t numCont){
-	vector<double> outMsgVec(numNodes, 0);
-	size_t numOutMsgs = 0;
-
-	//#pragma omp for
-	for ( size_t i = 0; i < numCont; i++){
-		double contrib = prCont[i];
-		//if ( outMsgVec[contKey[i]] == 0 ) numOutMsgs++;
-		//#pragma omp atomic
-		outMsgVec[contKey[i]] += contrib;
-	}
-
-	//#pragma omp for
-	for ( size_t i = 0; i < numNodes; i++){
-		if ( outMsgVec[i] > 0 ){
-			//#pragma omp atomic
-			numOutMsgs ++;
-		}
-	}
-	
-	outKeys = new int[numOutMsgs];
-	outPr = new double[numOutMsgs];
-	nOut = numOutMsgs;
-
-	size_t pos = 0;
-	//#pragma omp parallel for
-	for ( size_t i = 0; i < numNodes; i++){
-		if ( outMsgVec[i] > 0 ){
-			size_t myPos;
-			
-			//#pragma omp atomic capture
-			myPos = pos++;
-
-			outKeys[myPos] = i;
-			outPr[myPos] = outMsgVec[i];
-		}
-	}
-
 }
 
 void getNewPR(int * prKeys, void * prVP, size_t npr, int * contKeys, void * contribVP, size_t numContribs, int * eKeys UNUSED, void * errorVP, size_t nErrors UNUSED){
@@ -199,7 +172,6 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &createPR, "createPR");
 	fc.registerFunction((void*) &createErrors, "createErrors");
 	fc.registerFunction((void*) &givePageRank, "givePageRank");
-	fc.registerFunction((void*) &combine, "combine");
 	fc.registerFunction((void*) &getNewPR, "getNewPR");
 	fc.registerFunction((void*) &maxError, "maxError");
 	fc.registerGlobal(&numNodes);
@@ -238,12 +210,9 @@ int main(int argc, char ** argv){
 		auto start2 = system_clock::now();
 		auto contribs = iterationData->bulkFlatMap(&givePageRank);
 		fc.updateInfo();
+		cerr << contribs->getSize() << " (" << contribs->getSize() << ") messages. \n";
 
-		auto combContribs = contribs->bulkFlatMap(&combine);
-		fc.updateInfo();
-		cerr << contribs->getSize() << " (" << combContribs->getSize() << ") messages. \n";
-
-		pr->cogroup(combContribs, errors)->bulkUpdate(&getNewPR);
+		pr->cogroup(contribs, errors)->bulkUpdate(&getNewPR);
 		error = errors->reduce(&maxError).second;
 		fc.updateInfo();
 		cerr << "  Error " << error << " time:" << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";

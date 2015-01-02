@@ -669,7 +669,7 @@ namespace faster{
 			T * vals = new T[this->context->numProcs() - 1];
 			K * keys = new K[this->context->numProcs() - 1];
 
-			#pragma omp parallel for
+			//#pragma omp parallel for
 			for (int i = 0; i < (this->context->numProcs() - 1); ++i){
 				fastCommBuffer buffer(0);
 				std::pair <K,T> pr;
@@ -738,7 +738,7 @@ namespace faster{
 			buffer.setBuffer(partResult[0], pSize[0]);
 			buffer >> result;
 
-			#pragma omp parallel for
+			//#pragma omp parallel for
 			for (int i = 1; i < (this->context->numProcs() - 1); ++i){
 				std::tuple <K,T,size_t> pr;
 
@@ -759,7 +759,7 @@ namespace faster{
 			K * keys = new K[this->context->numProcs() - 1];
 			size_t * sizes = new size_t[this->context->numProcs() - 1];
 
-			#pragma omp parallel for
+			//#pragma omp parallel for
 			for (int i = 1; i < (this->context->numProcs() - 1); ++i){
 				fastCommBuffer buffer(0);
 				std::tuple <K,T,size_t> pr;

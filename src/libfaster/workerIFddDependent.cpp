@@ -94,72 +94,41 @@ void faster::_workerIFdd<K,T>::map (workerFddBase * dest, PmapIFunctionP<K,T,U> 
 
 
 template <typename K, typename T>
-std::vector< std::vector<T*>* > findKeyInterval(std::vector<K> & ukeys, K * keys, T * data, size_t fddSize){
+std::vector< std::vector<T*> > findKeyInterval(std::vector<K> & ukeys, K * keys, T * data, size_t fddSize){
 	//auto start = system_clock::now();
 
-	std::unordered_map<K, std::vector<T*>*> keyLocations(fddSize);
 	bool generateUK = (ukeys.size() == 0);
-	size_t numKeys = 0;
 
 	//std::cerr << "IFDDDependent ";
+	//std::cerr << "FindKeyInterval\n";
 
-	if (generateUK){
-		//std::cerr << "genUK ";
-		ukeys.resize(fddSize);
+	std::unordered_map<K, size_t> keyCount(fddSize);
+	for ( size_t i = 0; i < fddSize; i++){
+		keyCount[keys[i]] ++;
 	}
-	//auto t0 =  duration_cast<milliseconds>(system_clock::now() - start).count();
-	//auto start2 = system_clock::now();
 
-	/*for ( size_t i = 0; i < fddSize; i++){
+	std::unordered_map<K, std::vector<T*>> keyLocations(fddSize);
+	for ( auto it = keyCount.cbegin(); it != keyCount.end(); ++it ){
+		keyLocations[it->first].reserve(it->second);
+	}
+	keyCount.clear();
+
+	for ( size_t i = 0; i < fddSize; i++){
 		K & key = keys[i];
 		T * d = &data[i];
 		auto l = keyLocations.find(key);
-
-		if ( l == keyLocations.end() ) {
-			auto dl = new std::deque<T*>();
-
-			dl->push_back(d);
-
-			keyLocations.insert ( {key, dl} );
-
-			if (generateUK){
-				ukeys[numKeys++] = key;
-			}
-		}else{
-			l->second->push_back(d);
-		}
-	}// */
-	{
-		std::unordered_map<K, size_t> keyCount(fddSize);
-		for ( size_t i = 0; i < fddSize; i++){
-			keyCount[keys[i]] ++;
-		}
-		for ( size_t i = 0; i < fddSize; i++){
-			K & key = keys[i];
-			T * d = &data[i];
-			auto l = keyLocations.find(key);
-
-			if ( l == keyLocations.end() ) {
-				auto dl = new std::vector<T*>();
-
-				dl->reserve(keyCount[key]);
-				dl->insert(dl->end(), d);
-
-				keyLocations.insert ( {key, dl} );
-
-				if (generateUK){
-					ukeys[numKeys++] = key;
-				}
-			}else{
-				l->second->insert(l->second->end(), d);
-			}
-		}
+		if ( l != keyLocations.end() )
+			l->second.insert(l->second.end(), d);
 	}
 	//auto t1 =  duration_cast<milliseconds>(system_clock::now() - start2).count();
 	//start2 = system_clock::now();
 
 	if (generateUK){
-		ukeys.resize(numKeys);
+		size_t i = 0;
+		ukeys.resize(keyLocations.size());
+		for ( auto it = keyLocations.begin(); it != keyLocations.end(); it++ ){
+			ukeys[i++] = it->first;
+		}
 	}
 	//auto t2 =  duration_cast<milliseconds>(system_clock::now() - start2).count();
 	//start2 = system_clock::now();
@@ -167,26 +136,19 @@ std::vector< std::vector<T*>* > findKeyInterval(std::vector<K> & ukeys, K * keys
 	
 	//exit(231);
 
-	std::vector< std::vector<T*>* > keyLocationsV(ukeys.size(), NULL);
+	std::vector< std::vector<T*> > keyLocationsV(ukeys.size());
 
 	for ( size_t i = 0; i < ukeys.size(); i++ ){
 		K & key = ukeys[i];
 		auto l = keyLocations.find(key);
 
 		if ( l == keyLocations.end() ){
-			keyLocationsV[i] = new std::vector<T*>();
+			keyLocationsV[i] = {};
 		}else{
-			keyLocationsV[i] = l->second;
-			l->second = NULL;
+			keyLocationsV[i] = std::move(l->second);
 		}
 	}
 	
-	// TODO - MAKE THIS RIGHT!!! these keys should be included
-	for ( auto it = keyLocations.begin() ; it != keyLocations.end(); it++ ){
-		if ( it->second != NULL ){
-			delete it->second;
-		}
-	}
 	//std::cerr << "\nT0:" << t0 << " T1:" << t1 << " T2:" << t2 << " TOT:" << duration_cast<milliseconds>(system_clock::now() - start).count() << "\n";
 
 	return keyLocationsV;
@@ -201,35 +163,37 @@ void faster::_workerIFdd<K,T>::mapByKey (workerFddBase * dest, ImapByKeyIFunctio
 	T * id = this->localData->getData();
 	size_t s = this->localData->getSize();
 
+	//std::cerr << "      MaprByKey\n";
 	//std::cerr << "      MaprByKey T0:" << duration_cast<milliseconds>(system_clock::now() - start).count() << " ";
 	//start = system_clock::now();
 
-	auto keyLocations = findKeyInterval(this->uKeys, ik, id, s);
+	auto kL = findKeyInterval(this->uKeys, ik, id, s);
 	//std::cerr << "T1:" << duration_cast<milliseconds>(system_clock::now() - start).count() << " ";
 	//start = system_clock::now();
 
 	//dest->setSize(this->uKeys.size());
+	//std::cerr << "\n";
+	//std::cerr << "       SetSize: " << this->uKeys.size() << "\n";
 	dest->setSize(this->uKeys.size());
+	L * ok = (L*) dest->getKeys();
+	U * od = (U*) dest->getData();
 	//std::cerr << "T2:" << duration_cast<milliseconds>(system_clock::now() - start).count() << " ";
 	//start = system_clock::now();
 
-	L * ok = (L*) dest->getKeys();
-	U * od = (U*) dest->getData();
 
 	//std::cerr << "T3:" << duration_cast<milliseconds>(system_clock::now() - start).count() << " ";
 	//start = system_clock::now();
 
 	#pragma omp parallel for
 	for (size_t i = 0; i < this->uKeys.size(); i++){
-		std::pair<L,U> r = mapByKeyFunc(this->uKeys[i], keyLocations[i]);
+		std::pair<L,U> r = mapByKeyFunc(this->uKeys[i], kL[i]);
 
 		ok[i] = r.first;
 		od[i] = r.second;
-
-		delete keyLocations[i];
 	}
 	//std::cerr << "T4:" << duration_cast<milliseconds>(system_clock::now() - start).count() << "\n";
 	//start = system_clock::now();
+	//std::cerr << "        DONE\n";
 
 
 }		
@@ -290,7 +254,6 @@ void faster::_workerIFdd<K,T>::mapByKey (workerFddBase * dest, mapByKeyIFunction
 
 		od[i] = mapByKeyFunc(key, loc);
 
-		delete loc;
 	}
 }		
 

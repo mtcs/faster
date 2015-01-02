@@ -124,7 +124,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 	//using std::chrono::duration_cast;
 	//using std::chrono::milliseconds;
 
-	//std::cerr << "      Exchange Data By Key";
+	//std::cerr << "    \033[0;33mExchange Data By Key\033[0m\n";
 	K * keys = localData->getKeys();
 	T * data = localData->getData();
 	size_t size = localData->getSize();
@@ -134,55 +134,62 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 	std::vector<bool> deleted(size, false);
 	size_t pos;
 	bool dirty = false;
+	bool tryShrink = false;
 
 	//int Ti[5];
 	//auto start = system_clock::now();
 	
-	//std::cerr << "        [ KeyMap: ";
-	if ( uKeys.size() == 0 ){
+	//std::cerr << "\033[0;33mPRESS ENTER TO CONTINUE\033[0m\n";std::cin.get();
+	//std::cerr << comm->getProcId() << "        [ KeyMap: ";
+	if ( uKeys.size() != 0 ){
 		uKeys.clear();
-		uKeys.reserve(keyMap.size());
-		for ( auto it = keyMap.begin(); it != keyMap.end(); it++){
-			//std::cerr << it->first << ":" << it->second << " ";
-			if (it->second == comm->getProcId()){
-				uKeys.insert(uKeys.end(), it->first);
-			}
-		}
-		//std::cerr << "] \n";
-		uKeys.shrink_to_fit();
+		uKeys.reserve(keyMap.size()/2);
 	}
+	for ( auto it = keyMap.begin(); it != keyMap.end(); it++){
+		if (it->second == comm->getProcId()){
+			uKeys.insert(uKeys.end(), it->first);
+			//std::cerr << "\033[0;33m";
+		}
+		//std::cerr << it->first << "\033[0m ";
+	}
+	//std::cerr << "] \n";
 
-	//std::cerr << "      Write Buffers\n";
+	//std::cerr << comm->getProcId() << "        Write Buffers";
 	// Reserve space in the message for the header
 	for ( int i = 1; i < (comm->getNumProcs()); ++i){
 		size_t numSend = 0;
-		if (i == comm->getProcId()){
+		if (i == comm->getProcId())
 			continue;
-		}
 		buffer[i].reset();
 		buffer[i] << numSend ;
 	}
+	//std::cerr << "\n";
 
-	//std::cerr << "\n        [ Del: \033[0;31m";
+	//std::cerr << comm->getProcId() << "        [ ";
 	// Insert Data that dont belong to me in the message
 	for ( size_t i = 0; i < size; ++i){
 		K key = keys[i];
 		int owner = keyMap[key];
-		if (owner == comm->getProcId()){
+		
+		//if (owner != comm->getProcId())
+			//std::cerr << "\033[0;31m";
+		//std::cerr << " " << key << "\033[0m";
+
+		if (owner == comm->getProcId())
 			continue;
-		}
 		buffer[owner] << key <<  data[i];
+
 		dataSize[owner]++;
 		deleted[i] = true;
-		dirty = true;
-		//std::cerr << key << ":";
 		//p(data[i]);
+		//std::cerr << ":" << i;
 		//std::cerr << i << ":" << key << ">" << owner << "  ";
 		//std::cerr << i << ":" << (size_t) data[i] << " ";
-		//std::cerr << key << " ";
 	}
 
-	//std::cerr << "\033[0m- ";
+	//std::cerr << " - ";
+
+	comm->join();
 
 	//Ti[0] = duration_cast<milliseconds>(system_clock::now() - start).count();
 	//start = system_clock::now();
@@ -191,19 +198,31 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 	for ( int i = 1; i < (comm->getNumProcs()); ++i){
 		if (i == comm->getProcId())
 			continue;
+		if (dataSize[i] > 0)
+			tryShrink = true;
+
 		buffer[i].writePos(dataSize[i], 0);
 		comm->sendGroupByKeyData(i);
 		//std::cerr << "\033[0;31m"<< dataSize[i] << " \033[0m> " << i << "  ";
 	}
+	//std::cerr << "]\n";
 
 	//Ti[1] = duration_cast<milliseconds>(system_clock::now() - start).count();
 	//start = system_clock::now();
 
-	//std::cerr << "\n      Recv data In-place\n";
-	// Recv all keys I own in-place
+	//std::cerr << comm->getProcId() << "        Recv data In-place\n";
+	//std::cerr << comm->getProcId() << "          Insert: [";
+	// Find the first emty space
 	pos = 0;
+	if (tryShrink){
+		while ( (pos < deleted.size() ) && ( ! deleted[pos] ) )
+			pos++;
+	}else{
+		pos = deleted.size();
+	}
+	
+	// Recv all keys I own in-place
 	for ( int i = 1; i < (comm->getNumProcs() - 1); ++i){
-		//std::cerr << "        [ Insert: ";
 		int rSize;
 		size_t numItems;
 		fastCommBuffer rb(0);
@@ -211,7 +230,10 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 		rb.setBuffer(rData, rSize);
 
 		rb >> numItems;
-		//std::cerr << "\033[0;32m"<< numItems << "\033[0m - ";
+		if (numItems > 0)
+			dirty = true;
+		
+		//std::cerr << "| \033[0;32m" << numItems << "\033[0m - ";
 
 		for (size_t i = 0; i < numItems; ++i){
 			// Find a empty space in the local data
@@ -224,22 +246,22 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 				keys = localData->getKeys();
 				//std::cerr << "( GROW: "<< localData->getSize() << " ) ";
 			}
-			//std::cerr << keys[pos] << ":";
 			//p(data[pos]);
 			rb >> keys[pos] >> data[pos];
+			//std::cerr  << keys[pos] << ">" << pos << " ";
+			//std::cerr  << keys[pos] << " ";
 			pos++;
 		}
-		//std::cerr << " ]\n";
 	}
-	//std::cerr << "\n";
+	//std::cerr << "]\n";
 	comm->waitForReq(comm->getNumProcs() - 2);
 
 	//Ti[2] = duration_cast<milliseconds>(system_clock::now() - start).count();
 	//start = system_clock::now();
 
 	// If there are elements that are still sparse in the memory
-	if ( dirty && ( pos < localData->getSize() ) ){
-		//std::cerr << "        [ Shrink:";
+	if ( tryShrink && ( pos < deleted.size() ) ){
+		//std::cerr << "        [ Shrink: (" << pos << "," << deleted.size() << " ";
 		// Bring them forward and correct size
 		for (size_t i = (pos); i < localData->getSize(); ++i){
 			// Found sparse a item
@@ -248,13 +270,21 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 				if (i > pos) {
 					keys[pos] = keys[i];
 					data[pos] = data[i];
+					//std::cerr << ">" << pos;
 				}
-				//std::cerr << ">" << pos;
 				pos++;
 			}
 		}
 		localData->setSize(pos);
 		//std::cerr << " ]\n" ;
+	}
+
+	// Clear Key location saved by last ByKey function
+	if (dirty | tryShrink){
+		if (keyLocations.size() > 0){
+			keyLocations.clear();
+			//std::cerr << " CLEAR KeyLocations\n" ;
+		}
 	}
 	//std::cerr << "        (new size: " << localData->getSize() << ")\n";
 	
@@ -284,7 +314,7 @@ void faster::workerIFddCore<K,T>::groupByKey(fastComm *comm){
 	exchangeDataByKey(comm, &keyMap);
 	
 	//comm->waitForReq(comm->getNumProcs()-1);
-	//resultBuffer << size_t(localData->getSize());
+	resultBuffer << size_t(localData->getSize());
 
 	//std::cerr << "    DONE\n";
 }

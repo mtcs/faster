@@ -90,7 +90,8 @@ namespace faster{
 		CollectDL	= 0x15,
 		GroupByKeyDL	= 0x16,
 		CountByKeyDL	= 0x17,
-		ExchangeDataByKeyDL = 0x18
+		ExchangeDataByKeyDL = 0x18,
+		GetKeyLocationDL	= 0x19
 
 	} dFuncName;
 
@@ -213,13 +214,13 @@ namespace faster{
 	using PmapByKeyIFunctionP = std::pair<U, size_t> (*) (const K & inKey, T * input, size_t size);
 	*/
 	template <typename K, typename T, typename L, typename U>
-	using ImapByKeyIFunctionP = std::pair<L,U> (*) (const K & inKey, std::vector<T *> * input);
+	using ImapByKeyIFunctionP = std::pair<L,U> (*) (const K & inKey, std::vector<T *> & input);
 	template <typename K, typename T, typename U>
-	using mapByKeyIFunctionP = U (*) (const K & inKey, std::vector <T *> * input);
+	using mapByKeyIFunctionP = U (*) (const K & inKey, std::vector <T *> & input);
 	template <typename K, typename T, typename L, typename U>
-	using IPmapByKeyIFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, std::vector <T *> * input);
+	using IPmapByKeyIFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, std::vector <T *> & input);
 	template <typename K, typename T, typename U>
-	using PmapByKeyIFunctionP = std::pair<U, size_t> (*) (const K & inKey, std::vector <T *> * input);
+	using PmapByKeyIFunctionP = std::pair<U, size_t> (*) (const K & inKey, std::vector <T *> & input);
 
 	template <typename K, typename T, typename L, typename U>
 	using IbulkMapIFunctionP = void (*) (L * outKey, U * output, K * inKey, T * input, size_t size);
@@ -322,10 +323,10 @@ namespace faster{
 	// --------------- Grouped FDDs -------------//
 
 	template <typename K>
-	using updateByKeyG2FunctionP = void (*) (const K & key, std::deque<void*> * a, std::deque<void*> * b);
+	using updateByKeyG2FunctionP = void (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b);
 
 	template <typename K>
-	using updateByKeyG3FunctionP = void (*) (const K & key, std::deque<void*> * a, std::deque<void*> * b, std::deque<void*> * c);
+	using updateByKeyG3FunctionP = void (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b, std::vector<void*> & c);
 
 
 	template <typename K>
@@ -336,29 +337,29 @@ namespace faster{
 
 
 	template <typename K, typename To>
-	using mapByKeyG2FunctionP = To (*) (const K & key, std::deque<void*> * a, std::deque<void*> * b);
+	using mapByKeyG2FunctionP = To (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b);
 
 	template <typename K, typename To>
-	using mapByKeyG3FunctionP = To (*) (const K & key, std::deque<void*> * a, std::deque<void*> * b, std::deque<void*> * c);
+	using mapByKeyG3FunctionP = To (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b, std::vector<void*> & c);
 
 	template <typename K, typename Ko, typename To>
-	using ImapByKeyG2FunctionP = std::pair<Ko,To> (*) (const K & key, std::deque<void*> * a, std::deque<void*> * b);
+	using ImapByKeyG2FunctionP = std::pair<Ko,To> (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b);
 
 	template <typename K, typename Ko, typename To>
-	using ImapByKeyG3FunctionP = std::pair<Ko,To> (*) (const K & key, std::deque<void*> * a, std::deque<void*> * b, std::deque<void*> * c);
+	using ImapByKeyG3FunctionP = std::pair<Ko,To> (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b, std::vector<void*> & c);
 
 
 	template <typename K, typename To>
-	using flatMapByKeyG2FunctionP = std::deque<To> (*) (const K & key, std::deque<void*> * a, std::deque<void*> * b);
+	using flatMapByKeyG2FunctionP = std::deque<To> (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b);
 
 	template <typename K, typename To>
-	using flatMapByKeyG3FunctionP = std::deque<To> (*) (const K & key, std::deque<void*> * a, std::deque<void*> * b, std::deque<void*> * c);
+	using flatMapByKeyG3FunctionP = std::deque<To> (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b, std::vector<void*> & c);
 
 	template <typename K, typename Ko, typename To>
-	using IflatMapByKeyG2FunctionP = std::deque<std::pair<Ko,To>> (*) (const K & key, std::deque<void*> * a, std::deque<void*> * b);
+	using IflatMapByKeyG2FunctionP = std::deque<std::pair<Ko,To>> (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b);
 
 	template <typename K, typename Ko, typename To>
-	using IflatMapByKeyG3FunctionP = std::deque<std::pair<Ko,To>> (*) (const K & key, std::deque<void*> * a, std::deque<void*> * b, std::deque<void*> * c);
+	using IflatMapByKeyG3FunctionP = std::deque<std::pair<Ko,To>> (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b, std::vector<void*> & c);
 
 
 	template <typename K, typename To>

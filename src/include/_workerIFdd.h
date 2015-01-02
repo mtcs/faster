@@ -26,6 +26,7 @@ namespace faster{
 		protected:
 			indexedFddStorage <K,T> * localData;
 			std::vector<K> uKeys;
+			std::vector< std::vector<void*> > keyLocations;
 			bool groupedByKey;
 
 			// ByKey Functions
@@ -68,6 +69,10 @@ namespace faster{
 			void groupByKey(fastComm *comm);
 			void countByKey(fastComm *comm);
 			void exchangeDataByKey(fastComm *comm, void * keyMap);
+			std::vector< std::vector<void*> > * getKeyLocations(){
+				return (std::vector< std::vector<void*> > *) & keyLocations;
+			}
+
 
 
 	};

@@ -34,6 +34,7 @@ namespace faster{
 
 		void collectDL(workerFddBase * fdd, fastComm * comm);
 		void exchangeDataByKeyDL(workerFddBase * fdd, fastComm *comm, void * keyMap);
+		void * getKeyLocationsDL(workerFddBase * fdd);
 	}
 }
 

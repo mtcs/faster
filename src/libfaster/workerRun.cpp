@@ -126,7 +126,7 @@ void faster::worker::run(){
 				break;
 			default:
 				std::cerr << "    \033[1;31mR:ERROR UNRECOGNIZED MESSAGE " << tag << " from " << msgSrc << "!!!!!!!!\033[0m\n";
-				//usleep(500000);
+				usleep(100000);
 				break;
 		}
 	}

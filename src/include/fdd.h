@@ -422,7 +422,7 @@ namespace faster{
 			bulkReduceFunctionP<T> bulkReduceFunc = (bulkReduceFunctionP<T>) this->context->funcTable[funcId];
 			T * vals = new T[this->context->numProcs() - 1];
 
-			#pragma omp parallel for
+			//#pragma omp parallel for
 			for (int i = 1; i < (this->context->numProcs() - 1); ++i){
 				fastCommBuffer buffer(0);
 

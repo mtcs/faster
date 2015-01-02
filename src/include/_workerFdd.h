@@ -32,6 +32,7 @@ namespace faster {
 			fddStorage <T> * localData;
 
 			void exchangeDataByKey(fastComm *comm UNUSED, void * keyMap UNUSED){};
+			std::vector< std::vector<void*> > * getKeyLocations(){ return NULL; }
 
 		public:
 			workerFddCore(unsigned int ident, fddType t);

@@ -62,6 +62,7 @@ namespace faster{
 			void bulkUpdate(void * mapByKeyFunc);
 
 			void exchangeDataByKey(fastComm *comm UNUSED, void * keyMap UNUSED){};
+			std::vector< std::vector<void*> > * getKeyLocations(){ return NULL; }
 			void cogroup(fastComm *comm);
 
 		public:

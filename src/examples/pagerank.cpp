@@ -46,9 +46,9 @@ pair<int, double> createPR(const int & key, vector<int> & s UNUSED){
 	return make_pair(key, 1);
 }
 
-deque<pair<int, double>> givePageRank(const int & key UNUSED, deque<void *> * sl, deque<void *> * prl){
-	auto & s = * (vector<int>*) * sl->begin();
-	auto & pr = * (double*) * prl->begin();
+deque<pair<int, double>> givePageRank(const int & key UNUSED, vector<void *> & sl, vector<void *> & prl){
+	auto & s = * (vector<int>*) * sl.begin();
+	auto & pr = * (double*) * prl.begin();
 	deque<pair<int,double>> msgList;
 	double contrib = dumpingFactor * pr / s.size();
 
@@ -59,27 +59,27 @@ deque<pair<int, double>> givePageRank(const int & key UNUSED, deque<void *> * sl
 	
 	return msgList;
 }
-pair<int, double> combine(const int & key, vector<double *> * prl){
+pair<int, double> combine(const int & key, vector<double *> & prl){
 	pair<int,double> r;
 
 	r.first = key;
 		
 	//cerr << key << ":" << prl.size() << " ";
-	for ( auto it = prl->begin(); it != prl->end(); it++){
+	for ( auto it = prl.begin(); it != prl.end(); it++){
 		r.second += **it;
 	}
 
 	return r;
 }
 
-double getNewPR(const int & key UNUSED, deque<void *> * prL, deque<void *> * contribL){
+double getNewPR(const int & key UNUSED, vector<void *> & prL, vector<void *> & contribL){
 	//cerr << key << " ";
-	double & pr = * (double*) * prL->begin();
+	double & pr = * (double*) * prL.begin();
 	double oldPR = pr;
 	double sum = 0;
 
 
-	for( auto it = contribL->begin(); it != contribL->end(); it++){
+	for( auto it = contribL.begin(); it != contribL.end(); it++){
 		double contrib = *(double*) *it;
 		sum += contrib;
 	}
@@ -111,6 +111,7 @@ int main(int argc, char ** argv){
 	fc.startWorkers();
 
 	fc.printHeader();
+	cerr << "  Init Time: " << duration_cast<milliseconds>(system_clock::now() - start).count() << "ms\n";
 
 	if ( (argc > 2) && (argv[2][0] == '1') ){
 		cerr << "Calibrate Performance\n";
@@ -119,7 +120,9 @@ int main(int argc, char ** argv){
 	}
 
 	cerr << "Import Data\n";
+	auto start2 = system_clock::now();
 	auto data = new fdd<string>(fc, argv[1]);
+	cerr << "  Read Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 
 	cerr << "Convert to Adjacency List\n";
 	auto structure = data->map<int, vector<int>>(&toAList)->cache();
@@ -137,7 +140,7 @@ int main(int argc, char ** argv){
 	int i = 0;
 	while( error >= 1){
 		cerr << "\033[1;32mIteration " << i++ << "\033[0m\n" ;
-		auto start2 = system_clock::now();
+		start2 = system_clock::now();
 		auto contribs = iterationData->flatMapByKey(&givePageRank);
 		fc.updateInfo();
 
@@ -150,17 +153,18 @@ int main(int argc, char ** argv){
 		fc.updateInfo();
 		cerr << "  Error " << error << " time:" << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 	}
+	start2 = system_clock::now();
 	auto result = pr->collect();
 
-	auto duration = duration_cast<milliseconds>(system_clock::now() - start);
+	cerr << "  Collect Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
+	start2 = system_clock::now();
 
-	cerr << "Sorting" << '\n';
-	sort(result.begin(), result.end(), [](const pair<int,double> a, const pair<int,double> b){ return a.first < b.first; });
-
-	cerr << "PageRank in " << structure->getSize() << " node graph in "<< i << " iterations! In " << duration.count() << "ms (error: " << error <<  ") \n";
 	for ( auto it = result.begin(); it != result.end(); it++){
 		printf("%d %.8f\n", it->first, it->second);
 	}
+	auto duration = duration_cast<milliseconds>(system_clock::now() - start).count();
+	cerr << "  Write Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
+	cerr << "PageRank in " << structure->getSize() << " node graph in "<< i << " iterations! In " << duration << "ms (error: " << error <<  ") \n";
 	
 	//cerr << "PRESS ENTER TO CONTINUE\n";
 	//cin.get();

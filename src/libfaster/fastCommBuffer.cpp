@@ -62,7 +62,8 @@ void faster::fastCommBuffer::grow(size_t s){
 		
 		char * newdata = new char[_allocatedSize];
 		
-		memcpy(newdata, _data, _size );
+		//memcpy(newdata, _data, _size );
+		std::copy(_data, _data+_size, newdata);
 
 		delete [] _data;
 

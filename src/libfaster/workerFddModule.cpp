@@ -90,3 +90,7 @@ void faster::exchangeDataByKeyDL(workerFddBase * fdd, fastComm * comm, void * ke
 	fdd->exchangeDataByKey(comm, keyMap);
 }
 
+void * faster::getKeyLocationsDL(workerFddBase * fdd){
+	return fdd->getKeyLocations();
+}
+

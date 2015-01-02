@@ -27,21 +27,21 @@ using namespace faster;
 
 	return result;
 }*/
-pair<int,int> mapByKey1(const int & key, deque<void*> * al, deque<void*> * bl){
+pair<int,int> mapByKey1(const int & key, vector<void*> & al, vector<void*> & bl){
 	double sum = 0;
 	pair<int,int> result (key, 0);
 	cout << "\033[0;31m";
 	cout << key << "\033[0m -  "; cout.flush();
 
-	for ( auto it = al->begin(); it != al->end(); it++){
+	for ( auto it = al.begin(); it != al.end(); it++){
 		int a = *(int*) *it;
 		cout << a << " ";
-		sum += (double) a/al->size();
+		sum += (double) a/al.size();
 	}
-	for ( auto it = bl->begin(); it != bl->end(); it++){
+	for ( auto it = bl.begin(); it != bl.end(); it++){
 		int b = *(int*) *it;
 		cout << b << " ";
-		sum += (double) b/bl->size();
+		sum += (double) b/bl.size();
 	}
 	result.second = sum/2;
 	cout << "\n";
