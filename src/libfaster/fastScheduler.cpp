@@ -260,7 +260,12 @@ void faster::fastScheduler::printProcstats(fastTask * task){
 	mutime /= task->procstats.size()-1;
 	mstime /= task->procstats.size()-1;
 
-	fprintf(stderr, "%4.1lf %3.1lf %3.1lf ", mram, mutime, mstime);
+	fprintf(stderr, "\033[1;34m%4.1lf %3.1lf %3.1lf ", mram, mutime, mstime);
+
+	std::cerr << "\033[0m| " ;
+	for ( size_t i = 0; i < task->procstats.size(); i++ ){
+		fprintf(stderr, "%4.1lf ", task->procstats[i].ram);
+	}
 	
 }
 
@@ -291,9 +296,9 @@ void faster::fastScheduler::printTaskInfo(size_t taskID){
 	printProcstats(task);
 	std::cerr << "| " ;
 
-	//for ( auto it2 = t.begin() ; it2 != t.end(); it2++){
-		//fprintf(stderr, "%5ld ", *it2);
-	//}
+	for ( auto it2 = t.begin() ; it2 != t.end(); it2++){
+		fprintf(stderr, "%5ld ", *it2);
+	}
 
 	std::cerr << "\n";
 }

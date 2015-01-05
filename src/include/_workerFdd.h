@@ -37,7 +37,7 @@ namespace faster {
 		public:
 			workerFddCore(unsigned int ident, fddType t);
 			workerFddCore(unsigned int ident, fddType t, size_t size);
-			~workerFddCore();
+			virtual ~workerFddCore();
 
 			void setData(void * k UNUSED, void * d UNUSED, size_t size UNUSED){}
 

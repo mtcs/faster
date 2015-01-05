@@ -57,8 +57,8 @@ void faster::_workerFdd<T>::map (workerFddBase * dest, ImapFunctionP<T,L,U> mapF
 	for ( size_t i = 0; i < s; ++i){
 		//std::cerr << i << " ";
 		std::pair<L,U> r = mapFunc(d[i]);
-		ok[i] = r.first;
-		od[i] = r.second;
+		ok[i] = std::move(r.first);
+		od[i] = std::move(r.second);
 	}
 	//std::cerr << "END ";
 }		

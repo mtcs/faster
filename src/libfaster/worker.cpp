@@ -120,6 +120,7 @@ void faster::worker::calibrate(){
 void faster::worker::updateGlobals(fastTask &task){
 	for ( size_t i = 0; i < task.globals.size(); i++){
 		std::memcpy((*globalTable)[i].first, task.globals[i].first, task.globals[i].second);
+		delete [] (char*) task.globals[i].first;
 	}
 }
 

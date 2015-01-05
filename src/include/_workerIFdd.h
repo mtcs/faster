@@ -39,7 +39,7 @@ namespace faster{
 		public:
 			workerIFddCore(unsigned int ident, fddType kt, fddType t);
 			workerIFddCore(unsigned int ident, fddType kt, fddType t, size_t size);
-			~workerIFddCore();
+			virtual ~workerIFddCore();
 			
 			fddType getType() override ;
 			fddType getKeyType() override ;
