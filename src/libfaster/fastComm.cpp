@@ -27,7 +27,6 @@ faster::fastComm::fastComm(int & argc, char **& argv){
 	req3 = new MPI_Request [numProcs];
 	req4 = new MPI_Request [numProcs];
 	buffer = new fastCommBuffer [numProcs];
-	buffer3 = new fastCommBuffer [numProcs];
 	bufferRecv = new fastCommBuffer [std::max(3, numProcs)];
 }
 
@@ -41,7 +40,6 @@ faster::fastComm::~fastComm(){
 	delete [] req3;
 	delete [] req4;
 	delete [] buffer;
-	delete [] buffer3;
 	delete [] bufferRecv;
 }
 

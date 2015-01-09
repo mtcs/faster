@@ -70,7 +70,7 @@ namespace faster{
 			void countByKey(fastComm *comm);
 			void exchangeDataByKey(fastComm *comm, void * keyMap);
 			std::vector< std::vector<void*> > * getKeyLocations(){
-				return (std::vector< std::vector<void*> > *) & keyLocations;
+				return  &keyLocations;
 			}
 
 

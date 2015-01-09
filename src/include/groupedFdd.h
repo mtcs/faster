@@ -62,6 +62,7 @@ namespace faster{
 					_tType = Null;
 					context = c;
 					members.reserve(4);
+					cached = false;
 			}
 			fddBase * _map (void * funcP, fddOpType op, fddBase * newFdd, system_clock::time_point & start);
 			template <typename To> 
@@ -87,6 +88,11 @@ namespace faster{
 				members.insert(members.end(), fdd2);
 				id = context->createFddGroup(this, members); 
 				cogroup(keyMap, start);
+			}
+
+			groupedFdd<K> * cache(){
+				this->cached = true;
+				return this;
 			}
 
 			// UpdateByKey
@@ -154,9 +160,8 @@ namespace faster{
 			}
 
 			void discard(){
-				for ( size_t i = 0; i < members.size(); ++i){
-					members[i]->discard();
-				}
+				context->discardFDD(id);
+				dataAlloc.clear();
 			}
 
 
@@ -210,10 +215,13 @@ namespace faster{
 			newFdd->setSize(fddSize);
 		}
 
-		for ( size_t i = 0; i < members.size(); ++i){
-			if ( ! members[i]->isCached() ){
-				members[i]->discard();
+		if ( ! cached ){
+			for ( size_t i = 0; i < members.size(); ++i){
+				if ( ! members[i]->isCached() ){
+					members[i]->discard();
+				}
 			}
+			discard();
 		}
 
 		//std::cerr << "\n";
@@ -260,6 +268,15 @@ namespace faster{
 		unsigned long int tid = context->enqueueTask(op, this->id, 0, funcId, this->size);
 
 		auto result = context->recvTaskResult(tid, sid, start);
+
+		if ( ! cached ){
+			for ( size_t i = 0; i < members.size(); ++i){
+				if ( ! members[i]->isCached() ){
+					members[i]->discard();
+				}
+			}
+			discard();
+		}
 
 		return this;
 	}

@@ -21,7 +21,7 @@ faster::workerFddGroup<K>::workerFddGroup(unsigned long int id, fddType keyT, st
 
 
 template <typename K>
-std::vector< std::vector<void*>> findKeyInterval(std::vector<K> & ukeys, faster::workerFddBase * wfdd){
+std::vector< std::vector<void*>> faster::workerFddGroup<K>::findKeyInterval(std::vector<K> & ukeys, faster::workerFddBase * wfdd){
 	//auto start = system_clock::now();
 
 	bool generateUK = (ukeys.size() == 0) ;
@@ -91,15 +91,39 @@ std::vector< std::vector<void*>> findKeyInterval(std::vector<K> & ukeys, faster:
 }
 
 template <typename K>
+void faster::workerFddGroup<K>::bla(std::vector< std::vector<void*> > * location, size_t s){
+	location->resize(s);
+}
+
+template <typename K>
+std::vector< std::vector<void*> > * faster::workerFddGroup<K>::getMemberKeyLocations(int i, std::vector<K> & uKeys, faster::workerFddBase * wfdd ){
+	std::vector< std::vector<void*> > * location;
+
+	location = wfdd->getKeyLocations();
+
+	if ( location->size() == 0 ){
+		auto loc = findKeyInterval(uKeys, wfdd);
+		//location->resize(loc.size());
+		bla(location, loc.size());
+		
+		for ( int j = 0; j < loc.size(); j++ ){
+			(*location)[j] = std::move(loc[j]);
+			loc[j].clear();
+		}
+		loc.clear();
+	}
+
+	return location;
+}
+
+template <typename K>
 void faster::workerFddGroup<K>::updateByKey(void * func){
 
 	//std::unordered_map<K, std::pair<void*, size_t>> keyLocations[3];
 	std::vector< std::vector<void*> > * keyLocations[3];
 
 	for ( size_t i = 0; i < members.size(); ++i){
-		keyLocations[i] = members[i]->getKeyLocations();
-		if ( keyLocations[i]->size() == 0 )
-			*(keyLocations[i]) = findKeyInterval(uKeys, members[i]);
+		keyLocations[i] = getMemberKeyLocations(i, uKeys, members[i]);
 	}
 
 	if ( members.size() < 3 ){  
@@ -151,9 +175,7 @@ void faster::workerFddGroup<K>::mapByKey(workerFddBase * dest, void * func){
 	//std::cerr << "START " << id << " " << s << "  ";
 
 	for ( size_t i = 0; i < members.size(); ++i){
-		keyLocations[i] = members[i]->getKeyLocations();
-		if ( keyLocations[i]->size() == 0 )
-			*(keyLocations[i]) = findKeyInterval(uKeys, members[i]);
+		keyLocations[i] = getMemberKeyLocations(i, uKeys, members[i]);
 	}
 	dest->setSize(uKeys.size());
 	U * od = (U*) dest->getData();
@@ -193,11 +215,7 @@ void faster::workerFddGroup<K>::mapByKeyI(workerFddBase * dest, void * func){
 
 	//std::cerr << "       FindKeyInterval ";
 	for ( size_t i = 0; i < members.size(); ++i){
-		keyLocations[i] = members[i]->getKeyLocations();
-		if ( keyLocations[i]->size() == 0 ){
-			*(keyLocations[i]) = findKeyInterval(uKeys, members[i]);
-			//std::cerr << i << " ";
-		}
+		keyLocations[i] = getMemberKeyLocations(i, uKeys, members[i]);
 	}
 	//std::cerr << "\n";
 	//std::cerr << "       SetSize: " << uKeys.size() << "\n";
@@ -246,9 +264,7 @@ void faster::workerFddGroup<K>::flatMapByKey(workerFddBase * dest, void * func){
 	std::deque<U> resultList;
 
 	for ( size_t i = 0; i < members.size(); ++i){
-		keyLocations[i] = members[i]->getKeyLocations();
-		if ( keyLocations[i]->size() == 0 )
-			* keyLocations[i] = findKeyInterval(uKeys, members[i]);
+		keyLocations[i] = getMemberKeyLocations(i, uKeys, members[i]);
 	}
 
 	if ( members.size() < 3 ){  
@@ -311,11 +327,7 @@ void faster::workerFddGroup<K>::flatMapByKeyI(workerFddBase * dest, void * func)
 
 	//std::cerr << "KL ";
 	for ( size_t i = 0; i < members.size(); ++i){
-		keyLocations[i] = members[i]->getKeyLocations();
-		if ( keyLocations[i]->size() == 0 ){
-			* keyLocations[i] = findKeyInterval(uKeys, members[i]);
-			//std::cerr << " ("<< i << ") ";
-		}
+		keyLocations[i] = getMemberKeyLocations(i, uKeys, members[i]);
 	}
 
 	if ( members.size() <3 ){  
@@ -541,6 +553,7 @@ void faster::workerFddGroup<K>::cogroup(fastComm *comm){
 	//std::cerr << "        Cogroup\n";
 	unsigned long tid = 0;
 	std::vector<bool> group(members.size()-1, false);
+	std::unordered_map<K,int> keyMap;
 	//auto start = system_clock::now();
 
 	//std::cerr << "      RecvKeyMap\n";

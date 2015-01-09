@@ -47,6 +47,7 @@ void faster::fastContext::startWorkers(){
 
 		worker.run();
 
+		auto id = comm->getProcId();
 		// Clean process
 		delete comm; 
 		delete settings; 

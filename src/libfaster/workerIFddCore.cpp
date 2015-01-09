@@ -24,6 +24,7 @@ faster::workerIFddCore<K,T>::workerIFddCore(unsigned int ident, fddType kt, fddT
 
 template <typename K, typename T>
 faster::workerIFddCore<K,T>::~workerIFddCore(){
+	keyLocations.clear();
 	delete localData;
 }
 
@@ -158,11 +159,11 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 	//std::cerr << comm->getProcId() << "        Write Buffers";
 	// Reserve space in the message for the header
 	for ( int i = 1; i < (comm->getNumProcs()); ++i){
-		size_t numSend = 0;
 		if (i == comm->getProcId())
 			continue;
 		buffer[i].reset();
-		buffer[i] << numSend ;
+		buffer[i].advance(sizeof(size_t));
+		//buffer[i].advance(1);
 	}
 	//std::cerr << "\n";
 
@@ -178,8 +179,22 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 
 		if (owner == comm->getProcId())
 			continue;
-		buffer[owner] << key <<  data[i];
 
+		/*
+		// If the buffer is toot big send some of the data already
+		if (buffer[i].size() >= 1024*1024){
+			buffer[i].writePos(dataSize[i], 0);
+			buffer[i].writePos(1, 1, sizeof(size_t));
+			
+			comm->sendGroupByKeyData(i);
+
+			buffer[i].advance(sizeof(size_t));
+			buffer[i].advance(1);
+			buffer[i].reset();
+		}
+		*/
+
+		buffer[owner] << key <<  data[i];
 		dataSize[owner]++;
 		deleted[i] = true;
 		//p(data[i]);
@@ -203,6 +218,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 			tryShrink = true;
 
 		buffer[i].writePos(dataSize[i], 0);
+		//buffer[i].writePos(0, 1, sizeof(size_t));
 		comm->sendGroupByKeyData(i);
 		//std::cerr << "\033[0;31m"<< dataSize[i] << " \033[0m> " << i << "  ";
 	}
@@ -227,32 +243,37 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 		int rSize;
 		size_t numItems;
 		fastCommBuffer rb(0);
-		void * rData = comm->recvGroupByKeyData(rSize);
-		rb.setBuffer(rData, rSize);
+		//char cont = 1;
 
-		rb >> numItems;
-		if (numItems > 0)
-			dirty = true;
-		
-		//std::cerr << "| \033[0;32m" << numItems << "\033[0m - ";
+		//while (!cont){	
 
-		for (size_t i = 0; i < numItems; ++i){
-			// Find a empty space in the local data
-			while ( (pos < deleted.size() ) && ( ! deleted[pos] ) )
+			void * rData = comm->recvGroupByKeyData(rSize);
+			rb.setBuffer(rData, rSize);
+
+			rb >> numItems ; // >> cont;
+			if (numItems > 0)
+				dirty = true;
+
+			//std::cerr << "| \033[0;32m" << numItems << "\033[0m - ";
+
+			for (size_t i = 0; i < numItems; ++i){
+				// Find a empty space in the local data
+				while ( (pos < deleted.size() ) && ( ! deleted[pos] ) )
+					pos++;
+				// Make sure it is not out of bounds, if it is, grow local data to fit new data
+				if( pos >= localData->getSize() ){
+					localData->setSize(localData->getSize() + numItems - i);
+					data = localData->getData();
+					keys = localData->getKeys();
+					//std::cerr << "( GROW: "<< localData->getSize() << " ) ";
+				}
+				//p(data[pos]);
+				rb >> keys[pos] >> data[pos];
+				//std::cerr  << keys[pos] << ">" << pos << " ";
+				//std::cerr  << keys[pos] << " ";
 				pos++;
-			// Make sure it is not out of bounds, if it is, grow local data to fit new data
-			if( pos >= localData->getSize() ){
-				localData->setSize(localData->getSize() + numItems - i);
-				data = localData->getData();
-				keys = localData->getKeys();
-				//std::cerr << "( GROW: "<< localData->getSize() << " ) ";
 			}
-			//p(data[pos]);
-			rb >> keys[pos] >> data[pos];
-			//std::cerr  << keys[pos] << ">" << pos << " ";
-			//std::cerr  << keys[pos] << " ";
-			pos++;
-		}
+		//}
 	}
 	//std::cerr << "]\n";
 	comm->waitForReq(comm->getNumProcs() - 2);

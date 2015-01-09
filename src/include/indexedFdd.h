@@ -57,7 +57,8 @@ namespace faster{
 				this->dataAlloc = dataAlloc;
 			}
 
-			~iFddCore(){}
+			virtual ~iFddCore(){
+			}
 
 			std::unordered_map<K, int> calculateKeyMap(std::unordered_map<K, std::tuple<size_t, int, size_t>> count);
 
@@ -97,7 +98,7 @@ namespace faster{
 
 			void discard(){
 				context->discardFDD(id);
-				keyMap.clear();
+				this->keyMap.clear();
 			}
 
 			void * getKeyMap(void) {

@@ -78,7 +78,6 @@ double getNewPR(const int & key UNUSED, vector<void *> & prL, vector<void *> & c
 	double oldPR = pr;
 	double sum = 0;
 
-
 	for( auto it = contribL.begin(); it != contribL.end(); it++){
 		double contrib = *(double*) *it;
 		sum += contrib;
@@ -119,6 +118,7 @@ int main(int argc, char ** argv){
 		fc.updateInfo();
 	}
 
+
 	cerr << "Import Data\n";
 	auto start2 = system_clock::now();
 	auto data = new fdd<string>(fc, argv[1]);
@@ -132,7 +132,7 @@ int main(int argc, char ** argv){
 
 	cerr << "Init Pagerank\n";
 	auto pr = structure->map<int, double>(&createPR)->cache();
-	auto iterationData = structure->cogroup(pr);
+	auto iterationData = structure->cogroup(pr)->cache();
 	double error = 1000;
 	fc.updateInfo();
 
@@ -168,6 +168,5 @@ int main(int argc, char ** argv){
 	
 	//cerr << "PRESS ENTER TO CONTINUE\n";
 	//cin.get();
-
 	return 0;
 }

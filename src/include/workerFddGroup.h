@@ -13,7 +13,6 @@ namespace faster{
 		private:
 			std::vector<workerFddBase*> members;
 			std::vector<K> uKeys;
-			std::unordered_map<K,int> keyMap;
 
 			/*template <typename T0, typename T1, typename T2>
 			void decodeLast(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer);
@@ -21,6 +20,11 @@ namespace faster{
 			inline void decodeThird(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer);
 			template <typename T0>
 			inline void decodeSecond(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer);// */
+
+			std::vector< std::vector<void*>> findKeyInterval(std::vector<K> & ukeys, faster::workerFddBase * wfdd);
+void bla(std::vector< std::vector<void*> > * location, size_t s);
+			std::vector< std::vector<void*> > * getMemberKeyLocations(int i, std::vector<K> & uKeys, faster::workerFddBase * wfdd );
+
 
 			//template <typename U, typename T0, typename T1, typename T2>
 			template <typename U>

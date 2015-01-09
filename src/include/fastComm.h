@@ -148,7 +148,6 @@ namespace faster{
 
 
 		fastCommBuffer * buffer;
-		fastCommBuffer * buffer3;
 		fastCommBuffer * bufferRecv;
 		fastCommBuffer resultBuffer;
 		public:
@@ -369,8 +368,10 @@ namespace faster{
 			MPI_Isend( lineSizes, size*sizeof(size_t), MPI_BYTE, dest, tagDataSize, MPI_COMM_WORLD, &req4[dest-1]);
 
 		// Send Keys
-		if (tagKeys) 
-			sendDataUltraPlus(dest, keys, NULL, size, tagKeys, buffer3[dest], &req3[dest-1] );
+		if (tagKeys){
+			sendDataUltraPlus(dest, keys, NULL, size, tagKeys, buffer[dest], &req3[dest-1] );
+			MPI_Wait(&req3[dest-1], status);
+		}
 
 		// Send subarrays
 		sendDataUltraPlus(dest, data, lineSizes, size, tagData, buffer[dest], &req[dest-1] );

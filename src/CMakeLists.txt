@@ -30,6 +30,7 @@ else (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	#add_definitions(-freorder-functions) 
 	#add_definitions(-pg)
 	#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+	#set (EXTRA_LIBS ${EXTRA_LIBS} tcmalloc)
 endif (CMAKE_BUILD_TYPE MATCHES "DEBUG") 
 
 

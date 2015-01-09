@@ -327,7 +327,7 @@ void faster::workerFdd::exchangeDataByKey(fastComm *comm, void * keyMap){
 }
 std::vector< std::vector<void*> > * faster::workerFdd::getKeyLocations() {
 	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GetKeyLocationDL];
-	return ((std::vector< std::vector<void*> > * (*) (workerFddBase *)) funcP)(_fdd); 
+	return (std::vector< std::vector<void*> > *) (( void * (*) (workerFddBase *)) funcP)(_fdd); 
 }
 
 
