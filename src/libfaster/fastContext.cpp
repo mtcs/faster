@@ -47,7 +47,7 @@ void faster::fastContext::startWorkers(){
 
 		worker.run();
 
-		auto id = comm->getProcId();
+		//auto id = comm->getProcId();
 		// Clean process
 		delete comm; 
 		delete settings; 
@@ -121,7 +121,7 @@ unsigned long int faster::fastContext::_createIFDD(fddBase * ref, fddType kType,
 	//std::cerr << "    Create IFDD\n";
 	for (int i = 1; i < comm->numProcs; ++i){
 		//std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:" << dataPerProc <<'\n';
-		if (dataAlloc){
+		if (dataAlloc != NULL){
 			//std::cerr << "    S:CreateIFdd ID:" << numFDDs << " K:" << kType << " T:" << tType << " S:" << (*dataAlloc)[i];
 			comm->sendCreateIFDD(numFDDs, kType, tType, (*dataAlloc)[i], i);
 			//std::cerr << ".\n";
@@ -259,7 +259,7 @@ std::vector< std::pair<void *, size_t> > faster::fastContext::recvTaskResult(uns
 	std::vector< std::pair<void*, size_t> > result ( comm->numProcs );
 	//std::cerr << "    R:TaskResult \n";
 
-	start =	system_clock::now();
+	//start =	system_clock::now();
 	for ( int  i = 1; i < comm->numProcs; i++ ){
 		size_t time;
 		size_t size;

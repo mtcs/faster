@@ -21,9 +21,8 @@ namespace faster{
 			template <typename T0>
 			inline void decodeSecond(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer);// */
 
-			std::vector< std::vector<void*>> findKeyInterval(std::vector<K> & ukeys, faster::workerFddBase * wfdd);
-void bla(std::vector< std::vector<void*> > * location, size_t s);
-			std::vector< std::vector<void*> > * getMemberKeyLocations(int i, std::vector<K> & uKeys, faster::workerFddBase * wfdd );
+			std::vector< std::vector<void*>> findKeyInterval(size_t i);
+			std::vector< std::vector<void*> > * getMemberKeyLocations(size_t i);
 
 
 			//template <typename U, typename T0, typename T1, typename T2>

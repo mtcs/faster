@@ -61,7 +61,6 @@ pair<int, int>  breduce1(int * k, int * in, size_t size){
 
 pair<int, int> gmapbk1(const int & k, vector<void*> & input, vector<void*> & input2){
 	*((int*)input2.front()) = *((int*)input.front());
-
 	return make_pair(k, *( (int*) input.front() ));
 }
 
@@ -69,6 +68,7 @@ deque<pair<int, int>> gfmapbk1(const int & k, vector<void*> & input, vector<void
 	deque<pair<int, int>> r;
 
 	auto a = *((int*)input.front());
+
 	*((int*)input2.front()) = a;
 	r.push_back(make_pair(k, *( (int*) input.front() )));
 
@@ -140,25 +140,25 @@ int main(int argc, char ** argv){
 	for ( int i = 0; i < numRuns; i++){
 		data = data->map(map1);
 	}
-	fc.updateInfo();
+	//fc.updateInfo();
 
 	cerr << "BulkMap\n" ;
 	for ( int i = 0; i < numRuns; i++){
 		data = data->bulkMap(bmap1);
 	}
-	fc.updateInfo();
+	//fc.updateInfo();
 
 	cerr << "FlatMap\n" ;
 	for ( int i = 0; i < numRuns; i++){
 		data = data->flatMap(fmap1);
 	}
-	fc.updateInfo();
+	//fc.updateInfo();
 
 	cerr << "BulkFlatMap\n" ;
 	for ( int i = 0; i < numRuns; i++){
 		data = data->bulkFlatMap(bfmap1);
 	}
-	fc.updateInfo();
+	//fc.updateInfo();
 
 	vector<indexedFdd<int,int>*> dataV(numRuns);
 
@@ -171,20 +171,20 @@ int main(int argc, char ** argv){
 		cerr << "." ;
 	}
 	cerr << "\n" ;
-	fc.updateInfo();
+	//fc.updateInfo();
 
 	cerr << "Reduce\n" ;
 	for ( int i = 0; i < numRuns; i++){
 		pair<int,int> r UNUSED = dataV[i]->reduce(reduce1);
 	}
-	fc.updateInfo();
+	//fc.updateInfo();
 
 	cerr << "BulkReduce\n" ;
 	for ( int i = 0; i < numRuns; i++){
 		pair<int,int> r UNUSED = dataV[i]->bulkReduce(breduce1);
 	}
 
-	fc.updateInfo();
+	//fc.updateInfo();
 	cerr << "---- Grouped Functions ----\n" ;
 	//cerr << "\033[0;33mPRESS ENTER TO CONTINUE\033[0m\n";
 	//cin.get();
@@ -197,30 +197,40 @@ int main(int argc, char ** argv){
 	}
 	cerr << "\n" ;
 
-	fc.updateInfo();
+	//fc.updateInfo();
 	//cerr << "\033[0;33mPRESS ENTER TO CONTINUE\033[0m\n";
 	//cin.get();
+
 
 	cerr << "G.MapByKey" ;
 	for ( int i = 0; i < numRuns; i++){
 		auto result = groupV[i]->mapByKey(gmapbk1)->cache();
-		//result->discard();
 		dataV[i]->discard();
 		dataV[i] = result;
 		cerr << "." ;
 	}
 	cerr << "\n" ;
-	fc.updateInfo();
+	//fc.updateInfo();
 	//cerr << "\033[0;33mPRESS ENTER TO CONTINUE\033[0m\n";
 	//cin.get();
 
+
+	
 	cerr << "Cogroup" ;
 	for ( int i = 0; i < numRuns; i++){
-		groupV[i] = data->cogroup(dataV[i]);
+		groupV[i] = data->cogroup(dataV[i])->cache();
 		cerr << "." ;
 	}
 	cerr << "\n" ;
-	fc.updateInfo();
+	//fc.updateInfo();
+
+	
+	//cerr << "TEST" ;
+	//for ( int i = 0; i < numRuns; i++){
+		//dataV[i]->map(map1);
+	//}
+	//fc.updateInfo();
+
 
 	//cerr << "\033[0;33mPRESS ENTER TO CONTINUE\033[0m\n";
 	//cin.get();
@@ -231,7 +241,7 @@ int main(int argc, char ** argv){
 		cerr << "." ;
 	}
 	cerr << "\n" ;
-	fc.updateInfo();
+	//fc.updateInfo();
 	//cerr << "\033[0;31mPRESS ENTER TO EXIT\033[0m\n";
 	//cin.get();
 
@@ -241,18 +251,19 @@ int main(int argc, char ** argv){
 		//result->discard();
 		dataV[i]->discard();
 		dataV[i] = result;
+		groupV[i]->discard();
 		cerr << "." ;
 	}
 	cerr << "\n" ;
-	fc.updateInfo();
-
+	//fc.updateInfo();
+	
 	cerr << "Cogroup" ;
 	for ( int i = 0; i < numRuns; i++){
-		groupV[i] = data->cogroup(dataV[i]);
+		groupV[i] = data->cogroup(dataV[i])->cache();
 		cerr << "." ;
 	}
 	cerr << "\n" ;
-	fc.updateInfo();
+	//fc.updateInfo();
 
 	cerr << "G.UpdateByKey" ;
 	for ( int i = 0; i < numRuns; i++){
@@ -260,7 +271,7 @@ int main(int argc, char ** argv){
 		cerr << "." ;
 	}
 	cerr << "\n" ;
-	fc.updateInfo();
+	//fc.updateInfo();
 
 	cerr << "G.BulkUpdate" ;
 	for ( int i = 0; i < numRuns; i++){
@@ -268,9 +279,9 @@ int main(int argc, char ** argv){
 		cerr << "." ;
 	}
 	cerr << "\n" ;
+	//fc.updateInfo();
 
 	fc.printInfo();
-
 
 	//cerr << "\033[0;31mPRESS ENTER TO EXIT\033[0m\n";
 	//cin.get();

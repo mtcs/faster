@@ -92,11 +92,11 @@ void faster::workerFddCore<T>::preapply(long unsigned int id, void * func, fddOp
 	durationP = buffer.size();
 	buffer.advance(sizeof(size_t));
 
-	rSizeP = buffer.size();
-	buffer.advance(sizeof(size_t));
-
 	rStatP = buffer.size();
 	buffer.advance(s);
+
+	rSizeP = buffer.size();
+	buffer.advance(sizeof(size_t));
 
 	headerSize = buffer.size();
 
@@ -112,8 +112,8 @@ void faster::workerFddCore<T>::preapply(long unsigned int id, void * func, fddOp
 	//std::cerr << " ET:" << duration.count() << " ";
 
 	buffer.writePos(size_t(duration.count()), durationP);
-	buffer.writePos(size_t(buffer.size() - headerSize), rSizeP);
 	buffer.writePos(getProcStat(), rStatP);
+	buffer.writePos(size_t(buffer.size() - headerSize), rSizeP);
 
 	comm->sendTaskResult();
 

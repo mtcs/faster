@@ -121,7 +121,7 @@ void * faster::fastComm::recvTaskResult(unsigned long int & id, unsigned long in
 
 	MPI_Irecv(bufferRecv[sid].data(), bufferRecv[sid].free(), MPI_BYTE, sid, MSG_TASKRESULT, MPI_COMM_WORLD, &req[sid-1]);	
 	
-	bufferRecv[sid] >> id >> time >> size >> stat;
+	bufferRecv[sid] >> id >> time >> stat >> size;
 
 	return bufferRecv[sid].pos();
 }

@@ -138,6 +138,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 	bool dirty = false;
 	bool tryShrink = false;
 
+
 	//int Ti[5];
 	//auto start = system_clock::now();
 	
@@ -145,7 +146,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 	//std::cerr << comm->getProcId() << "        [ KeyMap: ";
 	if ( uKeys.size() != 0 ){
 		uKeys.clear();
-		uKeys.reserve(keyMap.size()/2);
+		uKeys.reserve(keyMap.size()/(comm->getNumProcs()-2));
 	}
 	for ( auto it = keyMap.begin(); it != keyMap.end(); it++){
 		if (it->second == comm->getProcId()){
@@ -227,8 +228,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 	//Ti[1] = duration_cast<milliseconds>(system_clock::now() - start).count();
 	//start = system_clock::now();
 
-	//std::cerr << comm->getProcId() << "        Recv data In-place\n";
-	//std::cerr << comm->getProcId() << "          Insert: [";
+	
 	// Find the first emty space
 	pos = 0;
 	if (tryShrink){
@@ -239,6 +239,8 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 	}
 	
 	// Recv all keys I own in-place
+	//std::cerr << comm->getProcId() << "        Recv data In-place\n";
+	//std::cerr << comm->getProcId() << "          Insert: [";
 	for ( int i = 1; i < (comm->getNumProcs() - 1); ++i){
 		int rSize;
 		size_t numItems;
@@ -247,36 +249,37 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 
 		//while (!cont){	
 
-			void * rData = comm->recvGroupByKeyData(rSize);
-			rb.setBuffer(rData, rSize);
+		void * rData = comm->recvGroupByKeyData(rSize);
+		rb.setBuffer(rData, rSize);
 
-			rb >> numItems ; // >> cont;
-			if (numItems > 0)
-				dirty = true;
+		rb >> numItems ; // >> cont;
+		if (numItems > 0)
+			dirty = true;
 
-			//std::cerr << "| \033[0;32m" << numItems << "\033[0m - ";
+		//std::cerr << "| \033[0;32m" << numItems << "\033[0m - ";
 
-			for (size_t i = 0; i < numItems; ++i){
-				// Find a empty space in the local data
-				while ( (pos < deleted.size() ) && ( ! deleted[pos] ) )
-					pos++;
-				// Make sure it is not out of bounds, if it is, grow local data to fit new data
-				if( pos >= localData->getSize() ){
-					localData->setSize(localData->getSize() + numItems - i);
-					data = localData->getData();
-					keys = localData->getKeys();
-					//std::cerr << "( GROW: "<< localData->getSize() << " ) ";
-				}
-				//p(data[pos]);
-				rb >> keys[pos] >> data[pos];
-				//std::cerr  << keys[pos] << ">" << pos << " ";
-				//std::cerr  << keys[pos] << " ";
+		for (size_t i = 0; i < numItems; ++i){
+			// Find a empty space in the local data
+			while ( (pos < deleted.size() ) && ( ! deleted[pos] ) )
 				pos++;
+			// Make sure it is not out of bounds, if it is, grow local data to fit new data
+			if( pos >= localData->getSize() ){
+				localData->setSize(localData->getSize() + numItems - i);
+				data = localData->getData();
+				keys = localData->getKeys();
+				//std::cerr << "( GROW: "<< localData->getSize() << " ) ";
 			}
+			//p(data[pos]);
+			rb >> keys[pos] >> data[pos];
+			//std::cerr  << keys[pos] << ">" << pos << " ";
+			//std::cerr  << keys[pos] << " ";
+			pos++;
+		}
 		//}
 	}
 	//std::cerr << "]\n";
 	comm->waitForReq(comm->getNumProcs() - 2);
+
 
 	//Ti[2] = duration_cast<milliseconds>(system_clock::now() - start).count();
 	//start = system_clock::now();
@@ -302,7 +305,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 	}
 
 	// Clear Key location saved by last ByKey function
-	if (dirty | tryShrink){
+	if ( dirty | tryShrink ){
 		if (keyLocations.size() > 0){
 			keyLocations.clear();
 			//std::cerr << " CLEAR KeyLocations\n" ;
@@ -313,7 +316,6 @@ void faster::workerIFddCore<K,T>::exchangeDataByKey(fastComm *comm, void * keyMa
 	//Ti[3] = duration_cast<milliseconds>(system_clock::now() - start).count();
 	//start = system_clock::now();
 
-	//std::cerr << ".\n";
 }
 
 template <typename K, typename T>
@@ -363,11 +365,11 @@ void faster::workerIFddCore<K, T>::preapply(long unsigned int id, void * func, f
 	durationP = buffer.size();
 	buffer.advance(sizeof(size_t));
 
-	rSizeP = buffer.size();
-	buffer.advance(sizeof(size_t));
-
 	rStatP = buffer.size();
 	buffer.advance(s);
+
+	rSizeP = buffer.size();
+	buffer.advance(sizeof(size_t));
 
 	headerSize = buffer.size();
 
@@ -391,8 +393,8 @@ void faster::workerIFddCore<K, T>::preapply(long unsigned int id, void * func, f
 	//std::cerr << " ET:" << duration.count() << " ";
 
 	buffer.writePos(size_t(duration.count()), durationP);
-	buffer.writePos(size_t(buffer.size() - headerSize), rSizeP);
 	buffer.writePos(getProcStat(), rStatP);
+	buffer.writePos(size_t(buffer.size() - headerSize), rSizeP);
 
 	comm->sendTaskResult();
 

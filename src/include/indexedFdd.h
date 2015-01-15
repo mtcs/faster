@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <list>
 #include <tuple>
-
+#include <memory>
 
 #include "definitions.h"
 #include "fddBase.h"
@@ -30,7 +30,7 @@ namespace faster{
 
 		protected:
 			bool groupedByKey;
-			std::unordered_map<K, int> keyMap;
+			std::shared_ptr<std::unordered_map<K, int>> keyMap;
 			fastContext * context;
 
 			iFddCore() {
@@ -60,7 +60,7 @@ namespace faster{
 			virtual ~iFddCore(){
 			}
 
-			std::unordered_map<K, int> calculateKeyMap(std::unordered_map<K, std::tuple<size_t, int, size_t>> count);
+			std::shared_ptr<std::unordered_map<K, int>> calculateKeyMap(std::unordered_map<K, std::tuple<size_t, int, size_t>> count);
 
 			// -------------- Core FDD Functions --------------- //
 			fddBase * _map( void * funcP, fddOpType op, fddBase * newFdd, system_clock::time_point & start);
@@ -97,15 +97,16 @@ namespace faster{
 			indexedFdd<K,T> * groupByKey();
 
 			void discard(){
+				//std::cerr << "\033[0;31mDEL" << id << "\033[0m  "; 
 				context->discardFDD(id);
-				this->keyMap.clear();
+				this->keyMap.reset();
 			}
 
 			void * getKeyMap(void) {
 				return &this->keyMap;
 			}
 			void setKeyMap(void * keyMap) {
-				this->keyMap = * ( std::unordered_map<K, int> * ) keyMap;
+				this->keyMap = * ( std::shared_ptr<std::unordered_map<K, int>> * ) keyMap;
 			}
 			bool isGroupedByKey() { 
 				return groupedByKey; 
@@ -523,15 +524,15 @@ namespace faster{
 	}
 
 	template <typename K, typename T> 
-	std::unordered_map<K, int> iFddCore<K,T>::calculateKeyMap(std::unordered_map<K, std::tuple<size_t, int, size_t>> count){ 
+	std::shared_ptr<std::unordered_map<K, int>> iFddCore<K,T>::calculateKeyMap(std::unordered_map<K, std::tuple<size_t, int, size_t>> count){ 
 		size_t size = this->size;
-		std::unordered_map<K, int> kMap;
+		std::shared_ptr<std::unordered_map<K, int>> kMap = std::make_shared<std::unordered_map<K, int>>();
 		std::unordered_map<K, bool> done;
 		size_t numProcs = context->numProcs();
 		std::vector<size_t> keyAlloc(numProcs,0);
 		std::vector<size_t> procBudget = context->getAllocation(size);
 
-		kMap.reserve(count.size());
+		kMap->reserve(count.size());
 
 		//std::cerr << "      [ Budget: ";
 		//for ( int i = 1; i < numProcs; ++i)
@@ -544,7 +545,7 @@ namespace faster{
 			int preffered = std::get<1>(it->second);
 
 			if(keyAlloc[preffered] < procBudget[preffered]){
-				kMap[key] = preffered;
+				(*kMap)[key] = preffered;
 				keyAlloc [preffered] += kCount;
 				//count.erase(key);
 				done[key] = true;
@@ -563,7 +564,7 @@ namespace faster{
 				while(keyAlloc[preffered] >= procBudget[preffered]){
 					preffered = 1 + rand() % (numProcs - 1);
 				}
-				kMap[key] = preffered;
+				(*kMap)[key] = preffered;
 				keyAlloc [preffered] += kCount;
 			}
 		}
@@ -635,7 +636,7 @@ namespace faster{
 
 			// Migrate data according to key ownership
 			unsigned long int tid = context->enqueueTask(OP_GroupByKey, id, this->size);
-			context->sendKeyMap(tid, keyMap);
+			context->sendKeyMap(tid, *keyMap);
 
 			result = context->recvTaskResult(tid, sid, start);
 			groupedByKey = true;
