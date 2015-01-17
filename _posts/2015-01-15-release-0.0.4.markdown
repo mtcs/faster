@@ -1,0 +1,21 @@
+---
+layout: release
+title:  "Faster 0.0.3 Alpha"
+date:   2014-10-22 12:50:00
+docLink: "https://github.com/mtcs/faster/wiki"
+tag: "0.0.4-alpha"
+comment: "Alpha release with fully functional Pagerank example."
+categories: [release, news]
+---
+
+[0.0.4] is a Alpha Here!
+
+In this release we also focused in debuging and performance tunning to lower the framework overhead. 
+We also included functions to enable users to access runtime statistics from finished tasks.
+
+[Documantation Here] or at least it will be in the near future...
+
+Enjoy!
+
+[0.0.4]: https://github.com/mtcs/faster/releases/tag/0.0.4-alpha
+[Documantation here]: {{ page.docLink }}
