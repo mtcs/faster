@@ -311,6 +311,12 @@ a:visited { color: #c97; }
 ul > li {
 	margin-left: 2em;
 }
+
+.compactlist li {
+  line-height: 1.75em;
+  margin: 0em;
+}
+
 .aboutImgR{
 	float: right; 
 	padding: 2em;

@@ -11,7 +11,7 @@ title: Faster - Frequently Asked Questions
 	<p>
 	<a href="https://github.com/mtcs/faster/releases/tag/{{ post.tag }}">{{ post.title }}</a>  
 	<a href="/faster{{ post.url }}">Notes</a> 
-	<a href={{doclink}}>Doc</a> 
+	<a href={{post.doclink}}>Doc</a> 
 	<br>
 	<div class="comment" >{{ post.comment }}</div>
 	<a href="https://github.com/mtcs/faster/archive/{{post.tag}}.zip">[ .zip File ]</a> 
@@ -26,10 +26,10 @@ title: Faster - Frequently Asked Questions
 	<br>
 	<ul>
 		{% for post in site.categories.release offset:1 %}
-		<li>
+		<li class="compactList">
 		<a href="https://github.com/mtcs/faster/releases/tag/{{ post.tag }}">{{ post.title }}</a>  
 		<a href="/faster{{ post.url }}">Notes</a> 
-		<a href={{doclink}}>Doc</a> 
+		<a href={{post.doclink}}>Doc</a> 
 		<a href="https://github.com/mtcs/faster/archive/{{post.tag}}.zip">[ .zip File ]</a> 
 		<a href="https://github.com/mtcs/faster/archive/{{post.tag}}.tar.gz">[ .tar.gz File ]</a></li>
 		{% endfor %}
