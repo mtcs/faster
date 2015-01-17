@@ -1,0 +1,52 @@
+\hypertarget{classfaster_1_1fastScheduler}{}\section{faster\+:\+:fast\+Scheduler Class Reference}
+\label{classfaster_1_1fastScheduler}\index{faster\+::fast\+Scheduler@{faster\+::fast\+Scheduler}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classfaster_1_1fastScheduler_a5585b9363737823bf17e6782013b04a8}{}{\bfseries fast\+Scheduler} (unsigned int num\+Procs, std\+::vector$<$ std\+::string $>$ $\ast$func\+Name)\label{classfaster_1_1fastScheduler_a5585b9363737823bf17e6782013b04a8}
+
+\item 
+\hypertarget{classfaster_1_1fastScheduler_a91e01ea04fb7b0e58c48a04f6b8f572a}{}\hyperlink{classfaster_1_1fastTask}{fast\+Task} $\ast$ {\bfseries enqueue\+Task} (fdd\+Op\+Type op\+T, unsigned long int id\+Src, unsigned long int id\+Res, int func\+Id, size\+\_\+t size, std\+::vector$<$ std\+::pair$<$ void $\ast$, size\+\_\+t $>$ $>$ \&global\+Table)\label{classfaster_1_1fastScheduler_a91e01ea04fb7b0e58c48a04f6b8f572a}
+
+\item 
+\hypertarget{classfaster_1_1fastScheduler_a8bb0b7d5989b320016ab2c47517ea7fa}{}\hyperlink{classfaster_1_1fastTask}{fast\+Task} $\ast$ {\bfseries enqueue\+Task} (fdd\+Op\+Type op\+T, unsigned long int id, size\+\_\+t size, std\+::vector$<$ std\+::pair$<$ void $\ast$, size\+\_\+t $>$ $>$ \&global\+Table)\label{classfaster_1_1fastScheduler_a8bb0b7d5989b320016ab2c47517ea7fa}
+
+\item 
+\hypertarget{classfaster_1_1fastScheduler_a09db7fd6c9076e26dea68a7c925bf531}{}void {\bfseries task\+Progress} (unsigned long int id, unsigned long int pid, size\+\_\+t time, \hyperlink{classfaster_1_1procstat}{procstat} \&stat)\label{classfaster_1_1fastScheduler_a09db7fd6c9076e26dea68a7c925bf531}
+
+\item 
+\hypertarget{classfaster_1_1fastScheduler_af657bff84b9c117625135ca0c8f4ccf6}{}void {\bfseries task\+Finished} (unsigned long int id, size\+\_\+t time)\label{classfaster_1_1fastScheduler_af657bff84b9c117625135ca0c8f4ccf6}
+
+\item 
+\hypertarget{classfaster_1_1fastScheduler_a4d2aec030cd131b05c7091921545b3a4}{}void {\bfseries set\+Calibration} (std\+::vector$<$ size\+\_\+t $>$ time)\label{classfaster_1_1fastScheduler_a4d2aec030cd131b05c7091921545b3a4}
+
+\item 
+\hypertarget{classfaster_1_1fastScheduler_a17a44cb80cf026772647d5226ed56fcb}{}void {\bfseries print\+Procstats} (\hyperlink{classfaster_1_1fastTask}{fast\+Task} $\ast$task)\label{classfaster_1_1fastScheduler_a17a44cb80cf026772647d5226ed56fcb}
+
+\item 
+\hypertarget{classfaster_1_1fastScheduler_a426b97359b035f696ea99b0ce65ed781}{}void {\bfseries print\+Task\+Info} ()\label{classfaster_1_1fastScheduler_a426b97359b035f696ea99b0ce65ed781}
+
+\item 
+\hypertarget{classfaster_1_1fastScheduler_a93a5bb37ea8bc6a8d601dd01a2ed736b}{}void {\bfseries print\+Task\+Info} (size\+\_\+t task)\label{classfaster_1_1fastScheduler_a93a5bb37ea8bc6a8d601dd01a2ed736b}
+
+\item 
+\hypertarget{classfaster_1_1fastScheduler_a6c4b825db8c979eafead42e321e95d05}{}void {\bfseries print\+Header} ()\label{classfaster_1_1fastScheduler_a6c4b825db8c979eafead42e321e95d05}
+
+\item 
+\hypertarget{classfaster_1_1fastScheduler_a0c91feaec23646ee84e1fa530fe7cccf}{}void {\bfseries update\+Task\+Info} ()\label{classfaster_1_1fastScheduler_a0c91feaec23646ee84e1fa530fe7cccf}
+
+\item 
+\hypertarget{classfaster_1_1fastScheduler_a650ace70f7cb64835674cd67a5f605ca}{}bool {\bfseries data\+Migration\+Needed} ()\label{classfaster_1_1fastScheduler_a650ace70f7cb64835674cd67a5f605ca}
+
+\item 
+\hypertarget{classfaster_1_1fastScheduler_ab268908c69c5c78075c97b1189d599b8}{}std\+::vector$<$ std\+::deque$<$ std\+::pair$<$ int, long int $>$ $>$ $>$ {\bfseries get\+Data\+Migration\+Info} ()\label{classfaster_1_1fastScheduler_ab268908c69c5c78075c97b1189d599b8}
+
+\item 
+\hypertarget{classfaster_1_1fastScheduler_a0cc2c0d858e78cf5502d365da5877f71}{}std\+::vector$<$ size\+\_\+t $>$ {\bfseries get\+Allocation} (size\+\_\+t size)\label{classfaster_1_1fastScheduler_a0cc2c0d858e78cf5502d365da5877f71}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/mtcs/pesquisa/faster/faster.\+git/src/include/fast\+Scheduler.\+h\end{DoxyCompactItemize}
