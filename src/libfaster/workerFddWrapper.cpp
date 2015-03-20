@@ -148,6 +148,11 @@ void faster::workerFdd::loadSymbols(){
 	loadSym(CollectDL	, "collectDL");
 	loadSym(ExchangeDataByKeyDL, "exchangeDataByKeyDL");
 	loadSym(GetKeyLocationDL, "getKeyLocationsDL");
+	loadSym(GetUKeysDL	, "getUKeysDL");
+	loadSym(SetUKeysDL	, "setUKeysDL");
+	loadSym(GetKeyMapDL	, "getKeyMapDL");
+	loadSym(SetKeyMapDL	, "setKeyMapDL");
+	loadSym(WriteToFileDL	, "writeToFileDL");
 
 	//std::cerr << duration_cast<milliseconds>(system_clock::now() - start).count() << "ms]  ";
 }
@@ -321,13 +326,35 @@ void faster::workerFdd::collect(fastComm * comm){
 	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [CollectDL];
 	((void (*)(workerFddBase *, fastComm *)) funcP)(_fdd, comm);
 }
-void faster::workerFdd::exchangeDataByKey(fastComm *comm, void * keyMap){
+void faster::workerFdd::exchangeDataByKey(fastComm *comm){
 	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [ExchangeDataByKeyDL];
-	((void (*)(workerFddBase *, fastComm *, void*)) funcP)(_fdd, comm, keyMap);
+	((void (*)(workerFddBase *, fastComm *)) funcP)(_fdd, comm);
 }
 std::vector< std::vector<void*> > * faster::workerFdd::getKeyLocations() {
 	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GetKeyLocationDL];
 	return (std::vector< std::vector<void*> > *) (( void * (*) (workerFddBase *)) funcP)(_fdd); 
+}
+
+void * faster::workerFdd::getUKeys() {
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GetUKeysDL];
+	return (( void * (*) (workerFddBase *)) funcP)(_fdd); 
+}
+void faster::workerFdd::setUKeys(void * uk) {
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [SetUKeysDL];
+	(( void (*) (workerFddBase *, void*)) funcP)(_fdd, uk); 
+}
+void * faster::workerFdd::getKeyMap() {
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [GetKeyMapDL];
+	return (( void * (*) (workerFddBase *)) funcP)(_fdd); 
+}
+void faster::workerFdd::setKeyMap(void * km) {
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [SetKeyMapDL];
+	(( void (*) (workerFddBase *, void*)) funcP)(_fdd, km); 
+}
+
+void faster::workerFdd::writeToFile(void * path, size_t procId, void * sufix){
+	void * funcP = funcTable[hAssign[type]] [khAssign[keyType]] [WriteToFileDL];
+	(( void (*) (workerFddBase *, void*, size_t procId, void*)) funcP)(_fdd, path, procId, sufix); 
 }
 
 

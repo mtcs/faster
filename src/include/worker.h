@@ -54,6 +54,7 @@ namespace faster{
 			void setFDDOwnership(unsigned long int id, size_t low, size_t up);
 			
 			void readFDDFile(unsigned long int id, std::string &filename, size_t size, size_t offset);
+			void writeFDDFile(unsigned long int id, std::string &path, std::string &sufix);
 
 			void updateGlobals(fastTask &task);
 			void solve(fastTask & task);

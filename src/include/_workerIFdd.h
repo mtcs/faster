@@ -7,6 +7,7 @@
 #include <set>
 #include <unordered_map>
 #include <iostream>
+#include <memory>
 
 #include "workerFddBase.h"
 
@@ -25,9 +26,11 @@ namespace faster{
 	class workerIFddCore : public workerFddBase{
 		protected:
 			indexedFddStorage <K,T> * localData;
-			std::vector<K> uKeys;
+			std::shared_ptr<std::vector<K>> uKeys;
+			std::shared_ptr<std::unordered_map<K, int>> keyMap;
 			std::vector< std::vector<void*> > keyLocations;
 			bool groupedByKey;
+			bool groupedByHash;
 
 			// ByKey Functions
 			K * distributeOwnership(fastComm * comm, K * uKeys, size_t cSize);
@@ -35,6 +38,14 @@ namespace faster{
 			std::unordered_map<K, size_t> recvPartKeyMaxCount(fastComm *comm, std::unordered_map<K, std::pair<size_t, std::deque<int>> > & keyPPMaxCount);
 			std::unordered_map<K, size_t> recvPartKeyCount(fastComm *comm);
 			std::unordered_map<K, size_t> distributedMaxKeyCount(fastComm *comm, std::unordered_map<K, std::pair<size_t, std::deque<int>> > & keyPPMaxCount);
+
+			// Exchange Data By Key private functions
+			bool EDBKSendData(fastComm *comm, std::vector<size_t> & dataSize);
+			bool EDBKRecvData(fastComm *comm, std::vector<bool> & deleted, size_t & pos, bool tryShrink);
+			void EDBKShrinkData(std::vector<bool> & deleted, size_t pos, bool tryShrink);
+
+			void findMyKeys(int numProcs, int Id);
+			void findMyKeysByHash(int numProcs);
 
 		public:
 			workerIFddCore(unsigned int ident, fddType kt, fddType t);
@@ -64,14 +75,25 @@ namespace faster{
 			void shrink();
 
 			void preapply(unsigned long int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm);
+
+			bool onlineReadStage3(std::unordered_map<K, int> & localKeyMap, fastComm *comm, void * funcP, std::deque<std::vector<std::pair<K,T>>> & q2, omp_lock_t & q2lock);
+			void onlineFullPartRead(fastComm *comm, void * funcP);
+			void onlinePartRead(fastComm *comm, void * funcP);
 			
 			// ByKey Functions
 			void groupByKey(fastComm *comm);
+			void groupByKeyHashed(fastComm *comm);
 			void countByKey(fastComm *comm);
-			void exchangeDataByKey(fastComm *comm, void * keyMap);
-			std::vector< std::vector<void*> > * getKeyLocations(){
-				return  &keyLocations;
-			}
+			void exchangeDataByKey(fastComm *comm);
+			bool exchangeDataByKeyHashed(fastComm *comm);
+			void exchangeDataByKeyMapped(fastComm *comm);
+			std::vector< std::vector<void*> > * getKeyLocations(){ return  &keyLocations; }
+			void * getUKeys(){ return &uKeys; }
+			void  setUKeys(void * uk){ uKeys = * (std::shared_ptr<std::vector<K>>*) uk; }
+			void * getKeyMap(){ return &keyMap; }
+			void  setKeyMap(void * km){ keyMap = * (std::shared_ptr<std::unordered_map<K, int>>*) km; }
+
+			void writeToFile(void * path, size_t procId, void * sufix);
 
 
 
@@ -95,6 +117,7 @@ namespace faster{
 			void _preApplyI(void * func, fddOpType op, workerFddBase * destze);
 			void _preApply(void * func, fddOpType op, workerFddBase * destze);
 
+			std::vector< std::vector<T*> > findKeyInterval(K * keys, T * data, size_t fddSize);
 			void applyDependent(void * func, fddOpType op, workerFddBase * destze);
 			void applyIndependent(void * func, fddOpType op, fastCommBuffer & buffer);
 

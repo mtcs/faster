@@ -1,4 +1,6 @@
+#include <fstream>
 #include <chrono>
+#include <iomanip>
 
 #include "_workerFdd.h"
 #include "fastComm.h"
@@ -70,6 +72,40 @@ void faster::workerFddCore<T>::shrink(){
 	localData->shrink(); 
 }
 
+template <typename T>
+void printData(std::ofstream & outFile, std::vector<T> * data, size_t s){
+	outFile.precision(10);
+	for ( size_t i = 0; i < s; i++){
+		for ( size_t j = 0; j < data[i].size(); j++){
+			outFile << data[i][j] << " ";
+		}
+		outFile	<< "\n";
+	}
+}
+
+template <typename T>
+void printData(std::ofstream & outFile, T * data, size_t s){
+	outFile.precision(10);
+	for ( size_t i = 0; i < s; i++){
+		outFile << data[i] << "\n";
+	}
+}
+
+template <typename T>
+void faster::workerFddCore<T>::writeToFile(void * pathP, size_t procId, void * sufixP){
+	std::string path = * (std::string*) pathP;
+	std::string sufix = * (std::string*) sufixP;
+
+	T * data = localData->getData();
+	size_t s = localData->getSize();
+
+	std::string filename(path + std::to_string(procId) + sufix);
+	std::ofstream outFile(filename, std::ofstream::out);
+
+	printData(outFile, data, s);
+
+}
+
 
 template <typename T>
 void faster::workerFddCore<T>::preapply(long unsigned int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm){ 
@@ -126,11 +162,11 @@ template class faster::workerFddCore<long int>;
 template class faster::workerFddCore<float>;
 template class faster::workerFddCore<double>;
 
-template class faster::workerFddCore<char*>;
-template class faster::workerFddCore<int*>;
-template class faster::workerFddCore<long int*>;
-template class faster::workerFddCore<float*>;
-template class faster::workerFddCore<double*>;
+//template class faster::workerFddCore<char*>;
+//template class faster::workerFddCore<int*>;
+//template class faster::workerFddCore<long int*>;
+//template class faster::workerFddCore<float*>;
+//template class faster::workerFddCore<double*>;
 
 template class faster::workerFddCore<std::string>;
 

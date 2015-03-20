@@ -2,7 +2,9 @@
 #define LIBFASTER_WORKERFDDGROUP_H
 
 #include <vector>
+#include <unordered_map>
 #include <string>
+#include <memory>
 
 #include "workerFddBase.h"
 
@@ -12,7 +14,8 @@ namespace faster{
 	class workerFddGroup : public workerFddBase{
 		private:
 			std::vector<workerFddBase*> members;
-			std::vector<K> uKeys;
+			std::shared_ptr<std::vector<K>> uKeys;
+			std::shared_ptr<std::unordered_map<K, int>> keyMap;
 
 			/*template <typename T0, typename T1, typename T2>
 			void decodeLast(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer);
@@ -64,8 +67,9 @@ namespace faster{
 			void updateByKey(void * mapByKeyFunc);
 			void bulkUpdate(void * mapByKeyFunc);
 
-			void exchangeDataByKey(fastComm *comm UNUSED, void * keyMap UNUSED){};
+			void exchangeDataByKey(fastComm *comm UNUSED){};
 			std::vector< std::vector<void*> > * getKeyLocations(){ return NULL; }
+
 			void cogroup(fastComm *comm);
 
 		public:
@@ -105,6 +109,13 @@ namespace faster{
 			void preapply(unsigned long int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm) ;
 
 			void collect(fastComm * comm UNUSED) { /* TODO */ }
+
+			void * getUKeys(){ return &uKeys; }
+			void  setUKeys(void * uk){ uKeys = * (std::shared_ptr<std::vector<K>>*) uk; }
+			void * getKeyMap(){ return &keyMap; }
+			void  setKeyMap(void * km){ keyMap = * (std::shared_ptr<std::unordered_map<K, int>>*) km; }
+
+			void writeToFile(void * path UNUSED, size_t procId UNUSED, void * sufix UNUSED){}
 	};
 
 } 

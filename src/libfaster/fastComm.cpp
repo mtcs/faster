@@ -54,7 +54,11 @@ void faster::fastComm::waitForReq(int numReqs){
 	MPI_Waitall(numReqs, req, status);
 }
 
-void faster::fastComm::join(){
+void faster::fastComm::joinAll(){
+	MPI_Barrier(MPI_COMM_WORLD);
+}
+
+void faster::fastComm::joinSlaves(){
 	MPI_Barrier(slaveComm);
 }
 
@@ -331,6 +335,36 @@ void faster::fastComm::recvReadFDDFile(unsigned long int &id, std::string & file
 	//std::cerr << filename << "\n"; 
 }
 
+void faster::fastComm::sendWriteFDDFile(unsigned long int id,std::string & path, std::string & sufix){
+
+	for (int dest = 1; dest < numProcs; ++dest){
+		buffer[dest].reset();
+
+		buffer[dest] << id << path << sufix;
+
+		MPI_Isend( buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, MSG_WRITEFDDFILE, MPI_COMM_WORLD, &req[dest-1]);
+	}
+	MPI_Waitall( numProcs - 1, req, status);
+}
+
+void faster::fastComm::recvWriteFDDFile(unsigned long int & id,std::string & path, std::string & sufix){
+	MPI_Status stat;
+	//size_t filenameSize;
+
+	int msgSize = 0;
+	bufferRecv[0].reset();
+	MPI_Probe(0, MSG_WRITEFDDFILE, MPI_COMM_WORLD, &stat);
+	MPI_Get_count(&stat, MPI_BYTE, &msgSize);
+	bufferRecv[0].grow(msgSize);
+
+	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_WRITEFDDFILE, MPI_COMM_WORLD, &stat);	
+	//buffer[0] >> id >> size >> offset >> filenameSize;
+	//buffer[0].read(filename, filenameSize);
+	bufferRecv[0] >> id >> path >> sufix;
+	//std::cerr << filename << "\n"; 
+}
+
+
 
 void faster::fastComm::sendFDDInfo(size_t size){
 	MPI_Send( &size, sizeof(size_t), MPI_BYTE, 0, MSG_FDDINFO, MPI_COMM_WORLD);
@@ -339,6 +373,31 @@ void faster::fastComm::sendFDDInfo(size_t size){
 void faster::fastComm::recvFDDInfo(size_t &size, int & src){
 	MPI_Recv(&size, sizeof(size_t), MPI_BYTE, MPI_ANY_SOURCE, MSG_FDDINFO, MPI_COMM_WORLD, status);
 	src = status[0].MPI_SOURCE;
+}
+
+void faster::fastComm::sendFileName(std::string path){
+	buffer[0].reset();
+
+	buffer[0] << path;
+
+	for (int dest = 1; dest < numProcs; ++dest){
+		MPI_Isend( buffer[0].data(), buffer[0].size(), MPI_BYTE, dest, MSG_FILENAME, MPI_COMM_WORLD, &req[dest-1]);
+	}
+}
+
+void faster::fastComm::recvFileName(std::string & path){
+	MPI_Status stat;
+
+	int msgSize = 0;
+	bufferRecv[0].reset();
+	MPI_Probe(0, MSG_FILENAME, MPI_COMM_WORLD, &stat);
+	MPI_Get_count(&stat, MPI_BYTE, &msgSize);
+	bufferRecv[0].grow(msgSize);
+
+	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_FILENAME, MPI_COMM_WORLD, &stat);	
+	//buffer[0] >> id >> size >> offset >> filenameSize;
+	//buffer[0].read(filename, filenameSize);
+	bufferRecv[0] >> path;
 }
 
 
@@ -386,4 +445,8 @@ void faster::fastComm::recvFinish(){
 	MPI_Recv(bufferRecv[0].data(), 1, MPI_BYTE, 0, MSG_FINISH, MPI_COMM_WORLD, &stat);	
 }
 
+void faster::fastComm::bcastBuffer(int src, int i){
+	joinAll();
+	MPI_Bcast(buffer[i].data(), buffer[i].size(), MPI_BYTE, src, MPI_COMM_WORLD);
+}
 

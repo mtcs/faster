@@ -47,10 +47,13 @@ namespace faster{
 			void discard(){
 				context->discardFDD(id);
 			}
+			void writeToFile(std::string & path, std::string & sufix);
+
 			void * getKeyMap() { return NULL; }
 			void setKeyMap(void * keyMap UNUSED) {}
 			bool isGroupedByKey() { return false; }
 			void setGroupedByKey(bool gbk UNUSED) {}
+
 	};
 
 	// Driver side FDD
@@ -376,11 +379,18 @@ namespace faster{
 		if ( (op & 0xFF ) & (OP_FlatMap | OP_BulkFlatMap) ){
 			newFdd = new fdd<U>(*context);
 		}else{
+			if (dataAlloc.empty()) dataAlloc = context->getAllocation(size);
 			newFdd = new fdd<U>(*context, size, dataAlloc);
 		}
 
 		return (fdd<U> *) _map(funcP, op, newFdd);
 	}
+
+	template <typename T> 
+	void fddCore<T>::writeToFile(std::string & path, std::string & sufix){
+		context->writeToFile(id, path, sufix);
+	}
+
 	template <typename T> 
 	template <typename L, typename U> 
 	indexedFdd<L,U> * fddCore<T>::mapI( void * funcP, fddOpType op){
@@ -389,6 +399,7 @@ namespace faster{
 		if ( (op & 0xFF ) & (OP_FlatMap | OP_BulkFlatMap) ){
 			newFdd = new indexedFdd<L,U>(*context);
 		}else{
+			if (dataAlloc.empty()) dataAlloc = context->getAllocation(size);
 			newFdd = new indexedFdd<L,U>(*context, size, dataAlloc);
 		}
 

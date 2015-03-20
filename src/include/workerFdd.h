@@ -92,8 +92,14 @@ namespace faster {
 
 			void groupByKey(fastComm *comm);
 			void countByKey(fastComm *comm);
-			void exchangeDataByKey(fastComm *comm, void * keyMap);
+			void exchangeDataByKey(fastComm *comm);
 			std::vector< std::vector<void*> > * getKeyLocations() ;
+			void * getUKeys();
+			void  setUKeys(void * uk);
+			void * getKeyMap();
+			void  setKeyMap(void * km);
+
+			void writeToFile(void * path, size_t procId, void * sufix);
 	};
 
 }

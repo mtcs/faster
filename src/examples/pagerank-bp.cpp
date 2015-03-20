@@ -12,32 +12,64 @@ using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 
 size_t numNodes = 0;
+size_t numProcs = 0;
 
-pair<int,vector<int>> toAList(string & input){
-	
-	stringstream ss(input);
-	vector<int> edges;
-	int key;
-	int edge;
 
-	
-	int numTokens = 0;
-	for ( size_t i = 0; i < input.size(); ++i ){
-		if (input[i] == ' '){
-			numTokens++;
+int currNumNodes = 0;
+vector<int> budget;	
+vector<int> partAssignment(1000000, -1);
+
+int greedyPartition(int & k, vector<int> & d){
+
+	static bool started = false;
+	vector<int> neighbPartCount(numProcs, 0);	
+
+
+	if (! started){
+		budget.resize(numProcs,0);	
+		started = true;
+	}
+
+	currNumNodes++;
+
+	if ( size_t(k) >= partAssignment.size()){
+		partAssignment.resize(max(size_t(k+1), size_t(partAssignment.size()*1.5)), -1);
+	}
+
+	for ( size_t i = 0; i < d.size(); i++){
+		if ( size_t(d[i]) >= partAssignment.size())
+			partAssignment.resize(max(size_t(d[i]+1), size_t(partAssignment.size()*1.5)), -1);
+
+		int p = partAssignment[d[i]];
+
+		if ( p >= 0 )
+			neighbPartCount[p]++;
+	}
+	//cerr << "Scores: ";
+
+	int myPart = partAssignment[k];
+	float myScore = -1;
+	for ( size_t i = 1; i < neighbPartCount.size(); i++){
+		//cerr << neighbPartCount[i] << ":";
+		float score = neighbPartCount[i] * (1 - ( (float) budget[i] / currNumNodes ) );
+		//cerr << score  << " ";
+
+		if ( myScore < score ){
+			myScore = score;
+			myPart = i;
+		}else{
+			if ( ( myScore == score ) && ( budget[i] < budget[myPart] ) ){
+				myPart = i;
+			}
 		}
 	}
-	if (numTokens > 2){
-		edges.reserve(numTokens-1);
-	}// */
+	//cerr << "\n"; cerr.flush();
+	//cerr << myPart << " ";
 
-	ss >> key;
+	budget[myPart] ++;
+	partAssignment[k] = myPart;
 
-	while(ss >> edge){
-		edges.insert(edges.end(), edge);
-	}
-
-	return make_pair(key, std::move(edges));
+	return myPart;
 }// */
 
 pair<int, double> createPR(const int & key, vector<int> & s UNUSED){
@@ -60,7 +92,7 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 	vector<double> newPR(numPresNodes, (1 - dumpingFactor) / numNodes);
 
 
-	if ( (numPresNodes != nPR) || ( nPR != nErrors ) ) { 
+	if ( (numPresNodes != nPR) || ( numPresNodes != nErrors ) ) { 
 		cerr << "Internal unknown error!!!!";
 		exit(11);
 	}
@@ -172,7 +204,7 @@ int main(int argc, char ** argv){
 	auto start = system_clock::now();
 
 	fastContext fc(argc, argv);
-	fc.registerFunction((void*) &toAList, "toAList");
+	fc.registerFunction((void*) &greedyPartition, "greedyPartition");
 	fc.registerFunction((void*) &createPR, "createPR");
 	fc.registerFunction((void*) &createErrors, "createErrors");
 	fc.registerFunction((void*) &givePageRank, "givePageRank");
@@ -180,6 +212,7 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &maxNodeId, "maxNodeId");
 	fc.registerFunction((void*) &maxError, "maxError");
 	fc.registerGlobal(&numNodes);
+	fc.registerGlobal(&numProcs);
 	fc.startWorkers();
 
 	fc.printHeader();
@@ -190,23 +223,23 @@ int main(int argc, char ** argv){
 		fc.calibrate();
 		fc.updateInfo();
 	}
+	numProcs = fc.numProcs();
 
 	cerr << "Import Data" << '\n';
 	auto start2 = system_clock::now();
-	auto data = new fdd<string>(fc, argv[1]);
+	auto structure = fc.onlineFullPartRead(string(argv[1]), &greedyPartition)->cache();
+	partAssignment.clear();
 	cerr << "  Read Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 
-	cerr << "Convert to Adjacency List\n";
-	auto structure = data->map<int, vector<int>>(&toAList)->cache();
+	//cerr << "Convert to Adjacency List\n";
+	//auto structure = data->map<int, vector<int>>(&toAList)->cache();
 	numNodes = structure->reduce(&maxNodeId).first + 1;
 	fc.updateInfo();
 	cerr << numNodes << " node Graph" << '\n';
 
 	cerr << "Init Pagerank" << '\n';
 	auto pr = structure->map<int, double>(&createPR)->cache();
-	fc.updateInfo();
 	auto errors = structure->map<int, double>(&createErrors)->cache();
-	fc.updateInfo();
 	auto iterationData = structure->cogroup(pr, errors)->cache();
 	fc.updateInfo();
 	double error = 1;
@@ -231,7 +264,7 @@ int main(int argc, char ** argv){
 
 	auto duration = duration_cast<milliseconds>(system_clock::now() - start).count();
 	cerr << "  Write Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
-	cerr << "PageRank in " << structure->getSize() << " node graph in "<< i << " iterations! In " << duration << "ms (error: " << error <<  ") \n";
+	cerr << "PageRank in " << numNodes << " node graph in "<< i << " iterations! In " << duration << "ms (error: " << error <<  ") \n";
 
 	//cerr << "\033[0;31mPRESS ENTER TO EXIT\033[0m\n";
 	//cin.get();

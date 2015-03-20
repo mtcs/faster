@@ -16,34 +16,36 @@ using std::chrono::milliseconds;
 size_t numNodes = 0;
 
 pair<int,vector<int>> toAList(string & input){
-	long int lastPos = -1;
-	deque<pair<size_t,size_t>> pos;
+	
+	stringstream ss(input);
+	vector<int> edges;
+	int key;
 
-
+	
+	int numTokens = 0;
 	for ( size_t i = 0; i < input.size(); ++i ){
-		if ( (input[i] == ' ') && ( i < (input.size()-1) ) ){
-			if ((i-lastPos) > 1){
-				pos.push_back(make_pair(lastPos+1, i));
-			}
-			lastPos = i;
+		if (input[i] == ' '){
+			numTokens++;
 		}
 	}
-	pos.push_back(make_pair(lastPos+1, input.size()));
-	vector<int> v(pos.size()-1);
+	if (numTokens > 2){
+		edges.reserve(numTokens-1);
+	}// */
 
-	auto it = pos.begin();
-	int key = atoi(input.substr(it->first,it->second).data());
-	it++;
-	for ( size_t i = 0; i < (pos.size()-1) ; ++i){
-		v[i] = atoi(input.substr(it->first,it->second).data());
-		it++;
+	ss >> key;
+
+	while(ss){
+		int edge;
+
+		ss >> edge;
+		edges.insert(edges.end(), edge);
 	}
 
-	return make_pair(key,v);
-}
+	return make_pair(key, std::move(edges));
+}// */
 
 pair<int, double> createPR(const int & key, vector<int> & s UNUSED){
-	return make_pair(key, 1);
+	return make_pair(key, 1.0 / numNodes);
 }
 
 deque<pair<int, double>> givePageRank(const int & key UNUSED, vector<void *> & sl, vector<void *> & prl){
@@ -83,11 +85,24 @@ double getNewPR(const int & key UNUSED, vector<void *> & prL, vector<void *> & c
 		sum += contrib;
 	}
 	//pr = (1 - dumpingFactor) + dumpingFactor * sum;
-	pr = (1 - dumpingFactor) + sum;
+	pr = sum + ( (1.0 - dumpingFactor) / numNodes );
 
 	return abs(oldPR - pr);
 }
 
+pair<int,vector<int>> maxNodeId( const int & ka, vector<int> & a, const int & kb, vector<int> & b){
+	vector<int> vout;
+	int m = max(ka, kb);
+
+	for(auto it = a.begin(); it != a.end(); it++){
+		m = max(m, *it);
+	}
+	for(auto it = b.begin(); it != b.end(); it++){
+		m = max(m, *it);
+	}
+
+	return make_pair(m, vout);
+}
 double maxError( double & a, double & b){
 	return max(a,b);
 }
@@ -105,6 +120,7 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &givePageRank, "givePageRank");
 	fc.registerFunction((void*) &combine, "combine");
 	fc.registerFunction((void*) &getNewPR, "getNewPR");
+	fc.registerFunction((void*) &maxNodeId, "maxNodeId");
 	fc.registerFunction((void*) &maxError, "maxError");
 	fc.registerGlobal(&numNodes);
 	fc.startWorkers();
@@ -128,7 +144,10 @@ int main(int argc, char ** argv){
 	auto structure = data->map<int, vector<int>>(&toAList)->cache();
 	fc.updateInfo();
 
-	numNodes = structure->getSize();
+	//numNodes = structure->getSize();
+	numNodes = structure->reduce(&maxNodeId).first + 1;
+	fc.updateInfo();
+	cerr << numNodes << " node Graph" << '\n';
 
 	cerr << "Init Pagerank\n";
 	auto pr = structure->map<int, double>(&createPR)->cache();
@@ -138,7 +157,8 @@ int main(int argc, char ** argv){
 
 	cerr << "Process Data\n";
 	int i = 0;
-	while( error >= 1){
+	//while( (error >= 1E-4) && (i < 10)){
+	while( i < 10 ){
 		cerr << "\033[1;32mIteration " << i++ << "\033[0m\n" ;
 		start2 = system_clock::now();
 		auto contribs = iterationData->flatMapByKey(&givePageRank);
@@ -154,14 +174,9 @@ int main(int argc, char ** argv){
 		cerr << "  Error " << error << " time:" << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 	}
 	start2 = system_clock::now();
-	auto result = pr->collect();
 
-	cerr << "  Collect Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
-	start2 = system_clock::now();
-
-	for ( auto it = result.begin(); it != result.end(); it++){
-		printf("%d %.8f\n", it->first, it->second);
-	}
+	pr->writeToFile(std::string("/tmp/pr"), std::string(".txt"));
+	
 	auto duration = duration_cast<milliseconds>(system_clock::now() - start).count();
 	cerr << "  Write Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 	cerr << "PageRank in " << structure->getSize() << " node graph in "<< i << " iterations! In " << duration << "ms (error: " << error <<  ") \n";

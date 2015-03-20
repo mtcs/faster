@@ -1,5 +1,6 @@
 #include <iostream>
 #include <tuple>
+
 #include "_workerFdd.h"
 #include "workerFddBase.h"
 #include "fddStorageExtern.cpp"
@@ -60,7 +61,6 @@ void faster::_workerFdd<T>::map (workerFddBase * dest, ImapFunctionP<T,L,U> mapF
 		ok[i] = std::move(r.first);
 		od[i] = std::move(r.second);
 	}
-	//std::cerr << "END ";
 }		
 
 /*template <typename T>

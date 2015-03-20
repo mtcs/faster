@@ -30,7 +30,6 @@ namespace faster{
 
 		protected:
 			bool groupedByKey;
-			std::shared_ptr<std::unordered_map<K, int>> keyMap;
 			fastContext * context;
 
 			iFddCore() {
@@ -60,7 +59,8 @@ namespace faster{
 			virtual ~iFddCore(){
 			}
 
-			std::shared_ptr<std::unordered_map<K, int>> calculateKeyMap(std::unordered_map<K, std::tuple<size_t, int, size_t>> count);
+			std::unordered_map<K, std::tuple<size_t, int, size_t>> * calculateKeyCount(std::vector< std::pair<void *, size_t> > & result);
+			std::unordered_map<K, int> calculateKeyMap(std::unordered_map<K, std::tuple<size_t, int, size_t>> & count);
 
 			// -------------- Core FDD Functions --------------- //
 			fddBase * _map( void * funcP, fddOpType op, fddBase * newFdd, system_clock::time_point & start);
@@ -76,38 +76,34 @@ namespace faster{
 			//}
 			template<typename U> 
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1){
+
+				this->groupByKeyHashed();
 				auto start = system_clock::now();
 
-				this->groupByKey();
-
-				return new groupedFdd<K>(context, this, fdd1, keyMap, start);
+				return new groupedFdd<K>(context, this, fdd1, start);
 			}
 
 			template<typename U, typename V> 
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1, iFddCore<K,V> * fdd2){
+
+				this->groupByKeyHashed();
 				auto start = system_clock::now();
 
-				this->groupByKey();
-
-				return new groupedFdd<K>(context, this, fdd1, fdd2, keyMap, start);
+				return new groupedFdd<K>(context, this, fdd1, fdd2, start);
 			}
 
 			std::unordered_map<K, size_t> countByKey();
 
 			indexedFdd<K,T> * groupByKey();
+			indexedFdd<K,T> * groupByKeyHashed();
 
 			void discard(){
 				//std::cerr << "\033[0;31mDEL" << id << "\033[0m  "; 
 				context->discardFDD(id);
-				this->keyMap.reset();
 			}
 
-			void * getKeyMap(void) {
-				return &this->keyMap;
-			}
-			void setKeyMap(void * keyMap) {
-				this->keyMap = * ( std::shared_ptr<std::unordered_map<K, int>> * ) keyMap;
-			}
+			void writeToFile(std::string path, std::string sufix);
+
 			bool isGroupedByKey() { 
 				return groupedByKey; 
 			}
@@ -468,6 +464,7 @@ namespace faster{
 		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
 			newFdd = new indexedFdd<L,U>(*context);
 		}else{
+			if (dataAlloc.empty()) dataAlloc = context->getAllocation(size);
 			newFdd = new indexedFdd<L,U>(*context, size, dataAlloc);
 		}
 		
@@ -483,6 +480,7 @@ namespace faster{
 		if ( (op & 0xFF ) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ){
 			newFdd = new fdd<U>(*context);
 		}else{
+			if (dataAlloc.empty()) dataAlloc = context->getAllocation(size);
 			newFdd = new fdd<U>(*context, size, dataAlloc);
 		}
 		
@@ -523,16 +521,59 @@ namespace faster{
 		return count;
 	}
 
+
+
 	template <typename K, typename T> 
-	std::shared_ptr<std::unordered_map<K, int>> iFddCore<K,T>::calculateKeyMap(std::unordered_map<K, std::tuple<size_t, int, size_t>> count){ 
-		size_t size = this->size;
-		std::shared_ptr<std::unordered_map<K, int>> kMap = std::make_shared<std::unordered_map<K, int>>();
+	std::unordered_map<K, std::tuple<size_t, int, size_t>> * iFddCore<K,T>::calculateKeyCount(std::vector< std::pair<void *, size_t> > & result){ 
+		fastCommBuffer decoder(0);
+
+		auto * count = new std::unordered_map< K, std::tuple<size_t, int, size_t> >();
+		count->reserve(this->size);
+
+		for (int i = 1; i < context->numProcs(); ++i){
+			K key;
+			size_t kCount, numKeys;
+
+			if (result[i].second == 0) continue;
+
+			decoder.setBuffer(result[i].first, result[i].second);
+			decoder >> numKeys;
+
+			for ( size_t j = 0; j < numKeys; ++j ) {
+
+				decoder >> key >> kCount;
+				auto it = count->find(key);
+
+				if (it != count->end()){
+
+					int &owner = std::get<1>(it->second);
+					size_t &ownerCount = std::get<2>(it->second);
+
+					std::get<0>(it->second) += kCount;
+
+					// Fount the new majority owner
+					if (kCount > ownerCount){
+						owner = i;
+						ownerCount = kCount;
+					}
+
+				}else{
+					(*count)[key] = std::make_tuple(kCount, i, kCount);
+				}
+			}
+		}
+
+		return count;
+	}
+	template <typename K, typename T> 
+		std::unordered_map<K, int> iFddCore<K,T>::calculateKeyMap(std::unordered_map<K, std::tuple<size_t, int, size_t>> & count){ 
+			size_t size = this->size;
+		std::unordered_map<K, int> kMap(count.size());
 		std::unordered_map<K, bool> done;
 		size_t numProcs = context->numProcs();
 		std::vector<size_t> keyAlloc(numProcs,0);
 		std::vector<size_t> procBudget = context->getAllocation(size);
 
-		kMap->reserve(count.size());
 
 		//std::cerr << "      [ Budget: ";
 		//for ( int i = 1; i < numProcs; ++i)
@@ -545,7 +586,7 @@ namespace faster{
 			int preffered = std::get<1>(it->second);
 
 			if(keyAlloc[preffered] < procBudget[preffered]){
-				(*kMap)[key] = preffered;
+				kMap[key] = preffered;
 				keyAlloc [preffered] += kCount;
 				//count.erase(key);
 				done[key] = true;
@@ -561,10 +602,11 @@ namespace faster{
 				size_t kCount = std::get<0>(it->second);
 				int preffered = 1 + rand() % (numProcs - 1);
 
-				while(keyAlloc[preffered] >= procBudget[preffered]){
-					preffered = 1 + rand() % (numProcs - 1);
+				while(keyAlloc[preffered] >= (procBudget[preffered] + 1)){
+					//preffered = 1 + rand() % (numProcs - 1);
+					preffered = (preffered + 1) % numProcs;
 				}
-				(*kMap)[key] = preffered;
+				kMap[key] = preffered;
 				keyAlloc [preffered] += kCount;
 			}
 		}
@@ -584,59 +626,39 @@ namespace faster{
 
 	template <typename K, typename T> 
 	indexedFdd<K,T> * iFddCore<K,T>::groupByKey(){
-		fastCommBuffer decoder(0);
 		unsigned long int tid, sid;
 		// Key -> totalKeycount, maxowner, ownerCount
 
 		if (! groupedByKey){
-			//std::cerr << "  GroupByKey ";
-			auto * count = new std::unordered_map< K, std::tuple<size_t, int, size_t> >();
-			count->reserve(this->size);
-
+			using std::chrono::system_clock;
+			using std::chrono::duration_cast;
+			using std::chrono::milliseconds;
+			std::cerr << "  GroupByKey ";
 			auto start = system_clock::now();
+
 			context->enqueueTask(OP_CountByKey, id, this->size);
 
 			auto result = context->recvTaskResult(tid, sid, start);
+			std::cerr << " CBK:" << duration_cast<milliseconds>(system_clock::now() - start).count();
+			start = system_clock::now();
 
 			// Get a count by key with majority owner consideration
-			for (int i = 1; i < context->numProcs(); ++i){
-				K key;
-				size_t kCount, numKeys;
+			auto * count = calculateKeyCount(result);
+			std::cerr << " proc.Keys:" << duration_cast<milliseconds>(system_clock::now() - start).count();
+			auto start2 = system_clock::now();
 
-				if (result[i].second == 0) continue;
-
-				decoder.setBuffer(result[i].first, result[i].second);
-				decoder >> numKeys;
-
-				for ( size_t i = 0; i < numKeys; ++i ) {
-					
-					decoder >> key >> kCount;
-					auto it = count->find(key);
-
-					if (it != count->end()){
-
-						int &owner = std::get<1>(it->second);
-						size_t &ownerCount = std::get<2>(it->second);
-
-						std::get<0>(it->second) += kCount;
-
-						// Fount the new majority owner
-						if (kCount > ownerCount){
-							owner = sid;
-							ownerCount = kCount;
-						}
-
-					}else{
-						(*count)[key] = std::make_tuple(kCount, sid, kCount);
-					}
-				}
-			}
-			this->keyMap = calculateKeyMap(*count);
+			std::unordered_map<K, int> keyMap = calculateKeyMap(*count);
 			delete count;
+			std::cerr << " calc.KeyMap:" << duration_cast<milliseconds>(system_clock::now() - start2).count();
+			start2 = system_clock::now();
 
 			// Migrate data according to key ownership
 			unsigned long int tid = context->enqueueTask(OP_GroupByKey, id, this->size);
-			context->sendKeyMap(tid, *keyMap);
+			std::cerr << " enq.Task:" << duration_cast<milliseconds>(system_clock::now() - start2).count();
+			start2 = system_clock::now();
+			context->sendKeyMap(tid, keyMap);
+			keyMap.clear();
+			std::cerr << " snd.KeyMap:" << duration_cast<milliseconds>(system_clock::now() - start2).count();
 
 			result = context->recvTaskResult(tid, sid, start);
 			groupedByKey = true;
@@ -644,6 +666,32 @@ namespace faster{
 		//std::cerr << ". ";
 		return (indexedFdd<K,T> *)this;
 	}
+	template <typename K, typename T> 
+	indexedFdd<K,T> * iFddCore<K,T>::groupByKeyHashed(){
+		unsigned long int tid, sid;
+		// Key -> totalKeycount, maxowner, ownerCount
+
+		if (! groupedByKey){
+			auto start = system_clock::now();
+			//std::cerr << "  GroupByKeyHashed ";
+
+		
+			// Migrate data according to key ownership
+			tid = context->enqueueTask(OP_GroupByKeyH, id, this->size);
+
+			auto result = context->recvTaskResult(tid, sid, start);
+			groupedByKey = true;
+		}
+		//std::cerr << ". ";
+
+		return (indexedFdd<K,T> *)this;
+	}
+
+	template <typename K, typename T> 
+	void iFddCore<K,T>::writeToFile(std::string path, std::string sufix){
+		context->writeToFile(id, path, sufix);
+	}
+
 
 	template <typename K, typename T> 
 	std::pair <K,T>  indexedFdd<K,T>::finishReduces(char ** partResult, size_t * pSize, int funcId, fddOpType op){

@@ -66,6 +66,8 @@ namespace faster{
 		MSG_FDDSET2DDATASIZES,
 		MSG_FDDSET2DDATA ,
 		MSG_READFDDFILE	,
+		MSG_WRITEFDDFILE,
+		MSG_FILENAME,
 		MSG_COLLECT	,
 		MSG_FDDDATAID 	,
 		MSG_FDDDATA 	,
@@ -86,6 +88,7 @@ namespace faster{
 		MSG_IFDDDATA 	,
 		MSG_COLLECTDATA	,
 		MSG_KEYMAP	,
+		MSG_DISTKEYMAP	,
 		MSG_GROUPBYKEYDATA,
 
 		MSG_FINISH
@@ -164,7 +167,8 @@ namespace faster{
 
 		void probeMsgs(int & tag, int & src);
 		void waitForReq(int numReqs);
-		void join();
+		void joinAll();
+		void joinSlaves();
 
 		template <typename T>
 		size_t getSize(  T * data UNUSED, size_t * ds UNUSED, size_t s );
@@ -249,17 +253,24 @@ namespace faster{
 
 
 		// Read File
+		// THESE FUNCTIONS WILL BE DEPRECATED (THEY WILL BECOME TASKS)
 		void sendReadFDDFile(unsigned long int id, std::string filename, size_t size, size_t offset, int dest);
 		void recvReadFDDFile(unsigned long int &id, std::string & filename, size_t &size, size_t & offset);
+		void sendWriteFDDFile(unsigned long int id,std::string & path, std::string & sufix);
+		void recvWriteFDDFile(unsigned long int & id,std::string & path, std::string & sufix);
 
 		void sendFDDInfo(size_t size);
 		void recvFDDInfo(size_t &size, int & src);
+
+		void sendFileName(std::string path);
+		void recvFileName(std::string & filename);
 
 		void sendCollect(unsigned long int id);
 		void recvCollect(unsigned long int &id);
 
 		void sendFinish();
 		void recvFinish();
+		void bcastBuffer(int src, int i);
 
 
 		// GroupByKey
@@ -267,6 +278,8 @@ namespace faster{
 		void sendKeyMap(unsigned long tid, std::unordered_map<K, int> & keyMap);
 		template <typename K>
 		void recvKeyMap(unsigned long tid, std::unordered_map<K, int> & keyMap);
+		template <typename K>
+		void distributeKeyMap(std::unordered_map<K, int> & localKeyMap, std::unordered_map<K, int> & keyMap);
 		template <typename K>
 		void sendCogroupData(unsigned long tid, std::unordered_map<K, int> & keyMap, std::vector<bool> & flags);
 		template <typename K>
@@ -529,16 +542,78 @@ namespace faster{
 	// GroupByKey
 	template <typename K>
 	void faster::fastComm::sendKeyMap(unsigned long tid, std::unordered_map<K, int> & keyMap){
-		buffer[0].reset();
-		buffer[0] << tid << size_t(keyMap.size()); 
+		const int itemsPerMsg = (256 * 1024);
+		int num_msgs = ceil( (double) keyMap.size() / itemsPerMsg );
+		int inserted_items = 0;
+		int msg_num = 0;
+		int current_buffer = 0;
+
+		//MPI_Request * requests = new MPI_Request[ num_msgs * (numProcs - 1) ];
+		//MPI_Status * statuss = new MPI_Status[ num_msgs * (numProcs - 1) ];
+
+		// Include number of items in first message
+		buffer[current_buffer].reset();
+		buffer[current_buffer] << tid << size_t(keyMap.size()); 
+
+		std::cerr << " NM:" << num_msgs << "\n";
 
 		for ( auto it = keyMap.begin(); it != keyMap.end(); it++){
-			buffer[0] << it->first << it->second; 
+			buffer[current_buffer] << it->first << it->second; 
+			inserted_items ++;
+
+			// Send some keys
+			if (inserted_items >= itemsPerMsg){
+				std::cerr << msg_num << " ";
+				
+				if (msg_num > 0)
+					MPI_Waitall( (numProcs - 1), req, status);
+				
+				for ( int i = 1; i < (numProcs); ++i)
+					MPI_Isend(
+							buffer[current_buffer].data(), 
+							buffer[current_buffer].size(), 
+							MPI_BYTE, 
+							i, 
+							MSG_KEYMAP, 
+							MPI_COMM_WORLD, 
+							//&requests[ (i-1) + msg_num * (numProcs-1)]
+							&req[i-1]
+						 );
+				buffer[current_buffer].reset();
+				inserted_items = 0;
+				msg_num++;
+
+				// Next send will use next buffer
+				current_buffer = (current_buffer + 1) % numProcs;
+			}
 		}
 
-		for ( int i = 1; i < (numProcs); ++i)
-			MPI_Isend(buffer[0].data(), buffer[0].size(), MPI_BYTE, i, MSG_KEYMAP, MPI_COMM_WORLD, &req[i-1]);
-		MPI_Waitall( numProcs - 1, req, status);
+		// Send the rest of the keys
+		if (inserted_items > 0){
+			std::cerr << msg_num << " ";
+				
+			if (msg_num > 0)
+				MPI_Waitall( (numProcs - 1), req, status);
+				
+			for ( int i = 1; i < (numProcs); ++i)
+				MPI_Isend(
+						buffer[current_buffer].data(), 
+						buffer[current_buffer].size(), 
+						MPI_BYTE, 
+						i, 
+						MSG_KEYMAP, 
+						MPI_COMM_WORLD, 
+						//&requests[ (i-1) + msg_num * (numProcs-1)]
+						&req[i-1]
+					 );
+		}
+
+		// Wait for message send conclusion
+		//MPI_Waitall( num_msgs * (numProcs - 1), requests, statuss);
+		MPI_Waitall( (numProcs - 1), req, status);
+
+		//delete [] requests;
+		//delete [] statuss;
 	}
 	template <typename K>
 	void faster::fastComm::recvKeyMap(unsigned long tid, std::unordered_map<K, int> & keyMap){
@@ -546,26 +621,113 @@ namespace faster{
 		size_t size;
 		int rsize;
 		
+		// Recv initial data
 		MPI_Probe(0, MSG_KEYMAP, MPI_COMM_WORLD, &stat);
 		MPI_Get_count(&stat, MPI_BYTE, &rsize);
 		bufferRecv[0].grow(rsize);
-
 		bufferRecv[0].reset();
-		
-		MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_KEYMAP, MPI_COMM_WORLD, &stat);	
+		MPI_Recv(bufferRecv[0].data(), 
+				bufferRecv[0].free(), 
+				MPI_BYTE, 
+				0, 
+				MSG_KEYMAP, 
+				MPI_COMM_WORLD, 
+				&stat
+			);	
 
 		bufferRecv[0] >> tid >> size;
 		
 		// Allocate map with pre-known size
 		keyMap.reserve(size);
 
-		for ( size_t i = 0; i < size; ++i){
-			K key;
-			int count;
-			bufferRecv[0] >> key >> count;
-			keyMap[key] = count;
+		const int itemsPerMsg = (256 * 1024);
+		int num_msgs = ceil( (double) size / itemsPerMsg );
+		int inserted_items = 0;
+		std::cerr << "(NM:" << num_msgs << ")\n";
+
+		for ( int msg_num = 0; msg_num < num_msgs; ++msg_num){
+			int numRevcItems = std::min(size - inserted_items, size_t(itemsPerMsg));
+			std::cerr << msg_num << " ";
+
+			// Recv more keys
+			if (msg_num > 0){
+				MPI_Probe(0, MSG_KEYMAP, MPI_COMM_WORLD, &stat);
+				MPI_Get_count(&stat, MPI_BYTE, &rsize);
+				bufferRecv[0].grow(rsize);
+				bufferRecv[0].reset();
+				MPI_Recv(
+						bufferRecv[0].data(), 
+						bufferRecv[0].free(), 
+						MPI_BYTE, 
+						0, 
+						MSG_KEYMAP, 
+						MPI_COMM_WORLD, 
+						&stat
+					);	
+			}
+
+			// Insert recvd keys
+			for ( int i = 0; i < numRevcItems; ++i){
+				K key;
+				int count;
+				bufferRecv[0] >> key >> count;
+				keyMap[key] = count;
+			}
+			inserted_items += numRevcItems;
 		}
 	}
+
+	template <typename K>
+	void faster::fastComm::distributeKeyMap(std::unordered_map<K, int> & localKeyMap, std::unordered_map<K, int> & keyMap){
+		std::pair<K, int> p;
+		keyMap.reserve(localKeyMap.size() * numProcs);
+
+		std::cerr << "---------- Join Slaves ----------";
+		joinSlaves();
+		std::cerr << "\n";
+
+		for (int i = 1; i < (numProcs); ++i){
+			if (procId == i){
+				std::cerr << "S" << localKeyMap.size() << " ";
+				int reqIndex = 0;
+				
+				buffer[i] << size_t(localKeyMap.size());
+				for ( auto it = localKeyMap.begin(); it != localKeyMap.end(); it++){
+					buffer[i] << it->first << it->second;
+				}
+
+				for (int j = 1; j < (numProcs); ++j){
+					if ( j != i )
+						MPI_Isend(buffer[i].data(), buffer[i].size(), MPI_BYTE, j, MSG_DISTKEYMAP, MPI_COMM_WORLD, &req[reqIndex++]); 
+				}
+				MPI_Waitall( numProcs - 2, req, status);
+			}else{
+				int rsize;
+				size_t numItems;
+				MPI_Status stat;
+
+				MPI_Probe(i, MSG_DISTKEYMAP, MPI_COMM_WORLD, &stat);
+				MPI_Get_count(&stat, MPI_BYTE, &rsize);
+				bufferRecv[i].grow(rsize);
+
+				bufferRecv[i].reset();
+
+				MPI_Recv(bufferRecv[i].data(), bufferRecv[i].free(), MPI_BYTE, i, MSG_DISTKEYMAP, MPI_COMM_WORLD, &stat);	
+
+				bufferRecv[i] >> numItems;
+				std::cerr << "R:" << numItems << " ";
+
+				for (size_t j = 0; j < (numItems); ++j){
+					bufferRecv[i] >> p.first >> p.second;
+					keyMap.insert(std::move(p));
+				}
+			}
+			
+		}
+		keyMap.insert(localKeyMap.begin(), localKeyMap.end());
+		std::cerr << "    Final Size: " << keyMap.size() << "\n";
+	}
+
 	template <typename K>
 	void faster::fastComm::sendCogroupData(unsigned long tid, std::unordered_map<K, int> & keyMap, std::vector<bool> & flags){
 		buffer[0].reset();
@@ -583,6 +745,9 @@ namespace faster{
 		for ( int i = 1; i < (numProcs); ++i)
 			MPI_Isend(buffer[0].data(), buffer[0].size(), MPI_BYTE, i, MSG_KEYMAP, MPI_COMM_WORLD, &req[i-1]);
 		MPI_Waitall( numProcs - 1, req, status);
+
+		//bcastBuffer(0, 0);
+
 	}
 	template <typename K>
 	void faster::fastComm::recvCogroupData(unsigned long tid, std::unordered_map<K, int> & keyMap, std::vector<bool> & flags){
@@ -597,6 +762,7 @@ namespace faster{
 		bufferRecv[0].reset();
 		
 		MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_KEYMAP, MPI_COMM_WORLD, &stat);	
+		//bcastBuffer(0, 0);
 
 		bufferRecv[0] >> tid >> size;
 		

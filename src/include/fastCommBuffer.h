@@ -151,6 +151,7 @@ namespace faster {
 			}
 			template <typename T>
 			void readVec(std::vector<T> & v, size_t s){
+				v.resize(s);
 				v.assign((T*) &_data[_size], (T*) &_data[_size + s] );
 				_size += s;
 			}

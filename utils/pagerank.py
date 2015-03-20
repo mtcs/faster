@@ -5,34 +5,36 @@ import sys
 if ( len(sys.argv) < 2 ) :
     sys.exit("ERROR: usage: #pagerank.py graph file(string) [error(float)]\n")
 
-g = open ( sys.argv[1], 'r')
+gfile = open ( sys.argv[1], 'r')
 resolution = 1 if (len(sys.argv) < 3) else float(sys.argv[2])
 dumping = 0.85 if (len(sys.argv) < 4) else float(sys.argv[3])
 verbose = 0 if (len(sys.argv) < 5) else int(sys.argv[4])
 
 G = {}
+numNodes = 0
 
-for line in g :
+for line in gfile :
     tokens = line.split()
     node = int(tokens[0])
     G[node] = list(map(int, tokens[1:]))
+    numNodes = numNodes + 1;
 
-g.close()
+gfile.close()
 
 error = 10;
 pr = {}
 newpr = {}
 
 for node, neighbs in G.items(): 
-    pr[node] = 1.0;
+    pr[node] = 1.0 / numNodes;
 
 iteration = 0
-while ( error > resolution) :
+while ( iteration < 10) :
     print ( "Iteration:", iteration, file = sys.stderr, end = "\n")
     iteration += 1
 
     for node in G.keys(): 
-        newpr[node] = (1 - dumping)
+        newpr[node] = (1 - dumping) / numNodes
 
     # Give Pagerank
     for node, neighbs in G.items(): 
@@ -55,4 +57,4 @@ while ( error > resolution) :
 
 
 for node in sorted(G.keys()): 
-    print ("{} {:.8f}".format(node, pr[node]))
+    print ("{} {}".format(node, pr[node]))

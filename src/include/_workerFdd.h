@@ -31,7 +31,11 @@ namespace faster {
 		protected:
 			fddStorage <T> * localData;
 
-			void exchangeDataByKey(fastComm *comm UNUSED, void * keyMap UNUSED){};
+			void exchangeDataByKey(fastComm *comm UNUSED){};
+			void * getUKeys(){ return NULL; }
+			void  setUKeys(void * uk UNUSED){  }
+			void * getKeyMap(){ return NULL; }
+			void  setKeyMap(void * km UNUSED){  }
 			std::vector< std::vector<void*> > * getKeyLocations(){ return NULL; }
 
 		public:
@@ -62,6 +66,8 @@ namespace faster {
 
 			void deleteItem(void * item) override ;
 			void shrink();
+
+			void writeToFile(void * path, size_t procId, void * sufix);
 
 			void preapply(unsigned long int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm);
 

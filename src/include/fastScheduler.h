@@ -46,6 +46,7 @@ namespace faster{
 			bool dataMigrationNeeded();
 			std::vector<std::deque< std::pair<int,long int> >> getDataMigrationInfo();
 			std::vector<size_t> getAllocation(size_t size);
+			void setAllocation(std::vector<size_t> & alloc, size_t size);
 
 	};
 

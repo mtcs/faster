@@ -73,22 +73,22 @@ namespace faster{
 
 			groupedFdd<K> * update(void * funcP, fddOpType op);
 
-			void cogroup(std::shared_ptr<std::unordered_map<K, int>> & keyMap, system_clock::time_point & start);
+			void cogroup(system_clock::time_point & start);
 		public:
 			template <typename T, typename U> 
-			groupedFdd(fastContext * c, iFddCore<K,T> * fdd0, iFddCore<K,U> * fdd1, std::shared_ptr<std::unordered_map<K, int>> & keyMap, system_clock::time_point & start) : groupedFdd(c) { 
+			groupedFdd(fastContext * c, iFddCore<K,T> * fdd0, iFddCore<K,U> * fdd1, system_clock::time_point & start) : groupedFdd(c) { 
 				members.insert(members.end(), fdd0);
 				members.insert(members.end(), fdd1);
 				id = context->createFddGroup(this, members); 
-				cogroup(keyMap, start);
+				cogroup(start);
 			}
 			template <typename T, typename U, typename V> 
-			groupedFdd(fastContext * c, iFddCore<K,T> * fdd0, iFddCore<K,U> * fdd1,  iFddCore<K,V> * fdd2, std::shared_ptr<std::unordered_map<K, int>> & keyMap, system_clock::time_point & start) : groupedFdd(c){
+			groupedFdd(fastContext * c, iFddCore<K,T> * fdd0, iFddCore<K,U> * fdd1,  iFddCore<K,V> * fdd2, system_clock::time_point & start) : groupedFdd(c){
 				members.insert(members.end(), fdd0);
 				members.insert(members.end(), fdd1);
 				members.insert(members.end(), fdd2);
 				id = context->createFddGroup(this, members); 
-				cogroup(keyMap, start);
+				cogroup(start);
 			}
 
 			groupedFdd<K> * cache(){
@@ -185,8 +185,6 @@ namespace faster{
 			}
 
 
-			void * getKeyMap() { return NULL; }
-			void setKeyMap(void * keyMap UNUSED) {}
 			bool isGroupedByKey() { return false; }
 			void setGroupedByKey(bool gbk UNUSED) {}
 		
@@ -284,32 +282,25 @@ namespace faster{
 	}
 
 	template <typename K>
-	void groupedFdd<K>::cogroup(std::shared_ptr<std::unordered_map<K, int>> & keyMap, system_clock::time_point & start){
+	void groupedFdd<K>::cogroup(system_clock::time_point & start){
 		using std::chrono::system_clock;
-		std::vector<bool> exchangeData (members.size()-1, true);
+		using std::chrono::duration_cast;
+		using std::chrono::milliseconds;
+
+		std::cerr << "        DCogroup";
+		start = system_clock::now();
 
 		unsigned long int sid;
-
-		for (size_t i = 1; i < members.size(); ++i){
-			if ( members[i]->isGroupedByKey() ){
-				void * km = members[i]->getKeyMap();
-				if ( *(std::shared_ptr<std::unordered_map<K, int>>*)km != keyMap ){
-					members[i]->setKeyMap(&keyMap);
-				}else{
-					exchangeData[i-1] = false;
-				}
-			}else{
-				members[i]->setKeyMap(&keyMap);
-				members[i]->setGroupedByKey(true);
-			}
-		}
-
+		//std::cerr << " Init:" << duration_cast<milliseconds>(system_clock::now() - start).count() << "\n";
+		//start = system_clock::now();
 		unsigned long int tid = context->enqueueTask(OP_CoGroup, id, this->size);
 
-		context->sendCogroupData(tid, *keyMap, exchangeData);
-
+		for (size_t i = 1; i < members.size(); ++i){
+			members[i]->setGroupedByKey(true);
+		}
 
 		auto result = context->recvTaskResult(tid, sid, start);
+		std::cerr << " Process:" << duration_cast<milliseconds>(system_clock::now() - start).count() << "\n";
 	}
 
 

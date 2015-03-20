@@ -116,6 +116,11 @@ std::vector<size_t> faster::fastScheduler::getAllocation(size_t size){
 
 	return  r;
 }
+void faster::fastScheduler::setAllocation(std::vector<size_t> & alloc, size_t size){
+	for ( size_t  i = 0; i < alloc.size(); i++ ){
+		currentWeights[i] = (double) alloc[i] / size;
+	}
+}
 
 void faster::fastScheduler::updateWeights(){
 	unsigned int i;

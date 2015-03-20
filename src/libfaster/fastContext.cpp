@@ -5,6 +5,9 @@
 #include "fastContext.h"
 #include "misc.h"
 
+faster::fastContext::fastContext( int & argc, char **& argv): fastContext(fastSettings(), argc, argv){
+}
+
 // Create a context with local as master
 faster::fastContext::fastContext(const fastSettings & s, int & argc, char **& argv){
 
@@ -233,6 +236,19 @@ void faster::fastContext::getFDDInfo(size_t & s, std::vector<size_t> & dataAlloc
 	}
 }
 
+void faster::fastContext::writeToFile(unsigned long int id,std::string & path, std::string & sufix){
+	unsigned long int tid, sid;
+	system_clock::time_point start;
+
+	comm->sendWriteFDDFile(id, path, sufix);
+
+	for ( int  i = 1; i < comm->numProcs; i++ ){
+		size_t s;
+		size_t time;
+		procstat stat;
+		comm->recvTaskResult(tid, sid, s, time, stat);
+	}
+}
 
 unsigned long int faster::fastContext::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size){
 	fastTask * newTask = scheduler->enqueueTask(opT, idSrc, idRes, funcId, size, globalTable);

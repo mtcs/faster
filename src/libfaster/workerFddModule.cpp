@@ -86,11 +86,27 @@ void faster::preapplyDL(workerFddBase * fdd, unsigned long int id, void * func, 
 void faster::collectDL(workerFddBase * fdd, fastComm * comm){
 	fdd->collect(comm);
 }
-void faster::exchangeDataByKeyDL(workerFddBase * fdd, fastComm * comm, void * keyMap){
-	fdd->exchangeDataByKey(comm, keyMap);
+void faster::exchangeDataByKeyDL(workerFddBase * fdd, fastComm * comm){
+	fdd->exchangeDataByKey(comm);
 }
 
 void * faster::getKeyLocationsDL(workerFddBase * fdd){
 	return fdd->getKeyLocations();
+}
+
+void * faster::getUKeysDL(workerFddBase * fdd){
+	return fdd->getUKeys();
+}
+void  faster::setUKeysDL(workerFddBase * fdd, void * uk){
+	fdd->setUKeys(uk);
+}
+void * faster::getKeyMapDL(workerFddBase * fdd){
+	return fdd->getKeyMap();
+}
+void  faster::setKeyMapDL(workerFddBase * fdd, void * km){
+	fdd->setKeyMap(km);
+}
+void  faster::writeToFileDL(workerFddBase * fdd, void * path, size_t procId, void * sufix){
+	fdd->writeToFile(path, procId, sufix);
 }
 

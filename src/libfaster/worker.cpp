@@ -111,6 +111,34 @@ void faster::worker::calibrate(){
 	auto duration = duration_cast<milliseconds>(end - start);
 
 	buffer << size_t(duration.count());
+	buffer << getProcStat();
+	buffer << size_t(1);
+	buffer << ret;
+
+	comm->sendTaskResult();
+}
+
+void faster::worker::writeFDDFile(unsigned long int id, std::string &path, std::string &sufix){
+	using std::chrono::system_clock;
+	using std::chrono::duration_cast;
+	using std::chrono::milliseconds;
+
+	char ret = 0;
+	fastCommBuffer &buffer = comm->getResultBuffer();
+	workerFddBase * src = fddList[id];
+
+	buffer.reset();
+	buffer << size_t(0);
+
+	auto start = system_clock::now();
+	auto end = system_clock::now();
+	
+	src->writeToFile(&path, comm->getProcId(), &sufix);
+
+	auto duration = duration_cast<milliseconds>(end - start);
+
+	buffer << size_t(duration.count());
+	buffer << getProcStat();
 	buffer << size_t(1);
 	buffer << ret;
 

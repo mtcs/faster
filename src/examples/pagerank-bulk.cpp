@@ -250,14 +250,8 @@ int main(int argc, char ** argv){
 
 	}
 	start2 = system_clock::now();
-	auto result = pr->collect();
 
-	cerr << "  Collect Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
-	start2 = system_clock::now();
-
-	for ( auto it = result.begin(); it != result.end(); it++){
-		printf("%d %.8f\n", it->first, it->second);
-	}
+	pr->writeToFile(std::string("/tmp/pr"), std::string(".txt"));
 
 	auto duration = duration_cast<milliseconds>(system_clock::now() - start).count();
 	cerr << "  Write Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";

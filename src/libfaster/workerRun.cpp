@@ -19,7 +19,7 @@ void faster::worker::run(){
 		//void ** data2D = NULL;
 		size_t * lineSizes = NULL;
 		size_t size, offset;
-		std::string name;
+		std::string name, name2;
 		std::vector<unsigned long int> idV;
 
 		// Wait for a message to arrive
@@ -105,6 +105,13 @@ void faster::worker::run(){
 				comm->recvReadFDDFile(id, name, size, offset);
 				//std::cerr << "ID:" << id <<" F:" << name << "(offset:" << offset << ")";
 				readFDDFile(id, name, size, offset);
+				//std::cerr << ".\n";
+				break;
+			case MSG_WRITEFDDFILE:
+				//std::cerr << "    R:ReadFddFile \n" ;
+				comm->recvWriteFDDFile(id, name, name2);
+				//std::cerr << "ID:" << id <<" F:" << name << "(offset:" << offset << ")";
+				writeFDDFile(id, name, name2);
 				//std::cerr << ".\n";
 				break;
 

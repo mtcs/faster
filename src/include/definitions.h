@@ -55,8 +55,11 @@ namespace faster{
 	#define OP_GENERICMISC		0x0800
 	#define OP_CountByKey		0x0801
 	#define OP_GroupByKey		0x0802
-	#define OP_CoGroup		0x0804
-	#define OP_Calibrate		0x0808
+	#define OP_GroupByKeyH		0x0804
+	#define OP_CoGroup		0x0808
+	#define OP_Calibrate		0x0810
+	#define OP_OnPartRead		0x0811
+	#define OP_OnFullPRead		0x0812
 
 	typedef enum : char {
 		NewWorkerDL 	= 0x01,
@@ -91,13 +94,26 @@ namespace faster{
 		GroupByKeyDL	= 0x16,
 		CountByKeyDL	= 0x17,
 		ExchangeDataByKeyDL = 0x18,
-		GetKeyLocationDL	= 0x19
+		GetKeyLocationDL= 0x19,
+		GetUKeysDL	= 0x1a,
+		SetUKeysDL	= 0x1b,
+		GetKeyMapDL	= 0x1c,
+		SetKeyMapDL	= 0x1d,
+		WriteToFileDL	= 0x1e
 
 	} dFuncName;
 
+	// Partition function definitions
+	template <typename T>
+	using onlineFullPartFuncP = int (*) (T & input);
+
+	template <typename K, typename T>
+	using IonlineFullPartFuncP = int (*) (K & key, T & input);
+
+
 	// Not Indexed FFDs
 	// FDD function pointer types
-
+	
 	template <typename T, typename U>
 	using mapFunctionP = U (*) (T & input);
 	template <typename T, typename L, typename U>

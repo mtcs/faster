@@ -90,8 +90,10 @@ const std::string faster::decodeOptype(fddOpType op){
 		switch(op){
 			case OP_CountByKey: 	return "CountByKey ";
 			case OP_GroupByKey: 	return "GroupByKey ";
+			case OP_GroupByKeyH: 	return "GroupByKeyH";
 			case OP_CoGroup: 	return "Cogroup    ";
 			case OP_Calibrate: 	return "Calibrate  ";
+			case OP_OnFullPRead: 	return "OnFullPRead";
 		}
 	}
 	return "           ";
@@ -123,9 +125,11 @@ const std::string faster::decodeOptypeAb(fddOpType op){
 		switch(op){
 			case OP_CountByKey: 	return "CBK";
 			case OP_GroupByKey: 	return "GBK";
+			case OP_GroupByKeyH: 	return "GBK";
 			case OP_CoGroup: 	return "CG ";
 			case OP_Calibrate: 	return "CL ";
+			case OP_OnFullPRead: 	return "FPR";
 		}
 	}
-	return "           ";
+	return "---";
 }

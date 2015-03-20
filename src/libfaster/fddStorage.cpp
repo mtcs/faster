@@ -160,13 +160,15 @@ void   faster::fddStorage<T*>::setSize(size_t s){
 
 template <class T> 
 void faster::fddStorage<T>::insert(T & item){
-	grow(this->size + 1);
-	this->localData[this->size++] = item;	
+	if ( this->size == this->allocSize )
+		grow( std::max(this->size + 1, size_t(this->allocSize*1.5) ) );
+	this->localData[this->size++] = std::move(item);	
 }
 
 template <class T> 
 void faster::fddStorage<T*>::insert(T *& item, size_t s){
-	grow(this->size + 1);
+	if ( this->size == this->allocSize )
+		grow( std::max(this->size + 1, size_t(this->allocSize*1.5) ) );
 	lineSizes[this->size] = s;	
 	this->localData[this->size++] = item;	
 

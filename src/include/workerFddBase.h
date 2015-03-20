@@ -56,8 +56,14 @@ namespace faster{
 			virtual void apply(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer) = 0;
 
 			virtual void collect(fastComm * comm) = 0;
-			virtual void exchangeDataByKey(fastComm *comm, void * keyMap) = 0;
+			virtual void exchangeDataByKey(fastComm *comm) = 0;
 			virtual std::vector< std::vector<void*> > * getKeyLocations() = 0;
+			virtual void * getUKeys() = 0;
+			virtual void  setUKeys(void * uk) = 0;
+			virtual void * getKeyMap() = 0;
+			virtual void  setKeyMap(void * km) = 0;
+
+			virtual void writeToFile(void * path, size_t procId, void * sufix) = 0;
 	};
 }
 

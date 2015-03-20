@@ -214,14 +214,16 @@ void   faster::indexedFddStorage<K,T*>::setSize(size_t s){
 
 template <class K, class T> 
 void faster::indexedFddStorage<K,T>::insert(K key, T & item){
-	grow(this->size + 1);
-	this->localKeys[this->size] = key;
-	this->localData[this->size++] = item;	
+	if ( this->size == this->allocSize )
+		grow( std::max(this->size + 1, size_t(this->allocSize*1.5) ) );
+	this->localKeys[this->size] = std::move(key);
+	this->localData[this->size++] = std::move(item);	
 }
 
 template <class K, class T> 
 void faster::indexedFddStorage<K,T*>::insert(K key, T *& item, size_t s){
-	grow(this->size + 1);
+	if ( this->size == this->allocSize )
+		grow( std::max(this->size + 1, size_t(this->allocSize*1.5) ) );
 	lineSizes[this->size] = s;	
 	this->localKeys[this->size] = key;
 	this->localData[this->size++] = item;	
