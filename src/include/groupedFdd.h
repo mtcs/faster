@@ -287,7 +287,7 @@ namespace faster{
 		using std::chrono::duration_cast;
 		using std::chrono::milliseconds;
 
-		std::cerr << "        DCogroup";
+		//std::cerr << "        DCogroup";
 		start = system_clock::now();
 
 		unsigned long int sid;
@@ -300,7 +300,7 @@ namespace faster{
 		}
 
 		auto result = context->recvTaskResult(tid, sid, start);
-		std::cerr << " Process:" << duration_cast<milliseconds>(system_clock::now() - start).count() << "\n";
+		//std::cerr << " Process:" << duration_cast<milliseconds>(system_clock::now() - start).count() << "\n";
 	}
 
 

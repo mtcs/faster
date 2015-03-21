@@ -204,9 +204,7 @@ int main(int argc, char ** argv){
 
 	cerr << "Init Pagerank" << '\n';
 	auto pr = structure->map<int, double>(&createPR)->cache();
-	fc.updateInfo();
 	auto errors = structure->map<int, double>(&createErrors)->cache();
-	fc.updateInfo();
 	auto iterationData = structure->cogroup(pr, errors)->cache();
 	fc.updateInfo();
 	double error = 1;

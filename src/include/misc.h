@@ -45,6 +45,15 @@ namespace faster{
 	}
 
 	template < typename T >
+	double sum(std::vector<T> v){
+		T sum = 0;
+		for ( size_t i = 0; i < v.size(); ++i)
+			sum += v[i];
+
+		return sum;
+	}
+
+	template < typename T >
 	double stdDev(std::vector<T> v, double mean){
 		double sum = 0;
 		for ( size_t i = 0; i < v.size(); ++i)

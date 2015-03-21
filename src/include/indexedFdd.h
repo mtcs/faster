@@ -30,11 +30,13 @@ namespace faster{
 
 		protected:
 			bool groupedByKey;
+			bool groupedByMap;
 			fastContext * context;
 
 			iFddCore() {
 				_kType = decodeType(typeid(K).hash_code());
 				groupedByKey = false;
+				groupedByMap = false;
 				cached = false;
 			}
 			
@@ -42,6 +44,7 @@ namespace faster{
 			iFddCore(fastContext &c) {
 				_kType = decodeType(typeid(K).hash_code());
 				groupedByKey = false;
+				groupedByMap = false;
 				cached = false;
 				context = &c;
 			}
@@ -50,6 +53,7 @@ namespace faster{
 			iFddCore(fastContext &c, size_t s, const std::vector<size_t> & dataAlloc) {
 				_kType = decodeType(typeid(K).hash_code());
 				groupedByKey = false;
+				groupedByMap = false;
 				cached = false;
 				context = &c;
 				this->size = s;
@@ -69,6 +73,9 @@ namespace faster{
 			template <typename L, typename U> 
 			indexedFdd<L,U> * mapI( void * funcP, fddOpType op);
 
+			indexedFdd<K,T> * groupByKeyMapped();
+			indexedFdd<K,T> * groupByKeyHashed();
+
 		public:
 			//template<typename... FddTypes, typename... Args> 
 			//groupedFdd<K, T, FddTypes...> * cogroup(Args * ... args){
@@ -77,7 +84,7 @@ namespace faster{
 			template<typename U> 
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1){
 
-				this->groupByKeyHashed();
+				this->groupByKey();
 				auto start = system_clock::now();
 
 				return new groupedFdd<K>(context, this, fdd1, start);
@@ -86,7 +93,7 @@ namespace faster{
 			template<typename U, typename V> 
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1, iFddCore<K,V> * fdd2){
 
-				this->groupByKeyHashed();
+				this->groupByKey();
 				auto start = system_clock::now();
 
 				return new groupedFdd<K>(context, this, fdd1, fdd2, start);
@@ -95,7 +102,6 @@ namespace faster{
 			std::unordered_map<K, size_t> countByKey();
 
 			indexedFdd<K,T> * groupByKey();
-			indexedFdd<K,T> * groupByKeyHashed();
 
 			void discard(){
 				//std::cerr << "\033[0;31mDEL" << id << "\033[0m  "; 
@@ -109,6 +115,9 @@ namespace faster{
 			}
 			void setGroupedByKey(bool gbk) {
 				groupedByKey = gbk;
+			}
+			void setGroupedByMap(bool gbm) {
+				groupedByMap = gbm;
 			}
 
 	};
@@ -625,9 +634,9 @@ namespace faster{
 	}
 
 	template <typename K, typename T> 
-	indexedFdd<K,T> * iFddCore<K,T>::groupByKey(){
+	indexedFdd<K,T> * iFddCore<K,T>::groupByKeyMapped(){
 		unsigned long int tid, sid;
-		// Key -> totalKeycount, maxowner, ownerCount
+		std::vector<size_t> alloc(context->numProcs(), 0);
 
 		if (! groupedByKey){
 			using std::chrono::system_clock;
@@ -661,6 +670,11 @@ namespace faster{
 			std::cerr << " snd.KeyMap:" << duration_cast<milliseconds>(system_clock::now() - start2).count();
 
 			result = context->recvTaskResult(tid, sid, start);
+			for (int i = 1; i < context->numProcs(); ++i){
+				if (result[i].second > 0){
+					alloc[i] = * (size_t*) result[i].first; 
+				}
+			}
 			groupedByKey = true;
 		}
 		//std::cerr << ". ";
@@ -669,7 +683,7 @@ namespace faster{
 	template <typename K, typename T> 
 	indexedFdd<K,T> * iFddCore<K,T>::groupByKeyHashed(){
 		unsigned long int tid, sid;
-		// Key -> totalKeycount, maxowner, ownerCount
+		std::vector<size_t> alloc(context->numProcs(), 0);
 
 		if (! groupedByKey){
 			auto start = system_clock::now();
@@ -680,11 +694,23 @@ namespace faster{
 			tid = context->enqueueTask(OP_GroupByKeyH, id, this->size);
 
 			auto result = context->recvTaskResult(tid, sid, start);
+			for (int i = 1; i < context->numProcs(); ++i){
+				if (result[i].second > 0){
+					alloc[i] = * (size_t*) result[i].first; 
+				}
+			}
 			groupedByKey = true;
 		}
 		//std::cerr << ". ";
 
 		return (indexedFdd<K,T> *)this;
+	}
+	template <typename K, typename T> 
+	indexedFdd<K,T> * iFddCore<K,T>::groupByKey(){
+		if (groupedByMap)
+			return groupByKeyMapped();
+		else
+			return groupByKeyHashed();
 	}
 
 	template <typename K, typename T> 

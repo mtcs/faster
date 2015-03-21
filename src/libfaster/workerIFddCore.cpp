@@ -345,9 +345,6 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 	hasher<K> hash(comm->getNumProcs() - 1);
 
 	
-	//Ti[0] = duration_cast<milliseconds>(system_clock::now() - start).count();
-	//start = system_clock::now();
-
 	//std::cerr << comm->getProcId() << "        Write Buffers";
 	// Reserve space in the message for the header
 	for ( int i = 1; i < (comm->getNumProcs()); ++i){
@@ -378,9 +375,15 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 
 	comm->joinSlaves();
 
+	//Ti[0] = duration_cast<milliseconds>(system_clock::now() - start).count();
+	//start = system_clock::now();
+
 	tryShrink = EDBKSendData(comm, dataSize);
 
 	dirty = EDBKRecvData(comm, deleted, pos, tryShrink);
+
+	//Ti[1] = duration_cast<milliseconds>(system_clock::now() - start).count();
+	//start = system_clock::now();
 
 	EDBKShrinkData(deleted, pos, tryShrink);
 	//std::cerr << "        (new size: " << localData->getSize() << ")\n";
@@ -393,8 +396,10 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 		}
 		dirty = true;
 	}
-	//Ti[3] = duration_cast<milliseconds>(system_clock::now() - start).count();
-	//std::cerr << " TIn:" << Ti[0] << " TSn:" << Ti[1] << " TRv:" <<  Ti[2] << " TSh:" << Ti[3] << "\n";
+	//Ti[2] = duration_cast<milliseconds>(system_clock::now() - start).count();
+	
+	//std::cerr << "    \n";
+	//std::cerr << " \033[0;33mEDBK\033[0m IDOwner:" << Ti[0] << " ED:" << Ti[1] << " (" << sum(dataSize) << ") Sh:" << Ti[3] << "\n";
 	
 	//groupByKeyHashed = true;
 

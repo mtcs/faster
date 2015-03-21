@@ -329,6 +329,7 @@ namespace faster{
 		}
 		newFdd->setSize(newSize);
 		newFdd->setGroupedByKey(true);
+		newFdd->setGroupedByMap(true);
 		scheduler->setAllocation(alloc, newSize);
 			
 		return newFdd;
@@ -359,6 +360,7 @@ namespace faster{
 		}
 		newFdd->setSize(newSize);
 		newFdd->setGroupedByKey(true);
+		newFdd->setGroupedByMap(true);
 		scheduler->setAllocation(alloc, newSize);
 			
 		return newFdd;
