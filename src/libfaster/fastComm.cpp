@@ -402,12 +402,21 @@ void faster::fastComm::recvFileName(std::string & path){
 
 
 
+bool faster::fastComm::isSendBufferFree(int i){
+	if (bufferOcupied[i]){
+		// check if buffer has been freed
+		return false;
+	}else{
+		return true;
+	}
+}
 void faster::fastComm::sendGroupByKeyData(int i){
 	int savepoint = i - 1;
 	if ( i > procId ){
 		savepoint -= 1;
 	}
 	MPI_Isend( buffer[i].data(), buffer[i].size(), MPI_BYTE, i, MSG_GROUPBYKEYDATA, MPI_COMM_WORLD, &req[savepoint]);
+	bufferOcupied[i] = true;
 }
 
 void * faster::fastComm::recvGroupByKeyData(int & size){

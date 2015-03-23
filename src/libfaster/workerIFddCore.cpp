@@ -345,7 +345,7 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 			pos++;
 			continue;
 		}
-		if ( comm->sendBufferFree(owner) ){
+		if ( comm->isSendBufferFree(owner) ){
 			if ( dataSize[owner] >= comm->maxMsgSize){
 				//Send partial data
 				buffer[owner].writePos(dataSize[owner], 0);
@@ -429,22 +429,19 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 
 	comm->joinSlaves();
 
+	//Ti[0] = duration_cast<milliseconds>(system_clock::now() - start).count();
+	//start = system_clock::now();
+
 	while ( ! (recvFinished & sendFinished) ){
 		sendFinished |= EDBKSendDataHashed(comm, sendPos, deleted, dataSize, recvData, dirty);
 		recvFinished |= EDBKRecvData(comm, sendPos, recvPos, deleted, recvData, dirty);
 	}
 
-	//Ti[0] = duration_cast<milliseconds>(system_clock::now() - start).count();
-	//start = system_clock::now();
-
-	//tryShrink = EDBKSendData(comm, dataSize);
-
-	//dirty = EDBKRecvData(comm, deleted, pos, tryShrink);
-
 	//Ti[1] = duration_cast<milliseconds>(system_clock::now() - start).count();
 	//start = system_clock::now();
 
-	EDBKShrinkData(deleted, recvPos, recvData,  dirty);
+	if (dirty)
+		EDBKShrinkData(deleted, recvPos, recvData);
 	//std::cerr << "        (new size: " << localData->getSize() << ")\n";
 	
 	// Clear Key location saved by last ByKey function
