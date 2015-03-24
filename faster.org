@@ -1,0 +1,8 @@
+* Faster - Super Fast Distributted Computing
+
+** Development
+*** TODO Input Parsing
+
+** Eperiments
+*** TODO Function type brackdoown vs number of machines
+

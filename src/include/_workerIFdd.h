@@ -41,8 +41,10 @@ namespace faster{
 
 			// Exchange Data By Key private functions
 			bool EDBKSendData(fastComm *comm, std::vector<size_t> & dataSize);
-			bool EDBKRecvData(fastComm *comm, std::vector<bool> & deleted, size_t & pos, bool tryShrink);
-			void EDBKShrinkData(std::vector<bool> & deleted, size_t pos, bool tryShrink);
+			bool EDBKSendDataHashed(fastComm *comm, size_t & pos, std::vector<bool> & deleted, std::vector<size_t> & dataSize, std::deque< std::pair<K,T> >  & recvData, bool & dirty);
+			bool EDBKRecvData(fastComm *comm, size_t & pos, size_t & posLimit, std::vector<bool> & deleted, std::deque< std::pair<K,T> >  & recvData, int & peersFinised, bool & dirty);
+			void EDBKFinishDataInsert(std::vector<bool> & deleted, std::deque< std::pair<K,T> >  & recvData, size_t & pos );
+			void EDBKShrinkData(std::vector<bool> & deleted, size_t & pos);
 
 			void findMyKeys(int numProcs, int Id);
 			void findMyKeysByHash(int numProcs);

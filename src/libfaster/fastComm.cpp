@@ -28,6 +28,7 @@ faster::fastComm::fastComm(int & argc, char **& argv){
 	req4 = new MPI_Request [numProcs];
 	buffer = new fastCommBuffer [numProcs];
 	bufferRecv = new fastCommBuffer [std::max(3, numProcs)];
+	bufferBusy.resize(numProcs);
 }
 
 faster::fastComm::~fastComm(){
@@ -51,9 +52,6 @@ void faster::fastComm::probeMsgs(int & tag, int & src){
 }
 
 void faster::fastComm::waitForReq(int numReqs){
-	for ( int i = 0; i < numProcs; i++){
-		bufferOcupied[i] = false;
-	}
 	MPI_Waitall(numReqs, req, status);
 }
 
@@ -384,7 +382,14 @@ void faster::fastComm::sendFileName(std::string path){
 	buffer[0] << path;
 
 	for (int dest = 1; dest < numProcs; ++dest){
-		MPI_Isend( buffer[0].data(), buffer[0].size(), MPI_BYTE, dest, MSG_FILENAME, MPI_COMM_WORLD, &req[dest-1]);
+		MPI_Isend( 
+				buffer[0].data(), 
+				buffer[0].size(), 
+				MPI_BYTE, 
+				dest, 
+				MSG_FILENAME, 
+				MPI_COMM_WORLD, 
+				&req[dest-1]);
 	}
 }
 
@@ -397,47 +402,78 @@ void faster::fastComm::recvFileName(std::string & path){
 	MPI_Get_count(&stat, MPI_BYTE, &msgSize);
 	bufferRecv[0].grow(msgSize);
 
-	MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_FILENAME, MPI_COMM_WORLD, &stat);	
+	MPI_Recv(
+			bufferRecv[0].data(), 
+			bufferRecv[0].free(), 
+			MPI_BYTE, 
+			0, 
+			MSG_FILENAME, 
+			MPI_COMM_WORLD, 
+			&stat);	
 	//buffer[0] >> id >> size >> offset >> filenameSize;
 	//buffer[0].read(filename, filenameSize);
 	bufferRecv[0] >> path;
 }
 
-
-
 bool faster::fastComm::isSendBufferFree(int i){
-	int savepoint = i - 1;
-	int flag;
+	if (bufferBusy[i]){
+		int savepoint = i - 1;
+		int flag;
 
-	if ( i > procId ){
-		savepoint -= 1;
-	}
+		if ( i > procId ){
+			savepoint -= 1;
+		}
 
-	// check if buffer has been freed
-	MPI_Test(req[savepoint], &flag, MPI_STATUS_IGNORE);
-	if (flag){
-		return true;
-	}else{
-		return false;
+		// check if buffer has been freed
+		MPI_Test(&req[savepoint], &flag, MPI_STATUS_IGNORE);
+		if (flag){
+			bufferBusy[i] = false;
+			return true;
+		}else{
+			bufferBusy[i] = true;
+			return false;
+		}
 	}
+	return true;
 }
+
 void faster::fastComm::sendGroupByKeyData(int i){
 	int savepoint = i - 1;
 	if ( i > procId ){
 		savepoint -= 1;
 	}
-	MPI_Isend( buffer[i].data(), buffer[i].size(), MPI_BYTE, i, MSG_GROUPBYKEYDATA, MPI_COMM_WORLD, &req[savepoint]);
+	MPI_Isend( 
+			buffer[i].data(), 
+			buffer[i].size(), 
+			MPI_BYTE, 
+			i, 
+			MSG_GROUPBYKEYDATA, 
+			MPI_COMM_WORLD, 
+			&req[savepoint]);
+	bufferBusy[i] = true;
 }
 
 void * faster::fastComm::recvGroupByKeyData(int & size){
-	void * data;
 	MPI_Status stat;
 	size = 0;
-	int flag;
+	int flag = 0;
+	void * data;
 	
-	MPI_Iprobe(MPI_ANY_SOURCE, MSG_GROUPBYKEYDATA, MPI_COMM_WORLD, &flag, &stat);
-	if (flag){
-		recvDataUltraPlus(MPI_ANY_SOURCE, data, size, MSG_GROUPBYKEYDATA, bufferRecv[0]);
+	MPI_Iprobe(
+			MPI_ANY_SOURCE, 
+			MSG_GROUPBYKEYDATA, 
+			MPI_COMM_WORLD, 
+			&flag, 
+			&stat
+			);
+	if (flag == true){
+		recvDataUltraPlus(
+				MPI_ANY_SOURCE, 
+				data, 
+				size, 
+				MSG_GROUPBYKEYDATA, 
+				bufferRecv[0]
+				);
 	}
 
 	return data;
@@ -447,7 +483,15 @@ void * faster::fastComm::recvGroupByKeyData(int & size){
 
 void faster::fastComm::sendCollect(unsigned long int id){
 	for (int i = 1; i < numProcs; ++i){
-		MPI_Isend( &id, sizeof(long unsigned int), MPI_BYTE, i, MSG_COLLECT, MPI_COMM_WORLD, &req[i-1]);
+		MPI_Isend( 
+				&id, 
+				sizeof(long unsigned int), 
+				MPI_BYTE, 
+				i, 
+				MSG_COLLECT, 
+				MPI_COMM_WORLD, 
+				&req[i-1]
+				);
 	}
 
 	MPI_Waitall( numProcs - 1, req, status);

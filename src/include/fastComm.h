@@ -133,6 +133,8 @@ namespace faster{
 		int procId;
 		double timeStart, timeEnd;
 
+		std::vector<bool> bufferBusy;
+
 		template <typename T>
 		void sendDataUltraPlus(int dest, T * data, size_t * lineSizes, size_t size, int tag, fastCommBuffer & b UNUSED, MPI_Request * request);
 		void sendDataUltraPlus(int dest, std::string * data, size_t * lineSizes, size_t size, int tag, fastCommBuffer & b UNUSED, MPI_Request * request);
@@ -153,7 +155,11 @@ namespace faster{
 		fastCommBuffer * buffer;
 		fastCommBuffer * bufferRecv;
 		fastCommBuffer resultBuffer;
+
 		public:
+
+		const size_t maxMsgSize = 1500;
+		//const size_t maxMsgSize = 3;
 
 		fastComm(int & argc, char **& argv);
 		~fastComm();
@@ -285,6 +291,7 @@ namespace faster{
 		template <typename K>
 		void recvCogroupData(unsigned long tid, std::unordered_map<K, int> & keyMap, std::vector<bool> & flags);
 
+		bool isSendBufferFree(int i);
 		void sendGroupByKeyData(int i);
 		void * recvGroupByKeyData(int &size);
 

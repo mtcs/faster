@@ -71,11 +71,19 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 		prLocation[prKeys[i]] = i;
 	}
 
-	#pragma omp parallel for schedule(dynamic, 500)
+	#pragma omp parallel for schedule(dynamic, 200)
+	//#pragma omp parallel for 
 	for ( size_t i = 0; i < numPresNodes; ++i){
 		double contrib = dumpingFactor * pr[prLocation[keys[i]]] / adjList[i].size();
 		for ( size_t j = 0; j < adjList[i].size(); ++j){
 			auto target = adjList[i][j];
+			/*if (target == 1){
+				cerr << "\033[0;36m" << keys[i]  << " PR:" << pr[prLocation[keys[i]]] << " D:(" << adjList[i].size() << ") S1 : "<< contrib ;
+				if ( present[target] ){
+					cerr << "[LOCAL]";
+				}
+				cerr << "\033[0m\n";
+			}// */
 
 			if ( present[target] ){
 				auto l = prLocation[target];
@@ -101,6 +109,8 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 	for ( size_t i = 0; i < numPresNodes; ++i){
 		errors[i] = newPR[i] - pr[i];
 		pr[i] = newPR[i];
+		//if ( prKeys[i] == 1 )
+			//cerr << "\033[0;36m" << " TPR:" << pr[i] << " D:(" << adjList[i].size() << ") S1 : " << newPR[i] << "\033[0m\n";
 	}
 
 	return msgList;
@@ -119,12 +129,12 @@ void getNewPR(int * prKeys, void * prVP, size_t npr, int * contKeys, void * cont
 		exit(11);
 	}
 	
-	//#pragma omp parallel for
+	#pragma omp parallel for
 	for ( size_t i = 0; i < npr; ++i ){
 		prLocation[prKeys[i]] = i;
 		//eLocation[eKeys[i]] = i;
 	}
-	//#pragma omp parallel for
+	#pragma omp parallel for
 	for ( size_t i = 0; i < numContribs; ++i){
 		auto target = contKeys[i];
 		size_t targetPrLoc = prLocation[target];
@@ -132,9 +142,11 @@ void getNewPR(int * prKeys, void * prVP, size_t npr, int * contKeys, void * cont
 
 		//#pragma omp atomic
 		newPr[targetPrLoc] += cont;
+		//if ( target == 1 )
+			//cerr << "[\033[0;36m1 R:" << cont << "\033[0m] \n";
 	}
 
-	//#pragma omp parallel for
+	#pragma omp parallel for
 	for ( size_t i = 0; i < npr; ++i ){
 		// Output PR error
 		error[i] = abs(error[i] + newPr[i]);
@@ -197,7 +209,9 @@ int main(int argc, char ** argv){
 	cerr << "  Read Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 
 	cerr << "Convert to Adjacency List\n";
-	auto structure = data->map<int, vector<int>>(&toAList)->cache();
+	auto structure = data->map<int, vector<int>>(&toAList)->groupByKey()->cache();
+	fc.updateInfo();
+
 	numNodes = structure->reduce(&maxNodeId).first + 1;
 	fc.updateInfo();
 	cerr << numNodes << " node Graph" << '\n';
@@ -222,6 +236,12 @@ int main(int argc, char ** argv){
 		error = errors->reduce(&maxError).second;
 		fc.updateInfo();
 		cerr << "  Error " << error << " time:" << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
+
+		//auto p = pr->collect();
+		//sort(p.begin(), p.end());
+		//for ( auto i = 0; i < 10 ; i++ ){
+			//fprintf(stderr, "\033[0;32m%d:%.8lf\033[0m\n", p[i].first, p[i].second);
+		//}
 	}
 	start2 = system_clock::now();
 
