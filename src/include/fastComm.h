@@ -153,7 +153,10 @@ namespace faster{
 		fastCommBuffer * buffer;
 		fastCommBuffer * bufferRecv;
 		fastCommBuffer resultBuffer;
+
 		public:
+
+		const size_t maxMsgSize = 32*1024;
 
 		fastComm(int & argc, char **& argv);
 		~fastComm();
@@ -285,6 +288,7 @@ namespace faster{
 		template <typename K>
 		void recvCogroupData(unsigned long tid, std::unordered_map<K, int> & keyMap, std::vector<bool> & flags);
 
+		bool isSendBufferFree(int i);
 		void sendGroupByKeyData(int i);
 		void * recvGroupByKeyData(int &size);
 

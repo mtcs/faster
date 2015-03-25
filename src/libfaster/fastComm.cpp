@@ -51,9 +51,6 @@ void faster::fastComm::probeMsgs(int & tag, int & src){
 }
 
 void faster::fastComm::waitForReq(int numReqs){
-	for ( int i = 0; i < numProcs; i++){
-		bufferOcupied[i] = false;
-	}
 	MPI_Waitall(numReqs, req, status);
 }
 
@@ -403,8 +400,6 @@ void faster::fastComm::recvFileName(std::string & path){
 	bufferRecv[0] >> path;
 }
 
-
-
 bool faster::fastComm::isSendBufferFree(int i){
 	int savepoint = i - 1;
 	int flag;
@@ -414,13 +409,14 @@ bool faster::fastComm::isSendBufferFree(int i){
 	}
 
 	// check if buffer has been freed
-	MPI_Test(req[savepoint], &flag, MPI_STATUS_IGNORE);
+	MPI_Test(&req[savepoint], &flag, MPI_STATUS_IGNORE);
 	if (flag){
 		return true;
 	}else{
 		return false;
 	}
 }
+
 void faster::fastComm::sendGroupByKeyData(int i){
 	int savepoint = i - 1;
 	if ( i > procId ){

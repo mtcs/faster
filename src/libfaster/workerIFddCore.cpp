@@ -158,7 +158,8 @@ bool faster::workerIFddCore<K,T>::EDBKRecvData(
 		size_t & posLimit, 
 		std::vector<bool> & deleted, 
 		std::deque< std::pair<K,T> >  & recvData,
-		bool dirty
+		int & peersFinised, 
+		bool & dirty
 		){
 	K * keys = localData->getKeys();
 	T * data = localData->getData();
@@ -206,7 +207,7 @@ bool faster::workerIFddCore<K,T>::EDBKRecvData(
 		if (msgContinued == 0){
 			peersFinised++;
 		}
-		if (peersFinised >= (comm->numProcs - 1){
+		if (peersFinised >= (comm->getNumProcs() - 1)){
 			finished = true;
 		}
 	}
@@ -214,7 +215,7 @@ bool faster::workerIFddCore<K,T>::EDBKRecvData(
 	return finished;
 }
 template <typename K, typename T>
-void faster::workerIFddCore<K,T>::EDBKShrinkData(std::vector<bool> & deleted, size_t pos, bool tryShrink ){
+void faster::workerIFddCore<K,T>::EDBKShrinkData(std::vector<bool> & deleted, size_t & pos ){
 	K * keys = localData->getKeys();
 	T * data = localData->getData();
 
@@ -222,7 +223,7 @@ void faster::workerIFddCore<K,T>::EDBKShrinkData(std::vector<bool> & deleted, si
 	//start = system_clock::now();
 
 	// If there are elements that are still sparse in the memory
-	if ( tryShrink && ( pos < deleted.size() ) ){
+	if ( pos < deleted.size() ){
 		//std::cerr << "        [ Shrink: (" << pos << "," << deleted.size() << " ";
 		// Bring them forward and correct size
 		for (size_t i = (pos); i < localData->getSize(); ++i){
@@ -242,8 +243,39 @@ void faster::workerIFddCore<K,T>::EDBKShrinkData(std::vector<bool> & deleted, si
 	}
 
 }
+
 template <typename K, typename T>
-void faster::workerIFddCore<K,T>::exchangeDataByKeyMapped(fastComm *comm){
+void faster::workerIFddCore<K,T>::EDBKFinishDataInsert(std::vector<bool> & deleted, std::deque< std::pair<K,T> >  & recvData, size_t & pos ){
+	K * keys = localData->getKeys();
+	T * data = localData->getData();
+	size_t size = localData->getSize();
+
+	if ( recvData.size() > 0 ){
+		while ( pos < size ) {
+			if ( deleted[pos] ){
+				auto item = recvData.front();
+				keys[pos] = std::move(item.first);
+				data[pos] = std::move(item.second);
+				recvData.pop_front();
+			}
+			pos++;
+		}
+		localData->setSize(localData->getSize() + recvData.size());
+		data = localData->getData();
+		keys = localData->getKeys();
+
+		for (auto it = recvData.begin(); it != recvData.end(); it++){
+			keys[pos] = std::move(it->first);
+			data[pos] = std::move(it->second);
+			pos++;
+		}
+	}
+	recvData.clear();
+}
+
+template <typename K, typename T>
+void faster::workerIFddCore<K,T>::exchangeDataByKeyMapped(fastComm *comm UNUSED){
+	/*
 	//using std::chrono::system_clock;
 	//using std::chrono::duration_cast;
 	//using std::chrono::milliseconds;
@@ -251,10 +283,10 @@ void faster::workerIFddCore<K,T>::exchangeDataByKeyMapped(fastComm *comm){
 	//int Ti[5];
 	//auto start = system_clock::now();
 	//std::cerr << "    \033[0;33mExchange Data By Key\033[0m\n";
-	K * keys = localData->getKeys();
-	T * data = localData->getData();
+	//K * keys = localData->getKeys();
+	//T * data = localData->getData();
 	size_t size = localData->getSize();
-	fastCommBuffer * buffer = comm->getSendBuffers();
+	//fastCommBuffer * buffer = comm->getSendBuffers();
 	std::vector<size_t> dataSize(comm->getNumProcs(), 0);
 	std::vector<bool> deleted(size, false);
 	size_t pos;
@@ -268,7 +300,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKeyMapped(fastComm *comm){
 
 	//std::cerr << comm->getProcId() << "        Write Buffers";
 	// Reserve space in the message for the header
-	for ( int i = 1; i < (comm->getNumProcs()); ++i){
+	/*for ( int i = 1; i < (comm->getNumProcs()); ++i){
 		if (i == comm->getProcId())
 			continue;
 		buffer[i].reset();
@@ -296,21 +328,21 @@ void faster::workerIFddCore<K,T>::exchangeDataByKeyMapped(fastComm *comm){
 		//std::cerr << ":" << i;
 		//std::cerr << i << ":" << key << ">" << owner << "  ";
 		//std::cerr << i << ":" << (size_t) data[i] << " ";
-	}
+	}// * /
 
 	//std::cerr << " - ";
 
 
-	comm->joinSlaves();
+	//omm->joinSlaves();
 
 	// Send Data
-	tryShrink = EDBKSendData(comm, dataSize);
+	//ryShrink = EDBKSendData(comm, dataSize);
 
 	// Recv Data
-	dirty = EDBKRecvData(comm, deleted, pos, tryShrink);
+	//dirty = EDBKRecvData(comm, deleted, pos, tryShrink);
 
 	// Fit data do memmory
-	EDBKShrinkData(deleted, pos, tryShrink);
+	//EDBKShrinkData(deleted, pos);
 	//std::cerr << "        (new size: " << localData->getSize() << ")\n";
 	
 	// Clear Key location saved by last ByKey function
@@ -323,47 +355,59 @@ void faster::workerIFddCore<K,T>::exchangeDataByKeyMapped(fastComm *comm){
 	//Ti[3] = duration_cast<milliseconds>(system_clock::now() - start).count();
 	//std::cerr << " TIn:" << Ti[0] << " TSn:" << Ti[1] << " TRv:" <<  Ti[2] << " TSh:" << Ti[3] << "\n";
 
+	// */
 }
 
 template <typename K, typename T>
 bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 		fastComm *comm, 
 		size_t & pos, 
+		std::vector<bool> & deleted,
 		std::vector<size_t> & dataSize, 
-		std::deque< std::pair<K,T> >  & recvData) {
+		std::deque< std::pair<K,T> >  & recvData,
+		bool & dirty) {
 
 	K * keys = localData->getKeys();
 	T * data = localData->getData();
-	fastCommBuffer * buffer = comm->getSendBuffers();
 	size_t size = localData->getSize();
+	fastCommBuffer * buffer = comm->getSendBuffers();
+	hasher<K> hash(comm->getNumProcs() - 1);
 
 	// Insert Data that dont belong to me in the message
 	while ( pos < size){
 		K & key = keys[pos];
-
 		int owner = 1 + hash.get(key);
 		
+		// If it is my item dont send it
 		if (owner == comm->getProcId()){
 			pos++;
 			continue;
 		}
+
 		if ( comm->isSendBufferFree(owner) ){
-			if ( dataSize[owner] >= comm->maxMsgSize){
+			// Check to see if we reached the maximum message size;
+			if ( dataSize[owner] >= comm->maxMsgSize ){
 				//Send partial data
 				buffer[owner].writePos(dataSize[owner], 0);
 				buffer[owner] << char(0);
-				comm->sendGroupByKeyData(owner, false);
+				comm->sendGroupByKeyData(owner);
 				dataSize[owner] = 0;
+				return false;
+			}
+			// If it is the beginin of the message save space for the msg size
+			if ( dataSize[owner] == 0 ){
+				buffer[owner].reset();
+				buffer[owner].advance(sizeof(size_t));
 			}
 			// Insert data Into buffer
 			buffer[owner] << key <<  data[pos];
 			dataSize[owner]++;
+			dirty = true;
 
 			if (recvData.size() > 0){
 				// Insert data into vacant space
-				auto & item = recvData.front();
-				keys[pos] = std::move(recvData.front()->first);
-				data[pos] = std::move(recvData.front()->second);
+				keys[pos] = std::move(recvData.front().first);
+				data[pos] = std::move(recvData.front().second);
 				recvData.pop_front();
 			}else{
 				// Just delete item;
@@ -374,11 +418,14 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 			return false;
 		}
 	}
+
+	// Wait for all buffers to be freed
 	for ( int owner = 1; owner < comm->getNumProcs(); owner++){
-		if ( ! comm->sendBufferFree(owner) ){
+		if ( ! comm->isSendBufferFree(owner) ){
 			return false;
 		}
 	}
+
 	// Send last pice of data
 	for ( int owner = 1; owner < comm->getNumProcs(); owner++){
 		if ( owner == comm->getProcId() ){
@@ -386,8 +433,9 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 		}
 		buffer[owner].writePos(dataSize[owner], 0);
 		buffer[owner] << char(1);
-		comm->sendGroupByKeyData(owner, true);
+		comm->sendGroupByKeyData(owner);
 	}
+
 	return true;
 }
 
@@ -400,34 +448,16 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 	//int Ti[5];
 	//auto start = system_clock::now();
 	//std::cerr << "    \033[0;33mExchange Data By Key\033[0m\n";
+	size_t size = localData->getSize();
 	std::vector<bool> deleted(size, false);
 	std::deque< std::pair<K,T> > recvData;
-	std::vector<size_t> dataSize, 
+	std::vector<size_t> dataSize;
 	size_t sendPos = 0; 
 	size_t recvPos = 0;
 	bool dirty = false;
 	bool sendFinished = false;
 	bool recvFinished = false;
 	int peersFinised = 0;
-
-
-	hasher<K> hash(comm->getNumProcs() - 1);
-
-	
-	//std::cerr << comm->getProcId() << "        Write Buffers";
-	// Reserve space in the message for the header
-	for ( int i = 1; i < (comm->getNumProcs()); ++i){
-		if (i == comm->getProcId())
-			continue;
-		buffer[i].reset();
-		buffer[i].advance(sizeof(size_t));
-		//buffer[i].advance(1);
-	}
-	//std::cerr << "\n";
-
-	//std::cerr << comm->getProcId() << "        [ ";
-
-	//std::cerr << " - ";
 
 
 	comm->joinSlaves();
@@ -437,14 +467,16 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 
 	while ( ! (recvFinished & sendFinished) ){
 		sendFinished |= EDBKSendDataHashed(comm, sendPos, deleted, dataSize, recvData, dirty);
-		recvFinished |= EDBKRecvData(comm, sendPos, recvPos, deleted, recvData, dirty, peersFinised);
+		recvFinished |= EDBKRecvData(comm, sendPos, recvPos, deleted, recvData, peersFinised, dirty);
 	}
 
 	//Ti[1] = duration_cast<milliseconds>(system_clock::now() - start).count();
 	//start = system_clock::now();
+	
+	EDBKFinishDataInsert(deleted, recvData, recvPos);
 
 	if (dirty)
-		EDBKShrinkData(deleted, recvPos, recvData);
+		EDBKShrinkData(deleted, recvPos);
 	//std::cerr << "        (new size: " << localData->getSize() << ")\n";
 	
 	// Clear Key location saved by last ByKey function
