@@ -50,8 +50,9 @@ namespace faster{
 	#define OP_Reduce		0x0201
 	#define OP_BulkReduce		0x0202
 	#define OP_GENERICUPDATE	0x0400
-	#define OP_UpdateByKey		0x0401
-	#define OP_BulkUpdate		0x0402
+	#define OP_Update		0x0401
+	#define OP_UpdateByKey		0x0402
+	#define OP_BulkUpdate		0x0404
 	#define OP_GENERICMISC		0x0800
 	#define OP_CountByKey		0x0801
 	#define OP_GroupByKey		0x0802

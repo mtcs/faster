@@ -67,7 +67,8 @@ namespace faster{
 			std::unordered_map<K, int> calculateKeyMap(std::unordered_map<K, std::tuple<size_t, int, size_t>> & count);
 
 			// -------------- Core FDD Functions --------------- //
-			fddBase * _map( void * funcP, fddOpType op, fddBase * newFdd, system_clock::time_point & start);
+			void update(void * funcP, fddOpType op);
+			fddBase * _map(void * funcP, fddOpType op, fddBase * newFdd, system_clock::time_point & start);
 			template <typename U> 
 			fdd<U> * map( void * funcP, fddOpType op);
 			template <typename L, typename U> 
@@ -156,7 +157,11 @@ namespace faster{
 
 			// -------------- FDD Functions --------------- //
 
-			// -------------------- Map ------------------- //
+			//  Update
+			indexedFdd<K,T> * update(updateIFunctionP<K,T> funcP){
+				iFddCore<K,T>::_update((void*) funcP, OP_Update);
+				return this;
+			}
 			// Map
 			template <typename L, typename U> 
 			indexedFdd<L,U> * map( ImapIFunctionP<K,T,L,U> funcP ){
@@ -432,6 +437,27 @@ namespace faster{
 
 	};
 
+
+	template <typename K, typename T> 
+	void iFddCore<K,T>::update( void * funcP, fddOpType op){
+		//std::cerr << "  Map ";
+		unsigned long int tid, sid;
+		auto start = system_clock::now();
+
+		// Decode function pointer
+		int funcId = context->findFunc(funcP);
+
+		// Send task
+		context->enqueueTask(op, id, 0, funcId, this->size);
+
+		// Receive results
+		auto result = context->recvTaskResult(tid, sid, start);
+
+		if (!cached)
+			this->discard();
+
+		//std::cerr << "\n";
+	}
 
 	template <typename K, typename T> 
 	fddBase * iFddCore<K,T>::_map( void * funcP, fddOpType op, fddBase * newFdd, system_clock::time_point & start){
