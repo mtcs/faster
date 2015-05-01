@@ -68,23 +68,26 @@ std::pair<K,T>  faster::_workerIFdd<K,T>::bulkReduce (IbulkReduceIFunctionP<K,T>
 
 template <typename K, typename T>
 void faster::_workerIFdd<K,T>::applyIndependent(void * func, fddOpType op, fastCommBuffer & buffer){ 
-	std::pair<K,T> r;
+	char rc;
+	std::pair<K,T> rp;
 
 	switch (op){
 		case OP_Update:
-			r = update( ( updateIFunctionP<K,T> ) func );
+			rc = update( ( updateIFunctionP<K,T> ) func );
+			buffer << rc;
 			break;
 		case OP_Reduce:
 			//std::cerr << "        Reduce IFDD\n";
-			r = reduce( ( IreduceIFunctionP<K,T> ) func );
+			rp = reduce( ( IreduceIFunctionP<K,T> ) func );
+			buffer << rp;
 			break;
 		case OP_BulkReduce:
 			//std::cerr << "        BulkReduce IFDD\n";
-			r = bulkReduce( ( IbulkReduceIFunctionP<K,T> ) func );
+			rp = bulkReduce( ( IbulkReduceIFunctionP<K,T> ) func );
+			buffer << rp;
 			break;
 	}
 
-	buffer << r;
 }
 
 
