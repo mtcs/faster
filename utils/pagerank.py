@@ -30,7 +30,7 @@ for node, neighbs in G.items():
 
 iteration = 0
 while ( iteration < 10) :
-    print ( "Iteration:", iteration, file = sys.stderr, end = "\n")
+    print ( "Iteration:", iteration, file = sys.stderr, end = " ")
     iteration += 1
 
     for node in G.keys(): 
@@ -52,9 +52,10 @@ while ( iteration < 10) :
 
     if ( verbose ) :
         for node in sorted(G.keys()): 
-            #print ( "{}:{:.8f}  ".format(node, pr[node]), file = sys.stderr )
-            print ( "{:.2f}".format(pr[node]), file = sys.stderr , end = ' ')
+            #print ( "{}:{:.5f}  ".format(node, pr[node]), file = sys.stderr, end = '')
+            print ( "{:.5f}  ".format(pr[node]), file = sys.stderr, end = '')
+            #print ( "{:.2f}".format(pr[node]), file = sys.stderr , end = ' ')
 
 
 for node in sorted(G.keys()): 
-    print ("{} {}".format(node, pr[node]))
+    print ("{} {:.16f}".format(node, pr[node]))

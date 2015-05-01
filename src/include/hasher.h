@@ -11,6 +11,7 @@ namespace faster{
 			}
 			int get ( K key ){
 				return key % _spectrum;
+				//return ( key >> 6 ) % _spectrum;
 			}
 
 	};

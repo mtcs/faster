@@ -20,6 +20,7 @@ pair<int,vector<int>> toAList(string & input){
 	stringstream ss(input);
 	vector<int> edges;
 	int key;
+	int edge;
 
 	
 	int numTokens = 0;
@@ -34,10 +35,7 @@ pair<int,vector<int>> toAList(string & input){
 
 	ss >> key;
 
-	while(ss){
-		int edge;
-
-		ss >> edge;
+	while(ss >> edge){
 		edges.insert(edges.end(), edge);
 	}
 
@@ -56,6 +54,8 @@ deque<pair<int, double>> givePageRank(const int & key UNUSED, vector<void *> & s
 
 
 	for ( size_t i = 0; i < s.size(); ++i){
+		//if (s[i] == 1)
+			//cerr << "\033[0;36m" << key << " PR:" << pr << " D:(" << s.size()<< ") S1 : "<< contrib << "\033[0m\n";
 		msgList.push_back(make_pair(s[i], contrib));
 	}
 	
@@ -80,12 +80,18 @@ double getNewPR(const int & key UNUSED, vector<void *> & prL, vector<void *> & c
 	double oldPR = pr;
 	double sum = 0;
 
+	//if ( key == 1 )
+		//cerr << "\n[\033[0;36m1 R:\033[0m";
 	for( auto it = contribL.begin(); it != contribL.end(); it++){
 		double contrib = *(double*) *it;
 		sum += contrib;
+		//if ( key == 1 )
+			//cerr<< "\033[0;36m"  << contrib << "\033[0m ";
 	}
 	//pr = (1 - dumpingFactor) + dumpingFactor * sum;
 	pr = sum + ( (1.0 - dumpingFactor) / numNodes );
+	//if ( key == 1 )
+		//cerr << "]\n";
 
 	return abs(oldPR - pr);
 }
@@ -111,6 +117,7 @@ double maxError( double & a, double & b){
 
 int main(int argc, char ** argv){
 	// Init Faster Framework
+	cerr << "------------ K-MEANS -------------";
 
 	auto start = system_clock::now();
 
@@ -141,7 +148,7 @@ int main(int argc, char ** argv){
 	cerr << "  Read Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 
 	cerr << "Convert to Adjacency List\n";
-	auto structure = data->map<int, vector<int>>(&toAList)->cache();
+	auto structure = data->map<int, vector<int>>(&toAList)->groupByKey()->cache();
 	fc.updateInfo();
 
 	//numNodes = structure->getSize();
@@ -172,6 +179,12 @@ int main(int argc, char ** argv){
 		error = pr->cogroup(combContribs)->mapByKey(&getNewPR)->reduce(&maxError);
 		fc.updateInfo();
 		cerr << "  Error " << error << " time:" << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
+
+		//auto p = pr->collect();
+		//sort(p.begin(), p.end());
+		//for ( auto i = 0; i < 10 ; i++ ){
+			//fprintf(stderr, "\033[0;32m%d:%.8lf\033[0m\n", p[i].first, p[i].second);
+		//}
 	}
 	start2 = system_clock::now();
 

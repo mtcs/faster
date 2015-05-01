@@ -133,6 +133,8 @@ namespace faster{
 		int procId;
 		double timeStart, timeEnd;
 
+		std::vector<bool> bufferBusy;
+
 		template <typename T>
 		void sendDataUltraPlus(int dest, T * data, size_t * lineSizes, size_t size, int tag, fastCommBuffer & b UNUSED, MPI_Request * request);
 		void sendDataUltraPlus(int dest, std::string * data, size_t * lineSizes, size_t size, int tag, fastCommBuffer & b UNUSED, MPI_Request * request);
@@ -156,7 +158,8 @@ namespace faster{
 
 		public:
 
-		const size_t maxMsgSize = 32*1024;
+		const size_t maxMsgSize = 1500;
+		//const size_t maxMsgSize = 3;
 
 		fastComm(int & argc, char **& argv);
 		~fastComm();

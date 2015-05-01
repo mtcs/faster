@@ -207,8 +207,12 @@ namespace faster{
 	using PbulkReducePFunctionP = std::pair<T *, size_t> (*) (T ** input, size_t * inputDataSizes, size_t size);
 
 	// --------------- Indexed FDDs -------------- //
-	// FDD function pointer types
-	// TODO CHANGE THIS BELOW!
+	// IFDD function pointer types
+	template <typename K, typename T>
+	using updateIFunctionP = void (*) (K & inKey, T & input);
+	template <typename K, typename T>
+	using updateByKeyIFunctionP = void (*) (K & inKey, std::vector<T *> & input);
+	
 	template <typename K, typename T, typename L, typename U>
 	using ImapIFunctionP = std::pair<L,U> (*) (const K & inKey, T & input);
 	template <typename K, typename T, typename U>

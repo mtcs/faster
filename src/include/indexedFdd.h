@@ -636,7 +636,6 @@ namespace faster{
 	template <typename K, typename T> 
 	indexedFdd<K,T> * iFddCore<K,T>::groupByKeyMapped(){
 		unsigned long int tid, sid;
-		std::vector<size_t> alloc(context->numProcs(), 0);
 
 		if (! groupedByKey){
 			using std::chrono::system_clock;
@@ -669,12 +668,16 @@ namespace faster{
 			keyMap.clear();
 			std::cerr << " snd.KeyMap:" << duration_cast<milliseconds>(system_clock::now() - start2).count();
 
+			dataAlloc.resize(context->numProcs());
 			result = context->recvTaskResult(tid, sid, start);
+			size_t newSize = 0;
 			for (int i = 1; i < context->numProcs(); ++i){
 				if (result[i].second > 0){
-					alloc[i] = * (size_t*) result[i].first; 
+					dataAlloc[i] = * (size_t*) result[i].first; 
+					newSize += dataAlloc[i];
 				}
 			}
+			size = newSize;
 			groupedByKey = true;
 		}
 		//std::cerr << ". ";
@@ -683,7 +686,6 @@ namespace faster{
 	template <typename K, typename T> 
 	indexedFdd<K,T> * iFddCore<K,T>::groupByKeyHashed(){
 		unsigned long int tid, sid;
-		std::vector<size_t> alloc(context->numProcs(), 0);
 
 		if (! groupedByKey){
 			auto start = system_clock::now();
@@ -694,11 +696,15 @@ namespace faster{
 			tid = context->enqueueTask(OP_GroupByKeyH, id, this->size);
 
 			auto result = context->recvTaskResult(tid, sid, start);
+			size_t newSize = 0;
+			dataAlloc.resize(context->numProcs());
 			for (int i = 1; i < context->numProcs(); ++i){
 				if (result[i].second > 0){
-					alloc[i] = * (size_t*) result[i].first; 
+					dataAlloc[i] = * (size_t*) result[i].first; 
+					newSize += dataAlloc[i];
 				}
 			}
+			size = newSize;
 			groupedByKey = true;
 		}
 		//std::cerr << ". ";
