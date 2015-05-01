@@ -6,9 +6,24 @@
 #include "fastComm.h"
 #include "_workerIFdd.h"
 
+// UPDATE
+template <typename K, typename T>
+char faster::_workerIFdd<K,T>::update(updateIFunctionP<K,T> updateFunc){
+	T * d = this->localData->getData();
+	K * k = this->localData->getKeys();
+	size_t s = this->localData->getSize();
+	char ret = 0;
+
+	#pragma omp parallel for 
+	for ( size_t i = 0; i < s; ++i){
+		updateFunc(k[i], d[i]);
+	}
+	return ret;
+}
+
 // REDUCE
 template <typename K, typename T>
-std::pair<K,T> faster::_workerIFdd<K,T>::reduce (IreduceIFunctionP<K,T> reduceFunc){
+std::pair<K,T> faster::_workerIFdd<K,T>::reduce(IreduceIFunctionP<K,T> reduceFunc){
 	T * d = this->localData->getData();
 	std::pair<K,T> result;
 	size_t s = this->localData->getSize();
@@ -56,13 +71,16 @@ void faster::_workerIFdd<K,T>::applyIndependent(void * func, fddOpType op, fastC
 	std::pair<K,T> r;
 
 	switch (op){
+		case OP_Update:
+			r = update( ( updateIFunctionP<K,T> ) func );
+			break;
 		case OP_Reduce:
 			//std::cerr << "        Reduce IFDD\n";
-			r = reduce( ( IreduceIFunctionP<K,T> ) func);
+			r = reduce( ( IreduceIFunctionP<K,T> ) func );
 			break;
 		case OP_BulkReduce:
 			//std::cerr << "        BulkReduce IFDD\n";
-			r = bulkReduce( ( IbulkReduceIFunctionP<K,T> ) func);
+			r = bulkReduce( ( IbulkReduceIFunctionP<K,T> ) func );
 			break;
 	}
 

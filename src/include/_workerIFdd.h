@@ -174,6 +174,9 @@ namespace faster{
 			void bulkFlatMap(workerFddBase * dest,  PbulkFlatMapIFunctionP<K,T,U> bulkFlatMapFunc );
 
 
+			// Out put independent 
+			// UPDATE
+			char update (updateIFunctionP<K,T> reduceFunc);
 			// REDUCE
 			std::pair<K,T> reduce (IreduceIFunctionP<K,T> reduceFunc);
 			std::pair<K,T> bulkReduce (IbulkReduceIFunctionP<K,T> bulkReduceFunc);
