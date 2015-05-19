@@ -159,7 +159,7 @@ namespace faster{
 
 			//  Update
 			indexedFdd<K,T> * update(updateIFunctionP<K,T> funcP){
-				iFddCore<K,T>::_update((void*) funcP, OP_Update);
+				iFddCore<K,T>::update((void*) funcP, OP_Update);
 				return this;
 			}
 			// Map
@@ -715,7 +715,7 @@ namespace faster{
 
 		if (! groupedByKey){
 			auto start = system_clock::now();
-			//std::cerr << "  GroupByKeyHashed ";
+			std::cerr << "  GroupByKeyHashed ";
 
 		
 			// Migrate data according to key ownership
@@ -728,6 +728,7 @@ namespace faster{
 				if (result[i].second > 0){
 					dataAlloc[i] = * (size_t*) result[i].first; 
 					newSize += dataAlloc[i];
+					//std::cerr << dataAlloc[i] << " ";
 				}
 			}
 			size = newSize;

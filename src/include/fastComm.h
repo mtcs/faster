@@ -158,7 +158,7 @@ namespace faster{
 
 		public:
 
-		const size_t maxMsgSize = 1500;
+		const size_t maxMsgSize = 15000;
 		//const size_t maxMsgSize = 3;
 
 		fastComm(int & argc, char **& argv);

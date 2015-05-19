@@ -209,8 +209,11 @@ int main(int argc, char ** argv){
 	cerr << "  Read Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 
 	cerr << "Convert to Adjacency List\n";
-	auto structure = data->map<int, vector<int>>(&toAList)->groupByKey()->cache();
+	auto structure = data->map<int, vector<int>>(&toAList);
+	cerr << "GBK\n";
+	structure->groupByKey()->cache();
 	fc.updateInfo();
+	cerr << "REDUCE\n";
 
 	numNodes = structure->reduce(&maxNodeId).first + 1;
 	fc.updateInfo();

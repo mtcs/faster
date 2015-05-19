@@ -9,12 +9,12 @@ using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 
 const int numCentroids = 10;
-vector< vector<int> > globalCentroids;
+vector< vector<float> > globalCentroids;
 
-pair<int,vector<int>> toVector(string & input){
+pair<int,vector<float>> toVector(string & input){
 	
 	stringstream ss(input);
-	vector<int> position(2);
+	vector<float> position(2);
 	//int key;
 	int val;
 
@@ -27,13 +27,13 @@ pair<int,vector<int>> toVector(string & input){
 	return make_pair(0, move(position));
 }// */
 
-int vecDistance(vector<int> &a, vector<int> &b){
+float vecDistance(vector<float> &a, vector<float> &b){
 	int dx = a[0] - b[0];
 	int dy = a[1] - b[1];
 	return sqrt(dx*dx + dy*dy);
 }
 
-void updateCentroidAssignment(int & key, std::vector<int> & input){
+void updateCentroidAssignment(int & key, std::vector<float> & input){
 	int closer = 0;
 	float minDistance = vecDistance(input, globalCentroids[0]);
 	for ( int i = 1; i < numCentroids; i++ ){
@@ -47,17 +47,17 @@ void updateCentroidAssignment(int & key, std::vector<int> & input){
 }
 
 void updateCentroids(const int & key UNUSED, std::vector<void*> & items, std::vector<void*> & centroidPosP, std::vector<void*> & errorP){
-	vector<int> * centroidPos  = (vector<int> *) centroidPosP[0];
-	int * error = (int *) errorP[0];
+	vector<float> * centroidPos  = (vector<float> *) centroidPosP[0];
+	float * error = (float *) errorP[0];
 
-	int sumX = 0;
-	int sumY = 0;
+	float sumX = 0;
+	float sumY = 0;
 	for (size_t i = 0; i < items.size(); i++){
-		vector<int> * item = (vector<int> *) items[i];
+		vector<float> * item = (vector<float> *) items[i];
 		sumX += (*item)[0];
 		sumY += (*item)[1];
 	}
-	vector<int> newPos (2);
+	vector<float> newPos (2);
 	newPos[0] = sumX / items.size();
 	newPos[0] = sumY / items.size();
 	*error = vecDistance( *centroidPos, newPos);
@@ -73,8 +73,6 @@ int main(int argc, char ** argv){
 	globalCentroids.resize(numCentroids);
 
 	// Init Faster Framework
-	cerr << "------------ K-MEANS -------------";
-
 	auto start = system_clock::now();
 
 	fastContext fc(argc, argv);
@@ -86,6 +84,8 @@ int main(int argc, char ** argv){
 	fc.registerGlobal(&globalCentroids);
 	fc.startWorkers();
 
+	cerr << "------------ K-MEANS -------------";
+
 	fc.printHeader();
 	cerr << "Init Time: " << duration_cast<milliseconds>(system_clock::now() - start).count() << "ms\n";
 
@@ -96,14 +96,14 @@ int main(int argc, char ** argv){
 	cerr << "  Read Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 
 	cerr << "Convert to Adjacency List\n";
-	auto data = strdata->map<int, vector<int>>(&toVector)->cache();
+	auto data = strdata->map(&toVector)->cache();
 	fc.updateInfo();
 	numItems = data->getSize();
 	cerr << numItems << " items" << '\n';
 
 	cerr << "Init K-Means\n";
-	vector<int> initialCentroidKeys;
-	vector<vector<int>> initialCentroidPositions;
+	vector<int> initialCentroidKeys(numCentroids);
+	vector<vector<float>> initialCentroidPositions(numCentroids);
 	for ( int i = 0; i < numCentroids; i++ ){
 		initialCentroidKeys[i] = i;
 		initialCentroidPositions[i].resize(2);
@@ -111,11 +111,15 @@ int main(int argc, char ** argv){
 		initialCentroidPositions[i][1] = i / (numCentroids/3) ;
 	}
 
-	auto centroids = new indexedFdd<int, vector<int>> (fc, initialCentroidKeys.data(), initialCentroidPositions.data(), numCentroids);
-	auto errors = new indexedFdd<int, float>(fc,numCentroids);
+	cerr << "Init K-Means Step2\n";
+	auto centroids = new indexedFdd<int, vector<float>> (fc, initialCentroidKeys.data(), initialCentroidPositions.data(), numCentroids);
+	cerr << "Init K-Means Step3\n";
+	auto errors = new indexedFdd<int, float>(fc, numCentroids);
 
 	// Figue out where
+	cerr << "Init K-Means Step4\n";
 	data->update(&updateCentroidAssignment);
+	cerr << "Init K-Means Step5\n";
 	auto iterationData = data->cogroup(centroids, errors);
 	double error = 1000;
 	fc.updateInfo();

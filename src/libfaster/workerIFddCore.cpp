@@ -159,7 +159,7 @@ bool faster::workerIFddCore<K,T>::EDBKRecvData(
 		size_t & posLimit, 
 		std::vector<bool> & deleted, 
 		std::deque< std::pair<K,T> >  & recvData,
-		int & peersFinised, 
+		int & peersFinished, 
 		bool & dirty
 		){
 	K * keys = localData->getKeys();
@@ -170,8 +170,8 @@ bool faster::workerIFddCore<K,T>::EDBKRecvData(
 	fastCommBuffer rb(0);
 	char msgContinued = 0;
 
-	if (peersFinised >= (comm->getNumProcs() - 2)){
-		//std::cerr << "\033[0;31mRECV FINISHED\033[0m\n"; 
+	if (peersFinished >= (comm->getNumProcs() - 2)){
+		//std::cerr << "\033[0;31mRECV FINISHED \033[0m"; 
 		return true;
 	}
 
@@ -214,8 +214,8 @@ bool faster::workerIFddCore<K,T>::EDBKRecvData(
 		// Check for continuation
 		rb >> msgContinued;
 		if (msgContinued == 0){
-			peersFinised++;
-			//std::cerr << " \033[0;31m F:" <<  peersFinised << "\033[0m \n";
+			peersFinished++;
+			//std::cerr << " \033[0;31m F:" <<  peersFinished << "\033[0m";
 		}
 	}
 	return false;
@@ -451,7 +451,7 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 		pos++;
 
 		// Check to see if we reached the maximum message size
-		if ( dataSize[owner] >= comm->maxMsgSize ){
+		if ( buffer[owner].size() >= comm->maxMsgSize ){
 			//std::cerr << "S" << owner << "("<< dataSize[owner] << "," << buffer[owner].size()  << ") "; 
 			//Send partial data
 			buffer[owner] << char(1);
@@ -467,14 +467,16 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 
 	// Wait for all buffers to be freed
 	for ( int owner = 1; owner < comm->getNumProcs(); owner++){
-		if ( dataSize[owner] > 0){
-			if ( ! comm->isSendBufferFree(owner) ){
-				return false;
-			}
+		if ( owner == comm->getProcId() ) {
+				continue;
+		}
+		if ( ! comm->isSendBufferFree(owner) ){
+			return false;
 		}
 	}
 
 
+	//std::cerr << "\033[0;31mSF\033[0m "; 
 	// Send last pice of data
 	for ( int owner = 1; owner < comm->getNumProcs(); owner++){
 		if ( owner == comm->getProcId() ) {
@@ -492,7 +494,7 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 		//	fprintf(stderr, "%02x ", ((char*) buffer[owner].data())[i]);
 		//}
 
-		//std::cerr << "\033[0;31mSL\033[0m" << owner << "("<< dataSize[owner]   << "," << buffer[owner].size()  << ") "; 
+		//std::cerr << "SF-" << comm->getProcId() << ">" << owner << " "; 
 
 		// Send data
 		comm->sendGroupByKeyData(owner);
@@ -521,7 +523,7 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 	bool dirty = false;
 	bool sendFinished = false;
 	bool recvFinished = false;
-	int peersFinised = 0;
+	int peersFinished = 0;
 
 
 	comm->joinSlaves();
@@ -533,13 +535,14 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 		if ( ! sendFinished )
 			sendFinished |= EDBKSendDataHashed(comm, sendPos, deleted, dataSize, recvData, dirty);
 		if ( ! recvFinished )
-			recvFinished |= EDBKRecvData(comm, recvPos, sendPos, deleted, recvData, peersFinised, dirty);
+			recvFinished |= EDBKRecvData(comm, recvPos, sendPos, deleted, recvData, peersFinished, dirty);
 	}
+	//std::cerr << " PF:" << peersFinished << " CONDITIONS:" << sendFinished << " " << recvFinished << "\n";
 
 	//Ti[1] = duration_cast<milliseconds>(system_clock::now() - start).count();
 	//start = system_clock::now();
 	
-	K * keys = localData->getKeys();
+	//K * keys = localData->getKeys();
 	size = localData->getSize();
 	/*for ( size_t i = 0; i < size; i++){
 		if ( deleted[i] )
@@ -577,14 +580,17 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 	
 	//groupByKeyHashed = true;
 
-	keys = localData->getKeys();
-	size = localData->getSize();
+	//keys = localData->getKeys();
+	//size = localData->getSize();
 	//std::cerr << "\n";
 	//for ( size_t i = 0; i < size; i++){
 	      //std::cerr << i << " ";
 	//}
 	//std::cerr << "\n";// */
+	size = localData->getSize();
 	//std::cerr << "\033[34mFINISHED ("<< size <<")\033[0m";
+
+	comm->joinSlaves();
 
 	return dirty;
 }
