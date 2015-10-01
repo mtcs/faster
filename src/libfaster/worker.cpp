@@ -8,8 +8,8 @@
 #include "workerFdd.h"
 #include "worker.h"
 
-faster::worker::worker(fastComm * c, void ** ft, std::vector< std::pair<void*, size_t> > & globalTable){
-	std::cerr << "  Starting Worker " << c->getProcId() << '\n';
+faster::worker::worker(fastComm * c, void ** ft, std::vector< std::tuple<void*, size_t, int> > & globalTable){
+	//std::cerr << "  Starting Worker " << c->getProcId() << '\n';
 	funcTable = ft;
 	comm = c;
 	finished = false;
@@ -145,10 +145,35 @@ void faster::worker::writeFDDFile(unsigned long int id, std::string &path, std::
 	comm->sendTaskResult();
 }
 
+void resizeVector(std::tuple<void *, size_t, int> & var UNUSED){
+}
+
 void faster::worker::updateGlobals(fastTask &task){
 	for ( size_t i = 0; i < task.globals.size(); i++){
-		std::memcpy((*globalTable)[i].first, task.globals[i].first, task.globals[i].second);
-		delete [] (char*) task.globals[i].first;
+		int type = std::get<2>(task.globals[i]);
+		size_t s = std::get<1>(task.globals[i]);
+
+		if (type & VECTOR){
+			resizeVector((*globalTable)[i]);
+		}
+		if (type & POINTER){
+			char ** v = (char **) std::get<0>((*globalTable)[i]);
+			if (*v == NULL)
+				(*v) = new char[s];
+			std::memcpy(
+				*v, 
+				std::get<0>(task.globals[i]), 
+				s
+				);
+		}else{
+			std::memcpy(
+				std::get<0>((*globalTable)[i]), 
+				std::get<0>(task.globals[i]), 
+				s
+				);
+		}
+
+		delete [] (char*) std::get<0>(task.globals[i]);
 	}
 }
 

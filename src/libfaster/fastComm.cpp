@@ -71,8 +71,12 @@ void faster::fastComm::sendTask(fastTask &task){
 	buffer[0] << size_t(task.globals.size());
 
 	for ( size_t i = 0; i < task.globals.size(); i++){
-		buffer[0] << size_t(task.globals[i].second);
-		buffer[0].write(task.globals[i].first, task.globals[i].second);
+		size_t s = std::get<1>(task.globals[i]);
+		int type = std::get<2>(task.globals[i]);
+		//std::cerr << "SEND Glob.: "<< i <<"T:" << type << " S:" << s << "\n";
+		buffer[0] << type;
+		buffer[0] << s;
+		buffer[0].write(std::get<0>(task.globals[i]), s);
 	}
 
 	for (int i = 1; i < numProcs; ++i){
@@ -96,13 +100,17 @@ void faster::fastComm::recvTask(fastTask & task){
 	for ( size_t i = 0; i < numGlobals; i++){
 		size_t varSize = 0;
 		char * var;
+		int varType;
 		
+		bufferRecv[0] >> varType;
 		bufferRecv[0] >> varSize;
+
+		//std::cerr << "RGlob.: T:" << varType << " S:" << varSize << "\n";
 
 		var = new char[varSize]();
 		bufferRecv[0].read(var, varSize);
 
-		task.globals.insert(task.globals.end(), std::make_pair(var, varSize));
+		task.globals.insert(task.globals.end(), std::make_tuple(var, varSize, varType));
 	}
 }
 

@@ -82,6 +82,7 @@ const std::string faster::decodeOptype(fddOpType op){
 	}
 	if (op & OP_GENERICUPDATE){
 		switch(op){
+			case OP_Update: 	return "Update     ";
 			case OP_UpdateByKey: 	return "UpdateByKey";
 			case OP_BulkUpdate:	return "BulkUpdate ";
 		}
@@ -117,6 +118,7 @@ const std::string faster::decodeOptypeAb(fddOpType op){
 	}
 	if (op & OP_GENERICUPDATE){
 		switch(op){
+			case OP_Update: 	return "U  ";
 			case OP_UpdateByKey: 	return "UBK";
 			case OP_BulkUpdate:	return "BU ";
 		}

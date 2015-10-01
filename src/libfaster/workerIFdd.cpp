@@ -73,6 +73,7 @@ void faster::_workerIFdd<K,T>::applyIndependent(void * func, fddOpType op, fastC
 
 	switch (op){
 		case OP_Update:
+			//std::cerr << "        Update IFDD\n";
 			rc = update( ( updateIFunctionP<K,T> ) func );
 			buffer << rc;
 			break;

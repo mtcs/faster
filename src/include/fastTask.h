@@ -23,7 +23,7 @@ namespace faster{
 			size_t duration;
 			double * allocation;
 			std::vector<procstat> procstats;
-			std::vector< std::pair<void*, size_t> > globals;
+			std::vector< std::tuple<void*, size_t, int> > globals;
 
 	};
 }

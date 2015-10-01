@@ -76,6 +76,8 @@ namespace faster{
 			void deleteItem(void * item) override ;
 			void shrink();
 
+			std::vector< std::vector<T*> > findKeyInterval(K * keys, T * data, size_t fddSize);
+
 			void preapply(unsigned long int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm);
 
 			bool onlineReadStage3(std::unordered_map<K, int> & localKeyMap, fastComm *comm, void * funcP, std::deque<std::vector<std::pair<K,T>>> & q2, omp_lock_t & q2lock);
@@ -119,7 +121,6 @@ namespace faster{
 			void _preApplyI(void * func, fddOpType op, workerFddBase * destze);
 			void _preApply(void * func, fddOpType op, workerFddBase * destze);
 
-			std::vector< std::vector<T*> > findKeyInterval(K * keys, T * data, size_t fddSize);
 			void applyDependent(void * func, fddOpType op, workerFddBase * destze);
 			void applyIndependent(void * func, fddOpType op, fastCommBuffer & buffer);
 

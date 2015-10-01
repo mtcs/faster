@@ -94,6 +94,70 @@ void faster::workerIFddCore<K,T>::shrink(){
 
 
 template <typename K, typename T>
+std::vector< std::vector<T*> > faster::workerIFddCore<K,T>::findKeyInterval(K * keys, T * data, size_t fddSize){
+	//auto start = system_clock::now();
+
+	//std::cerr << "IFDDDependent ";
+	//std::cerr << "FindKeyInterval\n";
+
+	std::unordered_map<K, size_t> keyCount(fddSize);
+	for ( size_t i = 0; i < fddSize; i++){
+		keyCount[keys[i]] ++;
+	}
+
+	std::unordered_map<K, std::vector<T*>> keyLocations(fddSize);
+	for ( auto it = keyCount.cbegin(); it != keyCount.end(); ++it ){
+		keyLocations[it->first].reserve(it->second);
+	}
+	keyCount.clear();
+
+	for ( size_t i = 0; i < fddSize; i++){
+		K & key = keys[i];
+		T * d = &data[i];
+		auto l = keyLocations.find(key);
+		if ( l != keyLocations.end() )
+			l->second.insert(l->second.end(), d);
+	}
+	//auto t1 =  duration_cast<milliseconds>(system_clock::now() - start2).count();
+	//start2 = system_clock::now();
+
+	//auto t2 =  duration_cast<milliseconds>(system_clock::now() - start2).count();
+	//start2 = system_clock::now();
+	//std::cerr << " T0:" << t0 << " T1:" << t1 << " T2:" << t2 << "\n";
+	
+	//exit(231);
+	
+	if (this->uKeys.use_count() == 0){
+		this->uKeys = std::make_shared<std::vector<K>>();
+		this->uKeys->reserve( fddSize );
+		for ( auto it = keyLocations.begin(); it != keyLocations.end(); it++){
+			this->uKeys->insert(this->uKeys->end(), it->first);
+		}
+	}
+
+	std::vector< std::vector<T*> > keyLocationsV(this->uKeys->size());
+
+	for ( size_t i = 0; i < this->uKeys->size(); i++ ){
+		K & key = (*this->uKeys)[i];
+		auto l = keyLocations.find(key);
+
+		if ( l == keyLocations.end() ){
+			keyLocationsV[i] = {};
+		}else{
+			keyLocationsV[i] = std::move(l->second);
+		}
+	}
+	//std::cerr << "FindKeyIntervalDONE\n";
+	
+	//std::cerr << "\nT0:" << t0 << " T1:" << t1 << " T2:" << t2 << " TOT:" << duration_cast<milliseconds>(system_clock::now() - start).count() << "\n";
+
+	return keyLocationsV;
+}
+
+
+
+
+template <typename K, typename T>
 void faster::workerIFddCore<K,T>::countByKey(fastComm *comm){
 	//std::cerr << "        CountByKey\n";
 	K * keys = localData->getKeys();
@@ -182,8 +246,10 @@ bool faster::workerIFddCore<K,T>::EDBKRecvData(
 		rb.setBuffer(rData, rSize);
 
 		rb >> numItems;
-		if (numItems > 0)
+		if (numItems > 0){
+			//std::cerr << "R";
 			dirty = true;
+		}
 
 
 		//for (int i = 0; i < rSize; ++i){
@@ -227,6 +293,7 @@ void faster::workerIFddCore<K,T>::EDBKShrinkData(std::vector<bool> & deleted, si
 	T * data = localData->getData();
 	size_t size = localData->getSize();
 
+
 	// If there are elements that are still sparse in the memory
 	if ( size == deleted.size() ){
 		// Resume where last procedure left off
@@ -255,7 +322,12 @@ void faster::workerIFddCore<K,T>::EDBKShrinkData(std::vector<bool> & deleted, si
 			if (i >= deleted.size()) break;
 		}
 		while ( deleted[j] ){
+			if ( j == 0){
+				j--;
+				break;
+			}
 			j--;
+
 		}
 		if ( (j + 1) < localData->getSize() ){
 			//std::cerr << " \033[0;31mSD SETSIZE:" << j+1 << "\033[0m\n";
@@ -414,6 +486,7 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 	while ( pos < size){
 		K & key = keys[pos];
 		int owner = 1 + hash.get(key);
+		//std::cerr << key;
 		
 		// If it is my item dont send it
 		if (owner == comm->getProcId()){
@@ -438,6 +511,7 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 		buffer[owner] << key <<  data[pos];
 		dataSize[owner]++;
 		dirty = true;
+		//std::cerr << "S";
 
 		if (recvData.size() > 0){
 			// Replace deleted item data
@@ -568,10 +642,14 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 	
 	// Clear Key location saved by last ByKey function
 	if ( dirty ){
+		//std::cerr << "        \033[0;32mDIRTY..." ;
 		if (keyLocations.size() > 0){
+			//std::cerr << " CLEAR KeyLocations" ;
 			keyLocations.clear();
-			//std::cerr << " CLEAR KeyLocations\n" ;
 		}
+		//std::cerr << "\033[0m\n" ;
+	}else{
+		//std::cerr << "        \033[0;34mNOT DIRTY!!!!!\n\033[0m" ;
 	}
 	//Ti[2] = duration_cast<milliseconds>(system_clock::now() - start).count();
 	
@@ -588,9 +666,9 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 	//}
 	//std::cerr << "\n";// */
 	size = localData->getSize();
-	//std::cerr << "\033[34mFINISHED ("<< size <<")\033[0m";
 
 	comm->joinSlaves();
+	//std::cerr << "\033[34mFINISHED ("<< size <<")\033[0m";
 
 	return dirty;
 }
@@ -686,12 +764,14 @@ void faster::workerIFddCore<K,T>::groupByKey(fastComm *comm){
 template <typename K, typename T>
 void faster::workerIFddCore<K,T>::groupByKeyHashed(fastComm *comm){
 	fastCommBuffer &resultBuffer = comm->getResultBuffer();
-	//std::cerr << "      groupByKeyHashed\n";
+	//std::cerr << "S      groupByKeyHashed\n";
 
 	bool dirty = exchangeDataByKeyHashed(comm);
 
-	if (dirty)
+	if (dirty){
+		//std::cerr << "S      findMyKeysByHash\n";
 		findMyKeysByHash(comm->getNumProcs());
+	}
 
 
 	resultBuffer << size_t(localData->getSize());
@@ -1058,8 +1138,9 @@ template <typename K, typename T>
 void printData(std::ofstream & outFile, K * keys, std::vector<T> * data, size_t s){
 	outFile.precision(10);
 	for ( size_t i = 0; i < s; i++){
+		outFile << keys[i] << " ";
 		for ( size_t j = 0; j < data[i].size(); j++){
-			outFile << keys[i] << " " << data[i][j] << " ";
+			 outFile << data[i][j] << " ";
 		}
 		outFile	<< "\n";
 	}
@@ -1128,7 +1209,7 @@ void faster::workerIFddCore<K, T>::preapply(long unsigned int id, void * func, f
 
 	headerSize = buffer.size();
 
-	if (op & (OP_GENERICMAP | OP_GENERICREDUCE)){
+	if (op & (OP_GENERICMAP | OP_GENERICREDUCE | OP_GENERICUPDATE)){
 		this->apply(func, op, dest, buffer);
 		if (dest) buffer << size_t(dest->getSize());
 	}else{

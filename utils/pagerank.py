@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
 import sys
+import functools
 
 if ( len(sys.argv) < 2 ) :
-    sys.exit("ERROR: usage: #pagerank.py graph file(string) [error(float)]\n")
+    sys.exit("ERROR: usage: #pagerank.py <graph file>(string) [error(float)]\n")
 
 gfile = open ( sys.argv[1], 'r')
 resolution = 1 if (len(sys.argv) < 3) else float(sys.argv[2])
@@ -17,8 +18,10 @@ for line in gfile :
     tokens = line.split()
     node = int(tokens[0])
     G[node] = list(map(int, tokens[1:]))
-    numNodes = numNodes + 1;
+    numNodes = functools.reduce(max, G[node], numNodes)
 
+numNodes = numNodes + 1
+print ( numNodes, " node graph", file = sys.stderr)
 gfile.close()
 
 error = 10;
@@ -38,8 +41,17 @@ while ( iteration < 10) :
 
     # Give Pagerank
     for node, neighbs in G.items(): 
+        if ( verbose > 1 ) :
+            print("[{}:".format(node),file = sys.stderr, end = '')
         for neighb in neighbs: 
-            newpr[neighb] += dumping * pr[node] / len(neighbs);
+            if neighb not in newpr :
+                newpr[neighb] =  (1 - dumping) / numNodes
+            contrib = dumping * pr[node] / len(neighbs)
+            if ( verbose > 1 ) :
+                print ( "{}>{} ".format(contrib, neighb), file = sys.stderr, end = '')
+            newpr[neighb] += contrib 
+        if ( verbose > 1 ) :
+            print("]",file = sys.stderr)
 
     error = 0;
     for node in G.keys(): 
@@ -53,7 +65,7 @@ while ( iteration < 10) :
     if ( verbose ) :
         for node in sorted(G.keys()): 
             #print ( "{}:{:.5f}  ".format(node, pr[node]), file = sys.stderr, end = '')
-            print ( "{:.5f}  ".format(pr[node]), file = sys.stderr, end = '')
+            print ( "{} {:.5f}  ".format(node, pr[node]), file = sys.stderr, end = '')
             #print ( "{:.2f}".format(pr[node]), file = sys.stderr , end = ' ')
 
 

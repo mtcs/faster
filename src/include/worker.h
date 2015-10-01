@@ -26,9 +26,9 @@ namespace faster{
 			bool finished;
 			char * buffer;
 			void ** funcTable;
-			std::vector< std::pair<void*, size_t> > * globalTable;
+			std::vector< std::tuple<void*, size_t, int> > * globalTable;
 
-			worker(fastComm * c, void ** ft, std::vector< std::pair<void*, size_t> > & globalTable);
+			worker(fastComm * c, void ** ft, std::vector< std::tuple<void*, size_t, int> > & globalTable);
 			~worker();
 
 			void run();

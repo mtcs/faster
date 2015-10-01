@@ -25,7 +25,7 @@ faster::fastScheduler::fastScheduler(unsigned int numProcs, std::vector<std::str
 faster::fastScheduler::~fastScheduler(){
 	for ( auto it = taskList.begin(); it != taskList.end() ; it++ ){
 		for (size_t i = 0; i < (*it)->globals.size(); i++){
-			delete [] (char*) (*it)->globals[i].first;
+			delete [] (char*) std::get<0>((*it)->globals[i]);
 		}
 		delete (*it);
 	}
@@ -188,7 +188,7 @@ double * faster::fastScheduler::getNewAllocation(){
 	return r;
 }
 
-faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size, std::vector< std::pair<void*, size_t> > & globalTable){
+faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size, std::vector< std::tuple<void*, size_t, int> > & globalTable){
 	fastTask * newTask = new fastTask();
 	newTask->id = numTasks++;
 	newTask->srcFDD = idSrc;
@@ -203,11 +203,20 @@ faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned lo
 	newTask->procstats = std::vector<procstat>(numProcs);
 
 	for ( size_t i = 0; i < globalTable.size(); i++){
-		void * var = new char[globalTable[i].second];
+		size_t s = std::get<1>(globalTable[i]);
+		void * var = new char[s];
+		int type = std::get<2>(globalTable[i]);
+		//std::cerr << "T:" << type << " S:" << s << "\n";
 
-		std::memcpy(var, globalTable[i].first, globalTable[i].second);
+		if (type & POINTER){
+			//std::cerr << "POINTER ";
+			std::memcpy(var, *(char**)std::get<0>(globalTable[i]), s);
+		}else{
+			//std::cerr << "NOTPOINTER ";
+			std::memcpy(var, std::get<0>(globalTable[i]), s);
+		}
 
-		newTask->globals.insert(newTask->globals.end(), std::make_pair(var, globalTable[i].second) );
+		newTask->globals.insert(newTask->globals.end(), std::make_tuple(var, std::get<1>(globalTable[i]), type) );
 	}
 
 	taskList.insert(taskList.end(), newTask);
@@ -215,7 +224,7 @@ faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned lo
 	return newTask;
 }
 
-faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned long int sid, size_t size, std::vector< std::pair<void*, size_t> > & globalTable){
+faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned long int sid, size_t size, std::vector< std::tuple<void*, size_t, int> > & globalTable){
 	return enqueueTask(opT, sid, 0, -1, size, globalTable );
 }
 

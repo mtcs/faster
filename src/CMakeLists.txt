@@ -26,6 +26,12 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	#add_definitions(-fsanitize=undefined)
 	#add_definitions(-fsanitize=leak)
 	add_definitions(-fno-omit-frame-pointer)
+
+	set (EXTRA_LIBS ${EXTRA_LIBS} asan)
+	#set (EXTRA_LIBS ${EXTRA_LIBS} tsan)
+	#set (EXTRA_LIBS ${EXTRA_LIBS} usan)
+	#set (EXTRA_LIBS ${EXTRA_LIBS} lsan)
+	#set (EXTRA_LIBS ${EXTRA_LIBS} duma)
 else (CMAKE_BUILD_TYPE MATCHES "DEBUG") 
 	message("----------- RELEASE MODE -----------")
 	add_definitions(-O3)
@@ -54,15 +60,6 @@ link_directories(${MPI_CXX_LIBRARIES})
 #set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
 #include_directories("/usr/include/openmpi/")
 set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
-
-if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
-	set (EXTRA_LIBS ${EXTRA_LIBS} asan)
-	#set (EXTRA_LIBS ${EXTRA_LIBS} tsan)
-	#set (EXTRA_LIBS ${EXTRA_LIBS} usan)
-	#set (EXTRA_LIBS ${EXTRA_LIBS} lsan)
-	#set (EXTRA_LIBS ${EXTRA_LIBS} duma)
-endif (CMAKE_BUILD_TYPE MATCHES "DEBUG") 
-
 
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 

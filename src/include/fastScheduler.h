@@ -29,8 +29,8 @@ namespace faster{
 			fastScheduler(unsigned int numProcs, std::vector<std::string> * funcName);
 			~fastScheduler();
 			
-			fastTask * enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size, std::vector< std::pair<void*, size_t> > & globalTable);
-			fastTask * enqueueTask(fddOpType opT, unsigned long int id, size_t size, std::vector< std::pair<void*, size_t> > & globalTable);
+			fastTask * enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size, std::vector< std::tuple<void*, size_t, int> > & globalTable);
+			fastTask * enqueueTask(fddOpType opT, unsigned long int id, size_t size, std::vector< std::tuple<void*, size_t, int> > & globalTable);
 			
 			void taskProgress(unsigned long int id, unsigned long int pid, size_t time, procstat & stat);
 			void taskFinished(unsigned long int id, size_t time);

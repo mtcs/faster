@@ -117,7 +117,6 @@ double maxError( double & a, double & b){
 
 int main(int argc, char ** argv){
 	// Init Faster Framework
-	cerr << "------------ K-MEANS -------------";
 
 	auto start = system_clock::now();
 
@@ -131,6 +130,7 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &maxError, "maxError");
 	fc.registerGlobal(&numNodes);
 	fc.startWorkers();
+	cerr << "------------ PageRank -------------";
 
 	fc.printHeader();
 	cerr << "  Init Time: " << duration_cast<milliseconds>(system_clock::now() - start).count() << "ms\n";

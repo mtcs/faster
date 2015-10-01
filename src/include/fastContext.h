@@ -100,6 +100,10 @@ namespace faster{
 			void registerFunction(void * funcP, const std::string name);
 			template <class T>
 			void registerGlobal(T * varP);
+			template <class T>
+			void registerGlobal(T ** varP, size_t s);
+			template <class T>
+			void registerGlobal(std::vector<T> * varP);
 
 			void startWorkers();
 
@@ -127,7 +131,7 @@ namespace faster{
 			std::vector< fddBase * > fddList;
 			std::vector<void*> funcTable;
 			std::vector<std::string> funcName;
-			std::vector< std::pair<void*, size_t> > globalTable;
+			std::vector< std::tuple<void*, size_t, int> > globalTable;
 			fastComm * comm;
 			fastScheduler * scheduler;
 
@@ -267,10 +271,16 @@ namespace faster{
 
 	template <class T>
 	void fastContext::registerGlobal(T * varP){
-		std::pair<void*, size_t> globalReg ;
-		globalReg.first = varP;
-		globalReg.second = sizeof(T);
-		globalTable.insert( globalTable.end(), globalReg );
+		globalTable.insert( globalTable.end(), std::make_tuple(varP, sizeof(T), 0) );
+	}
+	template <class T>
+	void fastContext::registerGlobal(T ** varP, size_t s){
+		globalTable.insert( globalTable.end(), std::make_tuple(varP, s, POINTER) );
+	}
+	// Still unimplemented
+	template <class T>
+	void fastContext::registerGlobal(std::vector<T> * varP){
+		globalTable.insert( globalTable.end(), std::make_tuple(varP, sizeof(T) * varP->size(), VECTOR) );
 	}
 	
 	/*template <typename T>

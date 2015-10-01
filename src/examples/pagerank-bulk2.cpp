@@ -193,6 +193,7 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &maxError, "maxError");
 	fc.registerGlobal(&numNodes);
 	fc.startWorkers();
+	cerr << "------------ PageRank -------------";
 
 	fc.printHeader();
 	cerr << "  Init Time: " << duration_cast<milliseconds>(system_clock::now() - start).count() << "ms\n";
