@@ -20,7 +20,7 @@ faster::fastContext::fastContext(const fastSettings & s, int & argc, char **& ar
 }
 
 
-faster::fastContext::~fastContext(){ 
+faster::fastContext::~fastContext(){
 	// Tell workers to go home!
 	//std::cerr << "    S:FINISH! ";
 	comm->sendFinish();
@@ -52,8 +52,8 @@ void faster::fastContext::startWorkers(){
 
 		//auto id = comm->getProcId();
 		// Clean process
-		delete comm; 
-		delete settings; 
+		delete comm;
+		delete settings;
 		exit(0);
 	}// */
 
@@ -98,7 +98,7 @@ int faster::fastContext::findFunc(void * funcP){
 
 
 unsigned long int faster::fastContext::_createFDD(fddBase * ref, fddType type, const std::vector<size_t> * dataAlloc){
-	
+
 	//std::cerr << "    Create FDD\n";
 	for (int i = 1; i < comm->numProcs; ++i){
 		if (dataAlloc){
@@ -115,7 +115,7 @@ unsigned long int faster::fastContext::_createFDD(fddBase * ref, fddType type, c
 	fddList.insert(fddList.begin(), ref);
 	comm->waitForReq(comm->numProcs - 1);
 	//std::cerr << "    Done\n";
-	
+
 	return numFDDs++;
 }
 
@@ -192,7 +192,7 @@ size_t findFileSize(const char* filename)
 {
 	std::ifstream in(filename, std::ifstream::in | std::ifstream::binary);
 	in.seekg(0, std::ifstream::end);
-	return in.tellg(); 
+	return in.tellg();
 }
 
 unsigned long int faster::fastContext::readFDD(fddBase * ref, const char * fileName){
@@ -215,7 +215,7 @@ unsigned long int faster::fastContext::readFDD(fddBase * ref, const char * fileN
 	//std::cerr << "    S:ReadFdd";
 	comm->waitForReq(comm->numProcs - 1);
 	//std::cerr << '\n';
-	
+
 	return numFDDs++;
 }
 
