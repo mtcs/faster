@@ -18,12 +18,12 @@ void faster::_workerFdd<T>::map (workerFddBase * dest, mapFunctionP<T,U> mapFunc
 
 	//std::cerr << "START " << id << " " << s << "  ";
 
-	#pragma omp parallel for 
+	#pragma omp parallel for
 	for ( size_t i = 0; i < s; ++i){
 		od[i] = mapFunc(d[i]);
 	}
 	//std::cerr << "END ";
-}		
+}
 
 /*template <typename T>
 template <typename U>
@@ -35,14 +35,14 @@ void faster::_workerFdd<T>::map (workerFddBase * dest, PmapFunctionP<T,U> mapFun
 
 	//std::cerr << "START " << id << " " << s << "  ";
 
-	#pragma omp parallel for 
+	#pragma omp parallel for
 	for ( size_t i = 0; i < s; ++i){
 		std::pair<U,size_t> r = mapFunc(d[i]);
 		od[i] = r.first;
 		ls[i] = r.second;
 	}
 	//std::cerr << "END ";
-}*/		
+}*/
 
 template <typename T>
 template <typename L, typename U>
@@ -54,14 +54,14 @@ void faster::_workerFdd<T>::map (workerFddBase * dest, ImapFunctionP<T,L,U> mapF
 
 	//std::cerr << "START " << s << " \n ";
 
-	#pragma omp parallel for 
+	#pragma omp parallel for
 	for ( size_t i = 0; i < s; ++i){
 		//std::cerr << i << " ";
 		std::pair<L,U> r = mapFunc(d[i]);
 		ok[i] = std::move(r.first);
 		od[i] = std::move(r.second);
 	}
-}		
+}
 
 /*template <typename T>
 template <typename L, typename U>
@@ -74,12 +74,12 @@ void faster::_workerFdd<T>::map (workerFddBase * dest, IPmapFunctionP<T,L,U> map
 
 	//std::cerr << "START " << id << " " << s << "  ";
 
-	#pragma omp parallel for 
+	#pragma omp parallel for
 	for ( size_t i = 0; i < s; ++i){
 		std::tie(ok[i], od[i], ls[i]) = mapFunc(d[i]);
 	}
 	//std::cerr << "END ";
-}*/		
+}*/
 
 
 // BulkMap
@@ -113,11 +113,11 @@ void faster::_workerFdd<T>::flatMap(workerFddBase * dest,  flatMapFunctionP<T,U>
 	size_t s = this->localData->getSize();
 	std::deque<U> resultList;
 
-	#pragma omp parallel 
+	#pragma omp parallel
 	{
 		std::deque<U> partResultList;
 
-		#pragma omp for 
+		#pragma omp for
 		for ( size_t i = 0; i < s; ++i){
 			std::deque<U> r = flatMapFunc(d[i]);
 
@@ -137,11 +137,11 @@ void faster::_workerFdd<T>::flatMap(workerFddBase * dest,  PflatMapFunctionP<T,U
 	size_t s = this->localData->getSize();
 	std::deque< std::pair<U, size_t> > resultList;
 
-	#pragma omp parallel 
+	#pragma omp parallel
 	{
 		std::deque<std::pair<U, size_t>> partResultList;
 
-		#pragma omp for 
+		#pragma omp for
 		for ( size_t i = 0; i < s; ++i){
 			std::deque<std::pair<U, size_t>> r = flatMapFunc(d[i]);
 
@@ -161,11 +161,11 @@ void faster::_workerFdd<T>::flatMap(workerFddBase * dest,  IflatMapFunctionP<T,L
 	size_t s = this->localData->getSize();
 	std::deque<std::pair<L,U>> resultList;
 
-	#pragma omp parallel 
+	#pragma omp parallel
 	{
 		std::deque<std::pair<L,U>> partResultList;
 
-		#pragma omp for 
+		#pragma omp for
 		for ( size_t i = 0; i < s; ++i){
 			std::deque<std::pair<L,U>> r = flatMapFunc(d[i]);
 
@@ -185,11 +185,11 @@ void faster::_workerFdd<T>::flatMap(workerFddBase * dest,  IPflatMapFunctionP<T,
 	size_t s = this->localData->getSize();
 	std::deque< std::tuple<L, U, size_t> > resultList;
 
-	#pragma omp parallel 
+	#pragma omp parallel
 	{
 		std::deque<std::tuple<L, U, size_t>> partResultList;
 
-		#pragma omp for 
+		#pragma omp for
 		for ( size_t i = 0; i < s; ++i){
 			std::deque<std::tuple<L, U, size_t>> r = flatMapFunc(d[i]);
 
@@ -253,7 +253,7 @@ T faster::_workerFdd<T>::reduce (reduceFunctionP<T> reduceFunc){
 	T result;
 	size_t s = this->localData->getSize();
 
-	#pragma omp parallel 
+	#pragma omp parallel
 	{
 		int nT = omp_get_num_threads();
 		size_t tN = omp_get_thread_num();
@@ -263,11 +263,11 @@ T faster::_workerFdd<T>::reduce (reduceFunctionP<T> reduceFunc){
 			partResult = d[tN];
 		}
 
-		#pragma omp for 
+		#pragma omp for
 		for ( size_t i = nT; i < s; ++i){
 			partResult = reduceFunc(partResult, d[i]);
 		}
-		#pragma omp master
+		#pragma omp single
 		result = partResult;
 
 		#pragma omp barrier
@@ -399,7 +399,7 @@ void faster::_workerFdd<T>::_applyReduce(void * func, fddOpType op, fastCommBuff
 
 
 template <typename T>
-void faster::_workerFdd<T>::_preApply(void * func, fddOpType op, workerFddBase * dest){ 
+void faster::_workerFdd<T>::_preApply(void * func, fddOpType op, workerFddBase * dest){
 	switch (dest->getType()){
 		case Char:      _apply<char>(func, op,  dest); break;
 		case Int:       _apply<int>(func, op,  dest); break;
@@ -422,7 +422,7 @@ void faster::_workerFdd<T>::_preApply(void * func, fddOpType op, workerFddBase *
 }
 template <typename T>
 template <typename L>
-void faster::_workerFdd<T>::_preApplyI(void * func, fddOpType op, workerFddBase * dest){ 
+void faster::_workerFdd<T>::_preApplyI(void * func, fddOpType op, workerFddBase * dest){
 	switch (dest->getType()){
 		case Null: break;
 		case Char:      _applyI<L, char> 	(func, op, dest); break;
@@ -462,34 +462,34 @@ void faster::_workerFdd<T>::setDataRaw(void * data, size_t size) {
 }
 
 template <typename T>
-void faster::_workerFdd<T>::insert(void * k UNUSED, void * in, size_t s UNUSED){ 
+void faster::_workerFdd<T>::insert(void * k UNUSED, void * in, size_t s UNUSED){
 	this->localData->insert(* (T*) in);
 }
 template <typename T>
-void faster::_workerFdd<T>::insertl(void * in){ 
+void faster::_workerFdd<T>::insertl(void * in){
 	insert(* (std::deque<T> *) in);
 }
 
 
 template <typename T>
-void faster::_workerFdd<T>::insert(T & in){ 
-	this->localData->insert(in); 
+void faster::_workerFdd<T>::insert(T & in){
+	this->localData->insert(in);
 }
 // TODO CHANGE THIS !!!! MAK THE LIST ITERATION INSIDE THE STORAGE
 template <typename T>
-void faster::_workerFdd<T>::insert(std::deque<T> & in){ 
+void faster::_workerFdd<T>::insert(std::deque<T> & in){
 	typename std::deque<T>::iterator it;
 
 	if (this->localData->getSize() < in.size())
 		this->localData->grow(in.size());
 
 	for ( it = in.begin(); it != in.end(); it++)
-		this->localData->insert(*it); 
+		this->localData->insert(*it);
 }
 
 
 template <typename T>
-void faster::_workerFdd<T>::apply(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer){ 
+void faster::_workerFdd<T>::apply(void * func, fddOpType op, workerFddBase * dest, fastCommBuffer & buffer){
 	if (op & OP_GENERICMAP){
 		switch (dest->getKeyType()){
 			case Null:     _preApply(func, op, dest);break;
