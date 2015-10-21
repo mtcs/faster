@@ -204,9 +204,8 @@ int main(int argc, char ** argv){
 
 	cerr << "G.MapByKey" ;
 	for ( int i = 0; i < numRuns; i++){
-		auto result = groupV[i]->mapByKey(gmapbk1)->cache();
+		auto result UNUSED = groupV[i]->mapByKey(gmapbk1);
 		dataV[i]->discard();
-		dataV[i] = result;
 		cerr << "." ;
 	}
 	cerr << "\n" ;
@@ -215,7 +214,16 @@ int main(int argc, char ** argv){
 	//cin.get();
 
 
-	
+	cerr << "Recreate Data" ;
+	data->discard();
+	data = new indexedFdd<int,int>(fc, rawkeys, rawdata, numItems);
+	for ( int i = 0; i < numRuns; i++){
+		dataV[i] = new indexedFdd<int,int>(fc, rawkeys, rawdata, numItems);
+		dataV[i]->cache();
+		cerr << "." ;
+	}
+	cerr << "\n" ;
+
 	cerr << "Cogroup" ;
 	for ( int i = 0; i < numRuns; i++){
 		groupV[i] = data->cogroup(dataV[i])->cache();
@@ -224,7 +232,7 @@ int main(int argc, char ** argv){
 	cerr << "\n" ;
 	//fc.updateInfo();
 
-	
+
 	//cerr << "TEST" ;
 	//for ( int i = 0; i < numRuns; i++){
 		//dataV[i]->map(map1);
@@ -247,16 +255,27 @@ int main(int argc, char ** argv){
 
 	cerr << "G.BulkFlatMap" ;
 	for ( int i = 0; i < numRuns; i++){
-		auto result = groupV[i]->bulkFlatMap(gbfmap1)->cache();
+		auto result UNUSED = groupV[i]->bulkFlatMap(gbfmap1);
 		//result->discard();
 		dataV[i]->discard();
-		dataV[i] = result;
-		groupV[i]->discard();
 		cerr << "." ;
 	}
 	cerr << "\n" ;
 	//fc.updateInfo();
-	
+
+	cerr << "Recreate Data" ;
+	for ( int i = 0; i < numRuns; i++){
+		groupV[i]->discard();
+	}
+	data->discard();
+	data = new indexedFdd<int,int>(fc, rawkeys, rawdata, numItems);
+	for ( int i = 0; i < numRuns; i++){
+		dataV[i] = new indexedFdd<int,int>(fc, rawkeys, rawdata, numItems);
+		dataV[i]->cache();
+		cerr << "." ;
+	}
+	cerr << "\n" ;
+
 	cerr << "Cogroup" ;
 	for ( int i = 0; i < numRuns; i++){
 		groupV[i] = data->cogroup(dataV[i])->cache();
@@ -279,6 +298,9 @@ int main(int argc, char ** argv){
 		cerr << "." ;
 	}
 	cerr << "\n" ;
+	for ( int i = 0; i < numRuns; i++){
+		groupV[i]->discard();
+	}
 	//fc.updateInfo();
 
 	fc.printInfo();
