@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <vector>
 #include "libfaster.h"
 
 using namespace std;
@@ -123,8 +124,8 @@ int main(int argc, char ** argv){
 
 
 	cerr << "Generate Data\n" ;
-	int rawdata[numItems];
-	int rawkeys[numItems];
+	vector<int> rawdata(numItems);
+	vector<int> rawkeys(numItems);
 
 	for ( int i = 0; i < numItems; ++i ){
 		rawkeys[i] = i;
@@ -132,7 +133,7 @@ int main(int argc, char ** argv){
 	}
 
 	cerr << "Import Data\n" ;
-	auto data = new indexedFdd<int, int>(fc, rawkeys, rawdata, numItems);
+	auto data = new indexedFdd<int, int>(fc, rawkeys.data(), rawdata.data(), numItems);
 
 	cerr << "Run tests on " << numItems << " size " << numRuns << " times\n";
 
@@ -216,9 +217,9 @@ int main(int argc, char ** argv){
 
 	cerr << "Recreate Data" ;
 	data->discard();
-	data = new indexedFdd<int,int>(fc, rawkeys, rawdata, numItems);
+	data = new indexedFdd<int,int>(fc, rawkeys.data(), rawdata.data(), numItems);
 	for ( int i = 0; i < numRuns; i++){
-		dataV[i] = new indexedFdd<int,int>(fc, rawkeys, rawdata, numItems);
+		dataV[i] = new indexedFdd<int,int>(fc, rawkeys.data(), rawdata.data(), numItems);
 		dataV[i]->cache();
 		cerr << "." ;
 	}
@@ -268,9 +269,9 @@ int main(int argc, char ** argv){
 		groupV[i]->discard();
 	}
 	data->discard();
-	data = new indexedFdd<int,int>(fc, rawkeys, rawdata, numItems);
+	data = new indexedFdd<int,int>(fc, rawkeys.data(), rawdata.data(), numItems);
 	for ( int i = 0; i < numRuns; i++){
-		dataV[i] = new indexedFdd<int,int>(fc, rawkeys, rawdata, numItems);
+		dataV[i] = new indexedFdd<int,int>(fc, rawkeys.data(), rawdata.data(), numItems);
 		dataV[i]->cache();
 		cerr << "." ;
 	}
