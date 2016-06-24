@@ -465,6 +465,8 @@ namespace faster{
 		unsigned long int tid, sid;
 		unsigned long int newFddId = newFdd->getId();
 
+		context->setInternal(newFdd->getId(), true);
+
 		// Decode function pointer
 		int funcId = context->findFunc(funcP);
 

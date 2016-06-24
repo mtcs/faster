@@ -3,6 +3,8 @@
 
 
 #include <vector>
+#include <memory>
+
 #include "definitions.h"
 #include "misc.h"
 
@@ -21,7 +23,7 @@ namespace faster{
 			size_t workersFinished;
 			std::vector<size_t> times;
 			size_t duration;
-			double * allocation;
+			std::shared_ptr<std::vector<double>> allocation;
 			std::vector<procstat> procstats;
 			std::vector< std::tuple<void*, size_t, int> > globals;
 

@@ -19,7 +19,7 @@ namespace faster{
 	template <class K, class T>
 	class workerIFdd ;
 
-	template <class K, class T> 
+	template <class K, class T>
 	class indexedFddStorage;
 
 	template<typename K, typename T>
@@ -40,9 +40,38 @@ namespace faster{
 			std::unordered_map<K, size_t> distributedMaxKeyCount(fastComm *comm, std::unordered_map<K, std::pair<size_t, std::deque<int>> > & keyPPMaxCount);
 
 			// Exchange Data By Key private functions
-			bool EDBKSendData(fastComm *comm, std::vector<size_t> & dataSize);
-			bool EDBKSendDataHashed(fastComm *comm, size_t & pos, std::vector<bool> & deleted, std::vector<size_t> & dataSize, std::deque< std::pair<K,T> >  & recvData, bool & dirty);
-			bool EDBKRecvData(fastComm *comm, size_t & pos, size_t & posLimit, std::vector<bool> & deleted, std::deque< std::pair<K,T> >  & recvData, int & peersFinised, bool & dirty);
+			bool EDBKsendDataAsync(
+					fastComm *comm,
+					int owner,
+					K & key,
+					T & data,
+					std::vector<size_t> & dataSize);
+			bool sendPending(
+					fastComm *comm,
+					std::vector< std::deque< std::pair<K,T> > > & pendingSend,
+					std::vector<size_t> & dataSize
+					);
+			void flushDataSend(
+					fastComm *comm,
+					std::vector<size_t> & dataSize);
+			bool EDBKSendData(
+					fastComm *comm,
+					std::vector<size_t> & dataSize);
+			bool EDBKSendDataHashed(
+					fastComm *comm,
+					size_t & pos,
+					std::vector<bool> & deleted,
+					std::vector<size_t> & dataSize,
+					std::deque< std::pair<K,T> >  & recvData,
+					std::vector< std::deque< std::pair<K,T> > > & pendingSend,
+					bool & dirty);
+			bool EDBKRecvData(fastComm *comm,
+					size_t & pos,
+					size_t & posLimit,
+					std::vector<bool> & deleted,
+					std::deque< std::pair<K,T> >  & recvData,
+					int & peersFinised,
+					bool & dirty);
 			void EDBKFinishDataInsert(std::vector<bool> & deleted, std::deque< std::pair<K,T> >  & recvData, size_t & pos );
 			void EDBKShrinkData(std::vector<bool> & deleted, size_t & pos);
 
@@ -53,7 +82,7 @@ namespace faster{
 			workerIFddCore(unsigned int ident, fddType kt, fddType t);
 			workerIFddCore(unsigned int ident, fddType kt, fddType t, size_t size);
 			virtual ~workerIFddCore();
-			
+
 			fddType getType() override ;
 			fddType getKeyType() override ;
 
@@ -83,7 +112,7 @@ namespace faster{
 			bool onlineReadStage3(std::unordered_map<K, int> & localKeyMap, fastComm *comm, void * funcP, std::deque<std::vector<std::pair<K,T>>> & q2, omp_lock_t & q2lock);
 			void onlineFullPartRead(fastComm *comm, void * funcP);
 			void onlinePartRead(fastComm *comm, void * funcP);
-			
+
 			// ByKey Functions
 			void groupByKey(fastComm *comm);
 			void groupByKeyHashed(fastComm *comm);
@@ -175,7 +204,7 @@ namespace faster{
 			void bulkFlatMap(workerFddBase * dest,  PbulkFlatMapIFunctionP<K,T,U> bulkFlatMapFunc );
 
 
-			// Out put independent 
+			// Out put independent
 			// UPDATE
 			char update (updateIFunctionP<K,T> reduceFunc);
 			// REDUCE
@@ -199,13 +228,13 @@ namespace faster{
 			void setData(void * keys, void * data, size_t * lineSizes UNUSED, size_t size){
 				setData( (K*) keys, (T*) data, size);
 			}
-			
+
 			// For anonymous types
 			void setDataRaw(void * keys, void * data, size_t size) override;
 			void setDataRaw(void * keys UNUSED, void * data UNUSED, size_t * lineSizes UNUSED, size_t size UNUSED) override{}
 
-			size_t * getLineSizes(){ 
-				return NULL; 
+			size_t * getLineSizes(){
+				return NULL;
 			}
 
 			void insert(void * k, void * in, size_t s);
@@ -298,7 +327,7 @@ namespace faster{
 			std::tuple<K,T*,size_t> reduce (IPreduceIPFunctionP<K,T> reduceFunc);
 
 			std::tuple<K,T*,size_t> bulkReduce (IPbulkReduceIPFunctionP<K,T> bulkReduceFunc);
-			
+
 
 		public:
 			_workerIFdd(unsigned int ident, fddType kt, fddType t) : workerIFddCore<K,T*>(ident, kt, t) {}
@@ -313,7 +342,7 @@ namespace faster{
 			void setData(void * keys, void * data, size_t *lineSizes, size_t size){
 				setData( (K*) keys, (T**) data, lineSizes, size);
 			}
-			
+
 			// For anonymous types
 			void setDataRaw(void * keys UNUSED, void * data UNUSED, size_t size UNUSED) override{}
 			void setDataRaw(void * keys, void * data, size_t *lineSizes, size_t size) override;

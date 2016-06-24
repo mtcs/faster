@@ -20,26 +20,26 @@ using std::chrono::system_clock;
 
 namespace faster{
 
-	template <typename T> 
+	template <typename T>
 	class fdd;
 
-	template <typename K, typename T> 
+	template <typename K, typename T>
 	class indexedFdd;
 
 	class fastTask;
 	class fastContext;
 
 
-	//! Context configuration Class. 
+	//! Context configuration Class.
 	//!
-	//! Throught the fastSetting Class, the programmer can change default framework settings 
+	//! Throught the fastSetting Class, the programmer can change default framework settings
 	//! like enable dynamic load balancing
 	class fastSettings{
 		friend class fastContext;
 		public:
 
 			//! fastSetting default constructor
-			fastSettings() { 
+			fastSettings() {
 				_allowDataBalancing = false;
 			}
 
@@ -74,17 +74,17 @@ namespace faster{
 			//! fastContext default constructor
 			//! \param argc - number of arguments from main
 			//! \param argv - arguments from main
-			fastContext( int & argc, char **& argv);
+			fastContext( int argc=0, char ** argv=NULL);
 
 			//! fastContext constructor with custom settings
-			fastContext( const fastSettings & s, int & argc, char **& argv);
+			fastContext( const fastSettings & s, int argc, char ** argv);
 
 			//! fastContext destructor
 			~fastContext();
 
 			//! Register a user custom function in the context.
 			//!
-			//! Registering a user custom functions is necessary in order to pass it as 
+			//! Registering a user custom functions is necessary in order to pass it as
 			//! parametes to FDD functions like __map__ and __reduce__.
 			//!
 			//! \param funcP - Function pointer to a user defined function.
@@ -92,7 +92,7 @@ namespace faster{
 
 			//! Register a user custom function in the context.
 			//!
-			//! Registering a user custom functions is necessary in order to pass it as 
+			//! Registering a user custom functions is necessary in order to pass it as
 			//! parametes to FDD functions like __map__ and __reduce__.
 			//!
 			//! \param funcP - Function pointer to a user defined function.
@@ -107,6 +107,8 @@ namespace faster{
 
 			void startWorkers();
 
+			bool isDriver();
+
 			void calibrate();
 
 			template <typename T>
@@ -118,7 +120,7 @@ namespace faster{
 			indexedFdd<K,T> * onlinePartRead(std::string path, IonlineFullPartFuncP<K,T> funcP);
 
 			int numProcs(){ return comm->numProcs; }
-			
+
 			void printInfo();
 			void printHeader();
 			void updateInfo();
@@ -129,7 +131,8 @@ namespace faster{
 			//unsigned long int numTasks;
 			fastSettings * settings;
 			std::vector< fddBase * > fddList;
-			std::vector<void*> funcTable;
+			std::vector< bool > fddInternal;
+			std::vector< void * > funcTable;
 			std::vector<std::string> funcName;
 			std::vector< std::tuple<void*, size_t, int> > globalTable;
 			fastComm * comm;
@@ -166,17 +169,20 @@ namespace faster{
 			void sendKeyMap(unsigned long id, std::unordered_map<K, int> & keyMap);
 			template <typename K>
 			void sendCogroupData(unsigned long id, std::unordered_map<K, int> & keyMap, std::vector<bool> & flags);
-					
 
-			template <typename Z, typename FDD> 
+			void setInternal(size_t i, bool b){
+				fddInternal[i] = b;
+			}
+
+			template <typename Z, typename FDD>
 			void collectFDD(Z & ret, FDD * fddP){
 				//std::cerr << "    S:SendCollect " ;
-				
+
 				comm->sendCollect(fddP->getId());
 				//std::cerr << "ID:" << fddP->getId() << " ";
 
 				comm->recvFDDDataCollect(ret);
-				
+
 				//std::cerr << ".\n";
 			}
 
@@ -282,7 +288,7 @@ namespace faster{
 	void fastContext::registerGlobal(std::vector<T> * varP){
 		globalTable.insert( globalTable.end(), std::make_tuple(varP, sizeof(T) * varP->size(), VECTOR) );
 	}
-	
+
 	/*template <typename T>
 	fdd<T> * fastContext::onlineFullPartRead(std::string path, onlineFullPartFuncP<T> funcP){
 		auto start = system_clock::now();
@@ -309,7 +315,7 @@ namespace faster{
 		}
 		newFdd->setSize(newSize);
 		scheduler->setAllocation(alloc, newSize);
-			
+
 		fddList.insert(fddList.begin(), newFdd);
 
 		return newFdd;
@@ -341,7 +347,7 @@ namespace faster{
 		newFdd->setGroupedByKey(true);
 		newFdd->setGroupedByMap(true);
 		scheduler->setAllocation(alloc, newSize);
-			
+
 		return newFdd;
 	}
 
@@ -372,7 +378,7 @@ namespace faster{
 		newFdd->setGroupedByKey(true);
 		newFdd->setGroupedByMap(true);
 		scheduler->setAllocation(alloc, newSize);
-			
+
 		return newFdd;
 	}
 

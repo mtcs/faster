@@ -57,7 +57,7 @@ int main(int argc, char ** argv){
 
 	// Create a random adjacency matrix
 	for ( size_t i = 0; i < NUMITEMS; ++i ){
-		
+
 		// Random number of items
 		size_t dataSize = (rand() % 10) + 1;
 

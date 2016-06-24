@@ -30,7 +30,7 @@ void faster::worker::run(){
 				//std::cerr << "    R:Task \n";
 				comm->recvTask(task);
 				//std::cerr << "ID:" << task.id << " FDD:" << task.srcFDD  << " F:" << task.functionId << " ";
-				solve(task); 
+				solve(task);
 				//std::cerr << ".\n";
 				break;
 

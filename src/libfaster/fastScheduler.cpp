@@ -55,10 +55,10 @@ std::vector<std::deque< std::pair<int,long int> >> faster::fastScheduler::getDat
 		delta[0].second = 0;
 		for( i = 1; i < numProcs; ++i){
 			delta[i].first = i;
-			delta[i].second = lastTask->size*(thisTask->allocation[i] - lastTask->allocation[i]);
+			delta[i].second = lastTask->size*(thisTask->allocation.get()[0][i] - lastTask->allocation.get()[0][i]);
 		}
 		std::sort(delta.begin(), delta.end(), [](std::pair<int,size_t> a, std::pair<int,size_t> b){return a.second < b.second;});
-	
+
 		std::cerr << "      [ Migration info: ";
 		for( size_t i = 0; i < numProcs; ++i){
 			std::cerr << delta[i].first << ":" << delta[i].second << "  ";
@@ -131,7 +131,7 @@ void faster::fastScheduler::updateWeights(){
 		std::cerr << "      [ Exec.Times: ";
 		for( i = 1; i < numProcs; ++i){
 			std::cerr << lastTask->times[i] << " ";
-			rate[i] = lastTask->allocation[i]/(double)lastTask->times[i];
+			rate[i] = lastTask->allocation.get()[0][i]/(double)lastTask->times[i];
 		}
 		std::cerr << " ]\n";
 
@@ -151,8 +151,8 @@ void faster::fastScheduler::updateWeights(){
 }
 
 
-double * faster::fastScheduler::getNewAllocation(){
-	double * r;
+std::shared_ptr <std::vector<double>> faster::fastScheduler::getNewAllocation(){
+	std::shared_ptr<std::vector<double>> r;
 	_dataMigrationNeeded = false;
 
 	// see if the response times are too disbalanced
@@ -167,19 +167,21 @@ double * faster::fastScheduler::getNewAllocation(){
 		}
 	}
 
-	if ( (taskList.size() > 0) && ( ! _dataMigrationNeeded) )
+	if ( (taskList.size() > 0) && ( ! _dataMigrationNeeded) ){
 		//r = taskList.back()->allocation;
 		r = taskList.back()->allocation;
-	else
-		r = new double[numProcs];
-	
+	}else{
+
+		r = std::make_shared<std::vector<double>>(numProcs);
+	}
+
 	if ( (taskList.size() > 0) && ( _dataMigrationNeeded) )
 		updateWeights();
 
-	r[0] = 0;
+	r.get()[0][0] = 0;
 	//std::cerr << "      [ Processes Weights: ";
 	for( size_t i = 1; i < numProcs; ++i){
-		r[i] = currentWeights[i];
+		r.get()[0][i] = currentWeights[i];
 		//std::cerr << r[i] << " ";
 	}
 	//std::cerr << "]\n";
@@ -245,7 +247,7 @@ void faster::fastScheduler::setCalibration(std::vector<size_t> time){
 	for ( size_t i = 1; i < time.size(); ++i){
 		sum += time[i];
 	}
-	
+
 	std::vector<double> rate(numProcs, 0);
 
 	for ( size_t i = 1; i < time.size(); ++i){
@@ -280,7 +282,7 @@ void faster::fastScheduler::printProcstats(fastTask * task){
 	for ( size_t i = 0; i < task->procstats.size(); i++ ){
 		fprintf(stderr, "%4.1lf ", task->procstats[i].ram);
 	}
-	
+
 }
 
 void faster::fastScheduler::printTaskInfo(size_t taskID){
@@ -334,7 +336,7 @@ void faster::fastScheduler::printTaskInfo(){
 		t.erase(t.begin());
 		double m = mean(t);
 		double sd = stdDev(t, m);
-	
+
 		mm += m;
 		if( m > 100 ){
 			cvsum += sd/m;

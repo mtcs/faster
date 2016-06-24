@@ -4,6 +4,7 @@
 #include <vector>
 #include <tuple>
 #include <unordered_map>
+#include <memory>
 
 #include "definitions.h"
 #include "misc.h"
@@ -23,20 +24,20 @@ namespace faster{
 			size_t infoPos;
 
 			void updateWeights();
-			double * getNewAllocation();
+			std::shared_ptr<std::vector<double>> getNewAllocation();
 			void resetProcessWeights();
 		public:
 			fastScheduler(unsigned int numProcs, std::vector<std::string> * funcName);
 			~fastScheduler();
-			
+
 			fastTask * enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size, std::vector< std::tuple<void*, size_t, int> > & globalTable);
 			fastTask * enqueueTask(fddOpType opT, unsigned long int id, size_t size, std::vector< std::tuple<void*, size_t, int> > & globalTable);
-			
+
 			void taskProgress(unsigned long int id, unsigned long int pid, size_t time, procstat & stat);
 			void taskFinished(unsigned long int id, size_t time);
 
 			void setCalibration(std::vector<size_t> time);
-			
+
 			void printProcstats(fastTask * task);
 			void printTaskInfo();
 			void printTaskInfo(size_t task);

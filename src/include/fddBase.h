@@ -15,6 +15,9 @@ namespace faster{
 			std::vector<size_t> dataAlloc;
 			bool cached;
 		public:
+			fddBase(): size(0){ }
+			virtual ~fddBase() {}
+
 			void setSize(size_t &s){ size = s; }
 			size_t getSize(){ return size; }
 			int getId(){return id;}
@@ -24,7 +27,6 @@ namespace faster{
 			fddType kType(){ return _kType; }
 
 			bool isCached(){ return cached; }
-			
 
 			virtual void discard() = 0;
 			virtual bool isGroupedByKey() = 0;

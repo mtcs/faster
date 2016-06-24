@@ -16,13 +16,13 @@ using std::chrono::milliseconds;
 size_t numNodes = 0;
 
 pair<int,vector<int>> toAList(string & input){
-	
+
 	stringstream ss(input);
 	vector<int> edges;
 	int key;
 	int edge;
 
-	
+
 	int numTokens = 0;
 	for ( size_t i = 0; i < input.size(); ++i ){
 		if (input[i] == ' '){
@@ -58,14 +58,15 @@ deque<pair<int, double>> givePageRank(const int & key UNUSED, vector<void *> & s
 			//cerr << "\033[0;36m" << key << " PR:" << pr << " D:(" << s.size()<< ") S1 : "<< contrib << "\033[0m\n";
 		msgList.push_back(make_pair(s[i], contrib));
 	}
-	
+
 	return msgList;
 }
 pair<int, double> combine(const int & key, vector<double *> & prl){
 	pair<int,double> r;
 
 	r.first = key;
-		
+	r.second = 0;
+
 	//cerr << key << ":" << prl.size() << " ";
 	for ( auto it = prl.begin(); it != prl.end(); it++){
 		r.second += **it;
@@ -189,11 +190,11 @@ int main(int argc, char ** argv){
 	start2 = system_clock::now();
 
 	pr->writeToFile(std::string("/tmp/pr"), std::string(".txt"));
-	
+
 	auto duration = duration_cast<milliseconds>(system_clock::now() - start).count();
 	cerr << "  Write Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 	cerr << "PageRank in " << structure->getSize() << " node graph in "<< i << " iterations! In " << duration << "ms (error: " << error <<  ") \n";
-	
+
 	//cerr << "PRESS ENTER TO CONTINUE\n";
 	//cin.get();
 	return 0;

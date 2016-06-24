@@ -114,7 +114,7 @@ namespace faster{
 
 	// Not Indexed FFDs
 	// FDD function pointer types
-	
+
 	template <typename T, typename U>
 	using mapFunctionP = U (*) (T & input);
 	template <typename T, typename L, typename U>
@@ -213,7 +213,7 @@ namespace faster{
 	using updateIFunctionP = void (*) (K & inKey, T & input);
 	template <typename K, typename T>
 	using updateByKeyIFunctionP = void (*) (K & inKey, std::vector<T *> & input);
-	
+
 	template <typename K, typename T, typename L, typename U>
 	using ImapIFunctionP = std::pair<L,U> (*) (const K & inKey, T & input);
 	template <typename K, typename T, typename U>

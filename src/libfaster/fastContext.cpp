@@ -5,11 +5,11 @@
 #include "fastContext.h"
 #include "misc.h"
 
-faster::fastContext::fastContext( int & argc, char **& argv): fastContext(fastSettings(), argc, argv){
+faster::fastContext::fastContext( int argc, char ** argv): fastContext(fastSettings(), argc, argv){
 }
 
 // Create a context with local as master
-faster::fastContext::fastContext(const fastSettings & s, int & argc, char **& argv){
+faster::fastContext::fastContext(const fastSettings & s, int argc, char ** argv){
 
 	settings = new fastSettings(s);
 	comm = new fastComm(argc, argv );
@@ -23,13 +23,26 @@ faster::fastContext::fastContext(const fastSettings & s, int & argc, char **& ar
 faster::fastContext::~fastContext(){
 	// Tell workers to go home!
 	//std::cerr << "    S:FINISH! ";
-	comm->sendFinish();
+	if(comm->isDriver()){
+		comm->sendFinish();
 
-	// Clean process
-	fddList.clear();
+		// Delete FDDs TODO - Find out how to do this!!!!
+		std::cerr << "   DESTROY fastContext\n";
+		for ( size_t i = 0; i < fddList.size(); i++){
+			std::cerr << i << " ";
+			if (fddInternal[i]){
+				std::cerr << "   DELETING [" << i << "]\n";
+				delete fddList[i];
+			}
+		}
+
+		// Clean process
+		fddList.clear();
+	}
 	//taskList.clear();
 	delete comm;
 	delete settings;
+	delete scheduler;
 }
 
 void faster::fastContext::registerFunction(void * funcP){
@@ -52,11 +65,16 @@ void faster::fastContext::startWorkers(){
 
 		//auto id = comm->getProcId();
 		// Clean process
-		delete comm;
-		delete settings;
-		exit(0);
+		//delete comm;
+		//comm = NULL;
+		//delete settings;
+		//settings = NULL;
+		//exit(0);
 	}// */
 
+}
+bool faster::fastContext::isDriver(){
+	return comm->isDriver();
 }
 
 void faster::fastContext::calibrate(){
@@ -112,7 +130,8 @@ unsigned long int faster::fastContext::_createFDD(fddBase * ref, fddType type, c
 		}
 
 	}
-	fddList.insert(fddList.begin(), ref);
+	fddList.push_back(ref);
+	fddInternal.push_back(false);
 	comm->waitForReq(comm->numProcs - 1);
 	//std::cerr << "    Done\n";
 
@@ -134,7 +153,8 @@ unsigned long int faster::fastContext::_createIFDD(fddBase * ref, fddType kType,
 			//std::cerr << ".\n";
 		}
 	}
-	fddList.insert(fddList.begin(), ref);
+	fddList.push_back(ref);
+	fddInternal.push_back(false);
 	comm->waitForReq(comm->numProcs - 1);
 	//std::cerr << "    Done\n";
 
@@ -181,7 +201,8 @@ unsigned long int faster::fastContext::createFddGroup(fddBase * ref, std::vector
 
 	//std::cerr << "    S:CreateFddGroup ID:" << numFDDs << '\n';
 
-	fddList.insert(fddList.begin(), ref);
+	fddList.push_back(ref);
+	fddInternal.push_back(false);
 	return numFDDs++;
 }
 

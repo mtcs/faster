@@ -1,10 +1,11 @@
 #include <string>
 #include <algorithm>
+#include <numeric>
 
 #include "fastCommBuffer.h"
 #include "indexedFddStorage.h"
 
-template <class K, class T> 
+template <class K, class T>
 faster::indexedFddStorageCore<K,T>::indexedFddStorageCore(){
 	allocSize = 1000;
 	localData = new T[allocSize];
@@ -12,7 +13,7 @@ faster::indexedFddStorageCore<K,T>::indexedFddStorageCore(){
 	size = 0;
 }
 
-template <class K, class T> 
+template <class K, class T>
 faster::indexedFddStorageCore<K,T>::indexedFddStorageCore(size_t s){
 	if (s > 0){
 		allocSize = s;
@@ -23,7 +24,7 @@ faster::indexedFddStorageCore<K,T>::indexedFddStorageCore(size_t s){
 	localKeys = new K[allocSize];
 	size = s;
 }
-template <class K, class T> 
+template <class K, class T>
 faster::indexedFddStorageCore<K,T>::~indexedFddStorageCore(){
 	//if (localData != NULL){
 		delete [] localData;
@@ -31,21 +32,21 @@ faster::indexedFddStorageCore<K,T>::~indexedFddStorageCore(){
 	//}
 }
 
-template <class K, class T> 
-T * faster::indexedFddStorageCore<K,T>::getData(){ 
-	return localData; 
+template <class K, class T>
+T * faster::indexedFddStorageCore<K,T>::getData(){
+	return localData;
 }
 
-template <class K, class T> 
-K * faster::indexedFddStorageCore<K,T>::getKeys(){ 
-	return localKeys; 
+template <class K, class T>
+K * faster::indexedFddStorageCore<K,T>::getKeys(){
+	return localKeys;
 }
-template <class K, class T> 
-T & faster::indexedFddStorageCore<K,T>::operator[](size_t ref){ 
-	return localData[ref]; 
+template <class K, class T>
+T & faster::indexedFddStorageCore<K,T>::operator[](size_t ref){
+	return localData[ref];
 }
 
-template <class K, class T> 
+template <class K, class T>
 void faster::indexedFddStorageCore<K,T>::sortByKey(){
 	//std::cerr << "        SortByKey";
 	std::vector<size_t> p(size,0);
@@ -54,12 +55,12 @@ void faster::indexedFddStorageCore<K,T>::sortByKey(){
 	size_t i = 0;
 
 	// Sort
-	std::iota(p.begin(), p.end(), 0);
+	iota(p.begin(), p.end(), 0);
 	std::sort(p.begin(), p.end(),
 			        [&](size_t i, size_t j){ return localKeys[i] < localKeys[j]; });
-	
+
 	// Apply in-place
-	
+
 	// get reverse permutation item>position
 	for (i = 0; i < size; ++i){
 		rp[p[i]] = i;
@@ -82,7 +83,7 @@ void faster::indexedFddStorageCore<K,T>::sortByKey(){
 			// Save where it should go
 			size_t holdenPos = rp[pos];
 
-			// Replace 
+			// Replace
 			localKeys[pos] = savedKey;
 			localData[pos] = savedData;
 
@@ -103,27 +104,27 @@ void faster::indexedFddStorageCore<K,T>::sortByKey(){
 
 
 
-template <class K, class T> 
+template <class K, class T>
 faster::indexedFddStorage<K,T>::indexedFddStorage() : indexedFddStorageCore<K,T>(){}
-template <class K, class T> 
+template <class K, class T>
 faster::indexedFddStorage<K,T*>::indexedFddStorage() : indexedFddStorageCore<K,T*>(){}
 
-template <class K, class T> 
+template <class K, class T>
 faster::indexedFddStorage<K,T>::indexedFddStorage(size_t s) : indexedFddStorageCore<K,T>(s){
 }
 
-template <class K, class T> 
+template <class K, class T>
 faster::indexedFddStorage<K,T*>::indexedFddStorage(size_t s) : indexedFddStorageCore<K,T*>(s){
 	lineSizes = new size_t[s];
 }
 
 
-template <class K, class T> 
+template <class K, class T>
 faster::indexedFddStorage<K,T>::indexedFddStorage(K * keys, T * data, size_t s) : indexedFddStorage<K,T>(s){
 	setData(keys, data, s);
 }
 
-template <class K, class T> 
+template <class K, class T>
 faster::indexedFddStorage<K,T*>::indexedFddStorage(K * keys, T ** data, size_t * lineSizes, size_t s) : indexedFddStorage<K,T *>(s){
 	setData(keys, data, lineSizes, s);
 }
@@ -131,16 +132,16 @@ faster::indexedFddStorage<K,T*>::indexedFddStorage(K * keys, T ** data, size_t *
 
 
 
-template <class K, class T> 
+template <class K, class T>
 faster::indexedFddStorage<K,T*>::~indexedFddStorage(){
 	if (lineSizes != NULL){
 		delete [] lineSizes;
 	}
-}		
+}
 
 
 
-template <class K, class T> 
+template <class K, class T>
 void faster::indexedFddStorage<K,T>::setData(K * keys, T * data, size_t s){
 	grow(s);
 	this->size = s;
@@ -151,7 +152,7 @@ void faster::indexedFddStorage<K,T>::setData(K * keys, T * data, size_t s){
 	//this->localKeys = keys;
 }
 
-template <class K, class T> 
+template <class K, class T>
 void faster::indexedFddStorage<K,T*>::setData( K * keys, T ** data, size_t * ls, size_t s){
 	grow(s);
 	#pragma omp parallel for
@@ -166,7 +167,7 @@ void faster::indexedFddStorage<K,T*>::setData( K * keys, T ** data, size_t * ls,
 	}
 	this->size = s;
 }
-template <class K, class T> 
+template <class K, class T>
 void faster::indexedFddStorage<K,T>::setDataRaw(void * keys, void * data, size_t s){
 	fastCommBuffer buffer(0);
 	fastCommBuffer buffer2(0);
@@ -182,11 +183,11 @@ void faster::indexedFddStorage<K,T>::setDataRaw(void * keys, void * data, size_t
 		buffer2 >> this->localKeys[i];
 	}
 }
-template <class K, class T> 
+template <class K, class T>
 void faster::indexedFddStorage<K,T*>::setDataRaw( void * keys, void * data, size_t * ls, size_t s){
 	fastCommBuffer buffer(0);
 	fastCommBuffer buffer2(0);
-	
+
 	buffer.setBuffer(data, s);
 	buffer2.setBuffer(keys, s);
 
@@ -200,51 +201,51 @@ void faster::indexedFddStorage<K,T*>::setDataRaw( void * keys, void * data, size
 	}
 }
 
-template <class K, class T> 
-void   faster::indexedFddStorage<K,T>::setSize(size_t s){ 
-	this->grow(s); 
-	this->size = s;  
+template <class K, class T>
+void   faster::indexedFddStorage<K,T>::setSize(size_t s){
+	this->grow(s);
+	this->size = s;
 }
-template <class K, class T> 
-void   faster::indexedFddStorage<K,T*>::setSize(size_t s){ 
-	this->grow(s); 
-	this->size = s;  
+template <class K, class T>
+void   faster::indexedFddStorage<K,T*>::setSize(size_t s){
+	this->grow(s);
+	this->size = s;
 }
 
 
-template <class K, class T> 
+template <class K, class T>
 void faster::indexedFddStorage<K,T>::insert(K key, T & item){
 	if ( this->size == this->allocSize )
 		grow( std::max(this->size + 1, size_t(this->allocSize*1.5) ) );
 	this->localKeys[this->size] = std::move(key);
-	this->localData[this->size++] = std::move(item);	
+	this->localData[this->size++] = std::move(item);
 }
 
-template <class K, class T> 
+template <class K, class T>
 void faster::indexedFddStorage<K,T*>::insert(K key, T *& item, size_t s){
 	if ( this->size == this->allocSize )
 		grow( std::max(this->size + 1, size_t(this->allocSize*1.5) ) );
-	lineSizes[this->size] = s;	
+	lineSizes[this->size] = s;
 	this->localKeys[this->size] = key;
-	this->localData[this->size++] = item;	
+	this->localData[this->size++] = item;
 
 }
-			
 
 
 
 
 
 
-template <class K, class T> 
-size_t * faster::indexedFddStorage<K,T*>::getLineSizes(){ 
-	return lineSizes; 
+
+template <class K, class T>
+size_t * faster::indexedFddStorage<K,T*>::getLineSizes(){
+	return lineSizes;
 }
 
 
 
 
-template <class K, class T> 
+template <class K, class T>
 void faster::indexedFddStorage<K,T>::grow(size_t toSize){
 	if (this->allocSize < toSize){
 		//if ((this->allocSize * 2) > toSize){
@@ -255,7 +256,7 @@ void faster::indexedFddStorage<K,T>::grow(size_t toSize){
 		K * newKeys = new K [toSize];
 
 		if (this->size > 0) {
-			//#pragma omp parallel 
+			//#pragma omp parallel
 			{
 				//#pragma omp task
 				std::move(this->localData, this->localData + this->size, newStorage);
@@ -281,7 +282,7 @@ void faster::indexedFddStorage<K,T>::grow(size_t toSize){
 		this->allocSize = toSize;
 	}
 }
-template <class K, class T> 
+template <class K, class T>
 void faster::indexedFddStorage<K,T*>::grow(size_t toSize){
 	if (this->allocSize < toSize){
 		if ((this->allocSize * 2) > toSize){
@@ -320,7 +321,7 @@ void faster::indexedFddStorage<K,T*>::grow(size_t toSize){
 
 
 
-template <class K, class T> 
+template <class K, class T>
 void faster::indexedFddStorage<K,T>::shrink(){
 	if ( (this->size > 0) && (this->allocSize > this->size) ){
 		T * newStorage = new T [this->size];
@@ -339,7 +340,7 @@ void faster::indexedFddStorage<K,T>::shrink(){
 		this->allocSize = this->size;
 	}
 }
-template <class K, class T> 
+template <class K, class T>
 void faster::indexedFddStorage<K,T*>::shrink(){
 	if ( (this->size > 0) && (this->allocSize > this->size) ){
 		T ** newStorage = new T* [this->size];

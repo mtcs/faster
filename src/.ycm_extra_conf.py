@@ -43,7 +43,7 @@ flags = [
 '-DNDEBUG',
 # You 100% do NOT need -DUSE_CLANG_COMPLETER in your flags; only the YCM
 # source code needs it.
-'-DUSE_CLANG_COMPLETER',
+#'-DUSE_CLANG_COMPLETER',
 # THIS IS IMPORTANT! Without a "-std=<something>" flag, clang won't know which
 # language to use when compiling headers. So it will guess. Badly. So C++
 # headers will be compiled as C headers. You don't want that so ALWAYS specify
@@ -61,6 +61,9 @@ flags = [
 # harmful
 '-I', '.',
 '-I', './include',
+'-isystem', '/usr/include/c++/6.1.1/',
+'-isystem', '/usr/include/c++/6.1.1/x86_64-pc-linux-gnu',
+'-isystem', '/usr/include/c++/6.1.1/backward',
 '-isystem', '/usr/include/openmpi',
 '-fopenmp'
 ]

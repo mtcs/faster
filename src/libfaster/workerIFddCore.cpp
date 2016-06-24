@@ -216,6 +216,8 @@ bool faster::workerIFddCore<K,T>::EDBKSendData(fastComm *comm, std::vector<size_
 	return tryShrink;
 
 }
+
+// Checks for arriving data
 template <typename K, typename T>
 bool faster::workerIFddCore<K,T>::EDBKRecvData(
 		fastComm *comm,
@@ -287,6 +289,7 @@ bool faster::workerIFddCore<K,T>::EDBKRecvData(
 	return false;
 }
 
+// Get rid of blank spaces in fdd data storage
 template <typename K, typename T>
 void faster::workerIFddCore<K,T>::EDBKShrinkData(std::vector<bool> & deleted, size_t & pos ){
 	K * keys = localData->getKeys();
@@ -338,6 +341,7 @@ void faster::workerIFddCore<K,T>::EDBKShrinkData(std::vector<bool> & deleted, si
 
 }
 
+// Insert the rest of the received data inplace
 template <typename K, typename T>
 void faster::workerIFddCore<K,T>::EDBKFinishDataInsert(
 		std::vector<bool> & deleted,
@@ -466,88 +470,52 @@ void faster::workerIFddCore<K,T>::exchangeDataByKeyMapped(fastComm *comm UNUSED)
 	// */
 }
 
+// Insert data into departure buffer and send if buffer is full
 template <typename K, typename T>
-bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
+bool faster::workerIFddCore<K,T>::EDBKsendDataAsync(
 		fastComm *comm,
-		size_t & pos,
-		std::vector<bool> & deleted,
-		std::vector<size_t> & dataSize,
-		std::deque< std::pair<K,T> >  & recvData,
-		bool & dirty) {
-
-	K * keys = localData->getKeys();
-	T * data = localData->getData();
-	size_t size = localData->getSize();
+		int owner,
+		K & key,
+		T & data,
+		std::vector<size_t> & dataSize
+		){
 	fastCommBuffer * buffer = comm->getSendBuffers();
-	hasher<K> hash(comm->getNumProcs() - 1);
 
-
-	// Insert Data that dont belong to me in the message
-	while ( pos < size){
-		K & key = keys[pos];
-		int owner = 1 + hash.get(key);
-		//std::cerr << key;
-
-		// If it is my item dont send it
-		if (owner == comm->getProcId()){
-			pos++;
-			continue;
-		}
-
-		if ( ! comm->isSendBufferFree(owner) ){
-			usleep(1);
-			return false;
-		}
-		//std::cerr << "\033[0;34m" << key << "\033[0m:" << owner << " ";
-
-		// If it is the beginin of the message save space for the msg
-		// size
-		if ( dataSize[owner] == 0 ){
-			buffer[owner].reset();
-			buffer[owner].advance(sizeof(size_t));
-		}
-
-		// Insert data Into buffer
-		buffer[owner] << key <<  data[pos];
-		dataSize[owner]++;
-		dirty = true;
-		//std::cerr << "S";
-
-		if (recvData.size() > 0){
-			// Replace deleted item data
-			keys[pos] = std::move(recvData.front().first);
-			data[pos] = std::move(recvData.front().second);
-			recvData.pop_front();
-		}else{
-			// Just delete item;
-			deleted[pos] = true;
-		}
-		pos++;
-
-		// Check to see if we reached the maximum message size
-		if ( buffer[owner].size() >= comm->maxMsgSize ){
-			//std::cerr << "S" << owner << "("<< dataSize[owner] << "," << buffer[owner].size()  << ") ";
-			//Send partial data
-			buffer[owner] << char(1);
-			buffer[owner].writePos(dataSize[owner], 0);
-
-			// Send data
-			comm->sendGroupByKeyData(owner);
-			dataSize[owner] = 0;
-			return false;
-		}
-
+	// If it is the beginin of the message save space for the msg
+	// size
+	if ( dataSize[owner] == 0 ){
+		buffer[owner].reset();
+		buffer[owner].advance(sizeof(size_t));
 	}
 
-	// Wait for all buffers to be freed
-	for ( int owner = 1; owner < comm->getNumProcs(); owner++){
-		if ( owner == comm->getProcId() ) {
-				continue;
-		}
-		if ( ! comm->isSendBufferFree(owner) ){
-			return false;
-		}
+	// Insert data Into buffer
+	buffer[owner] << key << data;
+	dataSize[owner]++;
+
+	// Check to see if we reached the maximum message size
+	if ( buffer[owner].size() >= comm->maxMsgSize ){
+		//std::cerr << "S" << owner << "("<< dataSize[owner] << "," << buffer[owner].size()  << ") ";
+		//Send partial data
+		buffer[owner] << char(1);
+		buffer[owner].writePos(dataSize[owner], 0);
+
+		// Send data
+		comm->sendGroupByKeyData(owner);
+		dataSize[owner] = 0;
+		return true;
 	}
+
+	return false;
+}
+
+// Sends all buffers
+template <typename K, typename T>
+void faster::workerIFddCore<K,T>::flushDataSend(
+		fastComm *comm,
+		std::vector<size_t> & dataSize
+		){
+	fastCommBuffer * buffer = comm->getSendBuffers();
+
 
 
 	//std::cerr << "\033[0;31mSF\033[0m ";
@@ -556,7 +524,7 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 		if ( owner == comm->getProcId() ) {
 				continue;
 		}
-		// If it is the beginin of the message save space for the msg
+		// If it is the beginning of the message save space for the msg
 		// size
 		if ( dataSize[owner] == 0 ){
 			buffer[owner].reset();
@@ -572,10 +540,112 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 
 		// Send data
 		comm->sendGroupByKeyData(owner);
-		dataSize[owner] = 0;
+	}
+	//std::cerr << "\033[0;33mSEND FINISHED\033[0m\n";
+}
+
+// Sends pending data
+template <typename K, typename T>
+bool faster::workerIFddCore<K,T>::sendPending(
+		fastComm *comm,
+		std::vector< std::deque< std::pair<K,T> > > & pendingSend,
+		std::vector<size_t> & dataSize
+		){
+	bool finished = true;
+
+	for ( int owner = 1; owner < comm->getNumProcs(); owner++){
+		if ( (pendingSend[owner].size() > 0) && comm->isSendBufferFree(owner) ){
+			while (pendingSend[owner].size() > 0){
+				std::pair<K,T> & p = pendingSend[owner].front();
+				if ( EDBKsendDataAsync(comm, owner, p.first, p.second, dataSize) ){
+					return false;
+				}
+				pendingSend[owner].pop_front();
+			}
+		}else{
+			finished = false;
+		}
+	}
+	return finished;
+}
+
+// Send data that belong to other machines
+template <typename K, typename T>
+bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
+		fastComm *comm,
+		size_t & pos,
+		std::vector<bool> & deleted,
+		std::vector<size_t> & dataSize,
+		std::deque< std::pair<K,T> >  & recvData,
+		std::vector< std::deque< std::pair<K,T> > > & pendingSend,
+		bool & dirty) {
+
+	K * keys = localData->getKeys();
+	T * data = localData->getData();
+	size_t size = localData->getSize();
+	hasher<K> hash(comm->getNumProcs() - 1);
+	bool release = false;
+
+	sendPending(comm, pendingSend, dataSize);
+
+	// Insert Data that dont belong to me in the message
+	while ( pos < size){
+		K & key = keys[pos];
+		int owner = 1 + hash.get(key);
+		//std::cerr << key;
+
+		// If it is my item dont send it
+		if (owner == comm->getProcId()){
+			pos++;
+			continue;
+		}
+
+		dirty = true;
+		// Enqueue for sending later if buffer occupied
+		if ( ! comm->isSendBufferFree(owner) ){
+			//usleep(1);
+			pendingSend[owner].push_back( std::make_pair( key, std::move(data[pos]) ) );
+			//return false;
+		}else{
+			//std::cerr << "\033[0;34m" << key << "\033[0m:" << owner << " ";
+
+			release = EDBKsendDataAsync(comm, owner, key, data[pos], dataSize);
+		}
+		//std::cerr << "S";
+
+		// Place a received pair inplace
+		if (recvData.size() > 0){
+			// Replace deleted item data
+			keys[pos] = std::move(recvData.front().first);
+			data[pos] = std::move(recvData.front().second);
+			recvData.pop_front();
+		}else{
+			// Just delete item;
+			deleted[pos] = true;
+		}
+		pos++;
+
+		if (release)
+			return false;
+
 	}
 
-	//std::cerr << "\033[0;33mSEND FINISHED\033[0m\n";
+	if ( ! sendPending(comm, pendingSend, dataSize) ){
+		return false;
+	}
+
+	// Wait for all buffers to be freed
+	for ( int owner = 1; owner < comm->getNumProcs(); owner++){
+		if ( owner == comm->getProcId() ) {
+				continue;
+		}
+		if ( ! comm->isSendBufferFree(owner) ){
+			return false;
+		}
+	}
+
+	flushDataSend(comm, dataSize);
+
 	return true;
 }
 
@@ -592,6 +662,7 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 	std::vector<bool> deleted(size, false);
 	std::deque< std::pair<K,T> > recvData;
 	std::vector<size_t> dataSize(comm->getNumProcs(), 0);
+	std::vector< std::deque< std::pair<K,T> > > pendingSend(comm->getNumProcs());
 	size_t sendPos = 0;
 	size_t recvPos = 0;
 	bool dirty = false;
@@ -607,7 +678,7 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 
 	while ( ! (recvFinished & sendFinished) ){
 		if ( ! sendFinished )
-			sendFinished |= EDBKSendDataHashed(comm, sendPos, deleted, dataSize, recvData, dirty);
+			sendFinished |= EDBKSendDataHashed(comm, sendPos, deleted, dataSize, recvData, pendingSend, dirty);
 		if ( ! recvFinished )
 			recvFinished |= EDBKRecvData(comm, recvPos, sendPos, deleted, recvData, peersFinished, dirty);
 	}

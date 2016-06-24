@@ -7,7 +7,7 @@
 
 
 #include "definitions.h"
-#include "fastCommBuffer.h" 
+#include "fastCommBuffer.h"
 #include "misc.h"
 
 namespace faster{
@@ -384,7 +384,7 @@ namespace faster{
 		MPI_Isend( buffer[dest].data(), buffer[dest].size(), MPI_BYTE, dest, tagID , MPI_COMM_WORLD, &req2[dest-1]);
 
 		// Send subarrays sizes
-		if (tagDataSize) 
+		if (tagDataSize)
 			MPI_Isend( lineSizes, size*sizeof(size_t), MPI_BYTE, dest, tagDataSize, MPI_COMM_WORLD, &req4[dest-1]);
 
 		// Send Keys
@@ -535,7 +535,7 @@ namespace faster{
 			bufferRecv[0].reset();
 			bufferRecv[0].grow(msgSize);
 
-			MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, i, MSG_COLLECTDATA, MPI_COMM_WORLD, &stat);	
+			MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, i, MSG_COLLECTDATA, MPI_COMM_WORLD, &stat);
 
 			bufferRecv[0] >> id >> size;
 			//std::cerr << "[" << id << ":" << size<< "] " ;
@@ -560,29 +560,29 @@ namespace faster{
 
 		// Include number of items in first message
 		buffer[current_buffer].reset();
-		buffer[current_buffer] << tid << size_t(keyMap.size()); 
+		buffer[current_buffer] << tid << size_t(keyMap.size());
 
 		std::cerr << " NM:" << num_msgs << "\n";
 
 		for ( auto it = keyMap.begin(); it != keyMap.end(); it++){
-			buffer[current_buffer] << it->first << it->second; 
+			buffer[current_buffer] << it->first << it->second;
 			inserted_items ++;
 
 			// Send some keys
 			if (inserted_items >= itemsPerMsg){
 				std::cerr << msg_num << " ";
-				
+
 				if (msg_num > 0)
 					MPI_Waitall( (numProcs - 1), req, status);
-				
+
 				for ( int i = 1; i < (numProcs); ++i)
 					MPI_Isend(
-							buffer[current_buffer].data(), 
-							buffer[current_buffer].size(), 
-							MPI_BYTE, 
-							i, 
-							MSG_KEYMAP, 
-							MPI_COMM_WORLD, 
+							buffer[current_buffer].data(),
+							buffer[current_buffer].size(),
+							MPI_BYTE,
+							i,
+							MSG_KEYMAP,
+							MPI_COMM_WORLD,
 							//&requests[ (i-1) + msg_num * (numProcs-1)]
 							&req[i-1]
 						 );
@@ -598,18 +598,18 @@ namespace faster{
 		// Send the rest of the keys
 		if (inserted_items > 0){
 			std::cerr << msg_num << " ";
-				
+
 			if (msg_num > 0)
 				MPI_Waitall( (numProcs - 1), req, status);
-				
+
 			for ( int i = 1; i < (numProcs); ++i)
 				MPI_Isend(
-						buffer[current_buffer].data(), 
-						buffer[current_buffer].size(), 
-						MPI_BYTE, 
-						i, 
-						MSG_KEYMAP, 
-						MPI_COMM_WORLD, 
+						buffer[current_buffer].data(),
+						buffer[current_buffer].size(),
+						MPI_BYTE,
+						i,
+						MSG_KEYMAP,
+						MPI_COMM_WORLD,
 						//&requests[ (i-1) + msg_num * (numProcs-1)]
 						&req[i-1]
 					 );
@@ -627,23 +627,23 @@ namespace faster{
 		MPI_Status stat;
 		size_t size;
 		int rsize;
-		
+
 		// Recv initial data
 		MPI_Probe(0, MSG_KEYMAP, MPI_COMM_WORLD, &stat);
 		MPI_Get_count(&stat, MPI_BYTE, &rsize);
 		bufferRecv[0].grow(rsize);
 		bufferRecv[0].reset();
-		MPI_Recv(bufferRecv[0].data(), 
-				bufferRecv[0].free(), 
-				MPI_BYTE, 
-				0, 
-				MSG_KEYMAP, 
-				MPI_COMM_WORLD, 
+		MPI_Recv(bufferRecv[0].data(),
+				bufferRecv[0].free(),
+				MPI_BYTE,
+				0,
+				MSG_KEYMAP,
+				MPI_COMM_WORLD,
 				&stat
-			);	
+			);
 
 		bufferRecv[0] >> tid >> size;
-		
+
 		// Allocate map with pre-known size
 		keyMap.reserve(size);
 
@@ -663,14 +663,14 @@ namespace faster{
 				bufferRecv[0].grow(rsize);
 				bufferRecv[0].reset();
 				MPI_Recv(
-						bufferRecv[0].data(), 
-						bufferRecv[0].free(), 
-						MPI_BYTE, 
-						0, 
-						MSG_KEYMAP, 
-						MPI_COMM_WORLD, 
+						bufferRecv[0].data(),
+						bufferRecv[0].free(),
+						MPI_BYTE,
+						0,
+						MSG_KEYMAP,
+						MPI_COMM_WORLD,
 						&stat
-					);	
+					);
 			}
 
 			// Insert recvd keys
@@ -697,7 +697,7 @@ namespace faster{
 			if (procId == i){
 				std::cerr << "S" << localKeyMap.size() << " ";
 				int reqIndex = 0;
-				
+
 				buffer[i] << size_t(localKeyMap.size());
 				for ( auto it = localKeyMap.begin(); it != localKeyMap.end(); it++){
 					buffer[i] << it->first << it->second;
@@ -705,7 +705,7 @@ namespace faster{
 
 				for (int j = 1; j < (numProcs); ++j){
 					if ( j != i )
-						MPI_Isend(buffer[i].data(), buffer[i].size(), MPI_BYTE, j, MSG_DISTKEYMAP, MPI_COMM_WORLD, &req[reqIndex++]); 
+						MPI_Isend(buffer[i].data(), buffer[i].size(), MPI_BYTE, j, MSG_DISTKEYMAP, MPI_COMM_WORLD, &req[reqIndex++]);
 				}
 				MPI_Waitall( numProcs - 2, req, status);
 			}else{
@@ -719,7 +719,7 @@ namespace faster{
 
 				bufferRecv[i].reset();
 
-				MPI_Recv(bufferRecv[i].data(), bufferRecv[i].free(), MPI_BYTE, i, MSG_DISTKEYMAP, MPI_COMM_WORLD, &stat);	
+				MPI_Recv(bufferRecv[i].data(), bufferRecv[i].free(), MPI_BYTE, i, MSG_DISTKEYMAP, MPI_COMM_WORLD, &stat);
 
 				bufferRecv[i] >> numItems;
 				std::cerr << "R:" << numItems << " ";
@@ -729,7 +729,7 @@ namespace faster{
 					keyMap.insert(std::move(p));
 				}
 			}
-			
+
 		}
 		keyMap.insert(localKeyMap.begin(), localKeyMap.end());
 		std::cerr << "    Final Size: " << keyMap.size() << "\n";
@@ -738,10 +738,10 @@ namespace faster{
 	template <typename K>
 	void faster::fastComm::sendCogroupData(unsigned long tid, std::unordered_map<K, int> & keyMap, std::vector<bool> & flags){
 		buffer[0].reset();
-		buffer[0] << tid << size_t(keyMap.size()); 
+		buffer[0] << tid << size_t(keyMap.size());
 
 		for ( auto it = keyMap.begin(); it != keyMap.end(); it++){
-			buffer[0] << it->first << it->second; 
+			buffer[0] << it->first << it->second;
 		}
 
 		buffer[0] << int(flags.size());
@@ -761,18 +761,18 @@ namespace faster{
 		MPI_Status stat;
 		size_t size;
 		int rsize;
-		
+
 		MPI_Probe(0, MSG_KEYMAP, MPI_COMM_WORLD, &stat);
 		MPI_Get_count(&stat, MPI_BYTE, &rsize);
 		bufferRecv[0].grow(rsize);
 
 		bufferRecv[0].reset();
-		
-		MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_KEYMAP, MPI_COMM_WORLD, &stat);	
+
+		MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_KEYMAP, MPI_COMM_WORLD, &stat);
 		//bcastBuffer(0, 0);
 
 		bufferRecv[0] >> tid >> size;
-		
+
 		// Allocate map with pre-known size
 		keyMap.reserve(size);
 
