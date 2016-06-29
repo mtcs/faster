@@ -43,25 +43,14 @@ namespace faster {
 			template <typename T>
 			void write(T &v, size_t s){
 				grow(_size + s);
-				//std::memcpy( &_data[_size], &v, s );
 				std::copy_n( (char*)&v, s , _data+_size );
-
-				//char * p = (char*) &v;
-				//for ( size_t i = 0; i < s; i++){
-					//_data[_size + i] = p[i];
-				//}
 
 				_size += s;
 			}
 			template <typename T>
 			void writePos(const T &v, size_t s, size_t pos){
 				grow(pos + s);
-				//std::memcpy( &_data[pos], (char*) &v, s );
 				std::copy_n((char*) &v, s, _data + pos);
-				//char * p = (char*) &v;
-				//for ( size_t i = 0; i < s; i++){
-					//_data[_size + i] = p[i];
-				//}
 
 				if(_size < pos+s)
 					_size = pos+s;
@@ -73,12 +62,7 @@ namespace faster {
 
 			template <typename T>
 			inline void writeSafe(T * v, size_t s){
-				//std::memcpy( &_data[_size], v, s );
 				std::copy_n( (char*)v, s, &_data[_size]);
-				//char * p = (char*) &v;
-				//for ( size_t i = 0; i < s; i++){
-				//	_data[_size + i] = p[i];
-				//}
 
 				_size += s;
 			}
@@ -101,6 +85,14 @@ namespace faster {
 				grow(_size + sizeof(size_t) + s );
 				writeSafe( &s, sizeof(size_t) );
 				writeSafe( i.data(), s );
+			}
+			void write(std::vector<std::string> v){
+				size_t s = v.size();
+				grow(_size + sizeof(size_t) + s );
+				writeSafe( &s, sizeof(size_t) );
+				for ( auto i : v ){
+					write( i );
+				}
 			}
 			template <typename T>
 			void write(std::vector<T> v){
@@ -128,22 +120,12 @@ namespace faster {
 			// READ Data
 			template <typename T>
 			void read(T & v, size_t s){
-				//std::memcpy(&v, &_data[_size], s );
 				std::copy_n(_data + _size, s, (char*) &v);
-				//char * p = (char*) &v;
-				//for ( size_t i = 0; i < s; i++){
-					//p[i] = _data[_size + i];
-				//}
 				_size += s;
 			}
 			template <typename T>
 			void read(T * v, size_t s){
-				//std::memcpy((char*)v, &_data[_size], s );
 				std::copy_n(_data + _size, s, (char*) v);
-				//char * p = (char*) &v;
-				//for ( size_t i = 0; i < s; i++){
-					//p[i] = _data[_size + i];
-				//}
 				_size += s;
 			}
 			template <typename T>
@@ -156,8 +138,17 @@ namespace faster {
 				v.assign((T*) &_data[_size], (T*) &_data[_size + s] );
 				_size += s;
 			}
+			void read(std::vector<std::string> & v){
+				size_t s;
+				read(s);
+				v.resize(s);
+				for (size_t i = 0 ; i < s ; i++){
+					read(v[i]);
+				}
+			}
 			void readString(std::string & v, size_t s){
-				v.assign( &_data[_size], &_data[_size] + s );
+				v.resize(s);
+				std::copy_n( _data + _size, s, (char*)v.data() );
 				_size += s;
 			}
 			template <typename T>

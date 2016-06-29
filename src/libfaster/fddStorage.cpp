@@ -4,14 +4,14 @@
 #include "fastCommBuffer.h"
 #include "fddStorage.h"
 
-template <class T> 
+template <class T>
 faster::fddStorageCore<T>::fddStorageCore(){
 	allocSize = 1000;
 	localData = new T[allocSize];
 	size = 0;
 }
 
-template <class T> 
+template <class T>
 faster::fddStorageCore<T>::fddStorageCore(size_t s){
 	if (s > 0)
 		allocSize = s;
@@ -20,19 +20,19 @@ faster::fddStorageCore<T>::fddStorageCore(size_t s){
 	localData = new T[allocSize];
 	size = s;
 }
-template <class T> 
+template <class T>
 faster::fddStorageCore<T>::~fddStorageCore(){
 	delete [] localData;
 }
 
-template <class T> 
-T * faster::fddStorageCore<T>::getData(){ 
-	return localData; 
+template <class T>
+T * faster::fddStorageCore<T>::getData(){
+	return localData;
 }
 
-template <class T> 
-T & faster::fddStorageCore<T>::operator[](size_t ref){ 
-	return localData[ref]; 
+template <class T>
+T & faster::fddStorageCore<T>::operator[](size_t ref){
+	return localData[ref];
 }
 
 
@@ -58,23 +58,23 @@ template class faster::fddStorageCore<std::vector<double>>;
 
 
 
-template <class T> 
+template <class T>
 faster::fddStorage<T>::fddStorage() : fddStorageCore<T>(){}
-template <class T> 
+template <class T>
 faster::fddStorage<T*>::fddStorage() : fddStorageCore<T*>(){
 }
 
-template <class T> 
+template <class T>
 faster::fddStorage<T*>::fddStorage(size_t s):fddStorageCore<T *>(s){
 	lineSizes = new size_t[s];
 }
 
-template <class T> 
+template <class T>
 faster::fddStorage<T>::fddStorage(T * data, size_t s) : fddStorage<T>(s){
 	setData(data, s);
 }
 
-template <class T> 
+template <class T>
 faster::fddStorage<T*>::fddStorage(T ** data, size_t * lineSizes, size_t s) : fddStorage(s){
 	setData( data, lineSizes, s);
 }
@@ -82,17 +82,17 @@ faster::fddStorage<T*>::fddStorage(T ** data, size_t * lineSizes, size_t s) : fd
 
 
 
-template <class T> 
+template <class T>
 faster::fddStorage<T*>::~fddStorage(){
 	if (lineSizes != NULL){
 		delete [] lineSizes;
 	}
-}		
+}
 
 
 
 
-template <class T> 
+template <class T>
 void faster::fddStorage<T>::setData( T * data, size_t s){
 	grow(s);
 	this->size = s;
@@ -103,13 +103,13 @@ void faster::fddStorage<T>::setData( T * data, size_t s){
 }
 // Works for primitive and Containers
 
-template <class T> 
+template <class T>
 void faster::fddStorage<T*>::setData( T ** data, size_t * ls, size_t s){
 	grow(s);
 	#pragma omp parallel for
 	for ( size_t i = 0; i < s; ++i){
 		lineSizes[i] = ls[i];
-		
+
 		this->localData[i] = new  T [lineSizes[i]];
 		for ( size_t j = 0; j < lineSizes[i]; ++j){
 			this->localData[i][j] =  data[i][j];
@@ -117,7 +117,7 @@ void faster::fddStorage<T*>::setData( T ** data, size_t * ls, size_t s){
 	}
 	this->size = s;
 }
-template <class T> 
+template <class T>
 void faster::fddStorage<T>::setDataRaw(void * data, size_t s){
 	fastCommBuffer buffer(0);
 
@@ -132,7 +132,7 @@ void faster::fddStorage<T>::setDataRaw(void * data, size_t s){
 	}
 	//std::cerr << "\n";
 }
-template <class T> 
+template <class T>
 void faster::fddStorage<T*>::setDataRaw( void * data, size_t * ls, size_t s){
 	fastCommBuffer buffer(0);
 
@@ -147,30 +147,30 @@ void faster::fddStorage<T*>::setDataRaw( void * data, size_t * ls, size_t s){
 	}
 }
 
-template <class T> 
-void   faster::fddStorage<T>::setSize(size_t s){ 
-	this->grow(s); 
-	this->size = s;  
+template <class T>
+void   faster::fddStorage<T>::setSize(size_t s){
+	this->grow(s);
+	this->size = s;
 }
-template <class T> 
-void   faster::fddStorage<T*>::setSize(size_t s){ 
-	this->grow(s); 
-	this->size = s;  
+template <class T>
+void   faster::fddStorage<T*>::setSize(size_t s){
+	this->grow(s);
+	this->size = s;
 }
 
-template <class T> 
+template <class T>
 void faster::fddStorage<T>::insert(T & item){
 	if ( this->size == this->allocSize )
 		grow( std::max(this->size + 1, size_t(this->allocSize*1.5) ) );
-	this->localData[this->size++] = std::move(item);	
+	this->localData[this->size++] = std::move(item);
 }
 
-template <class T> 
+template <class T>
 void faster::fddStorage<T*>::insert(T *& item, size_t s){
 	if ( this->size == this->allocSize )
 		grow( std::max(this->size + 1, size_t(this->allocSize*1.5) ) );
-	lineSizes[this->size] = s;	
-	this->localData[this->size++] = item;	
+	lineSizes[this->size] = s;
+	this->localData[this->size++] = item;
 
 }
 
@@ -179,15 +179,15 @@ void faster::fddStorage<T*>::insert(T *& item, size_t s){
 
 
 
-template <class T> 
-size_t * faster::fddStorage<T*>::getLineSizes(){ 
-	return lineSizes; 
+template <class T>
+size_t * faster::fddStorage<T*>::getLineSizes(){
+	return lineSizes;
 }
 
 
 
 
-template <class T> 
+template <class T>
 void faster::fddStorage<T>::grow(size_t toSize){
 	if (this->allocSize < toSize){
 		if ((this->allocSize * 2) > toSize){
@@ -196,7 +196,7 @@ void faster::fddStorage<T>::grow(size_t toSize){
 
 		T * newStorage = new T [toSize];
 
-		if (this->size >0) 
+		if (this->size > 0)
 			std::move(this->localData, this->localData + this->size, newStorage);
 			//memcpy(newStorage, localData, size * sizeof( T ) );
 
@@ -206,7 +206,7 @@ void faster::fddStorage<T>::grow(size_t toSize){
 		this->allocSize = toSize;
 	}
 }
-template <class T> 
+template <class T>
 void faster::fddStorage<T*>::grow(size_t toSize){
 	if (this->allocSize < toSize){
 		if ((this->allocSize * 2) > toSize){
@@ -238,7 +238,7 @@ void faster::fddStorage<T*>::grow(size_t toSize){
 
 
 
-template <class T> 
+template <class T>
 void faster::fddStorage<T>::shrink(){
 	if ( (this->size > 0) && (this->allocSize > this->size) ){
 		T * newStorage = new T [this->size];
@@ -251,7 +251,7 @@ void faster::fddStorage<T>::shrink(){
 		this->allocSize = this->size;
 	}
 }
-template <class T> 
+template <class T>
 void faster::fddStorage<T*>::shrink(){
 	if ( (this->size > 0) && (this->allocSize > this->size) ){
 		T ** newStorage = new T* [this->size];
