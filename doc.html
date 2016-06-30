@@ -1,0 +1,35 @@
+---
+layout: default
+title: Faster - Documentation
+---
+<h2>Wiki</h2>
+
+<p>
+<a class="extra" href="https://github.com/mtcs/faster/wiki">Wiki Page</a>
+</p>
+
+<h2>Reference</h2>
+
+<p>
+	<ul>
+		<li class="compactList">
+			<a class="extra" href="http://mtcs.github.io/faster/doc/latest/html/">Latest</a>
+		</li>
+	{% for post in site.categories.release %}
+		<li class="compactList">
+			{{post.tag}}
+			<a href=faster/doc/{{post.tag}}/html/index.html>HTML</a>
+			<a href=faster/doc/{{post.tag}}/latex/irefman.pdf>PDF</a>
+		</li>
+	{% endfor %}
+
+	</ul>
+</p>
+
+<h2>Papers</h2>
+
+<p>
+	<i>Faster: a low overhead framework for massive data analysis</i><br>
+	Matheus C. Santos, Wagner Meira Jr., Dorgival Guedes and Virgı́lio F. Almeida<br>
+	CCGrid2016
+</p>
