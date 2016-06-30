@@ -1,0 +1,77 @@
+\hypertarget{classfaster_1_1iFddCore}{}\section{faster\+:\+:i\+Fdd\+Core$<$ K, T $>$ Class Template Reference}
+\label{classfaster_1_1iFddCore}\index{faster\+::i\+Fdd\+Core$<$ K, T $>$@{faster\+::i\+Fdd\+Core$<$ K, T $>$}}
+Inheritance diagram for faster\+:\+:i\+Fdd\+Core$<$ K, T $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classfaster_1_1iFddCore}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classfaster_1_1iFddCore_a311cd5a470392a25565057aaf0fa3226}{}{\footnotesize template$<$typename U $>$ }\\\hyperlink{classfaster_1_1groupedFdd}{grouped\+Fdd}$<$ K $>$ $\ast$ {\bfseries cogroup} (\hyperlink{classfaster_1_1iFddCore}{i\+Fdd\+Core}$<$ K, U $>$ $\ast$fdd1)\label{classfaster_1_1iFddCore_a311cd5a470392a25565057aaf0fa3226}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_af434c1c5118e380f9d78398fe46176d5}{}{\footnotesize template$<$typename U , typename V $>$ }\\\hyperlink{classfaster_1_1groupedFdd}{grouped\+Fdd}$<$ K $>$ $\ast$ {\bfseries cogroup} (\hyperlink{classfaster_1_1iFddCore}{i\+Fdd\+Core}$<$ K, U $>$ $\ast$fdd1, \hyperlink{classfaster_1_1iFddCore}{i\+Fdd\+Core}$<$ K, V $>$ $\ast$fdd2)\label{classfaster_1_1iFddCore_af434c1c5118e380f9d78398fe46176d5}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_a4ed897a7b2af2918f91c3f8f89835ed4}{}std\+::unordered\+\_\+map$<$ K, size\+\_\+t $>$ {\bfseries count\+By\+Key} ()\label{classfaster_1_1iFddCore_a4ed897a7b2af2918f91c3f8f89835ed4}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_ac671d250f94c0927152362d4a982e931}{}\hyperlink{classfaster_1_1indexedFdd}{indexed\+Fdd}$<$ K, T $>$ $\ast$ {\bfseries group\+By\+Key} ()\label{classfaster_1_1iFddCore_ac671d250f94c0927152362d4a982e931}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_a9a7002de9ec87e594aa461c1b379b453}{}void {\bfseries discard} ()\label{classfaster_1_1iFddCore_a9a7002de9ec87e594aa461c1b379b453}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_ae98ce87e7349cbed87ff69be57df978e}{}void $\ast$ {\bfseries get\+Key\+Map} (void)\label{classfaster_1_1iFddCore_ae98ce87e7349cbed87ff69be57df978e}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_acf3b47990ef3bb200c7e214e0c82b03e}{}void {\bfseries set\+Key\+Map} (void $\ast$key\+Map)\label{classfaster_1_1iFddCore_acf3b47990ef3bb200c7e214e0c82b03e}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_a85b2607d1cc8f604a3965c313f16b240}{}bool {\bfseries is\+Grouped\+By\+Key} ()\label{classfaster_1_1iFddCore_a85b2607d1cc8f604a3965c313f16b240}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_a37c6f71cc6ce171ccd78120c7103f181}{}void {\bfseries set\+Grouped\+By\+Key} (bool gbk)\label{classfaster_1_1iFddCore_a37c6f71cc6ce171ccd78120c7103f181}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classfaster_1_1iFddCore_a5cdc2cf07bee57087e0997a0e140c9bd}{}{\bfseries i\+Fdd\+Core} (\hyperlink{classfaster_1_1fastContext}{fast\+Context} \&c)\label{classfaster_1_1iFddCore_a5cdc2cf07bee57087e0997a0e140c9bd}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_ab5be69b5752ab08168469e5baed451ef}{}{\bfseries i\+Fdd\+Core} (\hyperlink{classfaster_1_1fastContext}{fast\+Context} \&c, size\+\_\+t s, const std\+::vector$<$ size\+\_\+t $>$ \&data\+Alloc)\label{classfaster_1_1iFddCore_ab5be69b5752ab08168469e5baed451ef}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_a567b68967ed190bdba66479aba4fbf8a}{}std\+::shared\+\_\+ptr$<$ std\+::unordered\+\_\+map$<$ K, int $>$ $>$ {\bfseries calculate\+Key\+Map} (std\+::unordered\+\_\+map$<$ K, std\+::tuple$<$ size\+\_\+t, int, size\+\_\+t $>$$>$ count)\label{classfaster_1_1iFddCore_a567b68967ed190bdba66479aba4fbf8a}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_a483deae8e4c275dcbff0244ef33c2f4a}{}\hyperlink{classfaster_1_1fddBase}{fdd\+Base} $\ast$ {\bfseries \+\_\+map} (void $\ast$func\+P, fdd\+Op\+Type op, \hyperlink{classfaster_1_1fddBase}{fdd\+Base} $\ast$new\+Fdd, system\+\_\+clock\+::time\+\_\+point \&start)\label{classfaster_1_1iFddCore_a483deae8e4c275dcbff0244ef33c2f4a}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_ad09cdfbaed755fb7c54b80d3bb6a4f63}{}{\footnotesize template$<$typename U $>$ }\\\hyperlink{classfaster_1_1fdd}{fdd}$<$ U $>$ $\ast$ {\bfseries map} (void $\ast$func\+P, fdd\+Op\+Type op)\label{classfaster_1_1iFddCore_ad09cdfbaed755fb7c54b80d3bb6a4f63}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_a88bba48ad95225c4bceb986c13301212}{}{\footnotesize template$<$typename L , typename U $>$ }\\\hyperlink{classfaster_1_1indexedFdd}{indexed\+Fdd}$<$ L, U $>$ $\ast$ {\bfseries map\+I} (void $\ast$func\+P, fdd\+Op\+Type op)\label{classfaster_1_1iFddCore_a88bba48ad95225c4bceb986c13301212}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classfaster_1_1iFddCore_a0fdbb128eb02349bcf1eedd637b70d7c}{}bool {\bfseries grouped\+By\+Key}\label{classfaster_1_1iFddCore_a0fdbb128eb02349bcf1eedd637b70d7c}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_a9a666ebb96e022ca9c0b221f670e2e8d}{}std\+::shared\+\_\+ptr$<$ std\+::unordered\+\_\+map$<$ K, int $>$ $>$ {\bfseries key\+Map}\label{classfaster_1_1iFddCore_a9a666ebb96e022ca9c0b221f670e2e8d}
+
+\item 
+\hypertarget{classfaster_1_1iFddCore_a698ad6bbac1d23c82f83bac07cd49c02}{}\hyperlink{classfaster_1_1fastContext}{fast\+Context} $\ast$ {\bfseries context}\label{classfaster_1_1iFddCore_a698ad6bbac1d23c82f83bac07cd49c02}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/mtcs/pesquisa/faster/faster.\+git/src/include/grouped\+Fdd.\+h\item 
+/home/mtcs/pesquisa/faster/faster.\+git/src/include/indexed\+Fdd.\+h\end{DoxyCompactItemize}

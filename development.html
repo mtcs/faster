@@ -1,0 +1,71 @@
+---
+layout: default
+title: Faster - Development
+---
+<div class="aboutPage">
+	<h1>Development Planing</h1>
+
+	<h2>Engineering</h2>
+	<ul>
+		<li><b>Better integration with Big Data environment:</b></li>
+		<ul>
+			<li>HDFS - Hadoop distributed file system</li>
+			<li>Yarn job scheduler</li>
+		</ul>
+		<li>Implement module testing:</li>
+		<ul>
+			<li>Unit Testing</li>
+			<li>TDD - Test driven development</li>
+		</ul>
+		<li>Finish operators congruency</li>
+		<li>Web Profiling Interface</li>
+		<li>Packaging:</li>
+		<ul>
+			<li>Ubuntu 14.04</li>
+			<li>Ubuntu 16.04</li>
+		</ul>
+	</ul>
+	<h2>Research</h2>
+	<ul>
+		<li><b>Richer performance analysis:</b></li>
+		<ul>
+			<li>RO operators vs RW operators<br>
+				What is the performance gain in running RO and RW operators?
+			</li>
+			<li>MPI vs TCP?<br>
+				Try to run MPI in a "compatibility mode" with TCP.
+			</li>
+			<li>Spark Garbage collection<br>
+				Try to measure Time Spark spends in GC
+			</li>
+			<li>Spark Execution overhead<br>
+				Measure time spent inside useful computing.<br>
+				overhead = [total time] - [useful computing]
+			</li>
+			<li>More algorithms:</li>
+			<ul>
+				<li>KMeans</li>
+				<li>Community Detection</li>
+				<li></li>
+			</ul>
+			<li>Compare algorithms to MPI implementations</li>
+			<li><b>Bigger Cluster</b></li>
+			<li></li>
+		</ul>
+		<li>More Special Operators</li>
+		<ul>
+			<li>Online File input + parsing</li>
+			<li>Online File input + parsing + operator</li>
+			<li>Filter Input</li>
+			<li>Asynchronous Message Machine</li>
+		</ul>
+		<li>Load balancing for unbalanced algorithms or heterogeneous environments</li>
+		<li>Integration with OpenMPI accelerators (GPGPU)</li>
+		<ul>
+			<li>Test compatibility with bulk functions</li>
+			<li>Test function pointer conversion (CPU-GPU)</li>
+			<li>Cache datasets in gpu memory</li>
+		</ul>
+		<li></li>
+	</ul>
+</div>
