@@ -1,4 +1,4 @@
 name: Faster
 subtitle: Super Fast Distributed Computing
-markdown: redcarpet
+markdown: kramdown
 highlighter: true

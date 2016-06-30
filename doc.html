@@ -13,13 +13,14 @@ title: Faster - Documentation
 <p>
 	<ul>
 		<li class="compactList">
-			<a class="extra" href="http://mtcs.github.io/faster/doc/latest/html/">Latest</a>
+			<a class="extra" href="http://mtcs.github.io/faster/doc/devel/html/">HTML</a>
+			<a class="extra" href="http://mtcs.github.io/faster/doc/devel/latex/">PDF</a>
 		</li>
 	{% for post in site.categories.release %}
 		<li class="compactList">
 			{{post.tag}}
-			<a href=faster/doc/{{post.tag}}/html/index.html>HTML</a>
-			<a href=faster/doc/{{post.tag}}/latex/irefman.pdf>PDF</a>
+			<a href=/faster/doc/{{post.tag}}/html/index.html>HTML</a>
+			<a href=/faster/doc/{{post.tag}}/latex/irefman.pdf>PDF</a>
 		</li>
 	{% endfor %}
 
