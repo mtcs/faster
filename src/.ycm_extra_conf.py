@@ -61,6 +61,7 @@ flags = [
 # harmful
 '-I', '.',
 '-I', './include',
+'-I', '/usr/lib/hadoop/include/'
 '-isystem', '/usr/include/c++/6.1.1/',
 '-isystem', '/usr/include/c++/6.1.1/x86_64-pc-linux-gnu',
 '-isystem', '/usr/include/c++/6.1.1/backward',

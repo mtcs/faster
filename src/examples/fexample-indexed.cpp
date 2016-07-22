@@ -2,16 +2,19 @@
 #include <iostream>
 #include "libfaster.h"
 
-#define NUMITEMS (10*1000)
+#define NUMITEMS (10*1000*1000)
 
 using namespace std;
 using namespace faster;
 
+//#pragma omp declare target
+
 pair<int,int> map1(const int & key, int & input){
-	pair<int,int> result (key, input);
+	pair<int,int> result (key, 2*input);
 
 	return result;
 }
+//#pragma omp end declare target
 
 
 pair<int,int> reduce1(const int & keyA, int &a, const int & keyB, int &b){
@@ -41,6 +44,8 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &reduce1);
 
 	fc.startWorkers();
+	if (!fc.isDriver())
+		return 0;
 
 	cout << "Generate Data" << '\n';
 	int rawdata[NUMITEMS];

@@ -10,6 +10,8 @@ set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMake")
 
 set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )
 
+option(hdfsEnabled "Haddop File System (HDFS) support" ON)
+
 if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	message("----------- DEBUG MODE -----------")
 	set(ENV{ASAN_OPTIONS} "symbolize=1")
@@ -21,6 +23,10 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	add_definitions(-Wextra)
 	add_definitions(-Warray-bounds)
 	add_definitions(-fno-omit-frame-pointer)
+
+	#add_definitions(-foffload=nvptx-none="-v")
+	#add_definitions(--with-build-time-tools=/usr/local/nvptx-none/bin)
+
 	add_definitions(-fsanitize=address)
 	#add_definitions(-fsanitize=thread)
 	#add_definitions(-fsanitize=undefined)

@@ -57,6 +57,14 @@ if(GTEST_FOUND)
 	mpi_test(gtest-indexedFdd)
 	mpi_test(gtest-groupedFdd)
 
+	# HDFS
+	set (HDFSLIBS -L/usr/lib/hadoop/lib/native -lhdfs)
+	set (JAVALIBS -L/usr/lib/jvm/default/jre/lib/amd64/server -ljvm)
+	include_directories("/usr/lib/hadoop/include")
+	add_executable(gtest-hdfsEngine gtest-hdfsEngine.cpp)
+	target_link_libraries (gtest-hdfsEngine ${JAVALIBS} ${HDFSLIBS} ${EXTRA_LIBS})
+	add_test(gtest-hdfsEngine gtest-hdfsEngine)
+
 endif(GTEST_FOUND)
 
 

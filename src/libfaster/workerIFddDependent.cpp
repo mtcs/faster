@@ -20,16 +20,17 @@ void faster::_workerIFdd<K,T>::map (workerFddBase * dest, ImapIFunctionP<K,T,L,U
 	L * ok = (L*) dest->getKeys();
 	U * od = (U*) dest->getData();
 
-	//std::cerr << "START " << id << " " << s << "  ";
+	//std::cerr << "START\n" ;
 
-	#pragma omp parallel for 
+	//#pragma omp target map(to:ik,d) map(from:ok,od)
+	#pragma omp parallel for
 	for (size_t i = 0; i < s; ++i){
 		std::pair<L,U> r = mapFunc(ik[i], d[i]);
 		ok[i] = r.first;
 		od[i] = r.second;
 	}
-	//std::cerr << "END ";
-}		
+	//std::cerr << "END\n";
+}
 
 /*template <typename K, typename T>
 template <typename L, typename U>
@@ -43,7 +44,7 @@ void faster::_workerIFdd<K,T>::map (workerFddBase * dest, IPmapIFunctionP<K,T,L,
 
 	//std::cerr << "START " << id << " " << s << "  ";
 
-	#pragma omp parallel for 
+	#pragma omp parallel for
 	for (size_t i = 0; i < s; ++i){
 		//mapFunc(ok[i], od[i], ols[i], d[i]);
 		std::tuple <L,U,size_t> r = mapFunc(ik[i],  d[i]);
@@ -52,7 +53,7 @@ void faster::_workerIFdd<K,T>::map (workerFddBase * dest, IPmapIFunctionP<K,T,L,
 		ols[i] = std::get<2>(r);
 	}
 	//std::cerr << "END ";
-}*/		
+}*/
 
 template <typename K, typename T>
 template < typename U>
@@ -64,12 +65,12 @@ void faster::_workerIFdd<K,T>::map (workerFddBase * dest, mapIFunctionP<K,T,U> m
 
 	//std::cerr << "START " << id << " " << s << "  ";
 
-	#pragma omp parallel for 
+	#pragma omp parallel for
 	for (size_t i = 0; i < s; ++i){
 		od[i] = mapFunc(ik[i], d[i]);
 	}
 	//std::cerr << "END ";
-}		
+}
 
 /*template <typename K, typename T>
 template <typename U>
@@ -82,7 +83,7 @@ void faster::_workerIFdd<K,T>::map (workerFddBase * dest, PmapIFunctionP<K,T,U> 
 
 	//std::cerr << "START " << id << " " << s << "  ";
 
-	#pragma omp parallel for 
+	#pragma omp parallel for
 	for (size_t i = 0; i < s; ++i){
 		//mapFunc(od[i], ols[i], d[i]);
 		std::pair<U, size_t> r = mapFunc(ik[i], d[i]);
@@ -90,7 +91,7 @@ void faster::_workerIFdd<K,T>::map (workerFddBase * dest, PmapIFunctionP<K,T,U> 
 		ols[i] = r.second;
 	}
 	//std::cerr << "END ";
-}*/		
+}*/
 
 
 template <typename K, typename T>
@@ -135,7 +136,7 @@ void faster::_workerIFdd<K,T>::mapByKey (workerFddBase * dest, ImapByKeyIFunctio
 	//std::cerr << "        DONE\n";
 
 
-}		
+}
 
 /*template <typename K, typename T>
 template <typename L, typename U>
@@ -153,7 +154,7 @@ void faster::_workerIFdd<K,T>::mapByKey (workerFddBase * dest, IPmapByKeyIFuncti
 	U * od = (U*) dest->getData();
 
 
-	#pragma omp parallel for 
+	#pragma omp parallel for
 	for (size_t i = 0; i < this->uKeys->size(); ++i){
 		//K & key = (*this->uKeys)[i];
 		//auto loc = keyLocations.find(key);
@@ -168,7 +169,7 @@ void faster::_workerIFdd<K,T>::mapByKey (workerFddBase * dest, IPmapByKeyIFuncti
 
 		delete loc;
 	}
-}*/		
+}*/
 
 template <typename K, typename T>
 template < typename U>
@@ -184,7 +185,7 @@ void faster::_workerIFdd<K,T>::mapByKey (workerFddBase * dest, mapByKeyIFunction
 	U * od = (U*) dest->getData();
 
 
-	#pragma omp parallel for 
+	#pragma omp parallel for
 	for (size_t i = 0; i < this->uKeys->size(); ++i){
 		//K & key = (*this->uKeys)[i];
 		//auto loc = keyLocations.find(key);
@@ -194,7 +195,7 @@ void faster::_workerIFdd<K,T>::mapByKey (workerFddBase * dest, mapByKeyIFunction
 		od[i] = mapByKeyFunc(key, loc);
 
 	}
-}		
+}
 
 /*template <typename K, typename T>
 template <typename U>
@@ -213,7 +214,7 @@ void faster::_workerIFdd<K,T>::mapByKey (workerFddBase * dest, PmapByKeyIFunctio
 	//std::cerr << "START " << id << " " << s << "  ";
 
 
-	#pragma omp parallel for 
+	#pragma omp parallel for
 	for (size_t i = 0; i < this->uKeys->size(); ++i){
 		//K & key = (*this->uKeys)[i];
 		//auto loc = keyLocations.find(key);
@@ -228,7 +229,7 @@ void faster::_workerIFdd<K,T>::mapByKey (workerFddBase * dest, PmapByKeyIFunctio
 		delete loc;
 	}
 	//std::cerr << "END ";
-}*/		
+}*/
 
 
 
@@ -265,11 +266,11 @@ void faster::_workerIFdd<K,T>::flatMap(workerFddBase * dest,  IflatMapIFunctionP
 	K * ik = (K*) this->localData->getKeys();
 	std::deque<std::pair<L,U>> resultList;
 
-	#pragma omp parallel 
+	#pragma omp parallel
 	{
 		std::deque<std::pair<L,U>> partResultList;
 
-		#pragma omp for 
+		#pragma omp for
 		for (size_t i = 0; i < s; ++i){
 			std::deque<std::pair<L,U>> r = flatMapFunc(ik[i], d[i]);
 
@@ -290,11 +291,11 @@ void faster::_workerIFdd<K,T>::flatMap(workerFddBase * dest,  IPflatMapIFunction
 	K * ik = (K*) this->localData->getKeys();
 	std::deque< std::tuple<L, U, size_t> > resultList;
 
-	#pragma omp parallel 
+	#pragma omp parallel
 	{
 		std::deque<std::tuple<L, U, size_t>> partResultList;
 
-		#pragma omp for 
+		#pragma omp for
 		for (size_t i = 0; i < s; ++i){
 			std::deque<std::tuple<L, U, size_t>> r = flatMapFunc(ik[i], d[i]);
 
@@ -315,11 +316,11 @@ void faster::_workerIFdd<K,T>::flatMap(workerFddBase * dest,  flatMapIFunctionP<
 	K * ik = (K*) this->localData->getKeys();
 	std::deque<U> resultList;
 
-	#pragma omp parallel 
+	#pragma omp parallel
 	{
 		std::deque<U> partResultList;
 
-		#pragma omp for 
+		#pragma omp for
 		for (size_t i = 0; i < s; ++i){
 			std::deque<U> r = flatMapFunc(ik[i], d[i]);
 
@@ -340,11 +341,11 @@ void faster::_workerIFdd<K,T>::flatMap(workerFddBase * dest,  PflatMapIFunctionP
 	K * ik = (K*) this->localData->getKeys();
 	std::deque< std::pair<U, size_t> > resultList;
 
-	#pragma omp parallel 
+	#pragma omp parallel
 	{
 		std::deque<std::pair<U, size_t>> partResultList;
 
-		#pragma omp for 
+		#pragma omp for
 		for (size_t i = 0; i < s; ++i){
 			std::deque<std::pair<U, size_t>> r = flatMapFunc(ik[i], d[i]);
 
@@ -567,7 +568,7 @@ void faster::_workerIFdd<K,T>::_preApply(void * func, fddOpType op, workerFddBas
 
 }
 template <typename K, typename T>
-void faster::_workerIFdd<K,T>::applyDependent(void * func, fddOpType op, workerFddBase * dest){ 
+void faster::_workerIFdd<K,T>::applyDependent(void * func, fddOpType op, workerFddBase * dest){
 	switch (dest->getKeyType()){
 		case Null:     _preApply(func, op, dest);break;
 		case Char:     _preApplyI<char>(func, op, dest); break;
