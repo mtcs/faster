@@ -31,7 +31,7 @@ if(GTEST_FOUND)
 
 	function(mpi_test test_name)
 		add_executable(${test_name} ${test_name}.cpp)
-		target_link_libraries (${test_name}  ${EXTRA_LIBS})
+		target_link_libraries (${test_name}  )
 		add_test(NAME ${test_name}
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 			COMMAND mpirun -np 4 ./tests/${test_name}
@@ -62,8 +62,12 @@ if(GTEST_FOUND)
 	set (JAVALIBS -L/usr/lib/jvm/default/jre/lib/amd64/server -ljvm)
 	include_directories("/usr/lib/hadoop/include")
 	add_executable(gtest-hdfsEngine gtest-hdfsEngine.cpp)
-	target_link_libraries (gtest-hdfsEngine ${JAVALIBS} ${HDFSLIBS} ${EXTRA_LIBS})
-	add_test(gtest-hdfsEngine gtest-hdfsEngine)
+	target_link_libraries (gtest-hdfsEngine ${EXTRA_LIBS} ${JAVALIBS} ${HDFSLIBS})
+	add_test(NAME gtest-hdfsEngine
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+		COMMAND  ./tests/gtest-hdfsEngine)
+	set_tests_properties(gtest-hdfsEngine PROPERTIES
+		    ENVIRONMENT "LD_LIBRARY_PATH='/usr/lib/hadoop/lib/native:/usr/lib/jvm/default/jre/lib/amd64/server/'")
 
 endif(GTEST_FOUND)
 
