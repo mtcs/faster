@@ -13,7 +13,7 @@ Wight now we have a partially functional framework with working examples and ini
 benchmarking tools. Faster implements a subset of the ideal functional operators for the different
 dataset types available. Most of them have very low latency:
 
-![Overall Low Latency]({{ site.url }}/img/functionLatencyNP.png)
+![Overall Low Latency](/faster/img/functionLatencyNP.png)
 
 Faster is able to create datasets from disk and from memory, apply several
 functional programming operators in parallel distributed across multiple machines, collect the
