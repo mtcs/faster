@@ -21,7 +21,7 @@ result or distributed data, and write on Disk.
 In the examples directory in de source we have several toy examples and also some algorithms. One of
 the alforithms is a Pagerank implementation that rendered up to 30x speedup over Spark.
 
-![30x times faster than Spark]({{ site.url }}/img/spark_vs_faster.png)
+![30x times faster than Spark](/faster/img/spark_vs_faster.png)
 
 With our performance results we have presented an [paper] at the 16th
 IEEE/ACM International Symposium on Cluster, Cloud and Grid Computing (CCGrid2016).
