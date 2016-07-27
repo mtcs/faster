@@ -11,31 +11,48 @@ set (EXTRA_LIBS ${EXTRA_LIBS} faster)
 #set (EXTRA_LIBS ${EXTRA_LIBS} efence)
 #set (EXTRA_LIBS ${EXTRA_LIBS} duma)
 
-find_package(GTest REQUIRED)
+find_package(GTest)
 if(GTEST_FOUND)
 	SET(CTEST_OUTPUT_ON_FAILURE TRUE)
 	include_directories(${GTEST_INCLUDE_DIRS} )
+
 	set (EXTRA_LIBS ${EXTRA_LIBS} ${GTEST_BOTH_LIBRARIES})
+	function(set_custom_env test_name)
+		if (hdfsEnabled)
+			set_property( TEST ${test_name}
+				PROPERTY
+				ENVIRONMENT "CLASSPATH=${GCLASSPATH}"
+				)
+			set_property( TEST ${test_name}
+				APPEND
+				PROPERTY
+				ENVIRONMENT "LD_LIBRARY_PATH=${hadoopHome}/lib/native:${jvmHome}/jre/lib/amd64/server/"
+				)
+		endif (hdfsEnabled)
+	endfunction(set_custom_env)
 
 	function(dec_test test_name)
 		add_executable(${test_name} ${test_name}.cpp)
 		target_link_libraries (${test_name}  ${EXTRA_LIBS})
 		add_test(${test_name} ${test_name})
+		set_custom_env(${test_name})
 	endfunction(dec_test)
 
 	function(dec_test_select test_name libs)
 		add_executable(${test_name} ${test_name}.cpp)
 		target_link_libraries (${test_name}  ${EXTRA_LIBS} ${libs})
 		add_test(${test_name} ${test_name})
+		set_custom_env(${test_name})
 	endfunction(dec_test_select)
 
 	function(mpi_test test_name)
 		add_executable(${test_name} ${test_name}.cpp)
-		target_link_libraries (${test_name}  )
+		target_link_libraries (${test_name}  ${EXTRA_LIBS})
 		add_test(NAME ${test_name}
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 			COMMAND mpirun -np 4 ./tests/${test_name}
 			)
+		set_custom_env(${test_name})
 	endfunction(mpi_test)
 
 
@@ -58,16 +75,9 @@ if(GTEST_FOUND)
 	mpi_test(gtest-groupedFdd)
 
 	# HDFS
-	set (HDFSLIBS -L/usr/lib/hadoop/lib/native -lhdfs)
-	set (JAVALIBS -L/usr/lib/jvm/default/jre/lib/amd64/server -ljvm)
-	include_directories("/usr/lib/hadoop/include")
-	add_executable(gtest-hdfsEngine gtest-hdfsEngine.cpp)
-	target_link_libraries (gtest-hdfsEngine ${EXTRA_LIBS} ${JAVALIBS} ${HDFSLIBS})
-	add_test(NAME gtest-hdfsEngine
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-		COMMAND  ./tests/gtest-hdfsEngine)
-	set_tests_properties(gtest-hdfsEngine PROPERTIES
-		    ENVIRONMENT "LD_LIBRARY_PATH='/usr/lib/hadoop/lib/native:/usr/lib/jvm/default/jre/lib/amd64/server/'")
+	if (hdfsEnabled)
+		dec_test(gtest-hdfsEngine)
+	endif (hdfsEnabled)
 
 endif(GTEST_FOUND)
 

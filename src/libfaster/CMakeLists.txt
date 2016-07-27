@@ -99,9 +99,6 @@ set (HEADERS ${HEADERS} ../include/workerIFdd.h)
 
 set(commonLibSources fastComm.cpp fastCommBuffer.cpp)
 if (hdfsEnabled)
-	set (HDFSLIBS -L/usr/lib/hadoop/lib/native -lhdfs)
-	set (JAVALIBS -L/usr/lib/jvm/default/jre/lib/amd64/server -ljvm)
-	include_directories("/usr/lib/hadoop/include")
 	set( commonLibSources ${commonLibSources} hdfsEngine.cpp )
 endif (hdfsEnabled)
 

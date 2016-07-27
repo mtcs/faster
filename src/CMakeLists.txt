@@ -10,7 +10,11 @@ set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMake")
 
 set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )
 
-option(hdfsEnabled "Haddop File System (HDFS) support" ON)
+# Options and user variables
+option(hdfsEnabled 	"Haddop File System (HDFS) support" ON)
+option(offloadingEnabled "Accelerator Offloading support" OFF)
+set(hadoopHome  	"/usr/lib/hadoop" CACHE STRING "Haddop File System (HDFS) home directory")
+set(jvmHome  		"/usr/lib/jvm/default" CACHE STRING "JVM home directory (for HDFS)")
 
 if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	message("----------- DEBUG MODE -----------")
@@ -24,20 +28,19 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	add_definitions(-Warray-bounds)
 	add_definitions(-fno-omit-frame-pointer)
 
-	#add_definitions(-foffload=nvptx-none="-v")
-	#add_definitions(--with-build-time-tools=/usr/local/nvptx-none/bin)
+	if (NOT hdfsEnabled)
+		add_definitions(-fsanitize=address)
+		#add_definitions(-fsanitize=thread)
+		#add_definitions(-fsanitize=undefined)
+		#add_definitions(-fsanitize=leak)
+		add_definitions(-fno-omit-frame-pointer)
 
-	#add_definitions(-fsanitize=address)
-	#add_definitions(-fsanitize=thread)
-	#add_definitions(-fsanitize=undefined)
-	#add_definitions(-fsanitize=leak)
-	add_definitions(-fno-omit-frame-pointer)
-
-	#set (EXTRA_LIBS ${EXTRA_LIBS} asan)
-	#set (EXTRA_LIBS ${EXTRA_LIBS} tsan)
-	#set (EXTRA_LIBS ${EXTRA_LIBS} usan)
-	#set (EXTRA_LIBS ${EXTRA_LIBS} lsan)
-	#set (EXTRA_LIBS ${EXTRA_LIBS} duma)
+		set (EXTRA_LIBS ${EXTRA_LIBS} asan)
+		#set (EXTRA_LIBS ${EXTRA_LIBS} tsan)
+		#set (EXTRA_LIBS ${EXTRA_LIBS} usan)
+		#set (EXTRA_LIBS ${EXTRA_LIBS} lsan)
+		#set (EXTRA_LIBS ${EXTRA_LIBS} duma)
+	endif (NOT hdfsEnabled)
 else (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	message("----------- RELEASE MODE -----------")
 	add_definitions(-O3)
@@ -49,9 +52,26 @@ else (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	#set (EXTRA_LIBS ${EXTRA_LIBS} tcmalloc)
 endif (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 
+if (offloadingEnabled)
+	add_definitions(-foffload=nvptx-none="-v")
+	add_definitions(--with-build-time-tools=/usr/local/nvptx-none/bin)
+endif (offloadingEnabled)
+
+if (hdfsEnabled)
+	set (HDFSLIBS -L${hadoopHome}/lib/native -lhdfs)
+	set (JAVALIBS -L${jvmHome}/jre/lib/amd64/server -ljvm)
+
+	include_directories("${hadoopHome}/include")
+
+	execute_process(COMMAND hadoop classpath --glob
+		OUTPUT_VARIABLE GCLASSPATH)
+	set (ENV{LD_LIBRARY_PATH} "${hadoopHome}/lib/native:${jvmHome}/jre/lib/amd64/server/")
+	set (ENV{CLASSPATH} "${GCLASSPATH}")
+endif (hdfsEnabled)
 
 
-find_package(OpenMP)
+
+find_package(OpenMP REQUIRED)
 if(OPENMP_FOUND)
  	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
  	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")

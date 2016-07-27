@@ -36,6 +36,8 @@ TEST_F(testHDFSFile, WriteFile){
 
 	// Write
 	faster::hdfsFile file = fs.open("/tmp/testw.txt", CW);
+	EXPECT_EQ(true, fs.exists("/tmp/testw.txt"))
+		<< "File should exist";
 	size_t n = file.write((char *) buffer.data(), buffer.size());
 	file.close();
 
