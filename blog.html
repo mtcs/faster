@@ -1,0 +1,27 @@
+---
+layout: default
+title: Faster - News
+---
+<div class="docPage">
+	<div class="homeRow">
+		<div class="blogWall">
+		<h1>Development Blog</h1>
+
+
+		{% for post in site.categories.blog %}
+			<h3>{{post.title}}</h3>
+			<p>
+				{{post.abstract}}
+
+				{{post.content}}
+			</p>
+		{% endfor %}
+
+		</div>
+		<div class="roadmapPanel">
+			<h2>Roadmap</h2>
+			<p>See our detailed development<br>
+			<a class="extra" href="/faster/development.html">roadmap >></a></p>
+		</div>
+	</div>
+</div>

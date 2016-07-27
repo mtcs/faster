@@ -2,3 +2,4 @@ name: Faster
 subtitle: Super Fast Distributed Computing
 markdown: kramdown
 highlighter: true
+paginate: 5

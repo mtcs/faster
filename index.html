@@ -8,18 +8,19 @@ title: Faster - Super Fast Distributed Computing
 		<div class="homeMain">
 			<div class="hero">
 				<p>
-				Faster is distributed computing framework built to help you solve hard problems faster! 
+				Faster is distributed computing framework built to help you solve hard problems faster!
 				</p>
 			</div>
 			<div class="lastNews">
+				<h1>Last news</h1>
 				{% for post in site.categories.news limit: 1 %}
-				<h3>{{ post.title }}</h3> <span>{{ post.date | date_to_string }}</span>
-				<p>{{ post.comment }}</br>
+				<h3>{{ post.title }} <span>{{ post.date | date_to_string }}</span></h3>
+				<p>{{ post.abstract }}</br>
 				</p>
-				<a href="/faster{{ post.url }}">read more >></a>
 				{% endfor %}
+				<a href="/faster/blog.html">read more >></a>
 			</div>
-				
+
 
 
 			<div class="featureWall">
