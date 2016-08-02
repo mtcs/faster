@@ -3,7 +3,7 @@ compiler: gcc
 script:
         - mkdir -p build
         - cd build
-        - cmake ../src/ && make
+        - cmake -DhdfsEnabled=OFF ../src/ && make
 
 # Ubuntu 14.04 Trusty support
 sudo: required
