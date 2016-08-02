@@ -131,6 +131,8 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &maxError, "maxError");
 	fc.registerGlobal(&numNodes);
 	fc.startWorkers();
+	if (!fc.isDriver())
+		return 0;
 	cerr << "------------ PageRank -------------";
 
 	fc.printHeader();

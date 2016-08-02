@@ -74,6 +74,8 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &reduce1);
 
 	fc.startWorkers();
+	if (!fc.isDriver())
+		return 0;
 
 	cout << "Generate Data" << '\n';
 	int * rawdata[NUMITEMS];
@@ -81,7 +83,7 @@ int main(int argc, char ** argv){
 
 	// Create a random adjacency matrix
 	for ( size_t i = 0; i < NUMITEMS; ++i ){
-		
+
 		// Random number of edges
 		dataSizes[i] = rand() % 100;
 		rawdata[i] = new int[dataSizes[i]];

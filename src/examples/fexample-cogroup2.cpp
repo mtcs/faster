@@ -80,6 +80,8 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &mapByKey1);
 
 	fc.startWorkers();
+	if (!fc.isDriver())
+		return 0;
 
 	cout << "Generate Data" << '\n';
 	int rawKeys[NUMITEMS];
@@ -113,7 +115,6 @@ int main(int argc, char ** argv){
 	for ( size_t i = 0; i < result.size(); ++i)
 	      cerr << result[i].second << "\t" ;
 	cout << "\n";
-
 
 
 	return 0;

@@ -24,6 +24,8 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &reduce1);
 
 	fc.startWorkers();
+	if (!fc.isDriver())
+		return 0;
 
 
 	cout << "Import Data" << '\n';

@@ -11,25 +11,14 @@ set (EXTRA_LIBS ${EXTRA_LIBS} faster)
 #set (EXTRA_LIBS ${EXTRA_LIBS} efence)
 #set (EXTRA_LIBS ${EXTRA_LIBS} duma)
 
+include ( CTest )
+
 find_package(GTest)
 if(GTEST_FOUND)
 	SET(CTEST_OUTPUT_ON_FAILURE TRUE)
 	include_directories(${GTEST_INCLUDE_DIRS} )
 
 	set (EXTRA_LIBS ${EXTRA_LIBS} ${GTEST_BOTH_LIBRARIES})
-	function(set_custom_env test_name)
-		if (hdfsEnabled)
-			set_property( TEST ${test_name}
-				PROPERTY
-				ENVIRONMENT "CLASSPATH=${GCLASSPATH}"
-				)
-			set_property( TEST ${test_name}
-				APPEND
-				PROPERTY
-				ENVIRONMENT "LD_LIBRARY_PATH=${hadoopHome}/lib/native:${jvmHome}/jre/lib/amd64/server/"
-				)
-		endif (hdfsEnabled)
-	endfunction(set_custom_env)
 
 	function(dec_test test_name)
 		add_executable(${test_name} ${test_name}.cpp)

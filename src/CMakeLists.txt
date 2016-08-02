@@ -16,6 +16,7 @@ option(offloadingEnabled "Accelerator Offloading support" OFF)
 set(hadoopHome  	"/usr/lib/hadoop" CACHE STRING "Haddop File System (HDFS) home directory")
 set(jvmHome  		"/usr/lib/jvm/default" CACHE STRING "JVM home directory (for HDFS)")
 
+
 if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	message("----------- DEBUG MODE -----------")
 	set(ENV{ASAN_OPTIONS} "symbolize=1")
@@ -28,6 +29,12 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	add_definitions(-Warray-bounds)
 	add_definitions(-fno-omit-frame-pointer)
 
+	# Coverage Tests
+	SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage" )
+	SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage -lgcov" )
+	find_program(CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
+	include(Dart)
+
 	if (NOT hdfsEnabled)
 		add_definitions(-fsanitize=address)
 		#add_definitions(-fsanitize=thread)
@@ -35,12 +42,13 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 		#add_definitions(-fsanitize=leak)
 		add_definitions(-fno-omit-frame-pointer)
 
-		set (EXTRA_LIBS ${EXTRA_LIBS} asan)
-		#set (EXTRA_LIBS ${EXTRA_LIBS} tsan)
-		#set (EXTRA_LIBS ${EXTRA_LIBS} usan)
-		#set (EXTRA_LIBS ${EXTRA_LIBS} lsan)
-		#set (EXTRA_LIBS ${EXTRA_LIBS} duma)
+		 set (EXTRA_LIBS asan ${EXTRA_LIBS})
+		#set (EXTRA_LIBS tsan ${EXTRA_LIBS})
+		#set (EXTRA_LIBS usan ${EXTRA_LIBS})
+		#set (EXTRA_LIBS lsan ${EXTRA_LIBS})
+		#set (EXTRA_LIBS duma ${EXTRA_LIBS})
 	endif (NOT hdfsEnabled)
+
 else (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	message("----------- RELEASE MODE -----------")
 	add_definitions(-O3)
@@ -57,6 +65,7 @@ if (offloadingEnabled)
 	add_definitions(--with-build-time-tools=/usr/local/nvptx-none/bin)
 endif (offloadingEnabled)
 
+
 if (hdfsEnabled)
 	set (HDFSLIBS -L${hadoopHome}/lib/native -lhdfs)
 	set (JAVALIBS -L${jvmHome}/jre/lib/amd64/server -ljvm)
@@ -68,6 +77,22 @@ if (hdfsEnabled)
 	set (ENV{LD_LIBRARY_PATH} "${hadoopHome}/lib/native:${jvmHome}/jre/lib/amd64/server/")
 	set (ENV{CLASSPATH} "${GCLASSPATH}")
 endif (hdfsEnabled)
+
+
+function(set_custom_env test_name)
+	if (hdfsEnabled)
+		set_property( TEST ${test_name}
+			PROPERTY
+			ENVIRONMENT "CLASSPATH=${GCLASSPATH}"
+			)
+		set_property( TEST ${test_name}
+			APPEND
+			PROPERTY
+			ENVIRONMENT "LD_LIBRARY_PATH=${hadoopHome}/lib/native:${jvmHome}/jre/lib/amd64/server/"
+			)
+	endif (hdfsEnabled)
+endfunction(set_custom_env)
+
 
 
 

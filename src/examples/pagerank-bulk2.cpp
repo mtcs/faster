@@ -14,13 +14,13 @@ using std::chrono::milliseconds;
 size_t numNodes = 0;
 
 pair<int,vector<int>> toAList(string & input){
-	
+
 	stringstream ss(input);
 	vector<int> edges;
 	int key;
 	int edge;
 
-	
+
 	int numTokens = 0;
 	for ( size_t i = 0; i < input.size(); ++i ){
 		if (input[i] == ' '){
@@ -60,7 +60,7 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 	vector<double> newPR(numPresNodes, (1 - dumpingFactor) / numNodes);
 
 
-	if ( (numPresNodes != nPR) || ( nPR != nErrors ) ) { 
+	if ( (numPresNodes != nPR) || ( nPR != nErrors ) ) {
 		cerr << "Internal unknown error!!!!";
 		exit(11);
 	}
@@ -72,7 +72,7 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 	}
 
 	#pragma omp parallel for schedule(dynamic, 200)
-	//#pragma omp parallel for 
+	//#pragma omp parallel for
 	for ( size_t i = 0; i < numPresNodes; ++i){
 		double contrib = dumpingFactor * pr[prLocation[keys[i]]] / adjList[i].size();
 		for ( size_t j = 0; j < adjList[i].size(); ++j){
@@ -128,7 +128,7 @@ void getNewPR(int * prKeys, void * prVP, size_t npr, int * contKeys, void * cont
 		cerr << "Internal unknown error!!!!!!";
 		exit(11);
 	}
-	
+
 	#pragma omp parallel for
 	for ( size_t i = 0; i < npr; ++i ){
 		prLocation[prKeys[i]] = i;
@@ -193,6 +193,8 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &maxError, "maxError");
 	fc.registerGlobal(&numNodes);
 	fc.startWorkers();
+	if (!fc.isDriver())
+		return 0;
 	cerr << "------------ PageRank -------------";
 
 	fc.printHeader();

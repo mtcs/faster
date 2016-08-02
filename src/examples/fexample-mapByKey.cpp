@@ -48,6 +48,8 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &mapByKey1);
 
 	fc.startWorkers();
+	if (!fc.isDriver())
+		return 0;
 
 	cout << "Generate Data" << '\n';
 	int rawdata[NUMITEMS];

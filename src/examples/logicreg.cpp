@@ -76,6 +76,8 @@ int main(int argc, char ** argv){
 
 	fc.registerGlobal(&globalWeights, numDimensions*sizeof(double));
 	fc.startWorkers();
+	if (!fc.isDriver())
+		return 0;
 
 	cerr << "------------ Logic Reg -------------\n";
 

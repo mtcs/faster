@@ -58,7 +58,7 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 	vector<double> newPR(numPresNodes);
 
 
-	if ( (numPresNodes != nPR) || ( nPR != nErrors ) ) { 
+	if ( (numPresNodes != nPR) || ( nPR != nErrors ) ) {
 		cerr << "Internal unknown error!!!!";
 		exit(11);
 	}
@@ -120,7 +120,7 @@ void combine(int *& outKeys, double *& outPr, size_t & nOut, int * contKey, doub
 			numOutMsgs ++;
 		}
 	}
-	
+
 	outKeys = new int[numOutMsgs];
 	outPr = new double[numOutMsgs];
 	nOut = numOutMsgs;
@@ -130,7 +130,7 @@ void combine(int *& outKeys, double *& outPr, size_t & nOut, int * contKey, doub
 	for ( size_t i = 0; i < numNodes; i++){
 		if ( outMsgVec[i] > 0 ){
 			size_t myPos;
-			
+
 			//#pragma omp atomic capture
 			myPos = pos++;
 
@@ -153,7 +153,7 @@ void getNewPR(int * prKeys, void * prVP, size_t npr, int * contKeys, void * cont
 		cerr << "Internal unknown error!!!!!!";
 		exit(11);
 	}
-	
+
 	//#pragma omp parallel
 	{
 		//#pragma omp for
@@ -204,6 +204,8 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &maxError, "maxError");
 	fc.registerGlobal(&numNodes);
 	fc.startWorkers();
+	if (!fc.isDriver())
+		return 0;
 
 	fc.printHeader();
 	cerr << "  Init Time: " << duration_cast<milliseconds>(system_clock::now() - start).count() << "ms\n";

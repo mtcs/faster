@@ -16,7 +16,7 @@ float * globalCentroidsX = NULL;
 float * globalCentroidsY = NULL;
 
 pair<int,vector<float>> toVector(string & input){
-	
+
 	stringstream ss(input);
 	vector<float> position;
 	position.reserve(2);
@@ -73,9 +73,9 @@ void updateAssignment(int & key, std::vector<float> & position){
 }
 
 void updateCentroids(
-		const int & key UNUSED, 
-		std::vector<void*> & centroidPosP, 
-		std::vector<void*> & items, 
+		const int & key UNUSED,
+		std::vector<void*> & centroidPosP,
+		std::vector<void*> & items,
 		std::vector<void*> & errorP){
 	//std::cerr  << "K:" << key << " i:" << items.size() << " C:" << centroidPosP.size() << " E:" << errorP.size() << "\n";
 	if (items.size() == 0 ) return;
@@ -146,9 +146,9 @@ int main(int argc, char ** argv){
 	// Init Faster Framework
 	auto start = system_clock::now();
 
-	if (argc < 3) 
-		numCentroids = 10 ; 
-	else 
+	if (argc < 3)
+		numCentroids = 10 ;
+	else
 		numCentroids = atoi(argv[2]);
 
 
@@ -164,6 +164,8 @@ int main(int argc, char ** argv){
 	fc.registerGlobal(&globalCentroidsX, numCentroids*sizeof(float));
 	fc.registerGlobal(&globalCentroidsY, numCentroids*sizeof(float));
 	fc.startWorkers();
+	if (!fc.isDriver())
+		return 0;
 
 	cerr << "------------ K-MEANS -------------\n";
 
@@ -218,7 +220,7 @@ int main(int argc, char ** argv){
 
 	cerr << "\033[1;33mInit K-Means Step4\033[0m\n";
 	clusterAssign->update(&updateAssignment);
-	
+
 	// PRINT INFO
 	/*for(size_t i = 0; i < numCentroids; i++) {
 		printf("[%.1f ", globalCentroidsX[i]);
@@ -243,14 +245,14 @@ int main(int argc, char ** argv){
 		clusterAssign->groupByKey();
 		iterationData->updateByKey(&updateCentroids);
 		fc.updateInfo();
-		
+
 		// Retrieve centroids
 		retrieveCentroidPositions(centroidPos);
 		fc.updateInfo();
 
 		auto clusterSizes = clusterAssign->countByKey();
 		error = max( error, randomizeEmptyCentroids(clusterSizes, minXY[0], maxXY[0], minXY[1], maxXY[1]) );
-		
+
 		// Update item centroid assignment
 		clusterAssign->update(&updateAssignment);
 		// PRINT INFO
@@ -263,7 +265,7 @@ int main(int argc, char ** argv){
 		//sort(v.begin(), v.end());
 		//for(size_t i = 0; i < v.size(); i++) printf("%d ", v[i].first);
 		//cerr << "\n" ;
-		
+
 		clusterAssign->setGroupedByKey(false);
 		fc.updateInfo();
 

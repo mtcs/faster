@@ -8,33 +8,13 @@
 void faster::worker::createFDD (unsigned long int id, fddType type, size_t size){
 	//std::cerr << "createFDD ";
 	workerFddBase * newFdd;
-	/*switch (type){
-		case Null: break;
-		case Char: newFdd = new workerFdd<char>(id, type, size); break;
-		case Int: newFdd = new workerFdd<int>(id, type, size); break;
-		case LongInt: newFdd = new workerFdd<long int>(id, type, size); break;
-		case Float: newFdd = new workerFdd<float>(id, type, size); break;
-		case Double: newFdd = new workerFdd<double>(id, type, size); break;
-		case CharP: newFdd = new workerFdd<char *>(id, type, size); break;
-		case IntP: newFdd = new workerFdd<int *>(id, type, size); break;
-		case LongIntP: newFdd = new workerFdd<long int *>(id, type, size); break;
-		case FloatP: newFdd = new workerFdd<float *>(id, type, size); break;
-		case DoubleP: newFdd = new workerFdd<double *>(id, type, size); break;
-		//case Custom: newFdd = new workerFdd<void *>(id, type, size); break;
-		case String: newFdd = new workerFdd<std::string>(id, type, size); break;
-		case CharV: newFdd = new workerFdd<std::vector<char>>(id, type, size); break;
-		case IntV: newFdd = new workerFdd<std::vector<int>>(id, type, size); break;
-		case LongIntV: newFdd = new workerFdd<std::vector<long int>>(id, type, size); break;
-		case FloatV: newFdd = new workerFdd<std::vector<float>>(id, type, size); break;
-		case DoubleV: newFdd = new workerFdd<std::vector<double>>(id, type, size); break;
-	}// */
 	newFdd = new workerFdd(id, type, size);
 	fddList.insert(fddList.end(), newFdd);
 }
 
 
 void faster::worker::readFDDFile(unsigned long int id, std::string &filename, size_t size, size_t offset){
-	std::string line; 
+	std::string line;
 	char c;
 
 	//workerFdd<std::string> * newFdd = new workerFdd<std::string>(id, String);
@@ -57,16 +37,16 @@ void faster::worker::readFDDFile(unsigned long int id, std::string &filename, si
 		inFile.seekg(offset-1, inFile.beg);
 		c = inFile.get();
 		// If the other process doesn't have this line, get it!
-		std::getline( inFile, line ); 
+		std::getline( inFile, line );
 		if ( c == '\n' ) {
 			//std::cerr << "(" << line << ")\n";
 			newFdd->insert(0, &line, 0);
 		}
 	}
-	
+
 	// Start reading lines
 	while( size_t(inFile.tellg()) < (offset + size) ){
-		std::getline( inFile, line ); 
+		std::getline( inFile, line );
 
 		//std::cerr << line << "\n";
 		//std::cerr << "[" << line << "]\n";

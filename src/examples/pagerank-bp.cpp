@@ -16,17 +16,17 @@ size_t numProcs = 0;
 
 
 int currNumNodes = 0;
-vector<int> budget;	
+vector<int> budget;
 vector<int> partAssignment(1000000, -1);
 
 int greedyPartition(int & k, vector<int> & d){
 
 	static bool started = false;
-	vector<int> neighbPartCount(numProcs, 0);	
+	vector<int> neighbPartCount(numProcs, 0);
 
 
 	if (! started){
-		budget.resize(numProcs,0);	
+		budget.resize(numProcs,0);
 		started = true;
 	}
 
@@ -92,7 +92,7 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 	vector<double> newPR(numPresNodes, (1 - dumpingFactor) / numNodes);
 
 
-	if ( (numPresNodes != nPR) || ( numPresNodes != nErrors ) ) { 
+	if ( (numPresNodes != nPR) || ( numPresNodes != nErrors ) ) {
 		cerr << "Internal unknown error!!!!";
 		exit(11);
 	}
@@ -150,7 +150,7 @@ void getNewPR(int * prKeys, void * prVP, size_t npr, int * contKeys, void * cont
 		cerr << "Internal unknown error!!!!!!";
 		exit(11);
 	}
-	
+
 	//#pragma omp parallel for
 	for ( size_t i = 0; i < npr; ++i ){
 		prLocation[prKeys[i]] = i;
@@ -214,6 +214,8 @@ int main(int argc, char ** argv){
 	fc.registerGlobal(&numNodes);
 	fc.registerGlobal(&numProcs);
 	fc.startWorkers();
+	if (!fc.isDriver())
+		return 0;
 
 	fc.printHeader();
 	cerr << "  Init Time: " << duration_cast<milliseconds>(system_clock::now() - start).count() << "ms\n";

@@ -9,7 +9,7 @@ using namespace std;
 using namespace faster;
 
 void bulkMap1(int * output, int * input, size_t size){
-	#pragma omp parallel for 
+	#pragma omp parallel for
 	for (size_t i = 0 ; i < size ; ++i){
 		output[i] = input[i] * 2;
 	}
@@ -19,17 +19,17 @@ void bulkMap1(int * output, int * input, size_t size){
 
 int bulkReduce1(int * input, size_t size){
 	int result = 0;
-	
-	#pragma omp parallel 
+
+	#pragma omp parallel
 	{
 		int partResult = 0;
 
-		#pragma omp for 
+		#pragma omp for
 		for (size_t i = 0; i < size; ++i){
 			partResult += input[i];
 		}
-		
-		#pragma omp atomic 
+
+		#pragma omp atomic
 		result += partResult;
 	}
 
@@ -44,6 +44,8 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*)&bulkReduce1);
 
 	fc.startWorkers();
+	if (!fc.isDriver())
+		return 0;
 
 	cout << "Generate Data" << '\n';
 	int rawdata[NUMITEMS];
