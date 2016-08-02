@@ -3,7 +3,7 @@ compiler: gcc
 script:
         - mkdir build
         - cd build
-        - cmake ../src/ && make -j4 && make test
+        - cmake ../src/ && make
 
 # Ubuntu 14.04 Trusty support
 sudo: required
