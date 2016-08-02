@@ -1,9 +1,11 @@
 language: cpp
 compiler: gcc
-script:
+before_script:
         - mkdir -p build
         - cd build
+script:
         - cmake -DhdfsEnabled=OFF ../src/ && make
+
 
 # Ubuntu 14.04 Trusty support
 sudo: required
@@ -19,3 +21,4 @@ addons:
     - gcc-5
     - g++-5
     - libopenmpi-dev
+    - valgrind
