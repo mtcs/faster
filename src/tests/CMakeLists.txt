@@ -15,6 +15,7 @@ include ( CTest )
 
 find_package(GTest)
 if(GTEST_FOUND)
+	SET(CTEST_TESTING_TIMEOUT 50)
 	SET(CTEST_OUTPUT_ON_FAILURE TRUE)
 	include_directories(${GTEST_INCLUDE_DIRS} )
 
