@@ -1,8 +1,5 @@
 language: cpp
 compiler: gcc
-install:
-        - sudo apt-get update -qq
-        - sudo apt-get install -qq libopenmpi-dev
 script:
         - mkdir build
         - cd build
@@ -21,3 +18,4 @@ addons:
     # install toolchains
     - gcc-5
     - g++-5
+    - libopenmpi-dev
