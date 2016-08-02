@@ -21,8 +21,6 @@ __Features:__
 * Easy to use with OpenMP GPU device accelerators.
 
 
-.. |unix_build| image:: https://travis-ci.org/mtcs/faster.svg?branch=dev%2Fmaster
-	:target: https://travis-ci.org/mtcs/faster
-	:alt: Build Status
+[![Build Status](https://travis-ci.org/mtcs/faster.svg?branch=dev%2Fmaster)](https://travis-ci.org/mtcs/faster)
 
 
