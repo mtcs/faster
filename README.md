@@ -5,7 +5,7 @@
 [Web Site](http://mtcs.github.io/faster)
 
 [![Build Status](https://travis-ci.org/mtcs/faster.svg?branch=dev%2Fmaster)](https://travis-ci.org/mtcs/faster)
-[![Coverage Status](https://coveralls.io/repos/github/mtcs/faster/badge.svg?branch=master)](https://coveralls.io/github/mtcs/faster?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/mtcs/faster/badge.svg?branch=master)](https://coveralls.io/github/mtcs/faster?branch=dev%2Fmaster)
 
 
 Faster is a distributed computing framework designed to be fast, efficient and flexible. It is designed to work well in small and large heterogeneous clusters. Although, we are still in heavy development.
