@@ -27,3 +27,4 @@ addons:
     - g++-5
     - libopenmpi-dev
     - valgrind
+    - libgtest-dev
