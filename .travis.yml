@@ -6,7 +6,7 @@ install:
 script:
         - mkdir build
         - cd build
-        - cmake .. && make -j4 && make test
+        - cmake ../src/ && make -j4 && make test
 
 # Ubuntu 14.04 Trusty support
 sudo: required
