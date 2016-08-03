@@ -1,31 +1,40 @@
 language: cpp
 compiler: gcc
 before_install:
+        # Coveralls
         - pip install --user cpp-coveralls
         - mkdir -p ~/build/mtcs/faster/build
-          #- mkdir -p ~/gtest-build && cd ~/gtest-build && cmake /usr/src/gtest/ && make && sudo cp *.a /usr/lib
+        # GTest
+        - mkdir -p ~/gtest-build && cd ~/gtest-build && cmake /usr/src/gtest/ && make && sudo cp *.a /usr/lib
           #- sudo wget 'https://archive.cloudera.com/cdh5/ubuntu/trusty/amd64/cdh/cloudera.list' -O /etc/apt/sources.list.d/cloudera.list
 before_script:
         # Configure HDFS
-        - sudo mkdir -p /var/tmp/hdfs-nn
-        - sudo mkdir -p /var/tmp/hdfs-dn
-        - sudo ln -s /usr/lib/jvm/default-java /usr/lib/jvm/default
-        - sudo chown hdfs:hadoop /var/tmp/hdfs*
-        - sudo sh -c 'echo -e "<configuration>\n <property>\n <name>dfs.replication</name>\n <value>1</value>\n </property>\n <property>\n <name>dfs.namenode.name.dir</name>\n <value>/var/tmp/hdfs-nn</value>\n </property>\n <property>\n <name>dfs.datanode.data.dir</name>\n <value>/var/tmp/hdfs-dn</value>\n </property>\n </configuration>\n " > /etc/hadoop/conf/hdfs-site.xml'
-        - sudo sh -c 'echo -e "<configuration>\n <property>\n <name>fs.defaultFS</name>\n <value>hdfs://localhost:9000</value>\n </property>\n </configuration>\n " > /etc/hadoop/conf/core-site.xml'
-        - sudo service hadoop-hdfs-namenode start
-        - sudo service hadoop-hdfs-datanode start
-        - sudo hadoop fs -mkdir /tmp
-        - sudo hadoop fs -chmod 777 /tmp
-        - echo "1\n2\n3\n4\n5\n7\n" > /tmp/test.txt
-        - hadoop fs -put /tmp/test.txt /tmp
-        # Goto build dir
+        #- sudo mkdir -p /var/tmp/hdfs-nn
+        #- sudo mkdir -p /var/tmp/hdfs-dn
+        #- sudo ln -s /usr/lib/jvm/default-java /usr/lib/jvm/default
+        #- sudo chown hdfs:hadoop /var/tmp/hdfs*
+        #- sudo sh -c 'echo -e "<?xml version="1.0" encoding="UTF-8"?>\n <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>\n <configuration>\n <property>\n <name>dfs.replication</name>\n <value>1</value>\n </property>\n <property>\n <name>dfs.namenode.name.dir</name>\n <value>/var/tmp/hdfs-nn</value>\n </property>\n <property>\n <name>dfs.datanode.data.dir</name>\n <value>/var/tmp/hdfs-dn</value>\n </property>\n </configuration>\n " > /etc/hadoop/conf/hdfs-site.xml'
+        #- sudo sh -c 'echo -e "<?xml version="1.0" encoding="UTF-8"?>\n <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>\n<configuration>\n <property>\n <name>fs.defaultFS</name>\n <value>hdfs://localhost:9000</value>\n </property>\n </configuration>\n " > /etc/hadoop/conf/core-site.xml'
+        #- sudo service hadoop-hdfs-namenode start
+        #- sudo service hadoop-hdfs-datanode start
+        #- sudo hadoop fs -mkdir /tmp
+        #- sudo hadoop fs -chmod 777 /tmp
+        #- echo "1\n2\n3\n4\n5\n7\n" > /tmp/test.txt
+        #- hadoop fs -put /tmp/test.txt /tmp
+        # Go to build dir
         - cd ~/build/mtcs/faster/build
 script:
         #- cmake -DGTEST_MAIN_LIBRARY:FILEPATH=libgtest_main.a -DGTEST_LIBRARY:FILEPATH=libgtest.a -DhdfsEnabled=OFF -DCMAKE_BUILD_TYPE=DEBUG -DCOVERALLS=ON  ~/build/mtcs/faster/src/ && make -j 3 &&  make -j 3 test
-        - cmake -DCMAKE_BUILD_TYPE=DEBUG -DCOVERALLS=ON  ~/build/mtcs/faster/src/ && make -j 3 &&  make -j 3 test
+        - cmake -DCXX="g++-6" -DhdfsEnabled=OFF -DCMAKE_BUILD_TYPE=DEBUG -DCOVERALLS=ON  ~/build/mtcs/faster/src/ && make -j 3 &&  make -j 3 test
 after_success:
         - coveralls --exclude tests --exclude test --exclude examples --gcov-options '\-lp'
+
+matrix:
+        env:
+                - CXX=g++-5
+                - CXX=g++-6
+        allow_failures:
+                - env: CXX=g++
 
 
 
@@ -36,24 +45,31 @@ dist: trusty
 addons:
   apt:
     sources:
-    # toolchains
-    - ubuntu-toolchain-r-test
-    # Hadoop
-    - sourceline: 'deb [arch=amd64] http://archive.cloudera.com/cdh5/ubuntu/trusty/amd64/cdh trusty-cdh5 contrib'
-    - sourceline: 'deb-src http://archive.cloudera.com/cdh5/ubuntu/trusty/amd64/cdh trusty-cdh5 contrib'
-    #- webupd8team/java
+        # toolchains
+        - ubuntu-toolchain-r-test
+        # cmake 3
+        #- george-edison55/cmake-3.x
+        # HDFS
+        #- sourceline: 'deb [arch=amd64] http://archive.cloudera.com/cdh5/ubuntu/trusty/amd64/cdh trusty-cdh5 contrib'
+        #- sourceline: 'deb-src http://archive.cloudera.com/cdh5/ubuntu/trusty/amd64/cdh trusty-cdh5 contrib'
+        #- webupd8team/java
     packages:
-    - oracle-java8-installer
-    - gcc-5
-    - g++-5
-    # MPI
-    - libopenmpi-dev
-    - openmpi-bin
-    # Tests
-    - valgrind
-    - libgtest-dev
-    - libasan3
-    # HDFS
-    - hadoop-hdfs
-    - hadoop-hdfs-datanode
-    - hadoop-hdfs-namenode
+        #- cmake
+        - oracle-java8-installer
+        - gcc-6
+        - gcc-5
+        - g++-6
+        - g++-5
+        # MPI
+        - libopenmpi-dev
+        - openmpi-bin
+        # Tests
+        - valgrind
+        - libgtest-dev
+        - libasan3
+        # HDFS
+        #- hadoop-hdfs
+        #- hadoop-hdfs-datanode
+        #- hadoop-hdfs-namenode
+        #- libhdfs0
+        #- libhdfs0-dev
