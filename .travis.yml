@@ -3,7 +3,7 @@ compiler: gcc
 before_install:
         - pip install --user cpp-coveralls
         - mkdir -p build && cd build
-        - mkdir -p ~/gtest-build && cd ~/gtest-build && cmake /usr/src/gtest/ && make && cp *.a ../
+        - mkdir -p ~/gtest-build && cd ~/gtest-build && cmake /usr/src/gtest/ && make && cp *.a ../ && cd ..
 before_script:
 script:
         - cmake -DGTEST_MAIN_LIBRARY:FILEPATH=libgtest_main.a -DGTEST_LIBRARY:FILEPATH=libgtest.a -DhdfsEnabled=OFF -DCMAKE_BUILD_TYPE=DEBUG -DCOVERALLS=ON  ../src/ && make -j 3 &&  make -j 3 test
