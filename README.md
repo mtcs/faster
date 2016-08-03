@@ -14,7 +14,7 @@
 [![Build Status Master](https://img.shields.io/travis/mtcs/faster/master.svg?maxAge=2592000)](https://travis-ci.org/mtcs/faster)
 [![Build Status Dev Master](https://img.shields.io/travis/mtcs/faster/dev/master.svg?maxAge=2592000&label=dev build)](https://travis-ci.org/mtcs/faster)
 [![Coverage Status](https://img.shields.io/coveralls/mtcs/faster/master.svg?maxAge=2592000)](https://coveralls.io/github/mtcs/faster?branch=master)
-[![Coverage Status](https://img.shields.io/coveralls/mtcs/faster/dev/master.svg?maxAge=2592000&label=dev coverage")](https://coveralls.io/github/mtcs/faster?branch=dev%2Fmaster)
+[![Coverage Status](https://img.shields.io/coveralls/mtcs/faster/dev/master.svg?maxAge=2592000&label=dev coverage)](https://coveralls.io/github/mtcs/faster?branch=dev%2Fmaster)
 
 [![Donate to Faster](https://img.shields.io/gratipay/team/faster.svg?maxAge=2592000)](https://gratipay.com/faster/)
 [![Donate to MtCS](https://img.shields.io/gratipay/user/mtcs.svg?maxAge=2592000)](https://gratipay.com/~mtcs/)
