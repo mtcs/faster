@@ -2,8 +2,8 @@ language: cpp
 compiler: gcc
 before_install:
         - pip install --user cpp-coveralls
-        - mkdir -p build
-        - mkdir -p ~/gtest-build && cd ~/gtest-build && cmake /usr/src/gtest/ && make && cp *.a ../
+        - mkdir -p ~/build
+        - mkdir -p ~/gtest-build && cd ~/gtest-build && cmake /usr/src/gtest/ && make && cp *.a ~/build/
         - cd ~/build
 before_script:
 script:
