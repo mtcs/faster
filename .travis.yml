@@ -4,7 +4,7 @@ before_install:
         - pip install --user cpp-coveralls
         - mkdir -p ~/build/mtcs/faster/build
           #- mkdir -p ~/gtest-build && cd ~/gtest-build && cmake /usr/src/gtest/ && make && cp *.a ~/build/mtcs/faster/build
-        - mkdir -p ~/gtest-build && cd ~/gtest-build && cmake /usr/src/gtest/ && make && cp *.a /usr/lib
+        - mkdir -p ~/gtest-build && cd ~/gtest-build && cmake /usr/src/gtest/ && make && sudo cp *.a /usr/lib
         - cd ~/build/mtcs/faster/build
 before_script:
 script:
