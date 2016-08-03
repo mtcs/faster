@@ -30,7 +30,7 @@ after_success:
         - coveralls --exclude tests --exclude test --exclude examples --gcov-options '\-lp'
 
 env:
-         CXX=g++-5
+        - COMPILER=g++-5
 
 #matrix:
 #        env:
