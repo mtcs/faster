@@ -1,10 +1,11 @@
-![Faster](https://github.com/mtcs/faster/wiki/img/Logo.png)
+[![Faster](https://github.com/mtcs/faster/wiki/img/Logo.png)](http://mtcs.github.io/faster)
 ======
 ####Super Fast Distributed Computing
 
-[Web Site](http://mtcs.github.io/faster)
+[](http://mtcs.github.io/faster)
 
-[![Build Status](https://travis-ci.org/mtcs/faster.svg?branch=dev%2Fmaster)](https://travis-ci.org/mtcs/faster)
+[![Build Status Master](https://travis-ci.org/mtcs/faster.svg?branch=master)](https://travis-ci.org/mtcs/faster)
+[![Build Status Dev Master](https://travis-ci.org/mtcs/faster.svg?branch=dev%2Fmaster)](https://travis-ci.org/mtcs/faster)
 [![Coverage Status](https://coveralls.io/repos/github/mtcs/faster/badge.svg?branch=dev%2Fmaster)](https://coveralls.io/github/mtcs/faster?branch=dev%2Fmaster)
 
 

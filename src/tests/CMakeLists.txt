@@ -15,6 +15,7 @@ include ( CTest )
 
 find_package(GTest)
 if(GTEST_FOUND)
+	message("GTest enabled")
 	SET(CTEST_TESTING_TIMEOUT 50)
 	SET(CTEST_OUTPUT_ON_FAILURE TRUE)
 	include_directories(${GTEST_INCLUDE_DIRS} )
@@ -69,6 +70,8 @@ if(GTEST_FOUND)
 		dec_test(gtest-hdfsEngine)
 	endif (hdfsEnabled)
 
+else(GTEST_FOUND)
+	message("GTest not found, disabling tests")
 endif(GTEST_FOUND)
 
 
