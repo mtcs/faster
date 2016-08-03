@@ -90,31 +90,28 @@ target_link_libraries (logicreg  ${EXTRA_LIBS})
 
 
 
-find_package(GTest)
-if(GTEST_FOUND)
-	function(mpi_test test_name)
-		add_test(NAME example-${test_name}
-			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-			COMMAND mpirun -np 4 ./examples/${test_name}
-			)
-		set_custom_env(example-${test_name})
-	endfunction(mpi_test)
-	mpi_test (fexample-int )
-	mpi_test (fexample-indexed )
-	mpi_test (fexample-bulk-int )
-	mpi_test (fexample-int-file )
+function(mpi_test test_name)
+	add_test(NAME example-${test_name}
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+		COMMAND mpirun -np 4 ./examples/${test_name}
+		)
+	set_custom_env(example-${test_name})
+endfunction(mpi_test)
+mpi_test (fexample-int )
+mpi_test (fexample-indexed )
+mpi_test (fexample-bulk-int )
+mpi_test (fexample-int-file )
 #mpi_test (fexample-int-array )
-	mpi_test (fexample-int-vector )
-	mpi_test (fexample-mapByKey )
-	mpi_test (fexample-cogroup )
-	mpi_test (fexample-cogroup2 )
-	mpi_test (pagerank )
-	mpi_test (pagerank-bulk )
-	mpi_test (pagerank-bp )
+mpi_test (fexample-int-vector )
+mpi_test (fexample-mapByKey )
+mpi_test (fexample-cogroup )
+mpi_test (fexample-cogroup2 )
+mpi_test (pagerank )
+mpi_test (pagerank-bulk )
+mpi_test (pagerank-bp )
 #mpi_test (pagerank-bp2 )
-	mpi_test (pagerank-bulk2 )
-	mpi_test (kmeans )
-	mpi_test (logicreg )
-endif(GTEST_FOUND)
+mpi_test (pagerank-bulk2 )
+mpi_test (kmeans )
+mpi_test (logicreg )
 
 

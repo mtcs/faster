@@ -6,7 +6,7 @@ before_script:
         - mkdir -p build
         - cd build
 script:
-        - cmake -DhdfsEnabled=OFF -DCMAKE_BUILD_TYPE=DEBUG -DCOVERALLS=ON  ../src/ && make -j 3 &&  make -j 3 test
+        - cmake -DGTEST_MAIN_LIBRARY:FILEPATH=/usr/lib/gtest/libgtest.a -DhdfsEnabled=OFF -DCMAKE_BUILD_TYPE=DEBUG -DCOVERALLS=ON  ../src/ && make -j 3 &&  make -j 3 test
 after_success:
         - coveralls --exclude tests --explude test --exclude examples --gcov-options '\-lp'
 
