@@ -55,19 +55,37 @@ title: Faster - Super Fast Distributed Computing
 
 			<h2>Last Releases</h2>
 			<ul>
-			{% for release in site.categories.release limit: 3 %}
+				{% for release in site.categories.release limit: 3 %}
 				<li><a href="/faster{{ release.url }}">{{ release.title }}</a> <span>{{ release.date | date_to_string }}</span> </li>
-			{% endfor %}
+				{% endfor %}
 			</ul>
 
-			<h2>Build Status</h2>
-			<p>
-			<h3>master branch</h3>
-			<a href="https://travis-ci.org/mtcs/faster"><img src="https://travis-ci.org/mtcs/faster.svg?branch=master" /></a><br>
-			<a href="https://coveralls.io/github/mtcs/faster?branch=master"><img src="https://coveralls.io/repos/github/mtcs/faster/badge.svg?branch=master" /></a><br>
-			<h3>dev/master branch</h3>
-			<a href="https://travis-ci.org/mtcs/faster"><img src="https://travis-ci.org/mtcs/faster.svg?branch=dev%2Fmaster" /></a><br>
-			<a href="https://coveralls.io/github/mtcs/faster?branch=dev%2Fmaster"><img src="https://coveralls.io/repos/github/mtcs/faster/badge.svg?branch=dev%2Fmaster" /></a><br>
+			<h2>Repository</h2>
+			<p align=center>
+			<a href="https://github.com/mtcs/faster"><img src="https://github.com/mtcs/faster/wiki/img/GitHub-Mark/PNG/GitHub-Mark-64px.png" /></a>
+			</p>
+
+			<p align=center>
+			<a href="https://github.com/mtcs/faster"><img src="https://img.shields.io/github/release/mtcs/faster.svg?maxAge=2592000" /></a>
+			<a href="https://github.com/mtcs/faster"><img src="https://img.shields.io/github/tag/mtcs/faster.svg?maxAge=25900" /></a>
+			<a href="https://github.com/mtcs/faster"><img src="https://img.shields.io/github/stars/mtcs/faster.svg?maxAge=2592000" /></a>
+			<a href="https://github.com/mtcs/faster"><img src="https://img.shields.io/github/watchers/mtcs/faster.svg?maxAge=2592000" /></a>
+			<a href="https://github.com/mtcs/faster"><img src="https://img.shields.io/github/downloads/mtcs/faster/total.svg?maxAge=2592000" /></a>
+			<a href="https://github.com/mtcs/faster/issues"><img src="https://img.shields.io/github/issues/mtcs/faster.svg?maxAge=2592000" /></a>
+			</p>
+
+			<p align=center>
+			<a href="https://travis-ci.org/mtcs/faster"><img src="https://img.shields.io/travis/mtcs/faster/master.svg?maxAge=2592000" /></a>
+			<a href="https://coveralls.io/github/mtcs/faster?branch=master"><img src="https://img.shields.io/coveralls/mtcs/faster/master.svg?maxAge=2592000" /></a></br>
+			<a href="https://travis-ci.org/mtcs/faster"><img src="https://img.shields.io/travis/mtcs/faster/dev/master.svg?maxAge=2592000&label=dev build" /></a>
+			<a href="https://coveralls.io/github/mtcs/faster?branch=dev%2Fmaster"><img src="https://img.shields.io/coveralls/mtcs/faster/dev/master.svg?maxAge=2592000&label=dev coverage" /></a></br>
+			</p>
+
+			<h2>Contribute</h2>
+			<p align=center>
+			<a href="https://gratipay.com/faster/"><img src="https://img.shields.io/gratipay/team/faster.svg?maxAge=2592000&label=tip faster" /></a>
+			<a href="https://gratipay.com/~mtcs/"><img src="https://img.shields.io/gratipay/user/mtcs.svg?maxAge=2592000&label=tip mtcs" /></a></br>
+			<a href="https://beerpay.io/mtcs/faster"><img src="https://beerpay.io/mtcs/faster/badge.svg?style=beer" /></a>
 			</p>
 		</div>
 	</div>
