@@ -46,25 +46,26 @@ title: Faster - Super Fast Distributed Computing
 				{% endfor %}
 			</div>
 			</a>
-			<h1>News</h1>
+			<h2>News</h2>
 			<ul>
 				{% for post in site.categories.news limit: 10 %}
 				<li><a href="/faster{{ post.url }}">{{ post.title }}</a> <span>{{ post.date | date_to_string }}</span></li>
 				{% endfor %}
 			</ul>
 
-			<h1>Last Releases</h1>
+			<h2>Last Releases</h2>
 			<ul>
 			{% for release in site.categories.release limit: 3 %}
 				<li><a href="/faster{{ release.url }}">{{ release.title }}</a> <span>{{ release.date | date_to_string }}</span> </li>
 			{% endfor %}
 			</ul>
 
+			<h2>Build Status</h2>
 			<p>
-			master branch:<br>
+			<h3>master branch</h3>
 			<a href="https://travis-ci.org/mtcs/faster"><img src="https://travis-ci.org/mtcs/faster.svg?branch=master" /></a><br>
 			<a href="https://coveralls.io/github/mtcs/faster?branch=master"><img src="https://coveralls.io/repos/github/mtcs/faster/badge.svg?branch=master" /></a><br>
-			dev/master branch:<br>
+			<h3>dev/master branch</h3>
 			<a href="https://travis-ci.org/mtcs/faster"><img src="https://travis-ci.org/mtcs/faster.svg?branch=dev%2Fmaster" /></a><br>
 			<a href="https://coveralls.io/github/mtcs/faster?branch=dev%2Fmaster"><img src="https://coveralls.io/repos/github/mtcs/faster/badge.svg?branch=dev%2Fmaster" /></a><br>
 			</p>
