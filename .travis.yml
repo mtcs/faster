@@ -29,12 +29,13 @@ script:
 after_success:
         - coveralls --exclude tests --exclude test --exclude examples --gcov-options '\-lp'
 
-matrix:
-        env:
-                - CXX=g++-5
-                - CXX=g++-6
-        allow_failures:
-                - env: CXX=g++
+env:
+         CXX=g++-5
+
+#matrix:
+#        env:
+#                - CXX=g++-5
+#                - CXX=g++-6
 
 
 
