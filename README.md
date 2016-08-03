@@ -11,11 +11,10 @@
 
 [](http://mtcs.github.io/faster)
 
-Master : [![Build Status Master](https://travis-ci.org/mtcs/faster.svg?branch=master)](https://travis-ci.org/mtcs/faster)
-[![Coverage Status](https://coveralls.io/repos/github/mtcs/faster/badge.svg?branch=master)](https://coveralls.io/github/mtcs/faster?branch=master)
-
-Dev/Master : [![Build Status Dev Master](https://travis-ci.org/mtcs/faster.svg?branch=dev%2Fmaster)](https://travis-ci.org/mtcs/faster)
-[![Coverage Status](https://coveralls.io/repos/github/mtcs/faster/badge.svg?branch=dev%2Fmaster)](https://coveralls.io/github/mtcs/faster?branch=dev%2Fmaster)
+[![Build Status Master](https://img.shields.io/travis/mtcs/faster/master.svg?maxAge=2592000)](https://travis-ci.org/mtcs/faster)
+[![Build Status Dev Master](https://img.shields.io/travis/mtcs/faster/dev/master.svg?maxAge=2592000&label=dev build)](https://travis-ci.org/mtcs/faster)
+[![Coverage Status](https://img.shields.io/coveralls/mtcs/faster/master.svg?maxAge=2592000)](https://coveralls.io/github/mtcs/faster?branch=master)
+[![Coverage Status](https://img.shields.io/coveralls/mtcs/faster/dev/master.svg?maxAge=2592000&label=dev coverage")](https://coveralls.io/github/mtcs/faster?branch=dev%2Fmaster)
 
 [![Donate to Faster](https://img.shields.io/gratipay/team/faster.svg?maxAge=2592000)](https://gratipay.com/faster/)
 [![Donate to MtCS](https://img.shields.io/gratipay/user/mtcs.svg?maxAge=2592000)](https://gratipay.com/~mtcs/)
