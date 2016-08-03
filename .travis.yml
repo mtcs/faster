@@ -4,7 +4,7 @@ before_install:
         - pip install --user cpp-coveralls
         - mkdir -p ~/build/mtcs/faster/build
           #- mkdir -p ~/gtest-build && cd ~/gtest-build && cmake /usr/src/gtest/ && make && sudo cp *.a /usr/lib
-        - sudo wget 'https://archive.cloudera.com/cdh5/ubuntu/trusty/amd64/cdh/cloudera.list' -O /etc/apt/sources.list.d/cloudera.list
+          #- sudo wget 'https://archive.cloudera.com/cdh5/ubuntu/trusty/amd64/cdh/cloudera.list' -O /etc/apt/sources.list.d/cloudera.list
 before_script:
         # Configure HDFS
         - mkdir -p /var/tmp/hdfs-nn
@@ -38,6 +38,8 @@ addons:
     # toolchains
     - ubuntu-toolchain-r-test
     # Hadoop
+    - sourceline: 'deb [arch=amd64] http://archive.cloudera.com/cdh5/ubuntu/trusty/amd64/cdh trusty-cdh5 contrib'
+    - sourceline: 'deb-src http://archive.cloudera.com/cdh5/ubuntu/trusty/amd64/cdh trusty-cdh5 contrib'
     #- webupd8team/java
     packages:
     - oracle-java8-installer
