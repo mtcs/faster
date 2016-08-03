@@ -7,9 +7,9 @@ before_install:
           #- sudo wget 'https://archive.cloudera.com/cdh5/ubuntu/trusty/amd64/cdh/cloudera.list' -O /etc/apt/sources.list.d/cloudera.list
 before_script:
         # Configure HDFS
-        - mkdir -p /var/tmp/hdfs-nn
-        - mkdir -p /var/tmp/hdfs-dn
-        - chown hdfs:hadoop /var/tmp/hdfs*
+        - sudo mkdir -p /var/tmp/hdfs-nn
+        - sudo mkdir -p /var/tmp/hdfs-dn
+        - sudo chown hdfs:hadoop /var/tmp/hdfs*
         - sudo echo -e "<configuration>\n <property>\n <name>dfs.replication</name>\n <value>1</value>\n </property>\n <property>\n <name>dfs.namenode.name.dir</name>\n <value>/var/tmp/hdfs-nn</value>\n </property>\n <property>\n <name>dfs.datanode.data.dir</name>\n <value>/var/tmp/hdfs-dn</value>\n </property>\n </configuration>\n " > /etc/hadoop/conf/hdfs-site.xml
         - sudo echo -e "<configuration>\n <property>\n <name>fs.defaultFS</name>\n <value>hdfs://localhost:9000</value>\n </property>\n </configuration>\n " > /etc/hadoop/conf/core-site.xml
         - sudo service hadoop-hdfs-namenode start
