@@ -103,9 +103,6 @@ endif (hdfsEnabled)
 # Common Dynamic LINKED libs
 add_library( fasterCommon SHARED ${commonLibSources} )
 set ( COMMDLIBS  fasterCommon )
-if (hdfsEnabled)
-	target_link_libraries(fasterCommon ${JAVALIBS} ${HDFSLIBS})
-endif (hdfsEnabled)
 
 # Worker Side Dynamic LINKED libs
 add_library(fasterWorkerFddCore SHARED workerFddCore.cpp fddStorage.cpp )
@@ -171,6 +168,9 @@ target_link_libraries(fasterWorkerIFddInstance11  ${ICOMMDLLIBS} ${COMMDLIBS})
 #target_link_libraries(fasterWorkerIPFddInstance4  ${IPCOMMDLLIBS} ${COMMDLIBS})
 #target_link_libraries(fasterWorkerIPFddInstance5  ${IPCOMMDLLIBS} ${COMMDLIBS})
 
+if (hdfsEnabled)
+	target_link_libraries(fasterCommon ${JAVALIBS} ${HDFSLIBS} ${EXTRA_LIBS})
+endif (hdfsEnabled)
 target_link_libraries (faster ${EXTRA_LIBS} ${COMMDLIBS})
 
 #cotire(fasterWorkerSFdd)

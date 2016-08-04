@@ -8,7 +8,7 @@ before_install:
         # GTest
         - export CC=gcc-6
         - export CXX=g++-6
-        - mkdir -p ~/gtest-build && cd ~/gtest-build && cmake -DBUILD_SHARED_LIBS=ON /usr/src/gtest/ && make && sudo cp *.{so,a} /usr/lib
+        - mkdir -p ~/gtest-build && cd ~/gtest-build && cmake -DBUILD_SHARED_LIBS=ON /usr/src/gtest/ && make && sudo cp *.so *.a /usr/lib
           #- sudo wget 'https://archive.cloudera.com/cdh5/ubuntu/trusty/amd64/cdh/cloudera.list' -O /etc/apt/sources.list.d/cloudera.list
 before_script:
         # Configure HDFS
