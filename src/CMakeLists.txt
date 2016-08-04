@@ -13,6 +13,7 @@ set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )
 # Options and user variables
 option(hdfsEnabled 	"Haddop File System (HDFS) support" ON)
 option(offloadingEnabled "Accelerator Offloading support" OFF)
+option(sanEnabled 	"Sanitizers debugging support" OFF)
 set(hadoopHome  	"/usr/lib/hadoop" CACHE STRING "Haddop File System (HDFS) home directory")
 set(jvmHome  		"/usr/lib/jvm/default" CACHE STRING "JVM home directory (for HDFS)")
 
@@ -41,17 +42,19 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	include(Dart)
 
 	if (NOT hdfsEnabled)
+	if (NOT sanEnabled)
 		add_definitions(-fsanitize=address)
 		#add_definitions(-fsanitize=thread)
 		#add_definitions(-fsanitize=undefined)
-		#add_definitions(-fsanitize=leak)
+		add_definitions(-fsanitize=leak)
 		add_definitions(-fno-omit-frame-pointer)
 
-		 set (EXTRA_LIBS asan ${EXTRA_LIBS})
+		set (EXTRA_LIBS asan ${EXTRA_LIBS})
 		#set (EXTRA_LIBS tsan ${EXTRA_LIBS})
 		#set (EXTRA_LIBS usan ${EXTRA_LIBS})
-		#set (EXTRA_LIBS lsan ${EXTRA_LIBS})
+		set (EXTRA_LIBS lsan ${EXTRA_LIBS})
 		#set (EXTRA_LIBS duma ${EXTRA_LIBS})
+	endif (NOT sanEnabled)
 	endif (NOT hdfsEnabled)
 
 else (CMAKE_BUILD_TYPE MATCHES "DEBUG")
@@ -95,6 +98,13 @@ function(set_custom_env test_name)
 			PROPERTY
 			ENVIRONMENT "LD_LIBRARY_PATH=${hadoopHome}/lib/native:${jvmHome}/jre/lib/amd64/server/"
 			)
+	else (hdfsEnabled)
+		if (NOT sanEnabled)
+			set_property( TEST ${test_name}
+				PROPERTY
+				ENVIRONMENT "LD_PRELOAD=libasan.so:liblsan.co"
+				)
+		endif (NOT sanEnabled)
 	endif (hdfsEnabled)
 endfunction(set_custom_env)
 

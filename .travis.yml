@@ -27,9 +27,9 @@ before_script:
         - cd ~/build/mtcs/faster
 script:
         #- cmake -DGTEST_MAIN_LIBRARY:FILEPATH=libgtest_main.a -DGTEST_LIBRARY:FILEPATH=libgtest.a -DhdfsEnabled=OFF -DCMAKE_BUILD_TYPE=DEBUG -DCOVERALLS=ON  ~/build/mtcs/faster/src/ && make -j 3 &&  make -j 3 test
-        - cmake -DhdfsEnabled=OFF -DCMAKE_BUILD_TYPE=DEBUG -DCOVERALLS=ON  src/ && make -j 3 &&  make -j 3 test
+        - cmake -DhdfsEnabled=OFF -DCMAKE_BUILD_TYPE=DEBUG -DCOVERALLS=ON  src/ && make -j 3 &&  ctest --timeout 30 test
 after_success:
-        - coveralls --exclude tests --exclude test --exclude examples --gcov-options '\-lp'
+        - coveralls --exclude src/tests --exclude src/test --exclude src/examples --gcov-options '\-lp'
 
 
 #matrix:
@@ -68,6 +68,7 @@ addons:
         - valgrind
         - libgtest-dev
         - libasan3
+        - liblsan0
         # HDFS
         #- hadoop-hdfs
         #- hadoop-hdfs-datanode

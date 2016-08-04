@@ -169,10 +169,10 @@ void faster::workerIFddCore<K,T>::countByKey(fastComm *comm){
 	std::unordered_map<K, size_t> count;
 	// Count keys
 	for ( size_t i = 0; i < size; ++i){
-		//typename std::unordered_map<K, size_t>::iterator it = count.find(keys[i]);
-		//if (count.find(keys[i]) == count.end())
-			//count[keys[i]] = 1;
-		//else
+		auto it = count.find(keys[i]);
+		if (it == count.end())
+			count[keys[i]] = 1;
+		else
 			count[keys[i]] += 1;
 	}
 	buffer << size_t(count.size());
