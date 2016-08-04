@@ -31,9 +31,6 @@ script:
 after_success:
         - coveralls --exclude tests --exclude test --exclude examples --gcov-options '\-lp'
 
-env:
-        - CC=gcc-5
-        - CXX=g++-5
 
 #matrix:
 #        env:
