@@ -4,11 +4,10 @@ compiler: gcc
 before_install:
         # Coveralls
         - pip install --user cpp-coveralls
-        - mkdir -p ~/build/mtcs/faster/build
         # GTest
         - export CC=gcc-6
         - export CXX=g++-6
-        - mkdir -p ~/gtest-build && cd ~/gtest-build && cmake -DBUILD_SHARED_LIBS=ON /usr/src/gtest/ && make && sudo cp *.so *.a /usr/lib
+        - mkdir -p ~/gtest-build && cd ~/gtest-build && cmake -DBUILD_SHARED_LIBS=ON /usr/src/gtest/ && make && sudo cp *.so /usr/lib
           #- sudo wget 'https://archive.cloudera.com/cdh5/ubuntu/trusty/amd64/cdh/cloudera.list' -O /etc/apt/sources.list.d/cloudera.list
 before_script:
         # Configure HDFS
@@ -25,10 +24,10 @@ before_script:
         #- echo "1\n2\n3\n4\n5\n7\n" > /tmp/test.txt
         #- hadoop fs -put /tmp/test.txt /tmp
         # Go to build dir
-        - cd ~/build/mtcs/faster/build
+        - cd ~/build/mtcs/faster
 script:
         #- cmake -DGTEST_MAIN_LIBRARY:FILEPATH=libgtest_main.a -DGTEST_LIBRARY:FILEPATH=libgtest.a -DhdfsEnabled=OFF -DCMAKE_BUILD_TYPE=DEBUG -DCOVERALLS=ON  ~/build/mtcs/faster/src/ && make -j 3 &&  make -j 3 test
-        - cmake -DhdfsEnabled=OFF -DCMAKE_BUILD_TYPE=DEBUG -DCOVERALLS=ON  ~/build/mtcs/faster/src/ && make -j 3 &&  make -j 3 test
+        - cmake -DhdfsEnabled=OFF -DCMAKE_BUILD_TYPE=DEBUG -DCOVERALLS=ON  src/ && make -j 3 &&  make -j 3 test
 after_success:
         - coveralls --exclude tests --exclude test --exclude examples --gcov-options '\-lp'
 
