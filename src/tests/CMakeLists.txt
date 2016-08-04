@@ -22,6 +22,17 @@ if(GTEST_FOUND)
 
 	set (EXTRA_LIBS ${EXTRA_LIBS} ${GTEST_BOTH_LIBRARIES})
 
+	find_package(MPI REQUIRED)
+	#set (MPI_CXX_COMPILER "mpicc")
+	add_definitions(${MPI_CXX_COMPILE_FLAGS})
+	include_directories(${MPI_CXX_INCLUDE_PATH})
+	link_directories(${MPI_CXX_LIBRARIES})
+	#set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
+	#set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
+	#include_directories("/usr/include/openmpi/")
+	set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
+
+
 	function(dec_test test_name)
 		add_executable(${test_name} ${test_name}.cpp)
 		target_link_libraries (${test_name}  ${EXTRA_LIBS})
