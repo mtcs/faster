@@ -16,6 +16,11 @@ option(offloadingEnabled "Accelerator Offloading support" OFF)
 set(hadoopHome  	"/usr/lib/hadoop" CACHE STRING "Haddop File System (HDFS) home directory")
 set(jvmHome  		"/usr/lib/jvm/default" CACHE STRING "JVM home directory (for HDFS)")
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED on)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	message("----------- DEBUG MODE -----------")

@@ -5,6 +5,8 @@ before_install:
         - pip install --user cpp-coveralls
         - mkdir -p ~/build/mtcs/faster/build
         # GTest
+        - export CC=gcc-5
+        - export CXX=g++-5
         - mkdir -p ~/gtest-build && cd ~/gtest-build && cmake /usr/src/gtest/ && make && sudo cp *.a /usr/lib
           #- sudo wget 'https://archive.cloudera.com/cdh5/ubuntu/trusty/amd64/cdh/cloudera.list' -O /etc/apt/sources.list.d/cloudera.list
 before_script:
@@ -30,7 +32,8 @@ after_success:
         - coveralls --exclude tests --exclude test --exclude examples --gcov-options '\-lp'
 
 env:
-        - COMPILER=g++-5
+        - CC=gcc-5
+        - CXX=g++-5
 
 #matrix:
 #        env:
@@ -57,9 +60,9 @@ addons:
     packages:
         #- cmake
         - oracle-java8-installer
-        - gcc-6
+          #- gcc-6
         - gcc-5
-        - g++-6
+          #- g++-6
         - g++-5
         # MPI
         - libopenmpi-dev

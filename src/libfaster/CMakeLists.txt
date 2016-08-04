@@ -7,8 +7,6 @@ set (libfaster_VERSION_MAJOR 0)
 set (libfaster_VERSION_MINOR 1)
 
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ldl ")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
