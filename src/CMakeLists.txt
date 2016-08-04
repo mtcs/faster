@@ -27,8 +27,8 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	message("----------- DEBUG MODE -----------")
 	set(ENV{ASAN_OPTIONS} "symbolize=1")
 	add_definitions(-O0)
-	#add_definitions(-g3)
-	add_definitions(-g)
+	add_definitions(-g3)
+	#add_definitions(-g)
 	#add_definitions(-fstack-protector-all)
 	add_definitions(-Wall)
 	add_definitions(-Wextra)
@@ -102,7 +102,7 @@ function(set_custom_env test_name)
 		if (NOT sanEnabled)
 			set_property( TEST ${test_name}
 				PROPERTY
-				ENVIRONMENT "LD_PRELOAD=libasan.so:liblsan.co"
+				ENVIRONMENT "LD_PRELOAD=libasan.so:liblsan.so"
 				)
 		endif (NOT sanEnabled)
 	endif (hdfsEnabled)
