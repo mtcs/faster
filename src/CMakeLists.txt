@@ -26,8 +26,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	message("----------- DEBUG MODE -----------")
 	add_definitions(-O0)
-	add_definitions(-g3)
-	#add_definitions(-g)
+	#add_definitions(-g3)
+	add_definitions(-g)
 	add_definitions(-fstack-protector-all)
 	add_definitions(-Wall)
 	add_definitions(-Wextra)
@@ -101,12 +101,12 @@ function(set_custom_env test_name)
 		if (sanEnabled)
 			set_property( TEST ${test_name}
 				PROPERTY
-				ENVIRONMENT "LD_PRELOAD=libasan.so:liblsan.so"
+				ENVIRONMENT "LD_PRELOAD=libasan.so.3:liblsan.so.0"
 				)
 			set_property( TEST ${test_name}
 				APPEND
 				PROPERTY
-				ENVIRONMENT "ASAN_OPTIONS=symbolize=1"
+				ENVIRONMENT "ASAN_OPTIONS=symbolize=1:abort_on_error=1:verbosity=1"
 				)
 			set_property( TEST ${test_name}
 				APPEND
