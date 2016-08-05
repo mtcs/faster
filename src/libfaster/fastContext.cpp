@@ -27,11 +27,11 @@ faster::fastContext::~fastContext(){
 		comm->sendFinish();
 
 		// Delete FDDs TODO - Find out how to do this!!!!
-		std::cerr << "   DESTROY fastContext\n";
+		//std::cerr << "   DESTROY fastContext\n";
 		for ( size_t i = 0; i < fddList.size(); i++){
-			std::cerr << i << " ";
+			//std::cerr  << i << " - "<< fddList[i]->getId() << " ";
 			if (fddInternal[i]){
-				std::cerr << "   DELETING [" << i << "]\n";
+				//std::cerr << "   DELETING\n";
 				delete fddList[i];
 			}
 		}

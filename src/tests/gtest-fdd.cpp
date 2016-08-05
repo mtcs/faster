@@ -77,7 +77,7 @@ class TestFDD : public ::testing::Test {
 
 		fastContext fc;
 		vector<T> localData;
-		fdd<T> * data;
+		fdd<T> * data = NULL;
 
 		virtual void SetUp() {
 			cerr << "Mockup setup\n";
@@ -98,7 +98,7 @@ class TestFDD : public ::testing::Test {
 
 		virtual void TearDown() {
 			cerr << "Mockup teardown\n";
-			delete data;
+			if (data) delete data;
 			//delete localData;
 			//delete fc;
 		}// */
