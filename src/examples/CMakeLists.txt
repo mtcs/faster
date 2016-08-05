@@ -66,52 +66,36 @@ target_link_libraries (pagerank-bulk2  ${EXTRA_LIBS})
 target_link_libraries (kmeans  ${EXTRA_LIBS})
 target_link_libraries (logicreg  ${EXTRA_LIBS})
 
-
-
-#cotire(fexample-int)
-#cotire(fexample-indexed)
-#cotire(fexample-bulk-int)
-#cotire(fexample-int-file)
-#cotire(fexample-int-array)
-#cotire(fexample-int-vector)
-#cotire(fexample-mapByKey)
-#cotire(fexample-cogroup)
-#cotire(fexample-cogroup2)
-#cotire(pagerank)
-#cotire(pagerank-bulk)
-#cotire(pagerank-bp)
-#cotire(pagerank-bulk2)
-#cotire(kmeans)
-
 #install(TARGETS fexample-int DESTINATION bin)
 #install(TARGETS fexample-bulk-int DESTINATION bin)
 #install(TARGETS fexample-int-file DESTINATION bin)
 #install(TARGETS fexample-int-array DESTINATION bin)
 
 
-
-function(mpi_test test_name)
-	add_test(NAME example-${test_name}
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-		COMMAND mpirun -np 4 ./examples/${test_name}
-		)
-	set_custom_env(example-${test_name})
-endfunction(mpi_test)
-mpi_test (fexample-int )
-mpi_test (fexample-indexed )
-mpi_test (fexample-bulk-int )
-mpi_test (fexample-int-file )
+if (examplesAsTests)
+	function(mpi_test test_name)
+		add_test(NAME example-${test_name}
+			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+			COMMAND mpirun -np 4 ./examples/${test_name}
+			)
+		set_custom_env(example-${test_name})
+	endfunction(mpi_test)
+	mpi_test (fexample-int )
+	mpi_test (fexample-indexed )
+	mpi_test (fexample-bulk-int )
+	mpi_test (fexample-int-file )
 #mpi_test (fexample-int-array )
-mpi_test (fexample-int-vector )
-mpi_test (fexample-mapByKey )
-mpi_test (fexample-cogroup )
-mpi_test (fexample-cogroup2 )
-mpi_test (pagerank )
-mpi_test (pagerank-bulk )
-mpi_test (pagerank-bp )
+	mpi_test (fexample-int-vector )
+	mpi_test (fexample-mapByKey )
+	mpi_test (fexample-cogroup )
+	mpi_test (fexample-cogroup2 )
+	mpi_test (pagerank )
+	mpi_test (pagerank-bulk )
+	mpi_test (pagerank-bp )
 #mpi_test (pagerank-bp2 )
-mpi_test (pagerank-bulk2 )
-mpi_test (kmeans )
-mpi_test (logicreg )
+	mpi_test (pagerank-bulk2 )
+	mpi_test (kmeans )
+	mpi_test (logicreg )
+endif (examplesAsTests)
 
 
