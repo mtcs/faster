@@ -195,7 +195,7 @@ int main(int argc, char ** argv){
 	fc.startWorkers();
 	if (!fc.isDriver())
 		return 0;
-	cerr << "------------ PageRank -------------";
+	cerr << "------------ PageRank -------------\n";
 
 	fc.printHeader();
 	cerr << "  Init Time: " << duration_cast<milliseconds>(system_clock::now() - start).count() << "ms\n";
