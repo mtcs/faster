@@ -69,6 +69,8 @@ addons:
         - libgtest-dev
         - libasan3
         - liblsan0
+        # Coveralls
+        - python-yaml
         # HDFS
         #- hadoop-hdfs
         #- hadoop-hdfs-datanode
