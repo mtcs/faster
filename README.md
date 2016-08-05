@@ -24,7 +24,8 @@
 
 Faster is a distributed computing framework designed to be fast, efficient and flexible. It is designed to work well in small and large heterogeneous clusters. Although, we are still in heavy development.
 
-__Features:__
+Features
+--------
 
 * High level distributed computing framework.
 * Implemented in C++ for speed.
@@ -36,5 +37,8 @@ __Features:__
 * MPI message passing wrapping.
 * Easy to use with OpenMP GPU device accelerators.
 
+Requirements
+------------
 
-
+* GCC 5 (6 if testing enabled)
+* CMake > 2.8
