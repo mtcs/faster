@@ -25,11 +25,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	message("----------- DEBUG MODE -----------")
-	set(ENV{ASAN_OPTIONS} "symbolize=1")
 	add_definitions(-O0)
 	add_definitions(-g3)
 	#add_definitions(-g)
-	#add_definitions(-fstack-protector-all)
+	add_definitions(-fstack-protector-all)
 	add_definitions(-Wall)
 	add_definitions(-Wextra)
 	add_definitions(-Warray-bounds)
@@ -99,12 +98,22 @@ function(set_custom_env test_name)
 			ENVIRONMENT "LD_LIBRARY_PATH=${hadoopHome}/lib/native:${jvmHome}/jre/lib/amd64/server/"
 			)
 	else (hdfsEnabled)
-		if (NOT sanEnabled)
+		if (sanEnabled)
 			set_property( TEST ${test_name}
 				PROPERTY
 				ENVIRONMENT "LD_PRELOAD=libasan.so:liblsan.so"
 				)
-		endif (NOT sanEnabled)
+			set_property( TEST ${test_name}
+				APPEND
+				PROPERTY
+				ENVIRONMENT "ASAN_OPTIONS=symbolize=1"
+				)
+			set_property( TEST ${test_name}
+				APPEND
+				PROPERTY
+				ENVIRONMENT "ASAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer"
+				)
+		endif (sanEnabled)
 	endif (hdfsEnabled)
 endfunction(set_custom_env)
 
