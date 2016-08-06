@@ -257,7 +257,7 @@ bool faster::workerIFddCore<K,T>::EDBKRecvData(
 		//for (int i = 0; i < rSize; ++i){
 			//fprintf(stderr, "%02x", ((char*) rData)[i]);
 		//}
-		//std::cerr << "\033[0;32m" << numItems << "(" << rSize << ")\033[0m ";
+		//std::cerr << "\033[0;32mRECV" << numItems << "(" << rSize << ")\033[0m ";
 
 		for (size_t i = 0; i < numItems; ++i){
 			// Find a empty space in the local data
@@ -494,7 +494,7 @@ bool faster::workerIFddCore<K,T>::EDBKsendDataAsync(
 
 	// Check to see if we reached the maximum message size
 	if ( buffer[owner].size() >= comm->maxMsgSize ){
-		//std::cerr << "S" << owner << "("<< dataSize[owner] << "," << buffer[owner].size()  << ") ";
+		//std::cerr << "Send Async" << owner << "("<< dataSize[owner] << "," << buffer[owner].size()  << ") ";
 		//Send partial data
 		buffer[owner] << char(1);
 		buffer[owner].writePos(dataSize[owner], 0);
@@ -536,7 +536,7 @@ void faster::workerIFddCore<K,T>::flushDataSend(
 		//	fprintf(stderr, "%02x ", ((char*) buffer[owner].data())[i]);
 		//}
 
-		//std::cerr << "SF-" << comm->getProcId() << ">" << owner << " ";
+		//std::cerr << "flushDataSend-" << comm->getProcId() << ">" << owner << " ";
 
 		// Send data
 		comm->sendGroupByKeyData(owner);
@@ -554,7 +554,11 @@ bool faster::workerIFddCore<K,T>::sendPending(
 	bool finished = true;
 
 	for ( int owner = 1; owner < comm->getNumProcs(); owner++){
-		if ( (pendingSend[owner].size() > 0) && comm->isSendBufferFree(owner) ){
+		if (pendingSend[owner].size() == 0) {
+			continue;
+		}
+		if (  comm->isSendBufferFree(owner) ){
+			//std::cerr << "sending " << pendingSend[owner].size() << " pending > " << owner << "\n";
 			while (pendingSend[owner].size() > 0){
 				std::pair<K,T> & p = pendingSend[owner].front();
 				if ( EDBKsendDataAsync(comm, owner, p.first, p.second, dataSize) ){
@@ -629,6 +633,7 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 			return false;
 
 	}
+	//std::cerr << "no more data to send\n ";
 
 	if ( ! sendPending(comm, pendingSend, dataSize) ){
 		return false;
@@ -640,6 +645,7 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 				continue;
 		}
 		if ( ! comm->isSendBufferFree(owner) ){
+			//std::cerr << "buffer "<< owner <<" not free\n ";
 			return false;
 		}
 	}
@@ -651,12 +657,12 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 
 template <typename K, typename T>
 bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
-	using std::chrono::system_clock;
-	using std::chrono::duration_cast;
-	using std::chrono::milliseconds;
+	//using std::chrono::system_clock;
+	//using std::chrono::duration_cast;
+	//using std::chrono::milliseconds;
+	//int Ti[5];
+	//auto start = system_clock::now();
 
-	int Ti[5];
-	auto start = system_clock::now();
 	size_t size = localData->getSize();
 	//std::cerr << "    \033[0;33mExchange Data By Key ID:" << id << "(" << size << ")\033[0m\n";
 	std::vector<bool> deleted(size, false);
@@ -672,11 +678,13 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 
 
 	comm->joinSlaves();
+	//std::cerr << "    JOINED\n"; std::cerr.flush();
 
-	Ti[0] = duration_cast<milliseconds>(system_clock::now() - start).count();
-	start = system_clock::now();
+	//Ti[0] = duration_cast<milliseconds>(system_clock::now() - start).count();
+	//start = system_clock::now();
 
 	while ( ! (recvFinished & sendFinished) ){
+		//std::cerr << "."; std::cerr.flush();
 		if ( ! sendFinished )
 			sendFinished |= EDBKSendDataHashed(comm, sendPos, deleted, dataSize, recvData, pendingSend, dirty);
 		if ( ! recvFinished )
@@ -684,8 +692,8 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 	}
 	//std::cerr << " PF:" << peersFinished << " CONDITIONS:" << sendFinished << " " << recvFinished << "\n";
 
-	Ti[1] = duration_cast<milliseconds>(system_clock::now() - start).count();
-	start = system_clock::now();
+	//Ti[1] = duration_cast<milliseconds>(system_clock::now() - start).count();
+	//start = system_clock::now();
 
 	//K * keys = localData->getKeys();
 	size = localData->getSize();
@@ -722,8 +730,9 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 	}else{
 		//std::cerr << "        \033[0;34mNOT DIRTY!!!!!\n\033[0m" ;
 	}
-	Ti[2] = duration_cast<milliseconds>(system_clock::now() - start).count();
-	start = system_clock::now();
+
+	//Ti[2] = duration_cast<milliseconds>(system_clock::now() - start).count();
+	//start = system_clock::now();
 
 	//std::cerr << "    \n";
 
@@ -738,15 +747,16 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 	//std::cerr << "\n";// */
 	size = localData->getSize();
 
+	//std::cerr << " Join:" ;
 	comm->joinSlaves();
 
-	Ti[3] = duration_cast<milliseconds>(system_clock::now() - start).count();
+	//Ti[3] = duration_cast<milliseconds>(system_clock::now() - start).count();
 	//std::cerr << "\033[34mFINISHED ("<< size <<")\033[0m";
-	std::cerr << " \033[0;33mEDBK\033[0m Join:" << Ti[0] <<
+	/*std::cerr << " \033[0;33mEDBK\033[0m Join:" << Ti[0] <<
 		" Exchange:" << Ti[1] << " (" << sum(dataSize) << ")" <<
 		" finish:" << Ti[2] <<
 		" Join:"  << Ti[3] <<
-		"\n";
+		"\n"; // */
 
 	return dirty;
 }
