@@ -16,9 +16,6 @@
 [![Coverage Status](https://img.shields.io/coveralls/mtcs/faster/master.svg?maxAge=2592000)](https://coveralls.io/github/mtcs/faster?branch=master)
 [![Coverage Status](https://img.shields.io/coveralls/mtcs/faster/dev%2Fmaster.svg?maxAge=2592000&label=dev coverage)](https://coveralls.io/github/mtcs/faster?branch=dev%2Fmaster)
 
-[![Donate to Faster](https://img.shields.io/gratipay/team/faster.svg?maxAge=2592000)](https://gratipay.com/faster/)
-[![Donate to MtCS](https://img.shields.io/gratipay/user/mtcs.svg?maxAge=2592000)](https://gratipay.com/~mtcs/)
-[![Beer pay Faster](https://beerpay.io/mtcs/faster/badge.svg?style=beer)](https://beerpay.io/mtcs/faster)
 
 
 
@@ -33,12 +30,18 @@ Features
 * Obect-Functional ideology similar to Apache Spark(map, reduce, flatMap, groupByKey, cogroup etc).
 * Built-in bulk functions (bulkMap, bulkReduce etc).
 * Minimal memmory usage.
-* OpenMP parallelization.
-* MPI message passing wrapping.
-* Easy to use with OpenMP GPU device accelerators.
+* OpenMP thread parallelization.
+* MPI message passing wrapping and job execution.
 
 Requirements
 ------------
 
 * GCC 5 (6 if testing enabled)
 * CMake > 2.8
+* MPI (tested with OpenMPI 1.6,1.9,1.10)
+* libhdfs - for hdfs support
+
+
+[![Donate to Faster](https://img.shields.io/gratipay/team/faster.svg?maxAge=2592000)](https://gratipay.com/faster/)
+[![Donate to MtCS](https://img.shields.io/gratipay/user/mtcs.svg?maxAge=2592000)](https://gratipay.com/~mtcs/)
+[![Beer pay Faster](https://beerpay.io/mtcs/faster/badge.svg?style=beer)](https://beerpay.io/mtcs/faster)
