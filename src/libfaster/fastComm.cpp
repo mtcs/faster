@@ -19,14 +19,14 @@ void exitCallback(){
 	}
 }
 
-faster::fastComm::fastComm(int & argc, char **& argv){
+faster::fastComm::fastComm(int & argc, char ** argv){
 	int mpi_initialized;
 
 	MPI_Initialized(&mpi_initialized);
 	if (!mpi_initialized){
 		std::atexit(exitCallback);
 		//std::cerr<< "INITIALIZING MPI!!!!!!!";
-		MPI_Init (&argc, &argv);
+		MPI_Init (0, NULL);
 	}
 
 	MPI_Comm_size (MPI_COMM_WORLD, &numProcs);

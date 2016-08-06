@@ -2,7 +2,7 @@
 #include <iostream>
 #include "libfaster.h"
 
-#define NUMITEMS (10*1000*1000)
+#define NUMITEMS (100*1000)
 
 using namespace std;
 using namespace faster;
