@@ -4,6 +4,7 @@ compiler: gcc
 before_install:
         # Coveralls
         - pip install --user cpp-coveralls
+        - pip install --user pyyaml
         # GTest
         - export CC=gcc-6
         - export CXX=g++-6
@@ -69,8 +70,6 @@ addons:
         - libgtest-dev
         - libasan3
         - liblsan0
-        # Coveralls
-        - python-yaml
         # HDFS
         #- hadoop-hdfs
         #- hadoop-hdfs-datanode
