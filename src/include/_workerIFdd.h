@@ -109,9 +109,11 @@ namespace faster{
 
 			void preapply(unsigned long int id, void * func, fddOpType op, workerFddBase * dest, fastComm * comm);
 
-			bool onlineReadStage3(std::unordered_map<K, int> & localKeyMap, fastComm *comm, void * funcP, std::deque<std::vector<std::pair<K,T>>> & q2, omp_lock_t & q2lock);
+			bool onlineReadStage3(std::deque<std::vector<std::pair<K,T>>> & q2, omp_lock_t & q2lock);
+			bool onlinePartReadStage3(std::unordered_map<K, int> & localKeyMap, fastComm *comm, void * funcP, std::deque<std::vector<std::pair<K,T>>> & q2, omp_lock_t & q2lock);
 			void onlineFullPartRead(fastComm *comm, void * funcP);
 			void onlinePartRead(fastComm *comm, void * funcP);
+			void onlineRead(fastComm *comm);
 
 			// ByKey Functions
 			void groupByKey(fastComm *comm);

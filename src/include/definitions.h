@@ -59,8 +59,9 @@ namespace faster{
 	#define OP_GroupByKeyH		0x0804
 	#define OP_CoGroup		0x0808
 	#define OP_Calibrate		0x0810
-	#define OP_OnPartRead		0x0811
-	#define OP_OnFullPRead		0x0812
+	#define OP_OnlineRead		0x0811
+	#define OP_OnPartRead		0x0812
+	#define OP_OnFullPRead		0x0814
 
 	typedef enum : char {
 		NewWorkerDL 	= 0x01,

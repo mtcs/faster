@@ -6,8 +6,8 @@
 using namespace std;
 using namespace faster;
 
-int map1(string & input){
-	return atoi(input.data());
+int map1(int & a){
+	return a / 2;
 }
 
 
@@ -27,9 +27,8 @@ int main(int argc, char ** argv){
 	if (!fc.isDriver())
 		return 0;
 
-
 	cout << "Import Data" << '\n';
-	fdd<string> data(fc, "../res/testM.txt");
+	fdd<int> data(fc, "../res/testM.txt");
 
 	cout << "Process Data" << '\n';
 	int result = data.map<int>(&map1)->reduce(&reduce1);

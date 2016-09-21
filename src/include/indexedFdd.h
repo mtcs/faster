@@ -152,6 +152,11 @@ namespace faster{
 				c.parallelizeI(this->id, keys, data, size);
 			}
 
+			// Create a fdd from file
+			indexedFdd(fastContext &c, std::string) : indexedFdd(c, size){
+				this->onlineRead();
+			}
+
 			~indexedFdd(){
 			}
 

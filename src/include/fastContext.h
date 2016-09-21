@@ -118,6 +118,7 @@ namespace faster{
 			indexedFdd<K,T> * onlineFullPartRead(std::string path, IonlineFullPartFuncP<K,T> funcP);
 			template <typename K, typename T>
 			indexedFdd<K,T> * onlinePartRead(std::string path, IonlineFullPartFuncP<K,T> funcP);
+			indexedFdd<K,T> * onlineRead(std::string path, IonlineFullPartFuncP<K,T> funcP);
 
 			int numProcs(){ return comm->numProcs; }
 

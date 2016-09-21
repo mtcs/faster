@@ -216,6 +216,9 @@ int main(int argc, char ** argv){
 	fc.startWorkers();
 	if (!fc.isDriver())
 		return 0;
+	// !!!!!!!! THIS EXAMPLE IS NOT SUPOSED TO RUN !!!!!!!!!!!
+	// !!!!!!!! IT HAS NOT BEEN IMPLEMENTED YET    !!!!!!!!!!!
+	return 0;
 
 	fc.printHeader();
 	cerr << "  Init Time: " << duration_cast<milliseconds>(system_clock::now() - start).count() << "ms\n";

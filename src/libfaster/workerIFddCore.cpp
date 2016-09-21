@@ -971,7 +971,6 @@ bool onlineReadStage1(std::ifstream & inFile, std::deque<std::vector<std::string
 template <typename K, typename T>
 bool onlineReadStage2(std::deque<std::vector<std::string>> & q1, omp_lock_t & q1lock, std::deque<std::vector<std::pair<K,T>>> & q2, omp_lock_t & q2lock){
 	std::vector<std::string> lines;
-	static std::stringstream ss;
 	std::pair<K,T> item;
 
 	omp_set_lock(&q1lock);
@@ -982,13 +981,12 @@ bool onlineReadStage2(std::deque<std::vector<std::string>> & q1, omp_lock_t & q1
 	std::vector<std::pair<K,T>> items;
 	items.reserve(lines.size());
 
-	omp_set_num_threads(10);
-	#pragma omp parallel for schedule(dynamic,10) private(ss)
+	//omp_set_num_threads(10);
+	//#pragma omp parallel for schedule(dynamic,10) private(ss)
 	for ( size_t i = 0; i < lines.size(); i++){
 		if (lines[i].length() > 0 ){
 			//std::cerr << lines[i] << "\n";
-			ss.clear();
-			ss.str(lines[i]);
+			std::stringstream ss(lines[i]);
 			parseData(ss, item.first);
 			parseData(ss, item.second);
 			items.insert(items.end(), item);
@@ -1005,7 +1003,7 @@ bool onlineReadStage2(std::deque<std::vector<std::string>> & q1, omp_lock_t & q1
 	return false;
 }
 template <typename K, typename T>
-bool faster::workerIFddCore<K,T>::onlineReadStage3(std::unordered_map<K, int> & localKeyMap, fastComm *comm, void * funcP, std::deque<std::vector<std::pair<K,T>>> & q2, omp_lock_t & q2lock){
+bool faster::workerIFddCore<K,T>::onlinePartReadStage3(std::unordered_map<K, int> & localKeyMap, fastComm *comm, void * funcP, std::deque<std::vector<std::pair<K,T>>> & q2, omp_lock_t & q2lock){
 	std::vector<std::pair<K,T>> items;
 
 	omp_set_lock(&q2lock);
@@ -1029,6 +1027,23 @@ bool faster::workerIFddCore<K,T>::onlineReadStage3(std::unordered_map<K, int> & 
 		}else{
 			location->second =  myPart;
 		}
+	}
+	return false;
+}
+template <typename K, typename T>
+bool faster::workerIFddCore<K,T>::onlineReadStage3(std::deque<std::vector<std::pair<K,T>>> & q2, omp_lock_t & q2lock){
+	std::vector<std::pair<K,T>> items;
+
+	omp_set_lock(&q2lock);
+	items = std::move(q2.front());
+	q2.pop_front();
+	omp_unset_lock(&q2lock);
+
+	for ( size_t i = 0; i < items.size(); i++){
+		K & key = items[i].first;
+		T & data = items[i].second;
+
+		this->insert(&key, &data, 1);
 	}
 	return false;
 }
@@ -1093,14 +1108,14 @@ void faster::workerIFddCore<K,T>::onlineFullPartRead(fastComm *comm, void * func
 			// Read fron disk
 			#pragma omp section
 			while(  ! stage1Done ){
-				std::cerr << 'R';
+				std::cerr << "\033[1;32mR";
 				stage1Done = onlineReadStage1Full(inFile, q1, q1lock, blocksize);
 			}
 
 			// Parse lines
 			#pragma omp section
 			while( ! stage2Done ){
-				std::cerr << 'P';
+				std::cerr << "\033[1;33mP";
 
 				stage2Done = waitForLastStage(q1, stage1Done);
 				if ( stage2Done ) break;
@@ -1112,16 +1127,16 @@ void faster::workerIFddCore<K,T>::onlineFullPartRead(fastComm *comm, void * func
 			// Insert items into the dataset
 			#pragma omp section
 			while( ! stage3Done ){
-				std::cerr << 'I';
+				std::cerr << "\033[1;34mI";
 
 				stage3Done = waitForLastStage(q2, stage2Done);
 				if ( stage3Done ) break;
 
-				stage2Done = onlineReadStage3(*this->keyMap, comm, funcP, q2, q2lock);
+				stage2Done = onlinePartReadStage3(*this->keyMap, comm, funcP, q2, q2lock);
 			}
 		}
 	}
-				std::cerr << " DONE\n";
+	std::cerr << " \033[mDONE\n";
 	omp_destroy_lock(&q1lock);
 	omp_destroy_lock(&q2lock);// */
 }
@@ -1208,7 +1223,7 @@ void faster::workerIFddCore<K,T>::onlinePartRead(fastComm *comm, void * funcP){
 				stage3Done = waitForLastStage(q2, stage2Done);
 				if ( stage3Done ) break;
 
-				stage3Done = onlineReadStage3(localKeyMap, comm, funcP, q2, q2lock);
+				stage3Done = onlinePartReadStage3(localKeyMap, comm, funcP, q2, q2lock);
 			}
 		}
 	}
@@ -1220,6 +1235,80 @@ void faster::workerIFddCore<K,T>::onlinePartRead(fastComm *comm, void * funcP){
 
 	comm->distributeKeyMap(localKeyMap, *keyMap);
 	std::cerr << " DistKeys:" << duration_cast<milliseconds>(system_clock::now() - start).count() << "\n";
+}
+
+template <typename K, typename T>
+void faster::workerIFddCore<K,T>::onlineRead(fastComm *comm){
+	using std::chrono::system_clock;
+	using std::chrono::duration_cast;
+	using std::chrono::milliseconds;
+
+	auto start = system_clock::now();
+	std::string filename;
+	std::deque<std::vector<std::string>> q1;
+	std::deque<std::vector<std::pair<K,T>>> q2;
+	omp_lock_t q1lock;
+	omp_lock_t q2lock;
+	omp_init_lock(&q1lock);
+	omp_init_lock(&q2lock);
+	bool stage1Done = false;
+	bool stage2Done = false;
+	bool stage3Done = false;
+	const int blocksize = 4;
+	size_t endOffset;
+
+	// Init
+	keyMap = std::make_shared<std::unordered_map<K, int>>();
+	uKeys = std::make_shared<std::vector<K>>();
+
+	// Get file path
+	comm->recvFileName(filename);
+
+	// Open File
+	std::ifstream inFile(filename, std::ifstream::in);
+
+	// Find file offset
+	findFileOffset(comm, inFile, endOffset, q1);
+
+	#pragma omp parallel
+	{
+		#pragma omp sections
+		{
+			// Read fron disk
+			#pragma omp section
+			while(  ! stage1Done ){
+				std::cerr << "\033[1;32mR";
+
+				stage1Done = onlineReadStage1(inFile, q1, q1lock, endOffset, blocksize);
+			}
+
+			// Parse line
+			#pragma omp section
+			while( ! stage2Done ){
+				std::cerr << "\033[1;33mP";
+
+				stage2Done = waitForLastStage(q1, stage1Done);
+				if ( stage2Done ) break;
+
+				stage2Done = onlineReadStage2(q1, q1lock, q2, q2lock);
+
+			}
+
+			#pragma omp section
+			while( ! stage3Done ){
+				std::cerr << "\033[1;34mI";
+
+				stage3Done = waitForLastStage(q2, stage2Done);
+				if ( stage3Done ) break;
+
+				stage3Done = onlineReadStage3(q2, q2lock);
+			}
+		}
+	}
+	omp_destroy_lock(&q1lock);
+	omp_destroy_lock(&q2lock);// */
+
+	std::cerr << " Read:" << duration_cast<milliseconds>(system_clock::now() - start).count() << "\n";
 }
 
 template <typename K, typename T>
@@ -1310,6 +1399,10 @@ void faster::workerIFddCore<K, T>::preapply(long unsigned int id, void * func, f
 				break;
 			case OP_GroupByKeyH:
 				groupByKeyHashed(comm);
+				break;
+			case OP_OnlineRead:
+				onlineRead(comm);
+				buffer << size_t(this->getSize());
 				break;
 			case OP_OnPartRead:
 				onlinePartRead(comm, func);
