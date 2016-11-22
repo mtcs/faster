@@ -83,12 +83,15 @@ $(document).ready(function(){initNavTree('group__grouped.html','');});
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">Grouped Datasets Operators</div>  </div>
 </div><!--header-->
 <div class="contents">
-<p>Once the user run a faster::indexedFDD::cogroup() a grouped dataset will be created. </p>
-<p>The grouped dataset created is a lightweight object that wrapps existing datasets in order to offer more comples operations.</p>
+<a name="details" id="details"></a><h2 class="groupheader">Description</h2>
+<p>Once the user run a indexedFdd::cogroup a grouped dataset will be created. </p>
+<p>The grouped dataset created is a lightweight object that wrapps existing datasets in order to offer more complex operations.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">K</td><td>- Key type of the created dataset </td></tr>
@@ -99,14 +102,75 @@ $(document).ready(function(){initNavTree('group__grouped.html','');});
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A pointer to a dataset group </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A pointer to a dataset group</dd></dl>
+<h2></h2>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ga691248cca7dbed1f3b5cd827eb721dc8"><td class="memItemLeft" align="right" valign="top"><a id="ga691248cca7dbed1f3b5cd827eb721dc8"></a>
+<a class="el" href="classfaster_1_1groupedFdd.html">groupedFdd</a>&lt; K &gt; *&#160;</td><td class="memItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::updateByKey</b> (updateByKeyG2FunctionP&lt; K &gt; funcP)</td></tr>
+<tr class="separator:ga691248cca7dbed1f3b5cd827eb721dc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf24f53ee2d42e249fbd6c15ea6946abc"><td class="memItemLeft" align="right" valign="top"><a id="gaf24f53ee2d42e249fbd6c15ea6946abc"></a>
+<a class="el" href="classfaster_1_1groupedFdd.html">groupedFdd</a>&lt; K &gt; *&#160;</td><td class="memItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::updateByKey</b> (updateByKeyG3FunctionP&lt; K &gt; funcP)</td></tr>
+<tr class="separator:gaf24f53ee2d42e249fbd6c15ea6946abc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac986965bdb4e59de83e64b2cee70fbd6"><td class="memItemLeft" align="right" valign="top"><a id="gac986965bdb4e59de83e64b2cee70fbd6"></a>
+<a class="el" href="classfaster_1_1groupedFdd.html">groupedFdd</a>&lt; K &gt; *&#160;</td><td class="memItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::bulkUpdate</b> (bulkUpdateG2FunctionP&lt; K &gt; funcP)</td></tr>
+<tr class="separator:gac986965bdb4e59de83e64b2cee70fbd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga94e31fcb308364979d63dd508a689121"><td class="memItemLeft" align="right" valign="top"><a id="ga94e31fcb308364979d63dd508a689121"></a>
+<a class="el" href="classfaster_1_1groupedFdd.html">groupedFdd</a>&lt; K &gt; *&#160;</td><td class="memItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::bulkUpdate</b> (bulkUpdateG3FunctionP&lt; K &gt; funcP)</td></tr>
+<tr class="separator:ga94e31fcb308364979d63dd508a689121"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8cb1ae5d826c3d627b2585427d39da71"><td class="memTemplParams" colspan="2"><a id="ga8cb1ae5d826c3d627b2585427d39da71"></a>
+template&lt;typename Ko , typename To &gt; </td></tr>
+<tr class="memitem:ga8cb1ae5d826c3d627b2585427d39da71"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classfaster_1_1indexedFdd.html">indexedFdd</a>&lt; Ko, To &gt; *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::mapByKey</b> (ImapByKeyG2FunctionP&lt; K, Ko, To &gt; funcP)</td></tr>
+<tr class="separator:ga8cb1ae5d826c3d627b2585427d39da71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab1b385fdc95450d7a07418b05ca3c404"><td class="memTemplParams" colspan="2"><a id="gab1b385fdc95450d7a07418b05ca3c404"></a>
+template&lt;typename Ko , typename To &gt; </td></tr>
+<tr class="memitem:gab1b385fdc95450d7a07418b05ca3c404"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classfaster_1_1indexedFdd.html">indexedFdd</a>&lt; Ko, To &gt; *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::mapByKey</b> (ImapByKeyG3FunctionP&lt; K, Ko, To &gt; funcP)</td></tr>
+<tr class="separator:gab1b385fdc95450d7a07418b05ca3c404"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8a2e1ce009a5d701d7f27d9821ae0770"><td class="memTemplParams" colspan="2"><a id="ga8a2e1ce009a5d701d7f27d9821ae0770"></a>
+template&lt;typename To &gt; </td></tr>
+<tr class="memitem:ga8a2e1ce009a5d701d7f27d9821ae0770"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classfaster_1_1fdd.html">fdd</a>&lt; To &gt; *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::mapByKey</b> (mapByKeyG2FunctionP&lt; K, To &gt; funcP)</td></tr>
+<tr class="separator:ga8a2e1ce009a5d701d7f27d9821ae0770"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7189b8f22a6b6aa82d826242e0c085e2"><td class="memTemplParams" colspan="2"><a id="ga7189b8f22a6b6aa82d826242e0c085e2"></a>
+template&lt;typename Ko , typename To &gt; </td></tr>
+<tr class="memitem:ga7189b8f22a6b6aa82d826242e0c085e2"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classfaster_1_1indexedFdd.html">indexedFdd</a>&lt; Ko, To &gt; *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::flatMapByKey</b> (IflatMapByKeyG2FunctionP&lt; K, Ko, To &gt; funcP)</td></tr>
+<tr class="separator:ga7189b8f22a6b6aa82d826242e0c085e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga30a78832f8adb812a4cf8e066a810694"><td class="memTemplParams" colspan="2"><a id="ga30a78832f8adb812a4cf8e066a810694"></a>
+template&lt;typename Ko , typename To &gt; </td></tr>
+<tr class="memitem:ga30a78832f8adb812a4cf8e066a810694"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classfaster_1_1indexedFdd.html">indexedFdd</a>&lt; Ko, To &gt; *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::flatMapByKey</b> (IflatMapByKeyG3FunctionP&lt; K, Ko, To &gt; funcP)</td></tr>
+<tr class="separator:ga30a78832f8adb812a4cf8e066a810694"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac04b3eda45e06a5d8ebaec16fd3e7df2"><td class="memTemplParams" colspan="2"><a id="gac04b3eda45e06a5d8ebaec16fd3e7df2"></a>
+template&lt;typename To &gt; </td></tr>
+<tr class="memitem:gac04b3eda45e06a5d8ebaec16fd3e7df2"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classfaster_1_1fdd.html">fdd</a>&lt; To &gt; *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::flatMapByKey</b> (flatMapByKeyG2FunctionP&lt; K, To &gt; funcP)</td></tr>
+<tr class="separator:gac04b3eda45e06a5d8ebaec16fd3e7df2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gace8e2aba0c083f8f2c0ac1a949521edf"><td class="memTemplParams" colspan="2"><a id="gace8e2aba0c083f8f2c0ac1a949521edf"></a>
+template&lt;typename To &gt; </td></tr>
+<tr class="memitem:gace8e2aba0c083f8f2c0ac1a949521edf"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classfaster_1_1fdd.html">fdd</a>&lt; To &gt; *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::flatMapByKey</b> (flatMapByKeyG3FunctionP&lt; K, To &gt; funcP)</td></tr>
+<tr class="separator:gace8e2aba0c083f8f2c0ac1a949521edf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad1fb70f835dd2e1fa59c2e5e616b545a"><td class="memTemplParams" colspan="2"><a id="gad1fb70f835dd2e1fa59c2e5e616b545a"></a>
+template&lt;typename Ko , typename To &gt; </td></tr>
+<tr class="memitem:gad1fb70f835dd2e1fa59c2e5e616b545a"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classfaster_1_1indexedFdd.html">indexedFdd</a>&lt; Ko, To &gt; *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::bulkFlatMap</b> (IbulkFlatMapG2FunctionP&lt; K, Ko, To &gt; funcP)</td></tr>
+<tr class="separator:gad1fb70f835dd2e1fa59c2e5e616b545a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3278e79b7930b60a9b7270442f5dd7fa"><td class="memTemplParams" colspan="2"><a id="ga3278e79b7930b60a9b7270442f5dd7fa"></a>
+template&lt;typename Ko , typename To &gt; </td></tr>
+<tr class="memitem:ga3278e79b7930b60a9b7270442f5dd7fa"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classfaster_1_1indexedFdd.html">indexedFdd</a>&lt; Ko, To &gt; *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::bulkFlatMap</b> (IbulkFlatMapG3FunctionP&lt; K, Ko, To &gt; funcP)</td></tr>
+<tr class="separator:ga3278e79b7930b60a9b7270442f5dd7fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga928ef7d6b2bbe1d07cfbb6fed1f9e858"><td class="memTemplParams" colspan="2"><a id="ga928ef7d6b2bbe1d07cfbb6fed1f9e858"></a>
+template&lt;typename To &gt; </td></tr>
+<tr class="memitem:ga928ef7d6b2bbe1d07cfbb6fed1f9e858"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classfaster_1_1fdd.html">fdd</a>&lt; To &gt; *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::bulkFlatMap</b> (bulkFlatMapG2FunctionP&lt; K, To &gt; funcP)</td></tr>
+<tr class="separator:ga928ef7d6b2bbe1d07cfbb6fed1f9e858"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafd1b583d3f24c565011797491849dd4e"><td class="memTemplParams" colspan="2"><a id="gafd1b583d3f24c565011797491849dd4e"></a>
+template&lt;typename To &gt; </td></tr>
+<tr class="memitem:gafd1b583d3f24c565011797491849dd4e"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classfaster_1_1fdd.html">fdd</a>&lt; To &gt; *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>faster::groupedFdd&lt; K &gt;::bulkFlatMap</b> (bulkFlatMapG3FunctionP&lt; K, To &gt; funcP)</td></tr>
+<tr class="separator:gafd1b583d3f24c565011797491849dd4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.8.12-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Nov 22 2016 15:52:52 for libfaster API Documentation by
+    <li class="footer">Generated on Tue Nov 22 2016 18:46:55 for libfaster API Documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.12 </li>
   </ul>

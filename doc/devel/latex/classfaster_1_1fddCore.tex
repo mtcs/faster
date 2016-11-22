@@ -26,24 +26,22 @@ core class that implements simple operations.
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\hypertarget{classfaster_1_1fddCore_a0addecf1c27311b6da3e37f77e414572}{}\label{classfaster_1_1fddCore_a0addecf1c27311b6da3e37f77e414572} 
-void {\bfseries discard} ()
-\item 
-\hypertarget{classfaster_1_1fddCore_a9504c32481c67c2ceaf98d132ef37ee6}{}\label{classfaster_1_1fddCore_a9504c32481c67c2ceaf98d132ef37ee6} 
-void {\bfseries write\+To\+File} (std\+::string \&path, std\+::string \&sufix)
-\item 
+void \hyperlink{group__memmodel_ga0addecf1c27311b6da3e37f77e414572}{discard} ()
+\begin{DoxyCompactList}\small\item\em deallocates previusly cached fdd \end{DoxyCompactList}\item 
+void \hyperlink{classfaster_1_1fddCore_a9504c32481c67c2ceaf98d132ef37ee6}{write\+To\+File} (std\+::string \&path, std\+::string \&sufix)
+\begin{DoxyCompactList}\small\item\em Writes F\+DD content to file. \end{DoxyCompactList}\item 
 \hypertarget{classfaster_1_1fddCore_a7dcd1b146c23c5f5ba149a6fc2bc7741}{}\label{classfaster_1_1fddCore_a7dcd1b146c23c5f5ba149a6fc2bc7741} 
-void $\ast$ {\bfseries get\+Key\+Map} ()
-\item 
+void $\ast$ \hyperlink{classfaster_1_1fddCore_a7dcd1b146c23c5f5ba149a6fc2bc7741}{get\+Key\+Map} ()
+\begin{DoxyCompactList}\small\item\em (U\+N\+U\+S\+ED) \end{DoxyCompactList}\item 
 \hypertarget{classfaster_1_1fddCore_ae268b85e9f217e3942600c11b8aa3347}{}\label{classfaster_1_1fddCore_ae268b85e9f217e3942600c11b8aa3347} 
-void {\bfseries set\+Key\+Map} (void $\ast$key\+Map U\+N\+U\+S\+ED)
-\item 
+void \hyperlink{classfaster_1_1fddCore_ae268b85e9f217e3942600c11b8aa3347}{set\+Key\+Map} (void $\ast$key\+Map U\+N\+U\+S\+ED)
+\begin{DoxyCompactList}\small\item\em (U\+N\+U\+S\+ED) \end{DoxyCompactList}\item 
 \hypertarget{classfaster_1_1fddCore_a4ff77df4fb389f5ee6ff468f773d58f8}{}\label{classfaster_1_1fddCore_a4ff77df4fb389f5ee6ff468f773d58f8} 
-bool {\bfseries is\+Grouped\+By\+Key} ()
-\item 
+bool \hyperlink{classfaster_1_1fddCore_a4ff77df4fb389f5ee6ff468f773d58f8}{is\+Grouped\+By\+Key} ()
+\begin{DoxyCompactList}\small\item\em (U\+N\+U\+S\+ED) \end{DoxyCompactList}\item 
 \hypertarget{classfaster_1_1fddCore_a9a47c562a1f92f6c7f79968beb339c3d}{}\label{classfaster_1_1fddCore_a9a47c562a1f92f6c7f79968beb339c3d} 
-void {\bfseries set\+Grouped\+By\+Key} (bool gbk U\+N\+U\+S\+ED)
-\end{DoxyCompactItemize}
+void \hyperlink{classfaster_1_1fddCore_a9a47c562a1f92f6c7f79968beb339c3d}{set\+Grouped\+By\+Key} (bool gbk U\+N\+U\+S\+ED)
+\begin{DoxyCompactList}\small\item\em (U\+N\+U\+S\+ED) \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Protected Member Functions}
 \begin{DoxyCompactItemize}
 \item 
@@ -68,6 +66,29 @@ void {\bfseries set\+Grouped\+By\+Key} (bool gbk U\+N\+U\+S\+ED)
 \hypertarget{classfaster_1_1fddCore_aa2bf63bd5c77afe78061ed4df3713a76}{}\label{classfaster_1_1fddCore_aa2bf63bd5c77afe78061ed4df3713a76} 
 \hyperlink{classfaster_1_1fastContext}{fast\+Context} $\ast$ {\bfseries context}
 \end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classfaster_1_1fddCore_a9504c32481c67c2ceaf98d132ef37ee6}{}\label{classfaster_1_1fddCore_a9504c32481c67c2ceaf98d132ef37ee6} 
+\index{faster\+::fdd\+Core@{faster\+::fdd\+Core}!write\+To\+File@{write\+To\+File}}
+\index{write\+To\+File@{write\+To\+File}!faster\+::fdd\+Core@{faster\+::fdd\+Core}}
+\subsubsection{\texorpdfstring{write\+To\+File()}{writeToFile()}}
+{\footnotesize\ttfamily template$<$typename T $>$ \\
+void \hyperlink{classfaster_1_1fddCore}{faster\+::fdd\+Core}$<$ T $>$\+::write\+To\+File (\begin{DoxyParamCaption}\item[{std\+::string \&}]{path,  }\item[{std\+::string \&}]{sufix }\end{DoxyParamCaption})}
+
+
+
+Writes F\+DD content to file. 
+
+Every process will write its own file with a rank number between the prefix and the suffix.
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & -\/ Prefix of the file path to be written \\
+\hline
+{\em sufix} & -\/ Sufix of the file path to be written \\
+\hline
+\end{DoxyParams}
 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}

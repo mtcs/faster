@@ -45,10 +45,10 @@ var hierarchy =
     [ "faster::hdfsFile", "classfaster_1_1hdfsFile.html", null ],
     [ "faster::procstat", "classfaster_1_1procstat.html", null ],
     [ "Test", null, [
-      [ "testFastComBuffer< NUMITEMS >", "classtestFastComBuffer.html", null ],
-      [ "TestFDD< T, NUMITEMS >", "classTestFDD.html", null ],
-      [ "testFddStorageFunctions< T >", "classtestFddStorageFunctions.html", null ],
-      [ "testFddStorageFunctions< T >", "classtestFddStorageFunctions.html", null ],
+      [ "testfaster::testFastComBuffer< NUMITEMS >", "classtestfaster_1_1testFastComBuffer.html", null ],
+      [ "testfaster::TestFDD< T, NUMITEMS >", "classtestfaster_1_1TestFDD.html", null ],
+      [ "testfaster::testFddStorageFunctions< T >", "classtestfaster_1_1testFddStorageFunctions.html", null ],
+      [ "testFddStorageFunctions< K, T >", "classtestFddStorageFunctions.html", null ],
       [ "testHDFSFile", "classtestHDFSFile.html", null ]
     ] ],
     [ "faster::worker", "classfaster_1_1worker.html", null ],

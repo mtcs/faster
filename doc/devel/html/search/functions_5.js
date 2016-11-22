@@ -1,4 +1,9 @@
 var searchData=
 [
-  ['map',['map',['../group__map.html#ga214d07df3240baf348492f9a4186d5cc',1,'faster::fdd::map(mapFunctionP&lt; T, U &gt; funcP)'],['../group__map.html#ga2cfde53328f21d2ffba58dde111219ff',1,'faster::fdd::map(PmapFunctionP&lt; T, U &gt; funcP)'],['../group__map.html#ga17066a9f6526c2c630d730727c6b1b51',1,'faster::fdd::map(ImapFunctionP&lt; T, L, U &gt; funcP)'],['../group__map.html#ga61ce985503e31026794696c6c6db20b8',1,'faster::fdd::map(IPmapFunctionP&lt; T, L, U &gt; funcP)']]]
+  ['getalloc',['getAlloc',['../classfaster_1_1fddBase.html#a2b6f4b4fa670e90cde938d456e5da3b7',1,'faster::fddBase']]],
+  ['getid',['getId',['../classfaster_1_1fddBase.html#a3902296c393cb15e830c02555a0f371f',1,'faster::fddBase']]],
+  ['getkeymap',['getKeyMap',['../classfaster_1_1fddCore.html#a7dcd1b146c23c5f5ba149a6fc2bc7741',1,'faster::fddCore']]],
+  ['getsize',['getSize',['../classfaster_1_1fddBase.html#ab9645c31245a53f97449446a440adf47',1,'faster::fddBase']]],
+  ['groupbykey',['groupByKey',['../group__shuffle.html#gac671d250f94c0927152362d4a982e931',1,'faster::iFddCore']]],
+  ['groupedfdd',['groupedFdd',['../classfaster_1_1groupedFdd.html#a3e057f8351843ebf4b2875d3bb763ccb',1,'faster::groupedFdd::groupedFdd(fastContext *c, iFddCore&lt; K, T &gt; *fdd0, iFddCore&lt; K, U &gt; *fdd1, system_clock::time_point &amp;start)'],['../classfaster_1_1groupedFdd.html#a0f6bb764367d709b4837afcdf2cf0c30',1,'faster::groupedFdd::groupedFdd(fastContext *c, iFddCore&lt; K, T &gt; *fdd0, iFddCore&lt; K, U &gt; *fdd1, iFddCore&lt; K, V &gt; *fdd2, system_clock::time_point &amp;start)']]]
 ];

@@ -18,7 +18,7 @@ var classfaster_1_1fdd =
     [ "bulkMap", "group__bulk.html#ga97ad1e63823abe30de230da1456481d4", null ],
     [ "bulkMap", "group__bulk.html#gabfd585e52364a7be20125aa25c0ab141", null ],
     [ "bulkReduce", "group__bulk.html#ga8f133f23bd653329f44290ebda70bb9b", null ],
-    [ "cache", "classfaster_1_1fdd.html#ac460ea12f02045a3d9203bb83eb5adb3", null ],
+    [ "cache", "group__memmodel.html#gac460ea12f02045a3d9203bb83eb5adb3", null ],
     [ "collect", "classfaster_1_1fdd.html#a089aa4c91205948dacbc6e6bd6e5bcde", null ],
     [ "flatMap", "group__flatmap.html#ga7efd43be1d3005d654c4656d521faf30", null ],
     [ "flatMap", "group__flatmap.html#ga3f353414307512c23d88fc3e8b2e8221", null ],

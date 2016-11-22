@@ -6,36 +6,35 @@ Inheritance diagram for faster\+:\+:i\+Fdd\+Core$<$ K, T $>$\+:\begin{figure}[H]
 \includegraphics[height=3.000000cm]{classfaster_1_1iFddCore}
 \end{center}
 \end{figure}
+
+
+\subsection{Description}
+\subsubsection*{template$<$typename K, typename T$>$\newline
+class faster\+::i\+Fdd\+Core$<$ K, T $>$}
+
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\hypertarget{classfaster_1_1iFddCore_a311cd5a470392a25565057aaf0fa3226}{}\label{classfaster_1_1iFddCore_a311cd5a470392a25565057aaf0fa3226} 
-{\footnotesize template$<$typename U $>$ }\\\hyperlink{classfaster_1_1groupedFdd}{grouped\+Fdd}$<$ K $>$ $\ast$ {\bfseries cogroup} (\hyperlink{classfaster_1_1iFddCore}{i\+Fdd\+Core}$<$ K, U $>$ $\ast$fdd1)
-\item 
-\hypertarget{classfaster_1_1iFddCore_af434c1c5118e380f9d78398fe46176d5}{}\label{classfaster_1_1iFddCore_af434c1c5118e380f9d78398fe46176d5} 
-{\footnotesize template$<$typename U , typename V $>$ }\\\hyperlink{classfaster_1_1groupedFdd}{grouped\+Fdd}$<$ K $>$ $\ast$ {\bfseries cogroup} (\hyperlink{classfaster_1_1iFddCore}{i\+Fdd\+Core}$<$ K, U $>$ $\ast$fdd1, \hyperlink{classfaster_1_1iFddCore}{i\+Fdd\+Core}$<$ K, V $>$ $\ast$fdd2)
-\item 
-\hypertarget{classfaster_1_1iFddCore_a4ed897a7b2af2918f91c3f8f89835ed4}{}\label{classfaster_1_1iFddCore_a4ed897a7b2af2918f91c3f8f89835ed4} 
-std\+::unordered\+\_\+map$<$ K, size\+\_\+t $>$ {\bfseries count\+By\+Key} ()
-\item 
-\hypertarget{classfaster_1_1iFddCore_ac671d250f94c0927152362d4a982e931}{}\label{classfaster_1_1iFddCore_ac671d250f94c0927152362d4a982e931} 
-\hyperlink{classfaster_1_1indexedFdd}{indexed\+Fdd}$<$ K, T $>$ $\ast$ {\bfseries group\+By\+Key} ()
-\item 
-\hypertarget{classfaster_1_1iFddCore_a9a7002de9ec87e594aa461c1b379b453}{}\label{classfaster_1_1iFddCore_a9a7002de9ec87e594aa461c1b379b453} 
-void {\bfseries discard} ()
-\item 
-\hypertarget{classfaster_1_1iFddCore_a6058211f45b0f603ff6e2ffab1976148}{}\label{classfaster_1_1iFddCore_a6058211f45b0f603ff6e2ffab1976148} 
-void {\bfseries write\+To\+File} (std\+::string path, std\+::string sufix)
-\item 
-\hypertarget{classfaster_1_1iFddCore_a85b2607d1cc8f604a3965c313f16b240}{}\label{classfaster_1_1iFddCore_a85b2607d1cc8f604a3965c313f16b240} 
-bool {\bfseries is\+Grouped\+By\+Key} ()
-\item 
+{\footnotesize template$<$typename U $>$ }\\\hyperlink{classfaster_1_1groupedFdd}{grouped\+Fdd}$<$ K $>$ $\ast$ \hyperlink{group__shuffle_ga311cd5a470392a25565057aaf0fa3226}{cogroup} (\hyperlink{classfaster_1_1iFddCore}{i\+Fdd\+Core}$<$ K, U $>$ $\ast$fdd1)
+\begin{DoxyCompactList}\small\item\em Groupes two datasets twogether according with the keys of the first dataset. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename U , typename V $>$ }\\\hyperlink{classfaster_1_1groupedFdd}{grouped\+Fdd}$<$ K $>$ $\ast$ \hyperlink{group__shuffle_gaf434c1c5118e380f9d78398fe46176d5}{cogroup} (\hyperlink{classfaster_1_1iFddCore}{i\+Fdd\+Core}$<$ K, U $>$ $\ast$fdd1, \hyperlink{classfaster_1_1iFddCore}{i\+Fdd\+Core}$<$ K, V $>$ $\ast$fdd2)
+\begin{DoxyCompactList}\small\item\em Groupes tree datasets together according with the keys of the first dataset. \end{DoxyCompactList}\item 
+std\+::unordered\+\_\+map$<$ K, size\+\_\+t $>$ \hyperlink{classfaster_1_1iFddCore_a4ed897a7b2af2918f91c3f8f89835ed4}{count\+By\+Key} ()
+\begin{DoxyCompactList}\small\item\em Count how many unique key there is in the dataset. \end{DoxyCompactList}\item 
+\hyperlink{classfaster_1_1indexedFdd}{indexed\+Fdd}$<$ K, T $>$ $\ast$ \hyperlink{group__shuffle_gac671d250f94c0927152362d4a982e931}{group\+By\+Key} ()
+\begin{DoxyCompactList}\small\item\em Groups distributed dataset by key. \end{DoxyCompactList}\item 
+void \hyperlink{group__memmodel_ga9a7002de9ec87e594aa461c1b379b453}{discard} ()
+\begin{DoxyCompactList}\small\item\em deallocates previously cached F\+DD \end{DoxyCompactList}\item 
+void \hyperlink{classfaster_1_1iFddCore_a6058211f45b0f603ff6e2ffab1976148}{write\+To\+File} (std\+::string path, std\+::string sufix)
+\begin{DoxyCompactList}\small\item\em Writes F\+DD content to file. \end{DoxyCompactList}\item 
+bool \hyperlink{classfaster_1_1iFddCore_a85b2607d1cc8f604a3965c313f16b240}{is\+Grouped\+By\+Key} ()
+\begin{DoxyCompactList}\small\item\em Determines if a dataset is grouped by key. \end{DoxyCompactList}\item 
 \hypertarget{classfaster_1_1iFddCore_a37c6f71cc6ce171ccd78120c7103f181}{}\label{classfaster_1_1iFddCore_a37c6f71cc6ce171ccd78120c7103f181} 
-void {\bfseries set\+Grouped\+By\+Key} (bool gbk)
-\item 
+void \hyperlink{classfaster_1_1iFddCore_a37c6f71cc6ce171ccd78120c7103f181}{set\+Grouped\+By\+Key} (bool gbk)
+\begin{DoxyCompactList}\small\item\em (U\+N\+U\+S\+ED) \end{DoxyCompactList}\item 
 \hypertarget{classfaster_1_1iFddCore_a54fc3721d1e6291b9e741c7d5e2b7573}{}\label{classfaster_1_1iFddCore_a54fc3721d1e6291b9e741c7d5e2b7573} 
-void {\bfseries set\+Grouped\+By\+Map} (bool gbm)
-\end{DoxyCompactItemize}
+void \hyperlink{classfaster_1_1iFddCore_a54fc3721d1e6291b9e741c7d5e2b7573}{set\+Grouped\+By\+Map} (bool gbm)
+\begin{DoxyCompactList}\small\item\em (U\+N\+U\+S\+ED) \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Protected Member Functions}
 \begin{DoxyCompactItemize}
 \item 
@@ -81,6 +80,61 @@ bool {\bfseries grouped\+By\+Map}
 \hypertarget{classfaster_1_1iFddCore_a698ad6bbac1d23c82f83bac07cd49c02}{}\label{classfaster_1_1iFddCore_a698ad6bbac1d23c82f83bac07cd49c02} 
 \hyperlink{classfaster_1_1fastContext}{fast\+Context} $\ast$ {\bfseries context}
 \end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classfaster_1_1iFddCore_a4ed897a7b2af2918f91c3f8f89835ed4}{}\label{classfaster_1_1iFddCore_a4ed897a7b2af2918f91c3f8f89835ed4} 
+\index{faster\+::i\+Fdd\+Core@{faster\+::i\+Fdd\+Core}!count\+By\+Key@{count\+By\+Key}}
+\index{count\+By\+Key@{count\+By\+Key}!faster\+::i\+Fdd\+Core@{faster\+::i\+Fdd\+Core}}
+\subsubsection{\texorpdfstring{count\+By\+Key()}{countByKey()}}
+{\footnotesize\ttfamily template$<$typename K , typename T $>$ \\
+std\+::unordered\+\_\+map$<$ K, size\+\_\+t $>$ \hyperlink{classfaster_1_1iFddCore}{faster\+::i\+Fdd\+Core}$<$ K, T $>$\+::count\+By\+Key (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Count how many unique key there is in the dataset. 
+
+\begin{DoxyReturn}{Returns}
+a unordered\+\_\+map (hash) of the key count. 
+\end{DoxyReturn}
+\hypertarget{classfaster_1_1iFddCore_a85b2607d1cc8f604a3965c313f16b240}{}\label{classfaster_1_1iFddCore_a85b2607d1cc8f604a3965c313f16b240} 
+\index{faster\+::i\+Fdd\+Core@{faster\+::i\+Fdd\+Core}!is\+Grouped\+By\+Key@{is\+Grouped\+By\+Key}}
+\index{is\+Grouped\+By\+Key@{is\+Grouped\+By\+Key}!faster\+::i\+Fdd\+Core@{faster\+::i\+Fdd\+Core}}
+\subsubsection{\texorpdfstring{is\+Grouped\+By\+Key()}{isGroupedByKey()}}
+{\footnotesize\ttfamily template$<$typename K, typename T$>$ \\
+bool \hyperlink{classfaster_1_1iFddCore}{faster\+::i\+Fdd\+Core}$<$ K, T $>$\+::is\+Grouped\+By\+Key (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Determines if a dataset is grouped by key. 
+
+\begin{DoxyReturn}{Returns}
+true is it has been groupe by key 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classfaster_1_1fddBase}{faster\+::fdd\+Base}.
+
+\hypertarget{classfaster_1_1iFddCore_a6058211f45b0f603ff6e2ffab1976148}{}\label{classfaster_1_1iFddCore_a6058211f45b0f603ff6e2ffab1976148} 
+\index{faster\+::i\+Fdd\+Core@{faster\+::i\+Fdd\+Core}!write\+To\+File@{write\+To\+File}}
+\index{write\+To\+File@{write\+To\+File}!faster\+::i\+Fdd\+Core@{faster\+::i\+Fdd\+Core}}
+\subsubsection{\texorpdfstring{write\+To\+File()}{writeToFile()}}
+{\footnotesize\ttfamily template$<$typename K , typename T $>$ \\
+void \hyperlink{classfaster_1_1iFddCore}{faster\+::i\+Fdd\+Core}$<$ K, T $>$\+::write\+To\+File (\begin{DoxyParamCaption}\item[{std\+::string}]{path,  }\item[{std\+::string}]{sufix }\end{DoxyParamCaption})}
+
+
+
+Writes F\+DD content to file. 
+
+Every process will write its own file with a rank number between the prefix and the suffix.
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & -\/ Prefix of the file path to be written \\
+\hline
+{\em sufix} & -\/ Sufix of the file path to be written \\
+\hline
+\end{DoxyParams}
 
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}

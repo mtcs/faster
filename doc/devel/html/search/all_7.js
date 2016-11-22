@@ -1,9 +1,11 @@
 var searchData=
 [
-  ['hasher',['hasher',['../classfaster_1_1hasher.html',1,'faster']]],
-  ['hasher_3c_20double_20_3e',['hasher&lt; double &gt;',['../classfaster_1_1hasher_3_01double_01_4.html',1,'faster']]],
-  ['hasher_3c_20float_20_3e',['hasher&lt; float &gt;',['../classfaster_1_1hasher_3_01float_01_4.html',1,'faster']]],
-  ['hasher_3c_20std_3a_3astring_20_3e',['hasher&lt; std::string &gt;',['../classfaster_1_1hasher_3_01std_1_1string_01_4.html',1,'faster']]],
-  ['hdfsengine',['hdfsEngine',['../classfaster_1_1hdfsEngine.html',1,'faster']]],
-  ['hdfsfile',['hdfsFile',['../classfaster_1_1hdfsFile.html',1,'faster']]]
+  ['getalloc',['getAlloc',['../classfaster_1_1fddBase.html#a2b6f4b4fa670e90cde938d456e5da3b7',1,'faster::fddBase']]],
+  ['getid',['getId',['../classfaster_1_1fddBase.html#a3902296c393cb15e830c02555a0f371f',1,'faster::fddBase']]],
+  ['getkeymap',['getKeyMap',['../classfaster_1_1fddCore.html#a7dcd1b146c23c5f5ba149a6fc2bc7741',1,'faster::fddCore']]],
+  ['getsize',['getSize',['../classfaster_1_1fddBase.html#ab9645c31245a53f97449446a440adf47',1,'faster::fddBase']]],
+  ['groupbykey',['groupByKey',['../group__shuffle.html#gac671d250f94c0927152362d4a982e931',1,'faster::iFddCore']]],
+  ['grouped_20datasets_20operators',['Grouped Datasets Operators',['../group__grouped.html',1,'']]],
+  ['groupedfdd',['groupedFdd',['../classfaster_1_1groupedFdd.html#a3e057f8351843ebf4b2875d3bb763ccb',1,'faster::groupedFdd::groupedFdd(fastContext *c, iFddCore&lt; K, T &gt; *fdd0, iFddCore&lt; K, U &gt; *fdd1, system_clock::time_point &amp;start)'],['../classfaster_1_1groupedFdd.html#a0f6bb764367d709b4837afcdf2cf0c30',1,'faster::groupedFdd::groupedFdd(fastContext *c, iFddCore&lt; K, T &gt; *fdd0, iFddCore&lt; K, U &gt; *fdd1, iFddCore&lt; K, V &gt; *fdd2, system_clock::time_point &amp;start)']]],
+  ['groupedfdd',['groupedFdd',['../classfaster_1_1groupedFdd.html',1,'faster']]]
 ];

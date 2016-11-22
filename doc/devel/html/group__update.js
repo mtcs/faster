@@ -1,5 +1,4 @@
 var group__update =
 [
-    [ "ByKey Operator Variants", "group__bykey.html", "group__bykey" ],
-    [ "Bulk Operator Variants", "group__bulk.html", "group__bulk" ]
+    [ "update", "group__update.html#gac1c08f691a992e6fdf17597d675a6bab", null ]
 ];

@@ -52,13 +52,11 @@ void \hyperlink{classfaster_1_1fdd_a8ab9e1a569f83b5bc9cb70777a14297e}{assign} (T
 \begin{DoxyCompactList}\small\item\em Assign a fdd content from a array. \end{DoxyCompactList}\item 
 \hypertarget{classfaster_1_1fdd_aea20888cf4c003e7ad518e1a88e94200}{}\label{classfaster_1_1fdd_aea20888cf4c003e7ad518e1a88e94200} 
 \hyperlink{classfaster_1_1fdd_aea20888cf4c003e7ad518e1a88e94200}{$\sim$fdd} ()
-\begin{DoxyCompactList}\small\item\em Class Destructor. \end{DoxyCompactList}\item 
-\hypertarget{classfaster_1_1fdd_a089aa4c91205948dacbc6e6bd6e5bcde}{}\label{classfaster_1_1fdd_a089aa4c91205948dacbc6e6bd6e5bcde} 
-std\+::vector$<$ T $>$ {\bfseries collect} ()
-\item 
-\hypertarget{classfaster_1_1fdd_ac460ea12f02045a3d9203bb83eb5adb3}{}\label{classfaster_1_1fdd_ac460ea12f02045a3d9203bb83eb5adb3} 
-\hyperlink{classfaster_1_1fdd}{fdd}$<$ T $>$ $\ast$ {\bfseries cache} ()
-\item 
+\begin{DoxyCompactList}\small\item\em Class Destructor. W\+A\+R\+N\+I\+NG\+: It will deallocate ditributted memory. \end{DoxyCompactList}\item 
+std\+::vector$<$ T $>$ \hyperlink{classfaster_1_1fdd_a089aa4c91205948dacbc6e6bd6e5bcde}{collect} ()
+\begin{DoxyCompactList}\small\item\em Brings the distributted data from a F\+DD to the driver memory. \end{DoxyCompactList}\item 
+\hyperlink{classfaster_1_1fdd}{fdd}$<$ T $>$ $\ast$ \hyperlink{group__memmodel_gac460ea12f02045a3d9203bb83eb5adb3}{cache} ()
+\begin{DoxyCompactList}\small\item\em Prevents automatic memory deallocation from hapenning. \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename U $>$ }\\\hyperlink{classfaster_1_1fdd}{fdd}$<$ U $>$ $\ast$ \hyperlink{group__map_ga214d07df3240baf348492f9a4186d5cc}{map} (map\+FunctionP$<$ T, U $>$ funcP)
 \begin{DoxyCompactList}\small\item\em creates a fdd$<$\+U$>$ \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename U $>$ }\\\hyperlink{classfaster_1_1fdd}{fdd}$<$ U $>$ $\ast$ \hyperlink{group__map_ga2cfde53328f21d2ffba58dde111219ff}{map} (Pmap\+FunctionP$<$ T, U $>$ funcP)
@@ -68,34 +66,51 @@ std\+::vector$<$ T $>$ {\bfseries collect} ()
 {\footnotesize template$<$typename L , typename U $>$ }\\\hyperlink{classfaster_1_1indexedFdd}{indexed\+Fdd}$<$ L, U $>$ $\ast$ \hyperlink{group__map_ga61ce985503e31026794696c6c6db20b8}{map} (I\+Pmap\+FunctionP$<$ T, L, U $>$ funcP)
 \begin{DoxyCompactList}\small\item\em creates a indexed\+Fdd$<$\+L,\+U$\ast$$>$ \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename U $>$ }\\\hyperlink{classfaster_1_1fdd}{fdd}$<$ U $>$ $\ast$ \hyperlink{group__bulk_ga0b4b82535fe1d2746973ce4e203d619f}{bulk\+Map} (bulk\+Map\+FunctionP$<$ T, U $>$ funcP)
-\begin{DoxyCompactList}\small\item\em bulk\+Map that creates a fdd$<$\+U$>$ \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em creates a fdd$<$\+U$>$ \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename U $>$ }\\\hyperlink{classfaster_1_1fdd}{fdd}$<$ U $>$ $\ast$ \hyperlink{group__bulk_ga72e07b032ee97aeed0261a20769720a7}{bulk\+Map} (Pbulk\+Map\+FunctionP$<$ T, U $>$ funcP)
-\begin{DoxyCompactList}\small\item\em bulk\+Map that creates a fdd$<$\+U $\ast$$>$ \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em creates a fdd$<$\+U $\ast$$>$ \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename L , typename U $>$ }\\\hyperlink{classfaster_1_1indexedFdd}{indexed\+Fdd}$<$ L, U $>$ $\ast$ \hyperlink{group__bulk_ga97ad1e63823abe30de230da1456481d4}{bulk\+Map} (Ibulk\+Map\+FunctionP$<$ T, L, U $>$ funcP)
-\begin{DoxyCompactList}\small\item\em bulk\+Map that creates a indexed\+Fdd$<$\+L,\+U$>$ \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em creates a indexed\+Fdd$<$\+L,\+U$>$ \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename L , typename U $>$ }\\\hyperlink{classfaster_1_1indexedFdd}{indexed\+Fdd}$<$ L, U $>$ $\ast$ \hyperlink{group__bulk_gabfd585e52364a7be20125aa25c0ab141}{bulk\+Map} (I\+Pbulk\+Map\+FunctionP$<$ T, L, U $>$ funcP)
-\begin{DoxyCompactList}\small\item\em bulk\+Map that creates a indexed\+Fdd$<$\+L,\+U$\ast$$>$ \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em creates a indexed\+Fdd$<$\+L,\+U$\ast$$>$ \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename U $>$ }\\\hyperlink{classfaster_1_1fdd}{fdd}$<$ U $>$ $\ast$ \hyperlink{group__flatmap_ga7efd43be1d3005d654c4656d521faf30}{flat\+Map} (flat\+Map\+FunctionP$<$ T, U $>$ funcP)
-\begin{DoxyCompactList}\small\item\em flat\+Map that creates a fdd$<$\+U$>$ \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em creates a fdd$<$\+U$>$ \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename U $>$ }\\\hyperlink{classfaster_1_1fdd}{fdd}$<$ U $>$ $\ast$ \hyperlink{group__flatmap_ga3f353414307512c23d88fc3e8b2e8221}{flat\+Map} (Pflat\+Map\+FunctionP$<$ T, U $>$ funcP)
-\begin{DoxyCompactList}\small\item\em flat\+Map that creates a fdd$<$\+U $\ast$$>$ \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em creates a fdd$<$\+U $\ast$$>$ \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename L , typename U $>$ }\\\hyperlink{classfaster_1_1indexedFdd}{indexed\+Fdd}$<$ L, U $>$ $\ast$ \hyperlink{group__flatmap_ga499a1c3638cc1e95e483cd91c7a884a7}{flat\+Map} (Iflat\+Map\+FunctionP$<$ T, L, U $>$ funcP)
-\begin{DoxyCompactList}\small\item\em flat\+Map that creates a indexed\+Fdd$<$\+L,\+U$>$ \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em creates a indexed\+Fdd$<$\+L,\+U$>$ \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename L , typename U $>$ }\\\hyperlink{classfaster_1_1indexedFdd}{indexed\+Fdd}$<$ L, U $>$ $\ast$ \hyperlink{group__flatmap_gab1c639e6fe55d66ac0cb50011d537567}{flat\+Map} (I\+Pflat\+Map\+FunctionP$<$ T, L, U $>$ funcP)
-\begin{DoxyCompactList}\small\item\em flat\+Map that creates a indexed\+Fdd$<$\+L,\+U$\ast$$>$ \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em creates a indexed\+Fdd$<$\+L,\+U$\ast$$>$ \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename U $>$ }\\\hyperlink{classfaster_1_1fdd}{fdd}$<$ U $>$ $\ast$ \hyperlink{group__bulk_ga6f87b4e650b28ea32c363f6d902babb1}{bulk\+Flat\+Map} (bulk\+Flat\+Map\+FunctionP$<$ T, U $>$ funcP)
-\begin{DoxyCompactList}\small\item\em bulk\+Flat\+Map that creates a fdd$<$\+U$>$ \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em creates a fdd$<$\+U$>$ \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename U $>$ }\\\hyperlink{classfaster_1_1fdd}{fdd}$<$ U $>$ $\ast$ \hyperlink{group__bulk_ga77058c1365a8696105acaf1468e8d3b4}{bulk\+Flat\+Map} (Pbulk\+Flat\+Map\+FunctionP$<$ T, U $>$ funcP)
-\begin{DoxyCompactList}\small\item\em bulk\+Flat\+Map that creates a fdd$<$\+U $\ast$$>$ \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em creates a fdd$<$\+U $\ast$$>$ \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename L , typename U $>$ }\\\hyperlink{classfaster_1_1indexedFdd}{indexed\+Fdd}$<$ L, U $>$ $\ast$ \hyperlink{group__bulk_gadfcb736f7161db476dbbb275f1d08659}{bulk\+Flat\+Map} (Ibulk\+Flat\+Map\+FunctionP$<$ T, L, U $>$ funcP)
-\begin{DoxyCompactList}\small\item\em bulk\+Flat\+Map that creates a indexed\+Fdd$<$\+L,\+U$>$ \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em creates a indexed\+Fdd$<$\+L,\+U$>$ \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename L , typename U $>$ }\\\hyperlink{classfaster_1_1indexedFdd}{indexed\+Fdd}$<$ L, U $>$ $\ast$ \hyperlink{group__bulk_gaf16d4811371f6dbcfbb717a73a182d48}{bulk\+Flat\+Map} (I\+Pbulk\+Flat\+Map\+FunctionP$<$ T, L, U $>$ funcP)
-\begin{DoxyCompactList}\small\item\em bulk\+Flat\+Map that creates a indexed\+Fdd$<$\+L,\+U$\ast$$>$ \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em creates a indexed\+Fdd$<$\+L,\+U$\ast$$>$ \end{DoxyCompactList}\item 
 T \hyperlink{group__reduce_ga1e828ad9a768db382aef2adf878aa1b2}{reduce} (reduce\+FunctionP$<$ T $>$ funcP)
 \begin{DoxyCompactList}\small\item\em summarizes a fdd$<$\+T$>$ into a single value of type T \end{DoxyCompactList}\item 
 T \hyperlink{group__bulk_ga8f133f23bd653329f44290ebda70bb9b}{bulk\+Reduce} (bulk\+Reduce\+FunctionP$<$ T $>$ funcP)
-\begin{DoxyCompactList}\small\item\em summarizes a fdd$<$\+T$>$ into a single value of type T using a bulk function {\itshape T F(deque$<$\+T$>$)} \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em summarizes a fdd$<$\+T$>$ into a single value of type T using a bulk function {\itshape T F(\+T,\+T)} \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classfaster_1_1fdd_a089aa4c91205948dacbc6e6bd6e5bcde}{}\label{classfaster_1_1fdd_a089aa4c91205948dacbc6e6bd6e5bcde} 
+\index{faster\+::fdd@{faster\+::fdd}!collect@{collect}}
+\index{collect@{collect}!faster\+::fdd@{faster\+::fdd}}
+\subsubsection{\texorpdfstring{collect()}{collect()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+std\+::vector$<$T$>$ \hyperlink{classfaster_1_1fdd}{faster\+::fdd}$<$ T $>$\+::collect (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Brings the distributted data from a F\+DD to the driver memory. 
+
+\begin{DoxyReturn}{Returns}
+a vector with the content of the F\+DD 
+\end{DoxyReturn}
 
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}

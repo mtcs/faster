@@ -5,7 +5,7 @@ var classfaster_1_1fddCore =
     [ "~fddCore", "classfaster_1_1fddCore.html#a822ba26fcec7a1a4a7d96392f0712e7f", null ],
     [ "fddCore", "classfaster_1_1fddCore.html#a437156da84fb4f0e7cb58f2f67ff172b", null ],
     [ "_map", "classfaster_1_1fddCore.html#a1fff34f140b7634b1a6e60b8069a3a29", null ],
-    [ "discard", "classfaster_1_1fddCore.html#a0addecf1c27311b6da3e37f77e414572", null ],
+    [ "discard", "group__memmodel.html#ga0addecf1c27311b6da3e37f77e414572", null ],
     [ "getKeyMap", "classfaster_1_1fddCore.html#a7dcd1b146c23c5f5ba149a6fc2bc7741", null ],
     [ "isGroupedByKey", "classfaster_1_1fddCore.html#a4ff77df4fb389f5ee6ff468f773d58f8", null ],
     [ "map", "classfaster_1_1fddCore.html#a30e174ccee6fc2d00387c85161422825", null ],

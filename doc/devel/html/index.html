@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.12"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>libfaster API Documentation: Introdutory Pages</title>
+<title>libfaster API Documentation: API Introduction</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -84,10 +84,11 @@ $(document).ready(function(){initNavTree('index.html','');});
 
 <div class="header">
   <div class="headertitle">
-<div class="title">Introdutory Pages </div>  </div>
+<div class="title">API Introduction </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>The context class is the class that manages dataset resources and task execution.</p>
+<div class="textblock"><p>Faster defines the <a href="namespacefaster.html">faster</a> namespace which contains all framework classes and definitions.</p>
+<p>The context class is the class that manages dataset resources and task execution.</p>
 <ul>
 <li><a class="el" href="classfaster_1_1fastContext.html" title="Framework context class. ">faster::fastContext</a> class</li>
 </ul>
@@ -96,8 +97,19 @@ $(document).ready(function(){initNavTree('index.html','');});
 <li><a class="el" href="classfaster_1_1indexedFdd.html">faster::indexedFdd</a> dataset - a indexed dataset containing a key and a value.</li>
 <li><a class="el" href="classfaster_1_1groupedFdd.html">faster::groupedFdd</a> dataset class - a group of indexed datasets.</li>
 </ul>
-<p>For working examples:</p><ul>
-<li><a class="el" href="examples.html">Examples</a> Examples </li>
+<h2>Step by step</h2>
+<p>In order to run code using faster you need:</p>
+<ol type="1">
+<li>Create a context object (<a class="el" href="classfaster_1_1fastContext.html" title="Framework context class. ">faster::fastContext</a>)</li>
+<li>Register user functions and variables (<a class="el" href="classfaster_1_1fastContext.html#a78d8eec46a44c600adb554bcdf8d8a2c" title="Register a user custom function in the context. ">faster::fastContext::registerFunction</a>)</li>
+<li>Start worker processes (<a class="el" href="classfaster_1_1fastContext.html#a1f6b1c1a940d67b434ac95bad4770508" title="Start worker machines computation. ">faster::fastContext::startWorkers</a>)</li>
+<li>Create a dataset from file or memory (<a class="el" href="classfaster_1_1fdd.html#a1f61fd1cb290f8d2f7570eb9f260866f" title="Create a empty fdd. ">faster::fdd::fdd()</a> or <a class="el" href="classfaster_1_1indexedFdd.html#a00f525684f5c451a2824e3244b256604" title="Create a empty indexedFdd. ">faster::indexedFdd::indexedFdd()</a>)</li>
+<li>Apply your functions to the dataset (<a class="el" href="group__map.html#ga214d07df3240baf348492f9a4186d5cc" title="creates a fdd&lt;U&gt; ">faster::fdd::map()</a> or faster::fdd::reduce() etc.)</li>
+<li>Write the dataset to disk or collect its content (<a class="el" href="classfaster_1_1fddCore.html#a9504c32481c67c2ceaf98d132ef37ee6" title="Writes FDD content to file. ">faster::fddCore::writeToFile()</a>, <a class="el" href="classfaster_1_1fdd.html#a089aa4c91205948dacbc6e6bd6e5bcde" title="Brings the distributted data from a FDD to the driver memory. ">faster::fdd::collect()</a>)</li>
+</ol>
+<h2>Examples</h2>
+<ul>
+<li><a class="el" href="examples.html">Examples</a> Full working examples </li>
 </ul>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
@@ -105,7 +117,7 @@ $(document).ready(function(){initNavTree('index.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Nov 22 2016 15:52:56 for libfaster API Documentation by
+    <li class="footer">Generated on Tue Nov 22 2016 18:47:00 for libfaster API Documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.12 </li>
   </ul>

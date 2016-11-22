@@ -1,7 +1,8 @@
 var NAVTREE =
 [
   [ "libfaster API Documentation", "index.html", [
-    [ "Introdutory Pages", "index.html", "index" ],
+    [ "API Introduction", "index.html", "index" ],
+    [ "Operator Groups", "md__home_mtcs_pesquisa_faster_faster_8git_src_DOC_GROUPS.html", null ],
     [ "Modules", "modules.html", "modules" ],
     [ "Namespaces", null, [
       [ "Namespace List", "namespaces.html", "namespaces" ],
@@ -27,10 +28,11 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"__workerFdd_8h_source.html",
-"classfaster_1_1fastContext.html#add296b9632bef0f4ceddbdc02a874bb4",
-"classfaster_1_1indexedFdd.html#aa06dfd667524b0ec9e10edf666414715",
-"classfaster_1_1workerIFddCore.html#a5db1be64cd268995e0ca456b5407510d"
+".html",
+"classfaster_1_1fastComm.html#a7e1ca7788c4310cb84640812fa50a012",
+"classfaster_1_1fdd_3_01T_01_5_01_4.html#ac930844af424e4434920531d285addaf",
+"classfaster_1_1workerFddCore.html#ae6834075d00c10b68b4ed8dc56a43ff1",
+"group__reduce.html#ga1e828ad9a768db382aef2adf878aa1b2"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
