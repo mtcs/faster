@@ -19,6 +19,9 @@ namespace faster{
 	template <class K, class T>
 	class indexedFdd ;
 
+	/// @brief core class that implements simple operations.
+	///
+	/// @tparam T - The type of the dataset entries
 	template <typename T>
 	class fddCore : public fddBase {
 		protected :
@@ -60,6 +63,10 @@ namespace faster{
 
 	// Driver side FDD
 	// It just sends commands to the workers.
+	/// @brief Fast Distributted Dataset(FDD) is like a cluster distributted Array. This
+	/// class is the user side implementation.
+	///
+	/// @tparam T - The type of the dataset entries
 	template <class T>
 	class fdd : public fddCore<T>{
 		private:
@@ -68,45 +75,65 @@ namespace faster{
 		public:
 			// -------------- Constructors --------------- //
 
-			// Create a empty fdd
+			/// @brief Create a empty fdd
 			fdd(fastContext &c) : fddCore<T>(c){
 				this->id = c.createFDD(this,  typeid(T).hash_code());
 			}
 
-			// Create a empty fdd with a pre allocated size
+			/// @brief Create a empty fdd with a pre allocated size
 			fdd(fastContext &c, size_t s, const std::vector<size_t> & dataAlloc) : fddCore<T>(c, s, dataAlloc){
 				this->id = c.createFDD(this,  typeid(T).hash_code(), dataAlloc);
 			}
 
-			// Create a empty fdd with a pre allocated size
+			/// @brief Create a empty fdd with a pre allocated size
 			fdd(fastContext &c, size_t s) : fdd(c, s, c.getAllocation(s)) { }
 
-			// Create a fdd from a array in memory
+			/// @brief Create a fdd from a array in memory
 			fdd(fastContext &c, T * data, size_t size) : fdd(c, size){
 				//c.parallelize(fddBase::id, data, size);
 				assign(data, size);
 			}
 
-			// Create a fdd from a vector in memory
+			/// @brief Create a fdd from a vector in memory
 			fdd(fastContext &c, std::vector<T> &dataV) : fdd(c, dataV.data(), dataV.size()){ }
 
-			// Create a fdd from a file
+			/// @brief Create a fdd from a file
 			fdd(fastContext &c, const char * fileName) ;
 
+			/// @brief Assign a fdd content from a vector
 			void assign(std::vector<T> & data){
 				assign(data.data(), data.size());
 			}
 
+			/// @brief Assign a fdd content from a array
 			void assign(T * data, size_t size){
 				fddCore<T>::context->parallelize(fddBase::id, data, size);
 			}
 
 
+			/// @brief Class Destructor
 			~fdd(){ }
 
-			// -------------- FDD Functions --------------- //
+			// --------------- FDD Builtin functions ------------- //
+			// Collect a FDD
+			std::vector<T> collect( ){
+				std::vector<T> data(this->size);
+				this->context->collectFDD(data, this);
+				return data;
+			}
+			/*void * _collect( ) override{
+				return fddCore<T>::context->collectFDD(this);
+			}*/
+			fdd<T> * cache(){
+				this->cached = true;
+				return this;
+			}
 
-			// Run a Map
+			// -------------- FDD Functions --------------- //
+			/// @name Map
+			/// @brief Run a __n to n__ map operator
+			/// @{
+
 			template <typename U>
 			fdd<U> * map( mapFunctionP<T,U> funcP ){
 				return fddCore<T>::template map<U>((void*) funcP, OP_Map);
@@ -123,7 +150,12 @@ namespace faster{
 			indexedFdd<L,U> * map( IPmapFunctionP<T,L,U> funcP ){
 				return fddCore<T>::template mapI<L,U>((void*) funcP, OP_Map);
 			}
+			/// @}
 
+
+			/// @name BulkMap
+			/// @brief Run a __n to n__ bulkMap
+			/// @{
 
 			template <typename U>
 			fdd<U> * bulkMap( bulkMapFunctionP<T,U> funcP ){
@@ -141,25 +173,39 @@ namespace faster{
 			indexedFdd<L,U> * bulkMap( IPbulkMapFunctionP<T,L,U> funcP ){
 				return fddCore<T>::template mapI<L,U>((void*) funcP, OP_BulkMap);
 			}
+			/// @}
 
 
+			/// @name FlatMap
+			/// @brief Run a __n to m__ flatMap
+			/// @{
+
+			/// @brief flatMap that creates a fdd<U>
 			template <typename U>
 			fdd<U> * flatMap( flatMapFunctionP<T,U> funcP ){
 				return fddCore<T>::template map<U>((void*) funcP, OP_FlatMap);
 			}
+			/// @brief flatMap that creates a fdd<U *>
 			template <typename U>
 			fdd<U> * flatMap( PflatMapFunctionP<T,U> funcP ){
 				return fddCore<T>::template map<U>((void*) funcP, OP_FlatMap);
 			}
+			/// @brief flatMap that creates a indexedFdd<L,U>
 			template <typename L, typename U>
 			indexedFdd<L,U> * flatMap( IflatMapFunctionP<T,L,U> funcP ){
 				return fddCore<T>::template mapI<L,U>((void*) funcP, OP_FlatMap);
 			}
 			template <typename L, typename U>
+			/// @brief flatMap that creates a indexedFdd<L,U*>
 			indexedFdd<L,U> * flatMap( IPflatMapFunctionP<T,L,U> funcP ){
 				return fddCore<T>::template mapI<L,U>((void*) funcP, OP_FlatMap);
 			}
+			/// @}
 
+
+			/// @name BulkFlatMap
+			/// @brief Run a __n to m__ bulkFlatMap
+			/// @{
 
 			template <typename U>
 			fdd<U> * bulkFlatMap( bulkFlatMapFunctionP<T,U> funcP ){
@@ -177,30 +223,21 @@ namespace faster{
 			indexedFdd<L,U> * bulkFlatMap( IPbulkFlatMapFunctionP<T,L,U> funcP ){
 				return fddCore<T>::template mapI<L,U>((void*) funcP, OP_BulkFlatMap);
 			}
+			/// @}
 
 
-			// Run a Reduce
+			/// @name Reduce
+			/// @brief Run a __n to 1__ reduce
+			/// @{
+
 			T reduce( reduceFunctionP<T> funcP ){
 				return reduce((void*) funcP, OP_Reduce);
 			}
 			T bulkReduce( bulkReduceFunctionP<T> funcP ){
 				return reduce((void*) funcP, OP_BulkReduce);
 			}
+			/// @}
 
-			// --------------- FDD Builtin functions ------------- //
-			// Collect a FDD
-			std::vector<T> collect( ){
-				std::vector<T> data(this->size);
-				this->context->collectFDD(data, this);
-				return data;
-			}
-			/*void * _collect( ) override{
-				return fddCore<T>::context->collectFDD(this);
-			}*/
-			fdd<T> * cache(){
-				this->cached = true;
-				return this;
-			}
 
 	};
 

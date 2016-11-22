@@ -30,24 +30,25 @@ namespace faster{
 	class fastContext;
 
 
-	//! Context configuration Class.
-	//!
-	//! Throught the fastSetting Class, the programmer can change default framework settings
-	//! like enable dynamic load balancing
+	/// @brief Context Configuration Class.
+	///
+	/// Throught the fastSetting Class,
+	/// the programmer can change default framework settings.
+	/// like ...
 	class fastSettings{
 		friend class fastContext;
 		public:
 
-			//! fastSetting default constructor
+			/// @brief fastSetting default constructor
 			fastSettings() {
 				_allowDataBalancing = false;
 			}
 
-			//! fastSetting dummy constructor
+			/// @brief fastSetting dummy constructor
 			fastSettings(const fastSettings & s UNUSED){
 			}
 
-			//! Enables dynamic load balancing
+			/// @brief Enables dynamic load balancing
 			void allowDataBalancing(){
 				_allowDataBalancing = true;
 			}
@@ -57,10 +58,11 @@ namespace faster{
 
 	};
 
-	//! General framework context
-	//!
-	//! The context manages communication, scheduler and start Workers.
-	//! A context is needed to create datasets!
+	/// @brief Framework context class.
+	///
+	/// The context manages communication, scheduler and start Workers.
+	/// A context is needed to create datasets!
+	///
 	class fastContext{
 
 		template <class T> friend class fdd;
@@ -71,61 +73,131 @@ namespace faster{
 		friend class worker;
 
 		public:
-			//! fastContext default constructor
-			//! \param argc - number of arguments from main
-			//! \param argv - arguments from main
+			/// @brief fastContext default constructor
+			///
+			/// @param argc - number of arguments from main
+			/// @param argv - arguments from main
 			fastContext( int argc=0, char ** argv=NULL);
 
-			//! fastContext constructor with custom settings
+			/// fastContext constructor with custom settings
 			fastContext( const fastSettings & s, int argc, char ** argv);
 
-			//! fastContext destructor
+			/// fastContext destructor
 			~fastContext();
 
-			//! Register a user custom function in the context.
-			//!
-			//! Registering a user custom functions is necessary in order to pass it as
-			//! parametes to FDD functions like __map__ and __reduce__.
-			//!
-			//! \param funcP - Function pointer to a user defined function.
+			/// @name Function and global variables registration
+			/// @{
+
+			/// @brief Register a user custom function in the context.
+			///
+			/// Registering a user custom functions is necessary in order to pass it as
+			/// parametes to FDD functions like __map__ and __reduce__.
+			///
+			/// @param funcP - Function pointer to a user defined function.
 			void registerFunction(void * funcP);
 
-			//! Register a user custom function in the context.
-			//!
-			//! Registering a user custom functions is necessary in order to pass it as
-			//! parametes to FDD functions like __map__ and __reduce__.
-			//!
-			//! \param funcP - Function pointer to a user defined function.
-			//! \param name - Custom name to registered funciton.
+			/// @brief Register a user custom function in the context.
+			///
+			/// Registering a user custom functions is necessary in order to pass it as
+			/// parametes to FDD functions like __map__ and __reduce__.
+			///
+			/// @param funcP - Function pointer to a user defined function.
+			/// @param name - Custom name to registered funciton.
 			void registerFunction(void * funcP, const std::string name);
+
+
+			/// @brief Gegisters a primitive global varible to be used inside used defined
+			///        functions in distributted environment.
+			///
+			/// @tparam T - Type of the global variable to be registered
+			/// @param varP - Global variable to be registered
 			template <class T>
 			void registerGlobal(T * varP);
+
+			/// @brief Gegisters a global array to be used inside used defined
+			///        functions in distributted environment.
+			///
+			/// @tparam T - Type of the global array to be registered
+			/// @param varP - Global array to be registered
+			/// @param s - Size of the array
 			template <class T>
 			void registerGlobal(T ** varP, size_t s);
+
+			/// @brief Gegisters a global Vector to be used inside used defined
+			///        functions in distributted environment.
+			///
+			/// @tparam T - Type of the global vector to be registered
+			/// @param varP - Global vector to be registered
 			template <class T>
 			void registerGlobal(std::vector<T> * varP);
+			/// @}
 
+			/// @brief Start worker machines computation
+			///
+			/// When this function is called, the driver processes and works processes
+			/// diverge from execution. While the Driver process starts to execute user
+			/// code, the worker processes start to waiting for tasks. Then workers
+			/// should exit short after this function is called.
 			void startWorkers();
 
+			/// @brief Checks for the driver process
+			///
+			/// @returns  -  true if the process is the driver process
 			bool isDriver();
+			/// @brief Return the number of processes running
+			///
+			/// @return number of active processes
+			int numProcs(){ return comm->numProcs; }
 
+
+			/// @brief Performs a microbenchmark to do dynamic load balancing (UNUSED)
 			void calibrate();
 
+			/// @name Online file reading and parsing
+			/// @{
+
+			/// @brief Reads a file with online parsing and partition (NOT IMPLEMENTED)
+			///
+			/// @tparam T - Dataset type
+			/// @param path - Input file path
+			/// @param funcP - partition function pointer of types ::faster::onlineFullPartFuncP or ::faster::IonlineFullPartFuncP
+			///
+			/// @returns - a dataset of ::faster::fdd<t> type and faster::indexedFdd<K,T>
 			template <typename T>
 			fdd<T> * onlineFullPartRead(std::string path, onlineFullPartFuncP<T> funcP);
-
 			template <typename K, typename T>
 			indexedFdd<K,T> * onlineFullPartRead(std::string path, IonlineFullPartFuncP<K,T> funcP);
 			template <typename K, typename T>
 			indexedFdd<K,T> * onlinePartRead(std::string path, IonlineFullPartFuncP<K,T> funcP);
+
+			/// @brief Reads a file with online parsing and mapping (?)
+			///
+			/// @tparam K - Dataset key type
+			/// @tparam T - Dataset type
+			/// @param path - File path
+			/// @param funcP - (?)
+			///
+			/// @return
+			template <typename T>
+			fdd<T> * onlineRead(std::string path, onlineFullPartFuncP<T> funcP);
 			template <typename K, typename T>
 			indexedFdd<K,T> * onlineRead(std::string path, IonlineFullPartFuncP<K,T> funcP);
+			/// @}
 
-			int numProcs(){ return comm->numProcs; }
+			/// @name Task execution profiling
+			/// @{
 
+			/// @brief Prints task execution information for all tasks executed by the user.
 			void printInfo();
+			/// @brief Prints a header for task execution information.
+			///
+			/// To be used with faster::fastContext::updateInfo()
 			void printHeader();
+			/// @brief Prints information from tesk ran since last faster::fastContext::updateInfo() called.
+			///
+			/// To be used with faster::fastContext::printHeader()
 			void updateInfo();
+			/// @}
 
 		private:
 			int id;
