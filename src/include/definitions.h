@@ -12,7 +12,7 @@
 
 namespace faster{
 
-
+	/// @brief Dataset type
 	typedef unsigned int fddType;
 
 	#define Null		0x0000
@@ -37,6 +37,7 @@ namespace faster{
 	#define DoubleV		0x1010
 	#define GroupFDD	0x8000
 
+	/// @brief Dataset operation type
 	typedef unsigned int fddOpType;
 
 	#define OP_GENERICMAP		0x0100
@@ -105,17 +106,18 @@ namespace faster{
 
 	} dFuncName;
 
-	// Partition function definitions
+	///@name Partition function definitions
+	///@{
 	template <typename T>
 	using onlineFullPartFuncP = int (*) (T & input);
 
 	template <typename K, typename T>
 	using IonlineFullPartFuncP = int (*) (K & key, T & input);
+	///@}
 
 
-	// Not Indexed FFDs
-	// FDD function pointer types
-
+	///@name Not Indexed FFDs function pointer types
+	///@{
 	template <typename T, typename U>
 	using mapFunctionP = U (*) (T & input);
 	template <typename T, typename L, typename U>
@@ -157,10 +159,10 @@ namespace faster{
 
 	template <typename T>
 	using bulkReduceFunctionP = T (*) (T * input, size_t size);
+	///@}
 
-	// Pointer FDD function pointer types
-
-	// Map
+	///@name Pointer FDD function pointer types
+	///@{
 	template <typename T, typename U>
 	using mapPFunctionP = U (*) (T * input, size_t size);
 	template <typename T, typename L, typename U>
@@ -207,9 +209,11 @@ namespace faster{
 
 	template <typename T>
 	using PbulkReducePFunctionP = std::pair<T *, size_t> (*) (T ** input, size_t * inputDataSizes, size_t size);
+	///@}
 
 	// --------------- Indexed FDDs -------------- //
-	// IFDD function pointer types
+	///@name IFDD function pointer types
+	/// @{
 	template <typename K, typename T>
 	using updateIFunctionP = void (*) (K & inKey, T & input);
 	template <typename K, typename T>
@@ -279,9 +283,10 @@ namespace faster{
 
 	template <typename K, typename T>
 	using IbulkReduceIFunctionP = std::pair<K,T> (*) (K * key, T * input, size_t size);
+	/// @}
 
-	// Pointer FDD function pointer types
-
+	///@name Pointer IFDD function pointer types
+	/// @{
 	// Map
 	template <typename K, typename T, typename L, typename U>
 	using ImapIPFunctionP = std::pair<L,U> (*) (K inKey, T * input, size_t size);
@@ -340,10 +345,11 @@ namespace faster{
 
 	template <typename K, typename T>
 	using IPbulkReduceIPFunctionP = std::tuple<K,T*,size_t> (*) (K * key, T ** input, size_t * inputDataSizes, size_t size);
+	/// @}
 
 
-	// --------------- Grouped FDDs -------------//
-
+	/// @name Grouped FDDs function pointer types
+	/// @{
 	template <typename K>
 	using updateByKeyG2FunctionP = void (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b);
 
@@ -462,6 +468,7 @@ namespace faster{
 	//using PPCountKeyMapT = std::unordered_map<K, std::pair<size_t, std::deque<int>> > ;
 
 
+	/// @}
 
 }
 #endif
