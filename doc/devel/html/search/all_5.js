@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['procstat',['procstat',['../classfaster_1_1procstat.html',1,'faster']]]
+  ['groupedfdd',['groupedFdd',['../classfaster_1_1groupedFdd.html',1,'faster']]]
 ];

@@ -3,47 +3,50 @@
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\hypertarget{classfaster_1_1fastScheduler_a5585b9363737823bf17e6782013b04a8}{}{\bfseries fast\+Scheduler} (unsigned int num\+Procs, std\+::vector$<$ std\+::string $>$ $\ast$func\+Name)\label{classfaster_1_1fastScheduler_a5585b9363737823bf17e6782013b04a8}
-
+\hypertarget{classfaster_1_1fastScheduler_a5585b9363737823bf17e6782013b04a8}{}\label{classfaster_1_1fastScheduler_a5585b9363737823bf17e6782013b04a8} 
+{\bfseries fast\+Scheduler} (unsigned int num\+Procs, std\+::vector$<$ std\+::string $>$ $\ast$func\+Name)
 \item 
-\hypertarget{classfaster_1_1fastScheduler_ab388ad86da72e45e0dd0ffa94890eb76}{}\hyperlink{classfaster_1_1fastTask}{fast\+Task} $\ast$ {\bfseries enqueue\+Task} (fdd\+Op\+Type op\+T, unsigned long int id\+Src, unsigned long int id\+Res, int func\+Id, size\+\_\+t size, std\+::vector$<$ std\+::pair$<$ void $\ast$, size\+\_\+t $>$ $>$ \&global\+Table)\label{classfaster_1_1fastScheduler_ab388ad86da72e45e0dd0ffa94890eb76}
-
+\hypertarget{classfaster_1_1fastScheduler_a25353e0b9cac5c731973ea0d453080e0}{}\label{classfaster_1_1fastScheduler_a25353e0b9cac5c731973ea0d453080e0} 
+\hyperlink{classfaster_1_1fastTask}{fast\+Task} $\ast$ {\bfseries enqueue\+Task} (\hyperlink{namespacefaster_a64379512d12d41c6e58f176939abfd80}{fdd\+Op\+Type} opT, unsigned long int id\+Src, unsigned long int id\+Res, int func\+Id, size\+\_\+t size, std\+::vector$<$ std\+::tuple$<$ void $\ast$, size\+\_\+t, int $>$ $>$ \&global\+Table)
 \item 
-\hypertarget{classfaster_1_1fastScheduler_a624be5f3699d56e5d865537b9c339ee4}{}\hyperlink{classfaster_1_1fastTask}{fast\+Task} $\ast$ {\bfseries enqueue\+Task} (fdd\+Op\+Type op\+T, unsigned long int id, size\+\_\+t size, std\+::vector$<$ std\+::pair$<$ void $\ast$, size\+\_\+t $>$ $>$ \&global\+Table)\label{classfaster_1_1fastScheduler_a624be5f3699d56e5d865537b9c339ee4}
-
+\hypertarget{classfaster_1_1fastScheduler_a3adc513709d0c00d1d6b9f62115c9284}{}\label{classfaster_1_1fastScheduler_a3adc513709d0c00d1d6b9f62115c9284} 
+\hyperlink{classfaster_1_1fastTask}{fast\+Task} $\ast$ {\bfseries enqueue\+Task} (\hyperlink{namespacefaster_a64379512d12d41c6e58f176939abfd80}{fdd\+Op\+Type} opT, unsigned long int id, size\+\_\+t size, std\+::vector$<$ std\+::tuple$<$ void $\ast$, size\+\_\+t, int $>$ $>$ \&global\+Table)
 \item 
-\hypertarget{classfaster_1_1fastScheduler_a09db7fd6c9076e26dea68a7c925bf531}{}void {\bfseries task\+Progress} (unsigned long int id, unsigned long int pid, size\+\_\+t time, \hyperlink{classfaster_1_1procstat}{procstat} \&stat)\label{classfaster_1_1fastScheduler_a09db7fd6c9076e26dea68a7c925bf531}
-
+\hypertarget{classfaster_1_1fastScheduler_a09db7fd6c9076e26dea68a7c925bf531}{}\label{classfaster_1_1fastScheduler_a09db7fd6c9076e26dea68a7c925bf531} 
+void {\bfseries task\+Progress} (unsigned long int id, unsigned long int pid, size\+\_\+t time, \hyperlink{classfaster_1_1procstat}{procstat} \&stat)
 \item 
-\hypertarget{classfaster_1_1fastScheduler_af657bff84b9c117625135ca0c8f4ccf6}{}void {\bfseries task\+Finished} (unsigned long int id, size\+\_\+t time)\label{classfaster_1_1fastScheduler_af657bff84b9c117625135ca0c8f4ccf6}
-
+\hypertarget{classfaster_1_1fastScheduler_af657bff84b9c117625135ca0c8f4ccf6}{}\label{classfaster_1_1fastScheduler_af657bff84b9c117625135ca0c8f4ccf6} 
+void {\bfseries task\+Finished} (unsigned long int id, size\+\_\+t time)
 \item 
-\hypertarget{classfaster_1_1fastScheduler_a4d2aec030cd131b05c7091921545b3a4}{}void {\bfseries set\+Calibration} (std\+::vector$<$ size\+\_\+t $>$ time)\label{classfaster_1_1fastScheduler_a4d2aec030cd131b05c7091921545b3a4}
-
+\hypertarget{classfaster_1_1fastScheduler_a4d2aec030cd131b05c7091921545b3a4}{}\label{classfaster_1_1fastScheduler_a4d2aec030cd131b05c7091921545b3a4} 
+void {\bfseries set\+Calibration} (std\+::vector$<$ size\+\_\+t $>$ time)
 \item 
-\hypertarget{classfaster_1_1fastScheduler_a17a44cb80cf026772647d5226ed56fcb}{}void {\bfseries print\+Procstats} (\hyperlink{classfaster_1_1fastTask}{fast\+Task} $\ast$task)\label{classfaster_1_1fastScheduler_a17a44cb80cf026772647d5226ed56fcb}
-
+\hypertarget{classfaster_1_1fastScheduler_a17a44cb80cf026772647d5226ed56fcb}{}\label{classfaster_1_1fastScheduler_a17a44cb80cf026772647d5226ed56fcb} 
+void {\bfseries print\+Procstats} (\hyperlink{classfaster_1_1fastTask}{fast\+Task} $\ast$task)
 \item 
-\hypertarget{classfaster_1_1fastScheduler_a426b97359b035f696ea99b0ce65ed781}{}void {\bfseries print\+Task\+Info} ()\label{classfaster_1_1fastScheduler_a426b97359b035f696ea99b0ce65ed781}
-
+\hypertarget{classfaster_1_1fastScheduler_a426b97359b035f696ea99b0ce65ed781}{}\label{classfaster_1_1fastScheduler_a426b97359b035f696ea99b0ce65ed781} 
+void {\bfseries print\+Task\+Info} ()
 \item 
-\hypertarget{classfaster_1_1fastScheduler_a93a5bb37ea8bc6a8d601dd01a2ed736b}{}void {\bfseries print\+Task\+Info} (size\+\_\+t task)\label{classfaster_1_1fastScheduler_a93a5bb37ea8bc6a8d601dd01a2ed736b}
-
+\hypertarget{classfaster_1_1fastScheduler_a93a5bb37ea8bc6a8d601dd01a2ed736b}{}\label{classfaster_1_1fastScheduler_a93a5bb37ea8bc6a8d601dd01a2ed736b} 
+void {\bfseries print\+Task\+Info} (size\+\_\+t task)
 \item 
-\hypertarget{classfaster_1_1fastScheduler_a6c4b825db8c979eafead42e321e95d05}{}void {\bfseries print\+Header} ()\label{classfaster_1_1fastScheduler_a6c4b825db8c979eafead42e321e95d05}
-
+\hypertarget{classfaster_1_1fastScheduler_a6c4b825db8c979eafead42e321e95d05}{}\label{classfaster_1_1fastScheduler_a6c4b825db8c979eafead42e321e95d05} 
+void {\bfseries print\+Header} ()
 \item 
-\hypertarget{classfaster_1_1fastScheduler_a0c91feaec23646ee84e1fa530fe7cccf}{}void {\bfseries update\+Task\+Info} ()\label{classfaster_1_1fastScheduler_a0c91feaec23646ee84e1fa530fe7cccf}
-
+\hypertarget{classfaster_1_1fastScheduler_a0c91feaec23646ee84e1fa530fe7cccf}{}\label{classfaster_1_1fastScheduler_a0c91feaec23646ee84e1fa530fe7cccf} 
+void {\bfseries update\+Task\+Info} ()
 \item 
-\hypertarget{classfaster_1_1fastScheduler_a650ace70f7cb64835674cd67a5f605ca}{}bool {\bfseries data\+Migration\+Needed} ()\label{classfaster_1_1fastScheduler_a650ace70f7cb64835674cd67a5f605ca}
-
+\hypertarget{classfaster_1_1fastScheduler_a650ace70f7cb64835674cd67a5f605ca}{}\label{classfaster_1_1fastScheduler_a650ace70f7cb64835674cd67a5f605ca} 
+bool {\bfseries data\+Migration\+Needed} ()
 \item 
-\hypertarget{classfaster_1_1fastScheduler_a181ea8d42d461ffd16785f77b4d6b416}{}std\+::vector$<$ std\+::deque$<$ std\+::pair$<$ int, long int $>$ $>$ $>$ {\bfseries get\+Data\+Migration\+Info} ()\label{classfaster_1_1fastScheduler_a181ea8d42d461ffd16785f77b4d6b416}
-
+\hypertarget{classfaster_1_1fastScheduler_a181ea8d42d461ffd16785f77b4d6b416}{}\label{classfaster_1_1fastScheduler_a181ea8d42d461ffd16785f77b4d6b416} 
+std\+::vector$<$ std\+::deque$<$ std\+::pair$<$ int, long int $>$ $>$ $>$ {\bfseries get\+Data\+Migration\+Info} ()
 \item 
-\hypertarget{classfaster_1_1fastScheduler_a47394267a9a85f9747a483a43cf6a650}{}std\+::vector$<$ size\+\_\+t $>$ {\bfseries get\+Allocation} (size\+\_\+t size)\label{classfaster_1_1fastScheduler_a47394267a9a85f9747a483a43cf6a650}
-
+\hypertarget{classfaster_1_1fastScheduler_a47394267a9a85f9747a483a43cf6a650}{}\label{classfaster_1_1fastScheduler_a47394267a9a85f9747a483a43cf6a650} 
+std\+::vector$<$ size\+\_\+t $>$ {\bfseries get\+Allocation} (size\+\_\+t size)
+\item 
+\hypertarget{classfaster_1_1fastScheduler_a6a691cada9432d0054a2dfefbe1fc9a3}{}\label{classfaster_1_1fastScheduler_a6a691cada9432d0054a2dfefbe1fc9a3} 
+void {\bfseries set\+Allocation} (std\+::vector$<$ size\+\_\+t $>$ \&alloc, size\+\_\+t size)
 \end{DoxyCompactItemize}
 
 

@@ -1,0 +1,8 @@
+var searchData=
+[
+  ['vecdistance',['vecDistance',['../kmeans_8cpp.html#adadd64a355d4849480efc4407511f033',1,'vecDistance(vector&lt; float &gt; &amp;a, vector&lt; float &gt; &amp;b):&#160;kmeans.cpp'],['../kmeans_8cpp.html#a56831154f4e7c5a60a563568afb9bf02',1,'vecDistance(float aX, float aY, float bX, float bY):&#160;kmeans.cpp']]],
+  ['vecdistancetocentroids',['vecDistanceToCentroids',['../kmeans_8cpp.html#acf6766c7cda42f464d798a6e3f464197',1,'kmeans.cpp']]],
+  ['vecsize',['VECSIZE',['../ftest_8cpp.html#a36a1e768e2eb11edcae1d9081eb07394',1,'ftest.cpp']]],
+  ['vector',['VECTOR',['../definitions_8h.html#ac6e89954deaa373db52a91ac6db50884',1,'definitions.h']]],
+  ['verify',['verify',['../ftest_8cpp.html#a249c960adefbf147b64c1a92095e30b2',1,'verify(std::vector&lt; T &gt; &amp;a, std::vector&lt; U &gt; &amp;b):&#160;ftest.cpp'],['../ftest_8cpp.html#aa5f7f492dbf8ab2d1f032b4a5aac181a',1,'verify(std::vector&lt; T *&gt; &amp;a, std::vector&lt; std::pair&lt; U *, size_t &gt;&gt; &amp;b, std::vector&lt; size_t &gt; &amp;ds):&#160;ftest.cpp'],['../ftest_8cpp.html#a19f9e4d3a8314a826dd33b369bd95e45',1,'verify(std::vector&lt; T *&gt; &amp;a, std::vector&lt; U &gt; &amp;b, std::vector&lt; size_t &gt; &amp;ds):&#160;ftest.cpp'],['../ftest_8cpp.html#a37ae94e7a26bcacf8d1a0c93c978f911',1,'verify(std::vector&lt; K &gt; &amp;k, std::vector&lt; T &gt; &amp;a, std::vector&lt; std::pair&lt; L, U &gt;&gt; &amp;b):&#160;ftest.cpp'],['../ftest_8cpp.html#ad7a5d18782114effa48f518514367011',1,'verify(std::vector&lt; K &gt; &amp;k, std::vector&lt; T *&gt; &amp;a, std::vector&lt; size_t &gt; &amp;ds, std::vector&lt; std::tuple&lt; L, U *, size_t &gt;&gt; &amp;b):&#160;ftest.cpp']]]
+];

@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['op_5fbulkflatmap',['OP_BulkFlatMap',['../definitions_8h.html#a2ad0c22a4310c20f6dca4d73070d5efe',1,'definitions.h']]],
+  ['op_5fbulkmap',['OP_BulkMap',['../definitions_8h.html#a5ddf4a1f3d8a190a7a21c9a7b99ba998',1,'definitions.h']]],
+  ['op_5fbulkreduce',['OP_BulkReduce',['../definitions_8h.html#a3aa047e941904d14d72ed6f4addf362c',1,'definitions.h']]],
+  ['op_5fbulkupdate',['OP_BulkUpdate',['../definitions_8h.html#a15724bba935ea024be9cf339b365cab7',1,'definitions.h']]],
+  ['op_5fcalibrate',['OP_Calibrate',['../definitions_8h.html#a7c9cdade585d1297e5e18328528940ed',1,'definitions.h']]],
+  ['op_5fcogroup',['OP_CoGroup',['../definitions_8h.html#a25fd84f79d51e36f368b9c7f0e2bb32c',1,'definitions.h']]],
+  ['op_5fcountbykey',['OP_CountByKey',['../definitions_8h.html#ac6879c94184b5cacdbfa781b82a5269b',1,'definitions.h']]],
+  ['op_5fflatmap',['OP_FlatMap',['../definitions_8h.html#adbfe7ff9339aa281285de984280cc6dd',1,'definitions.h']]],
+  ['op_5fflatmapbykey',['OP_FlatMapByKey',['../definitions_8h.html#a05446c67bc4c7d952c2edded4899569d',1,'definitions.h']]],
+  ['op_5fgenericmap',['OP_GENERICMAP',['../definitions_8h.html#abf205ec3bd3349a697494302747dbd9c',1,'definitions.h']]],
+  ['op_5fgenericmisc',['OP_GENERICMISC',['../definitions_8h.html#a14f440d365a603b8582b5645acb14671',1,'definitions.h']]],
+  ['op_5fgenericreduce',['OP_GENERICREDUCE',['../definitions_8h.html#ad4badc31ea069cc216116618f712b302',1,'definitions.h']]],
+  ['op_5fgenericupdate',['OP_GENERICUPDATE',['../definitions_8h.html#af4fef65625b901af0267116fcacbd5a5',1,'definitions.h']]],
+  ['op_5fgroupbykey',['OP_GroupByKey',['../definitions_8h.html#a1c963f34a588dd1ba880747301765074',1,'definitions.h']]],
+  ['op_5fgroupbykeyh',['OP_GroupByKeyH',['../definitions_8h.html#ae5223200ca7f90b42072327cf2830758',1,'definitions.h']]],
+  ['op_5fmap',['OP_Map',['../definitions_8h.html#a3bd0b5fdf52deb7abcda24418e36a761',1,'definitions.h']]],
+  ['op_5fmapbykey',['OP_MapByKey',['../definitions_8h.html#a72aebaf85f08cbcef638513dfda5aa2f',1,'definitions.h']]],
+  ['op_5fonfullpread',['OP_OnFullPRead',['../definitions_8h.html#a465715abc7c4996c365d300e9e226c57',1,'definitions.h']]],
+  ['op_5fonlineread',['OP_OnlineRead',['../definitions_8h.html#adb8ec3cb535a5da7c98f03b67a234f9f',1,'definitions.h']]],
+  ['op_5fonpartread',['OP_OnPartRead',['../definitions_8h.html#a56d1da1782641870fb1546d22d8fff48',1,'definitions.h']]],
+  ['op_5freduce',['OP_Reduce',['../definitions_8h.html#ac6782e5388adecc8ae1a374ec9178a4f',1,'definitions.h']]],
+  ['op_5fupdate',['OP_Update',['../definitions_8h.html#ac86ecfcb10d976ad3f35f5cd4aa3a856',1,'definitions.h']]],
+  ['op_5fupdatebykey',['OP_UpdateByKey',['../definitions_8h.html#a9e8c1122ecb3eb97bfc07f90795fe266',1,'definitions.h']]]
+];

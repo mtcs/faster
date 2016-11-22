@@ -12,7 +12,8 @@ var searchData=
   ['fddcore',['fddCore',['../classfaster_1_1fddCore.html',1,'faster']]],
   ['fddstorage',['fddStorage',['../classfaster_1_1fddStorage.html',1,'faster']]],
   ['fddstorage_3c_20t_20_2a_20_3e',['fddStorage&lt; T * &gt;',['../classfaster_1_1fddStorage_3_01T_01_5_01_4.html',1,'faster']]],
+  ['fddstorage_3c_20t_20_2a_3e',['fddStorage&lt; T *&gt;',['../classfaster_1_1fddStorage.html',1,'faster']]],
   ['fddstoragebase',['fddStorageBase',['../classfaster_1_1fddStorageBase.html',1,'faster']]],
   ['fddstoragecore',['fddStorageCore',['../classfaster_1_1fddStorageCore.html',1,'faster']]],
-  ['fddstoragecore_3c_20t_20_2a_20_3e',['fddStorageCore&lt; T * &gt;',['../classfaster_1_1fddStorageCore.html',1,'faster']]]
+  ['fddstoragecore_3c_20t_20_2a_3e',['fddStorageCore&lt; T *&gt;',['../classfaster_1_1fddStorageCore.html',1,'faster']]]
 ];

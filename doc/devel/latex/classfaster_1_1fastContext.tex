@@ -4,77 +4,87 @@
 
 {\ttfamily \#include $<$fast\+Context.\+h$>$}
 
-\subsection*{Public Member Functions}
+
+
+\subsection{Description}
+Framework context class. 
+
+The context manages communication, scheduler and start Workers. A context is needed to create datasets! \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\hyperlink{classfaster_1_1fastContext_a8e4531e2352a60246205ba69969f1f6b}{fast\+Context} (int \&argc, char $\ast$$\ast$\&argv)
-\item 
-\hypertarget{classfaster_1_1fastContext_a961ba8c8ffa9a9b4634e6d6bb4d685ea}{}\hyperlink{classfaster_1_1fastContext_a961ba8c8ffa9a9b4634e6d6bb4d685ea}{fast\+Context} (const \hyperlink{classfaster_1_1fastSettings}{fast\+Settings} \&s, int \&argc, char $\ast$$\ast$\&argv)\label{classfaster_1_1fastContext_a961ba8c8ffa9a9b4634e6d6bb4d685ea}
-
+\hyperlink{classfaster_1_1fastContext_adf84c9fd9f1d768f1fb8ba8bdd13bb47}{fast\+Context} (int argc=0, char $\ast$$\ast$argv=N\+U\+LL)
+\begin{DoxyCompactList}\small\item\em \hyperlink{classfaster_1_1fastContext}{fast\+Context} default constructor \end{DoxyCompactList}\item 
+\hypertarget{classfaster_1_1fastContext_a6836e1da0e0400ee290376d7cdec4fae}{}\label{classfaster_1_1fastContext_a6836e1da0e0400ee290376d7cdec4fae} 
+\hyperlink{classfaster_1_1fastContext_a6836e1da0e0400ee290376d7cdec4fae}{fast\+Context} (const \hyperlink{classfaster_1_1fastSettings}{fast\+Settings} \&s, int argc, char $\ast$$\ast$argv)
 \begin{DoxyCompactList}\small\item\em \hyperlink{classfaster_1_1fastContext}{fast\+Context} constructor with custom settings \end{DoxyCompactList}\item 
-\hypertarget{classfaster_1_1fastContext_a055ea19ba9b7597ebd8b2d950a2d7e06}{}\hyperlink{classfaster_1_1fastContext_a055ea19ba9b7597ebd8b2d950a2d7e06}{$\sim$fast\+Context} ()\label{classfaster_1_1fastContext_a055ea19ba9b7597ebd8b2d950a2d7e06}
-
+\hypertarget{classfaster_1_1fastContext_a055ea19ba9b7597ebd8b2d950a2d7e06}{}\label{classfaster_1_1fastContext_a055ea19ba9b7597ebd8b2d950a2d7e06} 
+\hyperlink{classfaster_1_1fastContext_a055ea19ba9b7597ebd8b2d950a2d7e06}{$\sim$fast\+Context} ()
 \begin{DoxyCompactList}\small\item\em \hyperlink{classfaster_1_1fastContext}{fast\+Context} destructor \end{DoxyCompactList}\item 
-void \hyperlink{classfaster_1_1fastContext_a78d8eec46a44c600adb554bcdf8d8a2c}{register\+Function} (void $\ast$func\+P)
-\item 
-void \hyperlink{classfaster_1_1fastContext_add296b9632bef0f4ceddbdc02a874bb4}{register\+Function} (void $\ast$func\+P, const std\+::string name)
-\item 
-\hypertarget{classfaster_1_1fastContext_a21c563c0ba6075a6dc31faf14dccb165}{}{\footnotesize template$<$class T $>$ }\\void {\bfseries register\+Global} (T $\ast$var\+P)\label{classfaster_1_1fastContext_a21c563c0ba6075a6dc31faf14dccb165}
-
-\item 
-\hypertarget{classfaster_1_1fastContext_a1f6b1c1a940d67b434ac95bad4770508}{}void {\bfseries start\+Workers} ()\label{classfaster_1_1fastContext_a1f6b1c1a940d67b434ac95bad4770508}
-
-\item 
-\hypertarget{classfaster_1_1fastContext_a3dd0172c18a37d863adf28b794020e5c}{}void {\bfseries calibrate} ()\label{classfaster_1_1fastContext_a3dd0172c18a37d863adf28b794020e5c}
-
-\item 
-\hypertarget{classfaster_1_1fastContext_a0258ce4c9efa6df4cdf46613132c9fd0}{}void {\bfseries print\+Info} ()\label{classfaster_1_1fastContext_a0258ce4c9efa6df4cdf46613132c9fd0}
-
-\item 
-\hypertarget{classfaster_1_1fastContext_a721a0db53e603bff27578e040b616f6f}{}void {\bfseries print\+Header} ()\label{classfaster_1_1fastContext_a721a0db53e603bff27578e040b616f6f}
-
-\item 
-\hypertarget{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26}{}void {\bfseries update\+Info} ()\label{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26}
-
-\end{DoxyCompactItemize}
-\subsection*{Friends}
+void \hyperlink{classfaster_1_1fastContext_a1f6b1c1a940d67b434ac95bad4770508}{start\+Workers} ()
+\begin{DoxyCompactList}\small\item\em Start worker machines computation. \end{DoxyCompactList}\item 
+bool \hyperlink{classfaster_1_1fastContext_a4c4b1bc0cfe9f4e4a7959cc176d2ec24}{is\+Driver} ()
+\begin{DoxyCompactList}\small\item\em Checks for the driver process. \end{DoxyCompactList}\item 
+int \hyperlink{classfaster_1_1fastContext_a287bc160898c677df176de122d9dfad9}{num\+Procs} ()
+\begin{DoxyCompactList}\small\item\em Return the number of processes running. \end{DoxyCompactList}\item 
+\hypertarget{classfaster_1_1fastContext_a3dd0172c18a37d863adf28b794020e5c}{}\label{classfaster_1_1fastContext_a3dd0172c18a37d863adf28b794020e5c} 
+void \hyperlink{classfaster_1_1fastContext_a3dd0172c18a37d863adf28b794020e5c}{calibrate} ()
+\begin{DoxyCompactList}\small\item\em Performs a microbenchmark to do dynamic load balancing (U\+N\+U\+S\+ED) \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{Indent}{\bf Function and global variables registration}\par
 \begin{DoxyCompactItemize}
 \item 
-\hypertarget{classfaster_1_1fastContext_a4fef19fb2fc81aa8f7f34f9401f30a6a}{}{\footnotesize template$<$class T $>$ }\\class {\bfseries fdd}\label{classfaster_1_1fastContext_a4fef19fb2fc81aa8f7f34f9401f30a6a}
-
+void \hyperlink{classfaster_1_1fastContext_a78d8eec46a44c600adb554bcdf8d8a2c}{register\+Function} (void $\ast$funcP)
+\begin{DoxyCompactList}\small\item\em Register a user custom function in the context. \end{DoxyCompactList}\item 
+void \hyperlink{classfaster_1_1fastContext_add296b9632bef0f4ceddbdc02a874bb4}{register\+Function} (void $\ast$funcP, const std\+::string name)
+\begin{DoxyCompactList}\small\item\em Register a user custom function in the context. \end{DoxyCompactList}\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{classfaster_1_1fastContext_a21c563c0ba6075a6dc31faf14dccb165}{register\+Global} (T $\ast$varP)
+\begin{DoxyCompactList}\small\item\em Gegisters a primitive global varible to be used inside used defined functions in distributted environment. \end{DoxyCompactList}\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{classfaster_1_1fastContext_a569dc3296b036b0d159a35fd7eb37cbe}{register\+Global} (T $\ast$$\ast$varP, size\+\_\+t s)
+\begin{DoxyCompactList}\small\item\em Gegisters a global array to be used inside used defined functions in distributted environment. \end{DoxyCompactList}\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{classfaster_1_1fastContext_a9cfc7e3b62baca68c7c5a1ddba548691}{register\+Global} (std\+::vector$<$ T $>$ $\ast$varP)
+\begin{DoxyCompactList}\small\item\em Gegisters a global Vector to be used inside used defined functions in distributted environment. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}{\bf Online file reading and parsing}\par
+\begin{DoxyCompactItemize}
 \item 
-\hypertarget{classfaster_1_1fastContext_a351468342339dbaff3d4c867f62ff479}{}{\footnotesize template$<$class T $>$ }\\class {\bfseries fdd\+Core}\label{classfaster_1_1fastContext_a351468342339dbaff3d4c867f62ff479}
-
+{\footnotesize template$<$typename T $>$ }\\\hyperlink{classfaster_1_1fdd}{fdd}$<$ T $>$ $\ast$ \hyperlink{classfaster_1_1fastContext_acb65e4cdd0eaae3bf4326247b822e025}{online\+Full\+Part\+Read} (std\+::string path, online\+Full\+Part\+FuncP$<$ T $>$ funcP)
+\begin{DoxyCompactList}\small\item\em Reads a file with online parsing and partition (N\+OT I\+M\+P\+L\+E\+M\+E\+N\+T\+ED) \end{DoxyCompactList}\item 
+\hypertarget{classfaster_1_1fastContext_aead4c4e15303ae7af9fe78840f219c2a}{}\label{classfaster_1_1fastContext_aead4c4e15303ae7af9fe78840f219c2a} 
+{\footnotesize template$<$typename K , typename T $>$ }\\\hyperlink{classfaster_1_1indexedFdd}{indexed\+Fdd}$<$ K, T $>$ $\ast$ {\bfseries online\+Full\+Part\+Read} (std\+::string path, Ionline\+Full\+Part\+FuncP$<$ K, T $>$ funcP)
 \item 
-\hypertarget{classfaster_1_1fastContext_accc85d808e1894334219d2e9806c0624}{}{\footnotesize template$<$class K , class T $>$ }\\class {\bfseries i\+Fdd\+Core}\label{classfaster_1_1fastContext_accc85d808e1894334219d2e9806c0624}
-
+\hypertarget{classfaster_1_1fastContext_a07f44b676114df50f159ae64225b07e4}{}\label{classfaster_1_1fastContext_a07f44b676114df50f159ae64225b07e4} 
+{\footnotesize template$<$typename K , typename T $>$ }\\\hyperlink{classfaster_1_1indexedFdd}{indexed\+Fdd}$<$ K, T $>$ $\ast$ {\bfseries online\+Part\+Read} (std\+::string path, Ionline\+Full\+Part\+FuncP$<$ K, T $>$ funcP)
 \item 
-\hypertarget{classfaster_1_1fastContext_a0da7c6b1bc8838a587f28aa48122f8ae}{}{\footnotesize template$<$class K , class T $>$ }\\class {\bfseries indexed\+Fdd}\label{classfaster_1_1fastContext_a0da7c6b1bc8838a587f28aa48122f8ae}
-
-\item 
-\hypertarget{classfaster_1_1fastContext_a49b56a3cf60e23045ffa4f8edb5dc82d}{}{\footnotesize template$<$class K $>$ }\\class {\bfseries grouped\+Fdd}\label{classfaster_1_1fastContext_a49b56a3cf60e23045ffa4f8edb5dc82d}
-
-\item 
-\hypertarget{classfaster_1_1fastContext_a4636d2eabf003b9aa517f234ac288a6c}{}class {\bfseries worker}\label{classfaster_1_1fastContext_a4636d2eabf003b9aa517f234ac288a6c}
-
+{\footnotesize template$<$typename T $>$ }\\\hyperlink{classfaster_1_1fdd}{fdd}$<$ T $>$ $\ast$ \hyperlink{classfaster_1_1fastContext_a8cf960425a7671021854367ea9649546}{online\+Read} (std\+::string path, online\+Full\+Part\+FuncP$<$ T $>$ funcP)
+\begin{DoxyCompactList}\small\item\em Reads a file with online parsing and mapping (?) \end{DoxyCompactList}\item 
+\hypertarget{classfaster_1_1fastContext_a1e099be70d2b7daeaf4a18f5f9542484}{}\label{classfaster_1_1fastContext_a1e099be70d2b7daeaf4a18f5f9542484} 
+{\footnotesize template$<$typename K , typename T $>$ }\\\hyperlink{classfaster_1_1indexedFdd}{indexed\+Fdd}$<$ K, T $>$ $\ast$ {\bfseries online\+Read} (std\+::string path, Ionline\+Full\+Part\+FuncP$<$ K, T $>$ funcP)
 \end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}{\bf Task execution profiling}\par
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classfaster_1_1fastContext_a0258ce4c9efa6df4cdf46613132c9fd0}{}\label{classfaster_1_1fastContext_a0258ce4c9efa6df4cdf46613132c9fd0} 
+void \hyperlink{classfaster_1_1fastContext_a0258ce4c9efa6df4cdf46613132c9fd0}{print\+Info} ()
+\begin{DoxyCompactList}\small\item\em Prints task execution information for all tasks executed by the user. \end{DoxyCompactList}\item 
+void \hyperlink{classfaster_1_1fastContext_a721a0db53e603bff27578e040b616f6f}{print\+Header} ()
+\begin{DoxyCompactList}\small\item\em Prints a header for task execution information. \end{DoxyCompactList}\item 
+void \hyperlink{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26}{update\+Info} ()
+\begin{DoxyCompactList}\small\item\em Prints information from tesk ran since last \hyperlink{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26}{faster\+::fast\+Context\+::update\+Info()} called. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{Indent}
 
 
-\subsection{Detailed Description}
-General framework context
-
-The Context manages communication, scheduler and start Workers. A context is needed to create datasets! 
-
-\subsection{Constructor \& Destructor Documentation}
-\hypertarget{classfaster_1_1fastContext_a8e4531e2352a60246205ba69969f1f6b}{}\index{faster\+::fast\+Context@{faster\+::fast\+Context}!fast\+Context@{fast\+Context}}
+\subsection{Constructors and Destructors}
+\hypertarget{classfaster_1_1fastContext_adf84c9fd9f1d768f1fb8ba8bdd13bb47}{}\label{classfaster_1_1fastContext_adf84c9fd9f1d768f1fb8ba8bdd13bb47} 
+\index{faster\+::fast\+Context@{faster\+::fast\+Context}!fast\+Context@{fast\+Context}}
 \index{fast\+Context@{fast\+Context}!faster\+::fast\+Context@{faster\+::fast\+Context}}
-\subsubsection[{fast\+Context}]{\setlength{\rightskip}{0pt plus 5cm}faster\+::fast\+Context\+::fast\+Context (
-\begin{DoxyParamCaption}
-\item[{int \&}]{argc, }
-\item[{char $\ast$$\ast$\&}]{argv}
-\end{DoxyParamCaption}
-)}\label{classfaster_1_1fastContext_a8e4531e2352a60246205ba69969f1f6b}
+\subsubsection{\texorpdfstring{fast\+Context()}{fastContext()}}
+{\footnotesize\ttfamily faster\+::fast\+Context\+::fast\+Context (\begin{DoxyParamCaption}\item[{int}]{argc = {\ttfamily 0},  }\item[{char $\ast$$\ast$}]{argv = {\ttfamily NULL} }\end{DoxyParamCaption})}
+
+
+
 \hyperlink{classfaster_1_1fastContext}{fast\+Context} default constructor 
+
+
 \begin{DoxyParams}{Parameters}
 {\em argc} & -\/ number of arguments from main \\
 \hline
@@ -84,42 +94,218 @@ The Context manages communication, scheduler and start Workers. A context is nee
 
 
 \subsection{Member Function Documentation}
-\hypertarget{classfaster_1_1fastContext_a78d8eec46a44c600adb554bcdf8d8a2c}{}\index{faster\+::fast\+Context@{faster\+::fast\+Context}!register\+Function@{register\+Function}}
-\index{register\+Function@{register\+Function}!faster\+::fast\+Context@{faster\+::fast\+Context}}
-\subsubsection[{register\+Function}]{\setlength{\rightskip}{0pt plus 5cm}void faster\+::fast\+Context\+::register\+Function (
-\begin{DoxyParamCaption}
-\item[{void $\ast$}]{func\+P}
-\end{DoxyParamCaption}
-)}\label{classfaster_1_1fastContext_a78d8eec46a44c600adb554bcdf8d8a2c}
-Register a user custom function in the context.
+\hypertarget{classfaster_1_1fastContext_a4c4b1bc0cfe9f4e4a7959cc176d2ec24}{}\label{classfaster_1_1fastContext_a4c4b1bc0cfe9f4e4a7959cc176d2ec24} 
+\index{faster\+::fast\+Context@{faster\+::fast\+Context}!is\+Driver@{is\+Driver}}
+\index{is\+Driver@{is\+Driver}!faster\+::fast\+Context@{faster\+::fast\+Context}}
+\subsubsection{\texorpdfstring{is\+Driver()}{isDriver()}}
+{\footnotesize\ttfamily bool faster\+::fast\+Context\+::is\+Driver (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
-Registering a user custom functions is necessary in order to pass it as parametes to F\+D\+D functions like {\bfseries map} and {\bfseries reduce}.
 
+
+Checks for the driver process. 
+
+\begin{DoxyReturn}{Returns}
+-\/ true if the process is the driver process 
+\end{DoxyReturn}
+\hypertarget{classfaster_1_1fastContext_a287bc160898c677df176de122d9dfad9}{}\label{classfaster_1_1fastContext_a287bc160898c677df176de122d9dfad9} 
+\index{faster\+::fast\+Context@{faster\+::fast\+Context}!num\+Procs@{num\+Procs}}
+\index{num\+Procs@{num\+Procs}!faster\+::fast\+Context@{faster\+::fast\+Context}}
+\subsubsection{\texorpdfstring{num\+Procs()}{numProcs()}}
+{\footnotesize\ttfamily int faster\+::fast\+Context\+::num\+Procs (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Return the number of processes running. 
+
+\begin{DoxyReturn}{Returns}
+number of active processes 
+\end{DoxyReturn}
+\hypertarget{classfaster_1_1fastContext_acb65e4cdd0eaae3bf4326247b822e025}{}\label{classfaster_1_1fastContext_acb65e4cdd0eaae3bf4326247b822e025} 
+\index{faster\+::fast\+Context@{faster\+::fast\+Context}!online\+Full\+Part\+Read@{online\+Full\+Part\+Read}}
+\index{online\+Full\+Part\+Read@{online\+Full\+Part\+Read}!faster\+::fast\+Context@{faster\+::fast\+Context}}
+\subsubsection{\texorpdfstring{online\+Full\+Part\+Read()}{onlineFullPartRead()}}
+{\footnotesize\ttfamily template$<$typename T $>$ \\
+\hyperlink{classfaster_1_1fdd}{fdd}$<$T$>$$\ast$ faster\+::fast\+Context\+::online\+Full\+Part\+Read (\begin{DoxyParamCaption}\item[{std\+::string}]{path,  }\item[{online\+Full\+Part\+FuncP$<$ T $>$}]{funcP }\end{DoxyParamCaption})}
+
+
+
+Reads a file with online parsing and partition (N\+OT I\+M\+P\+L\+E\+M\+E\+N\+T\+ED) 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & -\/ Dataset type \\
+\hline
+\end{DoxyTemplParams}
 
 \begin{DoxyParams}{Parameters}
-{\em func\+P} & -\/ Function pointer to a user defined function. \\
+{\em path} & -\/ Input file path \\
+\hline
+{\em funcP} & -\/ partition function pointer of types \+::faster\+::online\+Full\+Part\+FuncP or \+::faster\+::\+Ionline\+Full\+Part\+FuncP\\
 \hline
 \end{DoxyParams}
-\hypertarget{classfaster_1_1fastContext_add296b9632bef0f4ceddbdc02a874bb4}{}\index{faster\+::fast\+Context@{faster\+::fast\+Context}!register\+Function@{register\+Function}}
-\index{register\+Function@{register\+Function}!faster\+::fast\+Context@{faster\+::fast\+Context}}
-\subsubsection[{register\+Function}]{\setlength{\rightskip}{0pt plus 5cm}void faster\+::fast\+Context\+::register\+Function (
-\begin{DoxyParamCaption}
-\item[{void $\ast$}]{func\+P, }
-\item[{const std\+::string}]{name}
-\end{DoxyParamCaption}
-)}\label{classfaster_1_1fastContext_add296b9632bef0f4ceddbdc02a874bb4}
-Register a user custom function in the context.
+\begin{DoxyReturn}{Returns}
+-\/ a dataset of \+::faster\+::fdd$<$t$>$ type and faster\+::indexed\+Fdd$<$\+K,\+T$>$ 
+\end{DoxyReturn}
+\hypertarget{classfaster_1_1fastContext_a8cf960425a7671021854367ea9649546}{}\label{classfaster_1_1fastContext_a8cf960425a7671021854367ea9649546} 
+\index{faster\+::fast\+Context@{faster\+::fast\+Context}!online\+Read@{online\+Read}}
+\index{online\+Read@{online\+Read}!faster\+::fast\+Context@{faster\+::fast\+Context}}
+\subsubsection{\texorpdfstring{online\+Read()}{onlineRead()}}
+{\footnotesize\ttfamily template$<$typename T $>$ \\
+\hyperlink{classfaster_1_1fdd}{fdd}$<$T$>$$\ast$ faster\+::fast\+Context\+::online\+Read (\begin{DoxyParamCaption}\item[{std\+::string}]{path,  }\item[{online\+Full\+Part\+FuncP$<$ T $>$}]{funcP }\end{DoxyParamCaption})}
 
-Registering a user custom functions is necessary in order to pass it as parametes to F\+D\+D functions like {\bfseries map} and {\bfseries reduce}.
+
+
+Reads a file with online parsing and mapping (?) 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em K} & -\/ Dataset key type \\
+\hline
+{\em T} & -\/ Dataset type \\
+\hline
+\end{DoxyTemplParams}
+
+\begin{DoxyParams}{Parameters}
+{\em path} & -\/ File path \\
+\hline
+{\em funcP} & -\/ (?)\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+\hypertarget{classfaster_1_1fastContext_a721a0db53e603bff27578e040b616f6f}{}\label{classfaster_1_1fastContext_a721a0db53e603bff27578e040b616f6f} 
+\index{faster\+::fast\+Context@{faster\+::fast\+Context}!print\+Header@{print\+Header}}
+\index{print\+Header@{print\+Header}!faster\+::fast\+Context@{faster\+::fast\+Context}}
+\subsubsection{\texorpdfstring{print\+Header()}{printHeader()}}
+{\footnotesize\ttfamily void faster\+::fast\+Context\+::print\+Header (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Prints a header for task execution information. 
+
+To be used with \hyperlink{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26}{faster\+::fast\+Context\+::update\+Info()} \hypertarget{classfaster_1_1fastContext_a78d8eec46a44c600adb554bcdf8d8a2c}{}\label{classfaster_1_1fastContext_a78d8eec46a44c600adb554bcdf8d8a2c} 
+\index{faster\+::fast\+Context@{faster\+::fast\+Context}!register\+Function@{register\+Function}}
+\index{register\+Function@{register\+Function}!faster\+::fast\+Context@{faster\+::fast\+Context}}
+\subsubsection{\texorpdfstring{register\+Function()}{registerFunction()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void faster\+::fast\+Context\+::register\+Function (\begin{DoxyParamCaption}\item[{void $\ast$}]{funcP }\end{DoxyParamCaption})}
+
+
+
+Register a user custom function in the context. 
+
+Registering a user custom functions is necessary in order to pass it as parametes to F\+DD functions like {\bfseries map} and {\bfseries reduce}.
 
 
 \begin{DoxyParams}{Parameters}
-{\em func\+P} & -\/ Function pointer to a user defined function. \\
+{\em funcP} & -\/ Function pointer to a user defined function. \\
+\hline
+\end{DoxyParams}
+\hypertarget{classfaster_1_1fastContext_add296b9632bef0f4ceddbdc02a874bb4}{}\label{classfaster_1_1fastContext_add296b9632bef0f4ceddbdc02a874bb4} 
+\index{faster\+::fast\+Context@{faster\+::fast\+Context}!register\+Function@{register\+Function}}
+\index{register\+Function@{register\+Function}!faster\+::fast\+Context@{faster\+::fast\+Context}}
+\subsubsection{\texorpdfstring{register\+Function()}{registerFunction()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void faster\+::fast\+Context\+::register\+Function (\begin{DoxyParamCaption}\item[{void $\ast$}]{funcP,  }\item[{const std\+::string}]{name }\end{DoxyParamCaption})}
+
+
+
+Register a user custom function in the context. 
+
+Registering a user custom functions is necessary in order to pass it as parametes to F\+DD functions like {\bfseries map} and {\bfseries reduce}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em funcP} & -\/ Function pointer to a user defined function. \\
 \hline
 {\em name} & -\/ Custom name to registered funciton. \\
 \hline
 \end{DoxyParams}
+\hypertarget{classfaster_1_1fastContext_a21c563c0ba6075a6dc31faf14dccb165}{}\label{classfaster_1_1fastContext_a21c563c0ba6075a6dc31faf14dccb165} 
+\index{faster\+::fast\+Context@{faster\+::fast\+Context}!register\+Global@{register\+Global}}
+\index{register\+Global@{register\+Global}!faster\+::fast\+Context@{faster\+::fast\+Context}}
+\subsubsection{\texorpdfstring{register\+Global()}{registerGlobal()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+void faster\+::fast\+Context\+::register\+Global (\begin{DoxyParamCaption}\item[{T $\ast$}]{varP }\end{DoxyParamCaption})}
 
+
+
+Gegisters a primitive global varible to be used inside used defined functions in distributted environment. 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & -\/ Type of the global variable to be registered \\
+\hline
+\end{DoxyTemplParams}
+
+\begin{DoxyParams}{Parameters}
+{\em varP} & -\/ Global variable to be registered \\
+\hline
+\end{DoxyParams}
+\hypertarget{classfaster_1_1fastContext_a569dc3296b036b0d159a35fd7eb37cbe}{}\label{classfaster_1_1fastContext_a569dc3296b036b0d159a35fd7eb37cbe} 
+\index{faster\+::fast\+Context@{faster\+::fast\+Context}!register\+Global@{register\+Global}}
+\index{register\+Global@{register\+Global}!faster\+::fast\+Context@{faster\+::fast\+Context}}
+\subsubsection{\texorpdfstring{register\+Global()}{registerGlobal()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+void faster\+::fast\+Context\+::register\+Global (\begin{DoxyParamCaption}\item[{T $\ast$$\ast$}]{varP,  }\item[{size\+\_\+t}]{s }\end{DoxyParamCaption})}
+
+
+
+Gegisters a global array to be used inside used defined functions in distributted environment. 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & -\/ Type of the global array to be registered \\
+\hline
+\end{DoxyTemplParams}
+
+\begin{DoxyParams}{Parameters}
+{\em varP} & -\/ Global array to be registered \\
+\hline
+{\em s} & -\/ Size of the array \\
+\hline
+\end{DoxyParams}
+\hypertarget{classfaster_1_1fastContext_a9cfc7e3b62baca68c7c5a1ddba548691}{}\label{classfaster_1_1fastContext_a9cfc7e3b62baca68c7c5a1ddba548691} 
+\index{faster\+::fast\+Context@{faster\+::fast\+Context}!register\+Global@{register\+Global}}
+\index{register\+Global@{register\+Global}!faster\+::fast\+Context@{faster\+::fast\+Context}}
+\subsubsection{\texorpdfstring{register\+Global()}{registerGlobal()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+void faster\+::fast\+Context\+::register\+Global (\begin{DoxyParamCaption}\item[{std\+::vector$<$ T $>$ $\ast$}]{varP }\end{DoxyParamCaption})}
+
+
+
+Gegisters a global Vector to be used inside used defined functions in distributted environment. 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & -\/ Type of the global vector to be registered \\
+\hline
+\end{DoxyTemplParams}
+
+\begin{DoxyParams}{Parameters}
+{\em varP} & -\/ Global vector to be registered \\
+\hline
+\end{DoxyParams}
+\hypertarget{classfaster_1_1fastContext_a1f6b1c1a940d67b434ac95bad4770508}{}\label{classfaster_1_1fastContext_a1f6b1c1a940d67b434ac95bad4770508} 
+\index{faster\+::fast\+Context@{faster\+::fast\+Context}!start\+Workers@{start\+Workers}}
+\index{start\+Workers@{start\+Workers}!faster\+::fast\+Context@{faster\+::fast\+Context}}
+\subsubsection{\texorpdfstring{start\+Workers()}{startWorkers()}}
+{\footnotesize\ttfamily void faster\+::fast\+Context\+::start\+Workers (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Start worker machines computation. 
+
+When this function is called, the driver processes and works processes diverge from execution. While the Driver process starts to execute user code, the worker processes start to waiting for tasks. Then workers should exit short after this function is called. \hypertarget{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26}{}\label{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26} 
+\index{faster\+::fast\+Context@{faster\+::fast\+Context}!update\+Info@{update\+Info}}
+\index{update\+Info@{update\+Info}!faster\+::fast\+Context@{faster\+::fast\+Context}}
+\subsubsection{\texorpdfstring{update\+Info()}{updateInfo()}}
+{\footnotesize\ttfamily void faster\+::fast\+Context\+::update\+Info (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Prints information from tesk ran since last \hyperlink{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26}{faster\+::fast\+Context\+::update\+Info()} called. 
+
+To be used with \hyperlink{classfaster_1_1fastContext_a721a0db53e603bff27578e040b616f6f}{faster\+::fast\+Context\+::print\+Header()} 
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 
