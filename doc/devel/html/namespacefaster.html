@@ -93,10 +93,9 @@ $(document).ready(function(){initNavTree('namespacefaster.html','');});
 <div class="title">faster Namespace Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-
-<p>libfaster main namespace  
-<a href="#details">More...</a></p>
-<table class="memberdecls">
+<a name="details" id="details"></a><h2 class="groupheader">Description</h2>
+<div class="textblock"><p>libfaster main namespace </p>
+</div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr class="memitem:aa8898687bc64536b60a3d5f365060cd6"><td class="memItemLeft" align="right" valign="top"><a id="aa8898687bc64536b60a3d5f365060cd6"></a>
@@ -107,6 +106,406 @@ typedef unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class
 typedef unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacefaster.html#a64379512d12d41c6e58f176939abfd80">fddOpType</a></td></tr>
 <tr class="memdesc:a64379512d12d41c6e58f176939abfd80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dataset operation type. <br /></td></tr>
 <tr class="separator:a64379512d12d41c6e58f176939abfd80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad3c276ad2cf0991b45ce6f4b1652bb06"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:gad3c276ad2cf0991b45ce6f4b1652bb06"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapFunctionP</b> = U(*)(T &amp;input)</td></tr>
+<tr class="separator:gad3c276ad2cf0991b45ce6f4b1652bb06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac789f70264fc817eede4bf92e9c219e0"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gac789f70264fc817eede4bf92e9c219e0"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapFunctionP</b> = std::pair&lt; L, U &gt;(*)(T &amp;input)</td></tr>
+<tr class="separator:gac789f70264fc817eede4bf92e9c219e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1d58a9c53227a5924cb8496424f38335"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga1d58a9c53227a5924cb8496424f38335"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PmapFunctionP</b> = std::pair&lt; U, size_t &gt;(*)(T &amp;input)</td></tr>
+<tr class="separator:ga1d58a9c53227a5924cb8496424f38335"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6af32df57a56a326c5607fd164c0b543"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga6af32df57a56a326c5607fd164c0b543"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPmapFunctionP</b> = std::tuple&lt; L, U, size_t &gt;(*)(T &amp;input)</td></tr>
+<tr class="separator:ga6af32df57a56a326c5607fd164c0b543"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0e180c6074105430541baf6577a54a12"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga0e180c6074105430541baf6577a54a12"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkMapFunctionP</b> = void(*)(U *output, T *input, size_t size)</td></tr>
+<tr class="separator:ga0e180c6074105430541baf6577a54a12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8823a57c60753e5c5823fc67837befce"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga8823a57c60753e5c5823fc67837befce"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkMapFunctionP</b> = void(*)(L *outKey, U *output, T *input, size_t size)</td></tr>
+<tr class="separator:ga8823a57c60753e5c5823fc67837befce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga48907e6631187c57ab1667cd21ad4b3b"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga48907e6631187c57ab1667cd21ad4b3b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkMapFunctionP</b> = void(*)(U *output, size_t *outputDataSizes, T *input, size_t size)</td></tr>
+<tr class="separator:ga48907e6631187c57ab1667cd21ad4b3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gacf64dcb6de6c9249cf6a8e3ad16e2603"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gacf64dcb6de6c9249cf6a8e3ad16e2603"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkMapFunctionP</b> = void(*)(L *outKey, U *output, size_t *outputDataSizes, T *input, size_t size)</td></tr>
+<tr class="separator:gacf64dcb6de6c9249cf6a8e3ad16e2603"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab541346ef7fac41096b374a5a4b1699d"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:gab541346ef7fac41096b374a5a4b1699d"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>flatMapFunctionP</b> = std::deque&lt; U &gt;(*)(T &amp;input)</td></tr>
+<tr class="separator:gab541346ef7fac41096b374a5a4b1699d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafd17c939d0b28c2aa7709daf2016c4bb"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gafd17c939d0b28c2aa7709daf2016c4bb"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IflatMapFunctionP</b> = std::deque&lt; std::pair&lt; L, U &gt;&gt;(*)(T &amp;input)</td></tr>
+<tr class="separator:gafd17c939d0b28c2aa7709daf2016c4bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0c1211c120b49437f09a840ad282c042"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga0c1211c120b49437f09a840ad282c042"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PflatMapFunctionP</b> = std::deque&lt; std::pair&lt; U, size_t &gt;&gt;(*)(T &amp;input)</td></tr>
+<tr class="separator:ga0c1211c120b49437f09a840ad282c042"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaaca59f0e455ed2034a0e81caa04fdea8"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gaaca59f0e455ed2034a0e81caa04fdea8"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPflatMapFunctionP</b> = std::deque&lt; std::tuple&lt; L, U, size_t &gt;&gt;(*)(T &amp;input)</td></tr>
+<tr class="separator:gaaca59f0e455ed2034a0e81caa04fdea8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaaad4241d8c2d4641d83b750addbd3825"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:gaaad4241d8c2d4641d83b750addbd3825"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkFlatMapFunctionP</b> = void(*)(U *&amp;output, size_t &amp;outputSize, T *input, size_t size)</td></tr>
+<tr class="separator:gaaad4241d8c2d4641d83b750addbd3825"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa361fffa5a84ca6cdd1bf23b2521b7c3"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gaa361fffa5a84ca6cdd1bf23b2521b7c3"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkFlatMapFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t &amp;outputSize, T *input, size_t size)</td></tr>
+<tr class="separator:gaa361fffa5a84ca6cdd1bf23b2521b7c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga158792e312ed7f99f7802ce5dc18ab95"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga158792e312ed7f99f7802ce5dc18ab95"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkFlatMapFunctionP</b> = void(*)(U *&amp;output, size_t *&amp;outputDataSizes, size_t &amp;outputSize, T *input, size_t size)</td></tr>
+<tr class="separator:ga158792e312ed7f99f7802ce5dc18ab95"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga763d69de0e7eb7d1d53ee06b318eb3d1"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga763d69de0e7eb7d1d53ee06b318eb3d1"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkFlatMapFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t *&amp;outputDataSizes, size_t &amp;outputSize, T *input, size_t size)</td></tr>
+<tr class="separator:ga763d69de0e7eb7d1d53ee06b318eb3d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga980901f8c07924742f04646b02f77ffb"><td class="memTemplParams" colspan="2">
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ga980901f8c07924742f04646b02f77ffb"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>reduceFunctionP</b> = T(*)(T &amp;a, T &amp;b)</td></tr>
+<tr class="separator:ga980901f8c07924742f04646b02f77ffb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5e0e90e4869b9e67962cc107e2b498b1"><td class="memTemplParams" colspan="2">
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ga5e0e90e4869b9e67962cc107e2b498b1"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkReduceFunctionP</b> = T(*)(T *input, size_t size)</td></tr>
+<tr class="separator:ga5e0e90e4869b9e67962cc107e2b498b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac91327bad9d0ab5cc7f160b238faa847"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:gac91327bad9d0ab5cc7f160b238faa847"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapPFunctionP</b> = U(*)(T *input, size_t size)</td></tr>
+<tr class="separator:gac91327bad9d0ab5cc7f160b238faa847"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf75e097c003958f4585370be9ecb1426"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gaf75e097c003958f4585370be9ecb1426"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapPFunctionP</b> = std::pair&lt; L, U &gt;(*)(T *input, size_t size)</td></tr>
+<tr class="separator:gaf75e097c003958f4585370be9ecb1426"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaac5c8623ed75599bf57090fcb162ffb4"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:gaac5c8623ed75599bf57090fcb162ffb4"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PmapPFunctionP</b> = std::pair&lt; U, size_t &gt;(*)(T *input, size_t size)</td></tr>
+<tr class="separator:gaac5c8623ed75599bf57090fcb162ffb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8aba2cb14827dcb31270b41cab68aabf"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga8aba2cb14827dcb31270b41cab68aabf"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPmapPFunctionP</b> = std::tuple&lt; L, U, size_t &gt;(*)(T *input, size_t size)</td></tr>
+<tr class="separator:ga8aba2cb14827dcb31270b41cab68aabf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabc8ce10645cf1b07bd1868ef3880780a"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:gabc8ce10645cf1b07bd1868ef3880780a"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkMapPFunctionP</b> = void(*)(U *output, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:gabc8ce10645cf1b07bd1868ef3880780a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga03f2d9c0ddabb0e8d022865c38746f0b"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga03f2d9c0ddabb0e8d022865c38746f0b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkMapPFunctionP</b> = void(*)(L *outKey, U *output, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:ga03f2d9c0ddabb0e8d022865c38746f0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5b8fa33eafa86ebe6822506817134632"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga5b8fa33eafa86ebe6822506817134632"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkMapPFunctionP</b> = void(*)(U *output, size_t *outputDataSizes, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:ga5b8fa33eafa86ebe6822506817134632"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad66f4e8902cdf0b4e47cc949ac0ada43"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gad66f4e8902cdf0b4e47cc949ac0ada43"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkMapPFunctionP</b> = void(*)(L *outKey, U *output, size_t *outputDataSizes, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:gad66f4e8902cdf0b4e47cc949ac0ada43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa163266bfe2e37a92417dd1dfd5b8511"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:gaa163266bfe2e37a92417dd1dfd5b8511"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>flatMapPFunctionP</b> = std::deque&lt; U &gt;(*)(T *&amp;input, size_t size)</td></tr>
+<tr class="separator:gaa163266bfe2e37a92417dd1dfd5b8511"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac9369a384375fabb68f700143321a279"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gac9369a384375fabb68f700143321a279"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IflatMapPFunctionP</b> = std::deque&lt; std::pair&lt; L, U &gt;&gt;(*)(T *&amp;input, size_t size)</td></tr>
+<tr class="separator:gac9369a384375fabb68f700143321a279"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga01bd17b1c19682275b8d4c9e9161efb2"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga01bd17b1c19682275b8d4c9e9161efb2"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PflatMapPFunctionP</b> = std::deque&lt; std::pair&lt; U, size_t &gt;&gt;(*)(T *&amp;input, size_t size)</td></tr>
+<tr class="separator:ga01bd17b1c19682275b8d4c9e9161efb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac59087aff273c806dcc315092b51e925"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gac59087aff273c806dcc315092b51e925"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPflatMapPFunctionP</b> = std::deque&lt; std::tuple&lt; L, U, size_t &gt;&gt;(*)(T *&amp;input, size_t size)</td></tr>
+<tr class="separator:gac59087aff273c806dcc315092b51e925"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac8832d2db609a90552cbfa51e1b5082d"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:gac8832d2db609a90552cbfa51e1b5082d"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkFlatMapPFunctionP</b> = void(*)(U *&amp;output, size_t &amp;outputSize, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:gac8832d2db609a90552cbfa51e1b5082d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf3c8b1cc00a5f9d694e5cae4260482f8"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gaf3c8b1cc00a5f9d694e5cae4260482f8"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkFlatMapPFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t &amp;outputSize, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:gaf3c8b1cc00a5f9d694e5cae4260482f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga84a618e5c22a45158c1073b6094b6a45"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga84a618e5c22a45158c1073b6094b6a45"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkFlatMapPFunctionP</b> = void(*)(U *&amp;output, size_t *outputDataSizes, size_t &amp;outputSize, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:ga84a618e5c22a45158c1073b6094b6a45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga75874d292891edb3cab2cb2ad103052d"><td class="memTemplParams" colspan="2">
+template&lt;typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga75874d292891edb3cab2cb2ad103052d"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkFlatMapPFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t *outputDataSizes, size_t &amp;outputSize, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:ga75874d292891edb3cab2cb2ad103052d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga57ed0e204205b394ce44b6a38db3be4c"><td class="memTemplParams" colspan="2">
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ga57ed0e204205b394ce44b6a38db3be4c"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PreducePFunctionP</b> = std::pair&lt; T *, size_t &gt;(*)(T *a, size_t sizeA, T *b, size_t sizeB)</td></tr>
+<tr class="separator:ga57ed0e204205b394ce44b6a38db3be4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9603d643cde38851c656e1c8eac1ff13"><td class="memTemplParams" colspan="2">
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ga9603d643cde38851c656e1c8eac1ff13"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkReducePFunctionP</b> = std::pair&lt; T *, size_t &gt;(*)(T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:ga9603d643cde38851c656e1c8eac1ff13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaeeede5f3628246388e6a6026f8d49dbb"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T &gt; </td></tr>
+<tr class="memitem:gaeeede5f3628246388e6a6026f8d49dbb"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>updateIFunctionP</b> = void(*)(K &amp;inKey, T &amp;input)</td></tr>
+<tr class="separator:gaeeede5f3628246388e6a6026f8d49dbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga716f0776aa3644853164bd69c0dad488"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T &gt; </td></tr>
+<tr class="memitem:ga716f0776aa3644853164bd69c0dad488"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>updateByKeyIFunctionP</b> = void(*)(K &amp;inKey, std::vector&lt; T * &gt; &amp;input)</td></tr>
+<tr class="separator:ga716f0776aa3644853164bd69c0dad488"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga332d70e5410a8d5ec5e29782293a7e24"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga332d70e5410a8d5ec5e29782293a7e24"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapIFunctionP</b> = std::pair&lt; L, U &gt;(*)(const K &amp;inKey, T &amp;input)</td></tr>
+<tr class="separator:ga332d70e5410a8d5ec5e29782293a7e24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0ba7639b6285747affc4573ce803452e"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga0ba7639b6285747affc4573ce803452e"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapIFunctionP</b> = U(*)(const K &amp;inKey, T &amp;input)</td></tr>
+<tr class="separator:ga0ba7639b6285747affc4573ce803452e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga987b98044fcc70c32c56e9b79ab218c6"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga987b98044fcc70c32c56e9b79ab218c6"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPmapIFunctionP</b> = std::tuple&lt; L, U, size_t &gt;(*)(const K &amp;inKey, T &amp;input)</td></tr>
+<tr class="separator:ga987b98044fcc70c32c56e9b79ab218c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga68d1b7d89ba8b9e7218ddf700c05ffd5"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga68d1b7d89ba8b9e7218ddf700c05ffd5"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PmapIFunctionP</b> = std::pair&lt; U, size_t &gt;(*)(const K &amp;inKey, T &amp;input)</td></tr>
+<tr class="separator:ga68d1b7d89ba8b9e7218ddf700c05ffd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac4c46902b3c015a06eafd3ab600192b3"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gac4c46902b3c015a06eafd3ab600192b3"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapByKeyIFunctionP</b> = std::pair&lt; L, U &gt;(*)(const K &amp;inKey, std::vector&lt; T * &gt; &amp;input)</td></tr>
+<tr class="separator:gac4c46902b3c015a06eafd3ab600192b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad01309afe79f4cd5db4a4a6396a14b84"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:gad01309afe79f4cd5db4a4a6396a14b84"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapByKeyIFunctionP</b> = U(*)(const K &amp;inKey, std::vector&lt; T * &gt; &amp;input)</td></tr>
+<tr class="separator:gad01309afe79f4cd5db4a4a6396a14b84"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf4c309fabec604ea3b2636d80ef5cd43"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gaf4c309fabec604ea3b2636d80ef5cd43"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPmapByKeyIFunctionP</b> = std::tuple&lt; L, U, size_t &gt;(*)(const K &amp;inKey, std::vector&lt; T * &gt; &amp;input)</td></tr>
+<tr class="separator:gaf4c309fabec604ea3b2636d80ef5cd43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6049d8a78d2878f00a161a347e3cf31b"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga6049d8a78d2878f00a161a347e3cf31b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PmapByKeyIFunctionP</b> = std::pair&lt; U, size_t &gt;(*)(const K &amp;inKey, std::vector&lt; T * &gt; &amp;input)</td></tr>
+<tr class="separator:ga6049d8a78d2878f00a161a347e3cf31b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaee8458ad6a6480ecc969156ab94bd92b"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gaee8458ad6a6480ecc969156ab94bd92b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkMapIFunctionP</b> = void(*)(L *outKey, U *output, K *inKey, T *input, size_t size)</td></tr>
+<tr class="separator:gaee8458ad6a6480ecc969156ab94bd92b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6ea8660619f575727d3070009fdb0734"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga6ea8660619f575727d3070009fdb0734"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkMapIFunctionP</b> = void(*)(U *output, K *inKey, T *input, size_t size)</td></tr>
+<tr class="separator:ga6ea8660619f575727d3070009fdb0734"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gadb6f7cc5f58e322a6d8b685013d9e633"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gadb6f7cc5f58e322a6d8b685013d9e633"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkMapIFunctionP</b> = void(*)(L *outKey, U *output, size_t *outputDataSizes, K *inKey, T *input, size_t size)</td></tr>
+<tr class="separator:gadb6f7cc5f58e322a6d8b685013d9e633"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabf05760143da7722dcb9b53de169c8c1"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:gabf05760143da7722dcb9b53de169c8c1"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkMapIFunctionP</b> = void(*)(U *output, size_t *outputDataSizes, K *inKey, T *input, size_t size)</td></tr>
+<tr class="separator:gabf05760143da7722dcb9b53de169c8c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga30b9cc4ae1f5d6a0c5f6708042b3f98b"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga30b9cc4ae1f5d6a0c5f6708042b3f98b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IflatMapIFunctionP</b> = std::deque&lt; std::pair&lt; L, U &gt;&gt;(*)(K inKey, T &amp;input)</td></tr>
+<tr class="separator:ga30b9cc4ae1f5d6a0c5f6708042b3f98b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad79a7f81b549f96bab233b359eda7122"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:gad79a7f81b549f96bab233b359eda7122"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>flatMapIFunctionP</b> = std::deque&lt; U &gt;(*)(K inKey, T &amp;input)</td></tr>
+<tr class="separator:gad79a7f81b549f96bab233b359eda7122"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga60e3f77595065602818d628e6a257912"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga60e3f77595065602818d628e6a257912"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPflatMapIFunctionP</b> = std::deque&lt; std::tuple&lt; L, U, size_t &gt;&gt;(*)(K inKey, T &amp;input)</td></tr>
+<tr class="separator:ga60e3f77595065602818d628e6a257912"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga653f2a3168e9e683478e01f649b87dbb"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga653f2a3168e9e683478e01f649b87dbb"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PflatMapIFunctionP</b> = std::deque&lt; std::pair&lt; U, size_t &gt;&gt;(*)(K inKey, T &amp;input)</td></tr>
+<tr class="separator:ga653f2a3168e9e683478e01f649b87dbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga95de08f0fefbf150f266b2405ab2c52a"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga95de08f0fefbf150f266b2405ab2c52a"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkFlatMapIFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t &amp;outputSize, K *inKey, T *input, size_t size)</td></tr>
+<tr class="separator:ga95de08f0fefbf150f266b2405ab2c52a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa846e95ac3857cbb64497f73c56950f5"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:gaa846e95ac3857cbb64497f73c56950f5"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkFlatMapIFunctionP</b> = void(*)(U *&amp;output, size_t &amp;outputSize, K *inKey, T *input, size_t size)</td></tr>
+<tr class="separator:gaa846e95ac3857cbb64497f73c56950f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga647dc45bd371fdc3046f08c286cc956b"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga647dc45bd371fdc3046f08c286cc956b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkFlatMapIFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t *&amp;outputDataSizes, size_t &amp;outputSize, K *inKey, T *input, size_t size)</td></tr>
+<tr class="separator:ga647dc45bd371fdc3046f08c286cc956b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6b0805a2bbc284c47d3a80873bea9723"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga6b0805a2bbc284c47d3a80873bea9723"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkFlatMapIFunctionP</b> = void(*)(U *&amp;output, size_t *&amp;outputDataSizes, size_t &amp;outputSize, K *inKey, T *input, size_t size)</td></tr>
+<tr class="separator:ga6b0805a2bbc284c47d3a80873bea9723"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga50f80a65dc948bb1e75662fc1e1810d5"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T &gt; </td></tr>
+<tr class="memitem:ga50f80a65dc948bb1e75662fc1e1810d5"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IreduceIFunctionP</b> = std::pair&lt; K, T &gt;(*)(const K &amp;keyA, T &amp;a, const K &amp;keyB, T &amp;b)</td></tr>
+<tr class="separator:ga50f80a65dc948bb1e75662fc1e1810d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabe9f61ca3499c9d6a724de99cee68331"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T &gt; </td></tr>
+<tr class="memitem:gabe9f61ca3499c9d6a724de99cee68331"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IreduceByKeyIFunctionP</b> = std::pair&lt; K, T &gt;(*)(const K &amp;keyA, T *a, size_t sizeA, const K &amp;keyB, T *b, size_t sizeB)</td></tr>
+<tr class="separator:gabe9f61ca3499c9d6a724de99cee68331"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0ef9dee3732827aaa9a53c81f4188d1b"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T &gt; </td></tr>
+<tr class="memitem:ga0ef9dee3732827aaa9a53c81f4188d1b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkReduceIFunctionP</b> = std::pair&lt; K, T &gt;(*)(K *key, T *input, size_t size)</td></tr>
+<tr class="separator:ga0ef9dee3732827aaa9a53c81f4188d1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5f7e1117f4f21bd34ef951cba51c4e26"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga5f7e1117f4f21bd34ef951cba51c4e26"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapIPFunctionP</b> = std::pair&lt; L, U &gt;(*)(K inKey, T *input, size_t size)</td></tr>
+<tr class="separator:ga5f7e1117f4f21bd34ef951cba51c4e26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac819b92c4990bc7879b38d3e85dc3e62"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:gac819b92c4990bc7879b38d3e85dc3e62"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapIPFunctionP</b> = U(*)(K inKey, T *input, size_t size)</td></tr>
+<tr class="separator:gac819b92c4990bc7879b38d3e85dc3e62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga924d39688b5355e31efcd5bd76555351"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga924d39688b5355e31efcd5bd76555351"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPmapIPFunctionP</b> = std::tuple&lt; L, U, size_t &gt;(*)(K inKey, T *input, size_t size)</td></tr>
+<tr class="separator:ga924d39688b5355e31efcd5bd76555351"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6096faff99f26d3dc4597282bb35c89f"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga6096faff99f26d3dc4597282bb35c89f"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PmapIPFunctionP</b> = std::pair&lt; U, size_t &gt;(*)(K inKey, T *input, size_t size)</td></tr>
+<tr class="separator:ga6096faff99f26d3dc4597282bb35c89f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1d340fbec0f98c0b36b1bc2e1b8803fb"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga1d340fbec0f98c0b36b1bc2e1b8803fb"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapByKeyIPFunctionP</b> = std::pair&lt; L, U &gt;(*)(const K &amp;inKey, std::vector&lt; std::pair&lt; T *, size_t &gt;&gt;)</td></tr>
+<tr class="separator:ga1d340fbec0f98c0b36b1bc2e1b8803fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaee1551dad642983a26af40b8211575fc"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:gaee1551dad642983a26af40b8211575fc"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapByKeyIPFunctionP</b> = U(*)(const K &amp;inKey, std::vector&lt; std::pair&lt; T *, size_t &gt;&gt;)</td></tr>
+<tr class="separator:gaee1551dad642983a26af40b8211575fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga960580b7165f12812d5575829fd5b2a9"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga960580b7165f12812d5575829fd5b2a9"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPmapByKeyIPFunctionP</b> = std::tuple&lt; L, U, size_t &gt;(*)(const K &amp;inKey, std::vector&lt; std::pair&lt; T *, size_t &gt;&gt;)</td></tr>
+<tr class="separator:ga960580b7165f12812d5575829fd5b2a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaac38b3840b9bfd6fc181b0af9883ddcf"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:gaac38b3840b9bfd6fc181b0af9883ddcf"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PmapByKeyIPFunctionP</b> = std::pair&lt; U, size_t &gt;(*)(const K &amp;inKey, std::vector&lt; std::pair&lt; T *, size_t &gt;&gt;)</td></tr>
+<tr class="separator:gaac38b3840b9bfd6fc181b0af9883ddcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga447ec30ee877a388f8c7403a38952410"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga447ec30ee877a388f8c7403a38952410"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkMapIPFunctionP</b> = void(*)(L *outKey, U *output, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:ga447ec30ee877a388f8c7403a38952410"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga970040ba860fa32170cb42baf0e4799e"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga970040ba860fa32170cb42baf0e4799e"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkMapIPFunctionP</b> = void(*)(U *output, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:ga970040ba860fa32170cb42baf0e4799e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8180a9b7d03c0fd3ed9047a7baa0d444"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga8180a9b7d03c0fd3ed9047a7baa0d444"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkMapIPFunctionP</b> = void(*)(L *outKey, U *output, size_t *outputDataSizes, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:ga8180a9b7d03c0fd3ed9047a7baa0d444"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga08e4f6294cdac2a40b9ea934afd24fb9"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga08e4f6294cdac2a40b9ea934afd24fb9"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkMapIPFunctionP</b> = void(*)(U *output, size_t *outputDataSizes, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:ga08e4f6294cdac2a40b9ea934afd24fb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gadb84f3d27ffaf86addb7a4a28361308c"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gadb84f3d27ffaf86addb7a4a28361308c"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IflatMapIPFunctionP</b> = std::deque&lt; std::pair&lt; L, U &gt;&gt;(*)(T *&amp;input, size_t size)</td></tr>
+<tr class="separator:gadb84f3d27ffaf86addb7a4a28361308c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8be14aec14e63089848ff35d39a4fcb3"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga8be14aec14e63089848ff35d39a4fcb3"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>flatMapIPFunctionP</b> = std::deque&lt; U &gt;(*)(T *&amp;input, size_t size)</td></tr>
+<tr class="separator:ga8be14aec14e63089848ff35d39a4fcb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7149a73ec5a64ae993c2b94fd6d2655f"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga7149a73ec5a64ae993c2b94fd6d2655f"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPflatMapIPFunctionP</b> = std::deque&lt; std::tuple&lt; L, U, size_t &gt;&gt;(*)(T *&amp;input, size_t size)</td></tr>
+<tr class="separator:ga7149a73ec5a64ae993c2b94fd6d2655f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5f7087e8794b547ec3f8a6e20b84a830"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga5f7087e8794b547ec3f8a6e20b84a830"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PflatMapIPFunctionP</b> = std::deque&lt; std::pair&lt; U, size_t &gt;&gt;(*)(T *&amp;input, size_t size)</td></tr>
+<tr class="separator:ga5f7087e8794b547ec3f8a6e20b84a830"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab60edb026f84b2b9e7d1b0aca513f9f4"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:gab60edb026f84b2b9e7d1b0aca513f9f4"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkFlatMapIPFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t &amp;outputSize, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:gab60edb026f84b2b9e7d1b0aca513f9f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga962c9de7711b1a49cb10f97eab741899"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:ga962c9de7711b1a49cb10f97eab741899"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkFlatMapIPFunctionP</b> = void(*)(U *&amp;output, size_t &amp;outputSize, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:ga962c9de7711b1a49cb10f97eab741899"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7b7aa8d709aaac014b6e871861ff57f9"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
+<tr class="memitem:ga7b7aa8d709aaac014b6e871861ff57f9"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkFlatMapIPFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t *outputDataSizes, size_t &amp;outputSize, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:ga7b7aa8d709aaac014b6e871861ff57f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab0f95fdc0f493e360f63060945416e14"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T , typename U &gt; </td></tr>
+<tr class="memitem:gab0f95fdc0f493e360f63060945416e14"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkFlatMapIPFunctionP</b> = void(*)(U *&amp;output, size_t *outputDataSizes, size_t &amp;outputSize, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:gab0f95fdc0f493e360f63060945416e14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf0621ccc9bcd5359cfc2dc460dfc4351"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T &gt; </td></tr>
+<tr class="memitem:gaf0621ccc9bcd5359cfc2dc460dfc4351"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPreduceIPFunctionP</b> = std::tuple&lt; K, T *, size_t &gt;(*)(K keyA, T *a, size_t sizeA, K keyB, T *b, size_t sizeB)</td></tr>
+<tr class="separator:gaf0621ccc9bcd5359cfc2dc460dfc4351"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7c9588170de6c93258536baf80bd3102"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T &gt; </td></tr>
+<tr class="memitem:ga7c9588170de6c93258536baf80bd3102"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPreduceByKeyIPFunctionP</b> = std::tuple&lt; K, T *, size_t &gt;(*)(K keyA, T **a, size_t *dataSizesA, size_t sizeA, K keyB, T **b, size_t *dataSizesB, size_t sizeB)</td></tr>
+<tr class="separator:ga7c9588170de6c93258536baf80bd3102"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga80929daf5ea00aef1fcb81cd8aee74c1"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename T &gt; </td></tr>
+<tr class="memitem:ga80929daf5ea00aef1fcb81cd8aee74c1"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkReduceIPFunctionP</b> = std::tuple&lt; K, T *, size_t &gt;(*)(K *key, T **input, size_t *inputDataSizes, size_t size)</td></tr>
+<tr class="separator:ga80929daf5ea00aef1fcb81cd8aee74c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9ec777a5b58919804e301ce1a5c98adc"><td class="memTemplParams" colspan="2">
+template&lt;typename K &gt; </td></tr>
+<tr class="memitem:ga9ec777a5b58919804e301ce1a5c98adc"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>updateByKeyG2FunctionP</b> = void(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b)</td></tr>
+<tr class="separator:ga9ec777a5b58919804e301ce1a5c98adc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga67daf7bef40755e03e80b4ac5c0e6034"><td class="memTemplParams" colspan="2">
+template&lt;typename K &gt; </td></tr>
+<tr class="memitem:ga67daf7bef40755e03e80b4ac5c0e6034"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>updateByKeyG3FunctionP</b> = void(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b, std::vector&lt; void * &gt; &amp;c)</td></tr>
+<tr class="separator:ga67daf7bef40755e03e80b4ac5c0e6034"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga682408c556f96213a7ca446407c510da"><td class="memTemplParams" colspan="2">
+template&lt;typename K &gt; </td></tr>
+<tr class="memitem:ga682408c556f96213a7ca446407c510da"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkUpdateG2FunctionP</b> = void(*)(K *keyA, void *a, size_t na, K *keyB, void *b, size_t nb)</td></tr>
+<tr class="separator:ga682408c556f96213a7ca446407c510da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab1550d5f0229f90a47d1264587fd6dc9"><td class="memTemplParams" colspan="2">
+template&lt;typename K &gt; </td></tr>
+<tr class="memitem:gab1550d5f0229f90a47d1264587fd6dc9"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkUpdateG3FunctionP</b> = void(*)(K *keyA, void *a, size_t na, K *keyB, void *b, size_t nb, K *keyC, void *c, size_t nc)</td></tr>
+<tr class="separator:gab1550d5f0229f90a47d1264587fd6dc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga509cd598ec7468382878c53b0dc1324a"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename To &gt; </td></tr>
+<tr class="memitem:ga509cd598ec7468382878c53b0dc1324a"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapByKeyG2FunctionP</b> = To(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b)</td></tr>
+<tr class="separator:ga509cd598ec7468382878c53b0dc1324a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3b108dc8e2e7b776a6242449f506fcf0"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename To &gt; </td></tr>
+<tr class="memitem:ga3b108dc8e2e7b776a6242449f506fcf0"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapByKeyG3FunctionP</b> = To(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b, std::vector&lt; void * &gt; &amp;c)</td></tr>
+<tr class="separator:ga3b108dc8e2e7b776a6242449f506fcf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaff7a388c8fbc8135045bd655c1b2dfac"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename Ko , typename To &gt; </td></tr>
+<tr class="memitem:gaff7a388c8fbc8135045bd655c1b2dfac"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapByKeyG2FunctionP</b> = std::pair&lt; Ko, To &gt;(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b)</td></tr>
+<tr class="separator:gaff7a388c8fbc8135045bd655c1b2dfac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad646bdfb2c0a86f02cb17edb07e34552"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename Ko , typename To &gt; </td></tr>
+<tr class="memitem:gad646bdfb2c0a86f02cb17edb07e34552"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapByKeyG3FunctionP</b> = std::pair&lt; Ko, To &gt;(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b, std::vector&lt; void * &gt; &amp;c)</td></tr>
+<tr class="separator:gad646bdfb2c0a86f02cb17edb07e34552"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6ed5b483dcd18176555f3532a9570d17"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename To &gt; </td></tr>
+<tr class="memitem:ga6ed5b483dcd18176555f3532a9570d17"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>flatMapByKeyG2FunctionP</b> = std::deque&lt; To &gt;(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b)</td></tr>
+<tr class="separator:ga6ed5b483dcd18176555f3532a9570d17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga247d6c8c992ecdfd9c525478d4fe4bb8"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename To &gt; </td></tr>
+<tr class="memitem:ga247d6c8c992ecdfd9c525478d4fe4bb8"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>flatMapByKeyG3FunctionP</b> = std::deque&lt; To &gt;(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b, std::vector&lt; void * &gt; &amp;c)</td></tr>
+<tr class="separator:ga247d6c8c992ecdfd9c525478d4fe4bb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaab6ad08c8d74a2bd3b821944bc13b32a"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename Ko , typename To &gt; </td></tr>
+<tr class="memitem:gaab6ad08c8d74a2bd3b821944bc13b32a"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IflatMapByKeyG2FunctionP</b> = std::deque&lt; std::pair&lt; Ko, To &gt;&gt;(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b)</td></tr>
+<tr class="separator:gaab6ad08c8d74a2bd3b821944bc13b32a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gade9ab0b2a30dceeb9a67985cefcb345f"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename Ko , typename To &gt; </td></tr>
+<tr class="memitem:gade9ab0b2a30dceeb9a67985cefcb345f"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IflatMapByKeyG3FunctionP</b> = std::deque&lt; std::pair&lt; Ko, To &gt;&gt;(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b, std::vector&lt; void * &gt; &amp;c)</td></tr>
+<tr class="separator:gade9ab0b2a30dceeb9a67985cefcb345f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaff3cf5ee2922729ad44884888aee70ed"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename To &gt; </td></tr>
+<tr class="memitem:gaff3cf5ee2922729ad44884888aee70ed"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkFlatMapG2FunctionP</b> = std::deque&lt; To &gt;(*)(K *keyA, void *a, size_t na, K *keyB, void *b, size_t nb)</td></tr>
+<tr class="separator:gaff3cf5ee2922729ad44884888aee70ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad94bbbac99a9dbc8c809b7adab93a16c"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename To &gt; </td></tr>
+<tr class="memitem:gad94bbbac99a9dbc8c809b7adab93a16c"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkFlatMapG3FunctionP</b> = std::deque&lt; To &gt;(*)(K *keyA, void *a, size_t na, K *keyB, void *b, size_t nb, K *keyC, void *c, size_t nc)</td></tr>
+<tr class="separator:gad94bbbac99a9dbc8c809b7adab93a16c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa0e002d973b8a83a0f17d105fa04b279"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename Ko , typename To &gt; </td></tr>
+<tr class="memitem:gaa0e002d973b8a83a0f17d105fa04b279"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkFlatMapG2FunctionP</b> = std::deque&lt; std::pair&lt; Ko, To &gt;&gt;(*)(K *keyA, void *a, size_t na, K *keyB, void *b, size_t nb)</td></tr>
+<tr class="separator:gaa0e002d973b8a83a0f17d105fa04b279"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga30be1380be69d2fe9b0a508ff350f60a"><td class="memTemplParams" colspan="2">
+template&lt;typename K , typename Ko , typename To &gt; </td></tr>
+<tr class="memitem:ga30be1380be69d2fe9b0a508ff350f60a"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkFlatMapG3FunctionP</b> = std::deque&lt; std::pair&lt; Ko, To &gt;&gt;(*)(K *keyA, void *a, size_t na, K *keyB, void *b, size_t nb, K *keyC, void *c, size_t nc)</td></tr>
+<tr class="separator:ga30be1380be69d2fe9b0a508ff350f60a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Partition function definitions</div></td></tr>
 <tr class="memitem:a5a364e0e0a44ae1008621c848032e2e5"><td class="memTemplParams" colspan="2"><a id="a5a364e0e0a44ae1008621c848032e2e5"></a>
 template&lt;typename T &gt; </td></tr>
@@ -116,411 +515,6 @@ template&lt;typename T &gt; </td></tr>
 template&lt;typename K , typename T &gt; </td></tr>
 <tr class="memitem:a1b23c8b46e5a2d545c778cb82c67d7a0"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IonlineFullPartFuncP</b> = int(*)(K &amp;key, T &amp;input)</td></tr>
 <tr class="separator:a1b23c8b46e5a2d545c778cb82c67d7a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader">Not Indexed FFDs function pointer types</div></td></tr>
-<tr class="memitem:ad3c276ad2cf0991b45ce6f4b1652bb06"><td class="memTemplParams" colspan="2"><a id="ad3c276ad2cf0991b45ce6f4b1652bb06"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:ad3c276ad2cf0991b45ce6f4b1652bb06"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapFunctionP</b> = U(*)(T &amp;input)</td></tr>
-<tr class="separator:ad3c276ad2cf0991b45ce6f4b1652bb06"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac789f70264fc817eede4bf92e9c219e0"><td class="memTemplParams" colspan="2"><a id="ac789f70264fc817eede4bf92e9c219e0"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:ac789f70264fc817eede4bf92e9c219e0"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapFunctionP</b> = std::pair&lt; L, U &gt;(*)(T &amp;input)</td></tr>
-<tr class="separator:ac789f70264fc817eede4bf92e9c219e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d58a9c53227a5924cb8496424f38335"><td class="memTemplParams" colspan="2"><a id="a1d58a9c53227a5924cb8496424f38335"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:a1d58a9c53227a5924cb8496424f38335"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PmapFunctionP</b> = std::pair&lt; U, size_t &gt;(*)(T &amp;input)</td></tr>
-<tr class="separator:a1d58a9c53227a5924cb8496424f38335"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6af32df57a56a326c5607fd164c0b543"><td class="memTemplParams" colspan="2"><a id="a6af32df57a56a326c5607fd164c0b543"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a6af32df57a56a326c5607fd164c0b543"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPmapFunctionP</b> = std::tuple&lt; L, U, size_t &gt;(*)(T &amp;input)</td></tr>
-<tr class="separator:a6af32df57a56a326c5607fd164c0b543"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0e180c6074105430541baf6577a54a12"><td class="memTemplParams" colspan="2"><a id="a0e180c6074105430541baf6577a54a12"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:a0e180c6074105430541baf6577a54a12"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkMapFunctionP</b> = void(*)(U *output, T *input, size_t size)</td></tr>
-<tr class="separator:a0e180c6074105430541baf6577a54a12"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8823a57c60753e5c5823fc67837befce"><td class="memTemplParams" colspan="2"><a id="a8823a57c60753e5c5823fc67837befce"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a8823a57c60753e5c5823fc67837befce"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkMapFunctionP</b> = void(*)(L *outKey, U *output, T *input, size_t size)</td></tr>
-<tr class="separator:a8823a57c60753e5c5823fc67837befce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48907e6631187c57ab1667cd21ad4b3b"><td class="memTemplParams" colspan="2"><a id="a48907e6631187c57ab1667cd21ad4b3b"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:a48907e6631187c57ab1667cd21ad4b3b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkMapFunctionP</b> = void(*)(U *output, size_t *outputDataSizes, T *input, size_t size)</td></tr>
-<tr class="separator:a48907e6631187c57ab1667cd21ad4b3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf64dcb6de6c9249cf6a8e3ad16e2603"><td class="memTemplParams" colspan="2"><a id="acf64dcb6de6c9249cf6a8e3ad16e2603"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:acf64dcb6de6c9249cf6a8e3ad16e2603"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkMapFunctionP</b> = void(*)(L *outKey, U *output, size_t *outputDataSizes, T *input, size_t size)</td></tr>
-<tr class="separator:acf64dcb6de6c9249cf6a8e3ad16e2603"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab541346ef7fac41096b374a5a4b1699d"><td class="memTemplParams" colspan="2"><a id="ab541346ef7fac41096b374a5a4b1699d"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:ab541346ef7fac41096b374a5a4b1699d"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>flatMapFunctionP</b> = std::deque&lt; U &gt;(*)(T &amp;input)</td></tr>
-<tr class="separator:ab541346ef7fac41096b374a5a4b1699d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afd17c939d0b28c2aa7709daf2016c4bb"><td class="memTemplParams" colspan="2"><a id="afd17c939d0b28c2aa7709daf2016c4bb"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:afd17c939d0b28c2aa7709daf2016c4bb"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IflatMapFunctionP</b> = std::deque&lt; std::pair&lt; L, U &gt;&gt;(*)(T &amp;input)</td></tr>
-<tr class="separator:afd17c939d0b28c2aa7709daf2016c4bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0c1211c120b49437f09a840ad282c042"><td class="memTemplParams" colspan="2"><a id="a0c1211c120b49437f09a840ad282c042"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:a0c1211c120b49437f09a840ad282c042"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PflatMapFunctionP</b> = std::deque&lt; std::pair&lt; U, size_t &gt;&gt;(*)(T &amp;input)</td></tr>
-<tr class="separator:a0c1211c120b49437f09a840ad282c042"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaca59f0e455ed2034a0e81caa04fdea8"><td class="memTemplParams" colspan="2"><a id="aaca59f0e455ed2034a0e81caa04fdea8"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:aaca59f0e455ed2034a0e81caa04fdea8"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPflatMapFunctionP</b> = std::deque&lt; std::tuple&lt; L, U, size_t &gt;&gt;(*)(T &amp;input)</td></tr>
-<tr class="separator:aaca59f0e455ed2034a0e81caa04fdea8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaad4241d8c2d4641d83b750addbd3825"><td class="memTemplParams" colspan="2"><a id="aaad4241d8c2d4641d83b750addbd3825"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:aaad4241d8c2d4641d83b750addbd3825"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkFlatMapFunctionP</b> = void(*)(U *&amp;output, size_t &amp;outputSize, T *input, size_t size)</td></tr>
-<tr class="separator:aaad4241d8c2d4641d83b750addbd3825"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa361fffa5a84ca6cdd1bf23b2521b7c3"><td class="memTemplParams" colspan="2"><a id="aa361fffa5a84ca6cdd1bf23b2521b7c3"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:aa361fffa5a84ca6cdd1bf23b2521b7c3"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkFlatMapFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t &amp;outputSize, T *input, size_t size)</td></tr>
-<tr class="separator:aa361fffa5a84ca6cdd1bf23b2521b7c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a158792e312ed7f99f7802ce5dc18ab95"><td class="memTemplParams" colspan="2"><a id="a158792e312ed7f99f7802ce5dc18ab95"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:a158792e312ed7f99f7802ce5dc18ab95"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkFlatMapFunctionP</b> = void(*)(U *&amp;output, size_t *&amp;outputDataSizes, size_t &amp;outputSize, T *input, size_t size)</td></tr>
-<tr class="separator:a158792e312ed7f99f7802ce5dc18ab95"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a763d69de0e7eb7d1d53ee06b318eb3d1"><td class="memTemplParams" colspan="2"><a id="a763d69de0e7eb7d1d53ee06b318eb3d1"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a763d69de0e7eb7d1d53ee06b318eb3d1"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkFlatMapFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t *&amp;outputDataSizes, size_t &amp;outputSize, T *input, size_t size)</td></tr>
-<tr class="separator:a763d69de0e7eb7d1d53ee06b318eb3d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a980901f8c07924742f04646b02f77ffb"><td class="memTemplParams" colspan="2"><a id="a980901f8c07924742f04646b02f77ffb"></a>
-template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a980901f8c07924742f04646b02f77ffb"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>reduceFunctionP</b> = T(*)(T &amp;a, T &amp;b)</td></tr>
-<tr class="separator:a980901f8c07924742f04646b02f77ffb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5e0e90e4869b9e67962cc107e2b498b1"><td class="memTemplParams" colspan="2"><a id="a5e0e90e4869b9e67962cc107e2b498b1"></a>
-template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a5e0e90e4869b9e67962cc107e2b498b1"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkReduceFunctionP</b> = T(*)(T *input, size_t size)</td></tr>
-<tr class="separator:a5e0e90e4869b9e67962cc107e2b498b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader">Pointer FDD function pointer types</div></td></tr>
-<tr class="memitem:ac91327bad9d0ab5cc7f160b238faa847"><td class="memTemplParams" colspan="2"><a id="ac91327bad9d0ab5cc7f160b238faa847"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:ac91327bad9d0ab5cc7f160b238faa847"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapPFunctionP</b> = U(*)(T *input, size_t size)</td></tr>
-<tr class="separator:ac91327bad9d0ab5cc7f160b238faa847"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af75e097c003958f4585370be9ecb1426"><td class="memTemplParams" colspan="2"><a id="af75e097c003958f4585370be9ecb1426"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:af75e097c003958f4585370be9ecb1426"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapPFunctionP</b> = std::pair&lt; L, U &gt;(*)(T *input, size_t size)</td></tr>
-<tr class="separator:af75e097c003958f4585370be9ecb1426"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac5c8623ed75599bf57090fcb162ffb4"><td class="memTemplParams" colspan="2"><a id="aac5c8623ed75599bf57090fcb162ffb4"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:aac5c8623ed75599bf57090fcb162ffb4"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PmapPFunctionP</b> = std::pair&lt; U, size_t &gt;(*)(T *input, size_t size)</td></tr>
-<tr class="separator:aac5c8623ed75599bf57090fcb162ffb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8aba2cb14827dcb31270b41cab68aabf"><td class="memTemplParams" colspan="2"><a id="a8aba2cb14827dcb31270b41cab68aabf"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a8aba2cb14827dcb31270b41cab68aabf"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPmapPFunctionP</b> = std::tuple&lt; L, U, size_t &gt;(*)(T *input, size_t size)</td></tr>
-<tr class="separator:a8aba2cb14827dcb31270b41cab68aabf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abc8ce10645cf1b07bd1868ef3880780a"><td class="memTemplParams" colspan="2"><a id="abc8ce10645cf1b07bd1868ef3880780a"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:abc8ce10645cf1b07bd1868ef3880780a"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkMapPFunctionP</b> = void(*)(U *output, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:abc8ce10645cf1b07bd1868ef3880780a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a03f2d9c0ddabb0e8d022865c38746f0b"><td class="memTemplParams" colspan="2"><a id="a03f2d9c0ddabb0e8d022865c38746f0b"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a03f2d9c0ddabb0e8d022865c38746f0b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkMapPFunctionP</b> = void(*)(L *outKey, U *output, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:a03f2d9c0ddabb0e8d022865c38746f0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b8fa33eafa86ebe6822506817134632"><td class="memTemplParams" colspan="2"><a id="a5b8fa33eafa86ebe6822506817134632"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:a5b8fa33eafa86ebe6822506817134632"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkMapPFunctionP</b> = void(*)(U *output, size_t *outputDataSizes, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:a5b8fa33eafa86ebe6822506817134632"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad66f4e8902cdf0b4e47cc949ac0ada43"><td class="memTemplParams" colspan="2"><a id="ad66f4e8902cdf0b4e47cc949ac0ada43"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:ad66f4e8902cdf0b4e47cc949ac0ada43"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkMapPFunctionP</b> = void(*)(L *outKey, U *output, size_t *outputDataSizes, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:ad66f4e8902cdf0b4e47cc949ac0ada43"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa163266bfe2e37a92417dd1dfd5b8511"><td class="memTemplParams" colspan="2"><a id="aa163266bfe2e37a92417dd1dfd5b8511"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:aa163266bfe2e37a92417dd1dfd5b8511"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>flatMapPFunctionP</b> = std::deque&lt; U &gt;(*)(T *&amp;input, size_t size)</td></tr>
-<tr class="separator:aa163266bfe2e37a92417dd1dfd5b8511"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac9369a384375fabb68f700143321a279"><td class="memTemplParams" colspan="2"><a id="ac9369a384375fabb68f700143321a279"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:ac9369a384375fabb68f700143321a279"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IflatMapPFunctionP</b> = std::deque&lt; std::pair&lt; L, U &gt;&gt;(*)(T *&amp;input, size_t size)</td></tr>
-<tr class="separator:ac9369a384375fabb68f700143321a279"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a01bd17b1c19682275b8d4c9e9161efb2"><td class="memTemplParams" colspan="2"><a id="a01bd17b1c19682275b8d4c9e9161efb2"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:a01bd17b1c19682275b8d4c9e9161efb2"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PflatMapPFunctionP</b> = std::deque&lt; std::pair&lt; U, size_t &gt;&gt;(*)(T *&amp;input, size_t size)</td></tr>
-<tr class="separator:a01bd17b1c19682275b8d4c9e9161efb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac59087aff273c806dcc315092b51e925"><td class="memTemplParams" colspan="2"><a id="ac59087aff273c806dcc315092b51e925"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:ac59087aff273c806dcc315092b51e925"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPflatMapPFunctionP</b> = std::deque&lt; std::tuple&lt; L, U, size_t &gt;&gt;(*)(T *&amp;input, size_t size)</td></tr>
-<tr class="separator:ac59087aff273c806dcc315092b51e925"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8832d2db609a90552cbfa51e1b5082d"><td class="memTemplParams" colspan="2"><a id="ac8832d2db609a90552cbfa51e1b5082d"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:ac8832d2db609a90552cbfa51e1b5082d"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkFlatMapPFunctionP</b> = void(*)(U *&amp;output, size_t &amp;outputSize, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:ac8832d2db609a90552cbfa51e1b5082d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af3c8b1cc00a5f9d694e5cae4260482f8"><td class="memTemplParams" colspan="2"><a id="af3c8b1cc00a5f9d694e5cae4260482f8"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:af3c8b1cc00a5f9d694e5cae4260482f8"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkFlatMapPFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t &amp;outputSize, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:af3c8b1cc00a5f9d694e5cae4260482f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a84a618e5c22a45158c1073b6094b6a45"><td class="memTemplParams" colspan="2"><a id="a84a618e5c22a45158c1073b6094b6a45"></a>
-template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:a84a618e5c22a45158c1073b6094b6a45"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkFlatMapPFunctionP</b> = void(*)(U *&amp;output, size_t *outputDataSizes, size_t &amp;outputSize, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:a84a618e5c22a45158c1073b6094b6a45"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a75874d292891edb3cab2cb2ad103052d"><td class="memTemplParams" colspan="2"><a id="a75874d292891edb3cab2cb2ad103052d"></a>
-template&lt;typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a75874d292891edb3cab2cb2ad103052d"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkFlatMapPFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t *outputDataSizes, size_t &amp;outputSize, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:a75874d292891edb3cab2cb2ad103052d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a57ed0e204205b394ce44b6a38db3be4c"><td class="memTemplParams" colspan="2"><a id="a57ed0e204205b394ce44b6a38db3be4c"></a>
-template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a57ed0e204205b394ce44b6a38db3be4c"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PreducePFunctionP</b> = std::pair&lt; T *, size_t &gt;(*)(T *a, size_t sizeA, T *b, size_t sizeB)</td></tr>
-<tr class="separator:a57ed0e204205b394ce44b6a38db3be4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9603d643cde38851c656e1c8eac1ff13"><td class="memTemplParams" colspan="2"><a id="a9603d643cde38851c656e1c8eac1ff13"></a>
-template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a9603d643cde38851c656e1c8eac1ff13"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkReducePFunctionP</b> = std::pair&lt; T *, size_t &gt;(*)(T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:a9603d643cde38851c656e1c8eac1ff13"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader">IFDD function pointer types</div></td></tr>
-<tr class="memitem:aeeede5f3628246388e6a6026f8d49dbb"><td class="memTemplParams" colspan="2"><a id="aeeede5f3628246388e6a6026f8d49dbb"></a>
-template&lt;typename K , typename T &gt; </td></tr>
-<tr class="memitem:aeeede5f3628246388e6a6026f8d49dbb"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>updateIFunctionP</b> = void(*)(K &amp;inKey, T &amp;input)</td></tr>
-<tr class="separator:aeeede5f3628246388e6a6026f8d49dbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a716f0776aa3644853164bd69c0dad488"><td class="memTemplParams" colspan="2"><a id="a716f0776aa3644853164bd69c0dad488"></a>
-template&lt;typename K , typename T &gt; </td></tr>
-<tr class="memitem:a716f0776aa3644853164bd69c0dad488"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>updateByKeyIFunctionP</b> = void(*)(K &amp;inKey, std::vector&lt; T * &gt; &amp;input)</td></tr>
-<tr class="separator:a716f0776aa3644853164bd69c0dad488"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a332d70e5410a8d5ec5e29782293a7e24"><td class="memTemplParams" colspan="2"><a id="a332d70e5410a8d5ec5e29782293a7e24"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a332d70e5410a8d5ec5e29782293a7e24"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapIFunctionP</b> = std::pair&lt; L, U &gt;(*)(const K &amp;inKey, T &amp;input)</td></tr>
-<tr class="separator:a332d70e5410a8d5ec5e29782293a7e24"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0ba7639b6285747affc4573ce803452e"><td class="memTemplParams" colspan="2"><a id="a0ba7639b6285747affc4573ce803452e"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:a0ba7639b6285747affc4573ce803452e"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapIFunctionP</b> = U(*)(const K &amp;inKey, T &amp;input)</td></tr>
-<tr class="separator:a0ba7639b6285747affc4573ce803452e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a987b98044fcc70c32c56e9b79ab218c6"><td class="memTemplParams" colspan="2"><a id="a987b98044fcc70c32c56e9b79ab218c6"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a987b98044fcc70c32c56e9b79ab218c6"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPmapIFunctionP</b> = std::tuple&lt; L, U, size_t &gt;(*)(const K &amp;inKey, T &amp;input)</td></tr>
-<tr class="separator:a987b98044fcc70c32c56e9b79ab218c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68d1b7d89ba8b9e7218ddf700c05ffd5"><td class="memTemplParams" colspan="2"><a id="a68d1b7d89ba8b9e7218ddf700c05ffd5"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:a68d1b7d89ba8b9e7218ddf700c05ffd5"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PmapIFunctionP</b> = std::pair&lt; U, size_t &gt;(*)(const K &amp;inKey, T &amp;input)</td></tr>
-<tr class="separator:a68d1b7d89ba8b9e7218ddf700c05ffd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac4c46902b3c015a06eafd3ab600192b3"><td class="memTemplParams" colspan="2"><a id="ac4c46902b3c015a06eafd3ab600192b3"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:ac4c46902b3c015a06eafd3ab600192b3"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapByKeyIFunctionP</b> = std::pair&lt; L, U &gt;(*)(const K &amp;inKey, std::vector&lt; T * &gt; &amp;input)</td></tr>
-<tr class="separator:ac4c46902b3c015a06eafd3ab600192b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad01309afe79f4cd5db4a4a6396a14b84"><td class="memTemplParams" colspan="2"><a id="ad01309afe79f4cd5db4a4a6396a14b84"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:ad01309afe79f4cd5db4a4a6396a14b84"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapByKeyIFunctionP</b> = U(*)(const K &amp;inKey, std::vector&lt; T * &gt; &amp;input)</td></tr>
-<tr class="separator:ad01309afe79f4cd5db4a4a6396a14b84"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4c309fabec604ea3b2636d80ef5cd43"><td class="memTemplParams" colspan="2"><a id="af4c309fabec604ea3b2636d80ef5cd43"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:af4c309fabec604ea3b2636d80ef5cd43"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPmapByKeyIFunctionP</b> = std::tuple&lt; L, U, size_t &gt;(*)(const K &amp;inKey, std::vector&lt; T * &gt; &amp;input)</td></tr>
-<tr class="separator:af4c309fabec604ea3b2636d80ef5cd43"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6049d8a78d2878f00a161a347e3cf31b"><td class="memTemplParams" colspan="2"><a id="a6049d8a78d2878f00a161a347e3cf31b"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:a6049d8a78d2878f00a161a347e3cf31b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PmapByKeyIFunctionP</b> = std::pair&lt; U, size_t &gt;(*)(const K &amp;inKey, std::vector&lt; T * &gt; &amp;input)</td></tr>
-<tr class="separator:a6049d8a78d2878f00a161a347e3cf31b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aee8458ad6a6480ecc969156ab94bd92b"><td class="memTemplParams" colspan="2"><a id="aee8458ad6a6480ecc969156ab94bd92b"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:aee8458ad6a6480ecc969156ab94bd92b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkMapIFunctionP</b> = void(*)(L *outKey, U *output, K *inKey, T *input, size_t size)</td></tr>
-<tr class="separator:aee8458ad6a6480ecc969156ab94bd92b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6ea8660619f575727d3070009fdb0734"><td class="memTemplParams" colspan="2"><a id="a6ea8660619f575727d3070009fdb0734"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:a6ea8660619f575727d3070009fdb0734"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkMapIFunctionP</b> = void(*)(U *output, K *inKey, T *input, size_t size)</td></tr>
-<tr class="separator:a6ea8660619f575727d3070009fdb0734"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb6f7cc5f58e322a6d8b685013d9e633"><td class="memTemplParams" colspan="2"><a id="adb6f7cc5f58e322a6d8b685013d9e633"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:adb6f7cc5f58e322a6d8b685013d9e633"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkMapIFunctionP</b> = void(*)(L *outKey, U *output, size_t *outputDataSizes, K *inKey, T *input, size_t size)</td></tr>
-<tr class="separator:adb6f7cc5f58e322a6d8b685013d9e633"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abf05760143da7722dcb9b53de169c8c1"><td class="memTemplParams" colspan="2"><a id="abf05760143da7722dcb9b53de169c8c1"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:abf05760143da7722dcb9b53de169c8c1"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkMapIFunctionP</b> = void(*)(U *output, size_t *outputDataSizes, K *inKey, T *input, size_t size)</td></tr>
-<tr class="separator:abf05760143da7722dcb9b53de169c8c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a30b9cc4ae1f5d6a0c5f6708042b3f98b"><td class="memTemplParams" colspan="2"><a id="a30b9cc4ae1f5d6a0c5f6708042b3f98b"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a30b9cc4ae1f5d6a0c5f6708042b3f98b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IflatMapIFunctionP</b> = std::deque&lt; std::pair&lt; L, U &gt;&gt;(*)(K inKey, T &amp;input)</td></tr>
-<tr class="separator:a30b9cc4ae1f5d6a0c5f6708042b3f98b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad79a7f81b549f96bab233b359eda7122"><td class="memTemplParams" colspan="2"><a id="ad79a7f81b549f96bab233b359eda7122"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:ad79a7f81b549f96bab233b359eda7122"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>flatMapIFunctionP</b> = std::deque&lt; U &gt;(*)(K inKey, T &amp;input)</td></tr>
-<tr class="separator:ad79a7f81b549f96bab233b359eda7122"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a60e3f77595065602818d628e6a257912"><td class="memTemplParams" colspan="2"><a id="a60e3f77595065602818d628e6a257912"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a60e3f77595065602818d628e6a257912"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPflatMapIFunctionP</b> = std::deque&lt; std::tuple&lt; L, U, size_t &gt;&gt;(*)(K inKey, T &amp;input)</td></tr>
-<tr class="separator:a60e3f77595065602818d628e6a257912"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a653f2a3168e9e683478e01f649b87dbb"><td class="memTemplParams" colspan="2"><a id="a653f2a3168e9e683478e01f649b87dbb"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:a653f2a3168e9e683478e01f649b87dbb"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PflatMapIFunctionP</b> = std::deque&lt; std::pair&lt; U, size_t &gt;&gt;(*)(K inKey, T &amp;input)</td></tr>
-<tr class="separator:a653f2a3168e9e683478e01f649b87dbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95de08f0fefbf150f266b2405ab2c52a"><td class="memTemplParams" colspan="2"><a id="a95de08f0fefbf150f266b2405ab2c52a"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a95de08f0fefbf150f266b2405ab2c52a"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkFlatMapIFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t &amp;outputSize, K *inKey, T *input, size_t size)</td></tr>
-<tr class="separator:a95de08f0fefbf150f266b2405ab2c52a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa846e95ac3857cbb64497f73c56950f5"><td class="memTemplParams" colspan="2"><a id="aa846e95ac3857cbb64497f73c56950f5"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:aa846e95ac3857cbb64497f73c56950f5"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkFlatMapIFunctionP</b> = void(*)(U *&amp;output, size_t &amp;outputSize, K *inKey, T *input, size_t size)</td></tr>
-<tr class="separator:aa846e95ac3857cbb64497f73c56950f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a647dc45bd371fdc3046f08c286cc956b"><td class="memTemplParams" colspan="2"><a id="a647dc45bd371fdc3046f08c286cc956b"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a647dc45bd371fdc3046f08c286cc956b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkFlatMapIFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t *&amp;outputDataSizes, size_t &amp;outputSize, K *inKey, T *input, size_t size)</td></tr>
-<tr class="separator:a647dc45bd371fdc3046f08c286cc956b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b0805a2bbc284c47d3a80873bea9723"><td class="memTemplParams" colspan="2"><a id="a6b0805a2bbc284c47d3a80873bea9723"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:a6b0805a2bbc284c47d3a80873bea9723"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkFlatMapIFunctionP</b> = void(*)(U *&amp;output, size_t *&amp;outputDataSizes, size_t &amp;outputSize, K *inKey, T *input, size_t size)</td></tr>
-<tr class="separator:a6b0805a2bbc284c47d3a80873bea9723"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a50f80a65dc948bb1e75662fc1e1810d5"><td class="memTemplParams" colspan="2"><a id="a50f80a65dc948bb1e75662fc1e1810d5"></a>
-template&lt;typename K , typename T &gt; </td></tr>
-<tr class="memitem:a50f80a65dc948bb1e75662fc1e1810d5"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IreduceIFunctionP</b> = std::pair&lt; K, T &gt;(*)(const K &amp;keyA, T &amp;a, const K &amp;keyB, T &amp;b)</td></tr>
-<tr class="separator:a50f80a65dc948bb1e75662fc1e1810d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abe9f61ca3499c9d6a724de99cee68331"><td class="memTemplParams" colspan="2"><a id="abe9f61ca3499c9d6a724de99cee68331"></a>
-template&lt;typename K , typename T &gt; </td></tr>
-<tr class="memitem:abe9f61ca3499c9d6a724de99cee68331"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IreduceByKeyIFunctionP</b> = std::pair&lt; K, T &gt;(*)(const K &amp;keyA, T *a, size_t sizeA, const K &amp;keyB, T *b, size_t sizeB)</td></tr>
-<tr class="separator:abe9f61ca3499c9d6a724de99cee68331"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0ef9dee3732827aaa9a53c81f4188d1b"><td class="memTemplParams" colspan="2"><a id="a0ef9dee3732827aaa9a53c81f4188d1b"></a>
-template&lt;typename K , typename T &gt; </td></tr>
-<tr class="memitem:a0ef9dee3732827aaa9a53c81f4188d1b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkReduceIFunctionP</b> = std::pair&lt; K, T &gt;(*)(K *key, T *input, size_t size)</td></tr>
-<tr class="separator:a0ef9dee3732827aaa9a53c81f4188d1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader">Pointer IFDD function pointer types</div></td></tr>
-<tr class="memitem:a5f7e1117f4f21bd34ef951cba51c4e26"><td class="memTemplParams" colspan="2"><a id="a5f7e1117f4f21bd34ef951cba51c4e26"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a5f7e1117f4f21bd34ef951cba51c4e26"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapIPFunctionP</b> = std::pair&lt; L, U &gt;(*)(K inKey, T *input, size_t size)</td></tr>
-<tr class="separator:a5f7e1117f4f21bd34ef951cba51c4e26"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac819b92c4990bc7879b38d3e85dc3e62"><td class="memTemplParams" colspan="2"><a id="ac819b92c4990bc7879b38d3e85dc3e62"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:ac819b92c4990bc7879b38d3e85dc3e62"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapIPFunctionP</b> = U(*)(K inKey, T *input, size_t size)</td></tr>
-<tr class="separator:ac819b92c4990bc7879b38d3e85dc3e62"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a924d39688b5355e31efcd5bd76555351"><td class="memTemplParams" colspan="2"><a id="a924d39688b5355e31efcd5bd76555351"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a924d39688b5355e31efcd5bd76555351"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPmapIPFunctionP</b> = std::tuple&lt; L, U, size_t &gt;(*)(K inKey, T *input, size_t size)</td></tr>
-<tr class="separator:a924d39688b5355e31efcd5bd76555351"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6096faff99f26d3dc4597282bb35c89f"><td class="memTemplParams" colspan="2"><a id="a6096faff99f26d3dc4597282bb35c89f"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:a6096faff99f26d3dc4597282bb35c89f"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PmapIPFunctionP</b> = std::pair&lt; U, size_t &gt;(*)(K inKey, T *input, size_t size)</td></tr>
-<tr class="separator:a6096faff99f26d3dc4597282bb35c89f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d340fbec0f98c0b36b1bc2e1b8803fb"><td class="memTemplParams" colspan="2"><a id="a1d340fbec0f98c0b36b1bc2e1b8803fb"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a1d340fbec0f98c0b36b1bc2e1b8803fb"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapByKeyIPFunctionP</b> = std::pair&lt; L, U &gt;(*)(const K &amp;inKey, std::vector&lt; std::pair&lt; T *, size_t &gt;&gt;)</td></tr>
-<tr class="separator:a1d340fbec0f98c0b36b1bc2e1b8803fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aee1551dad642983a26af40b8211575fc"><td class="memTemplParams" colspan="2"><a id="aee1551dad642983a26af40b8211575fc"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:aee1551dad642983a26af40b8211575fc"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapByKeyIPFunctionP</b> = U(*)(const K &amp;inKey, std::vector&lt; std::pair&lt; T *, size_t &gt;&gt;)</td></tr>
-<tr class="separator:aee1551dad642983a26af40b8211575fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a960580b7165f12812d5575829fd5b2a9"><td class="memTemplParams" colspan="2"><a id="a960580b7165f12812d5575829fd5b2a9"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a960580b7165f12812d5575829fd5b2a9"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPmapByKeyIPFunctionP</b> = std::tuple&lt; L, U, size_t &gt;(*)(const K &amp;inKey, std::vector&lt; std::pair&lt; T *, size_t &gt;&gt;)</td></tr>
-<tr class="separator:a960580b7165f12812d5575829fd5b2a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac38b3840b9bfd6fc181b0af9883ddcf"><td class="memTemplParams" colspan="2"><a id="aac38b3840b9bfd6fc181b0af9883ddcf"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:aac38b3840b9bfd6fc181b0af9883ddcf"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PmapByKeyIPFunctionP</b> = std::pair&lt; U, size_t &gt;(*)(const K &amp;inKey, std::vector&lt; std::pair&lt; T *, size_t &gt;&gt;)</td></tr>
-<tr class="separator:aac38b3840b9bfd6fc181b0af9883ddcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a447ec30ee877a388f8c7403a38952410"><td class="memTemplParams" colspan="2"><a id="a447ec30ee877a388f8c7403a38952410"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a447ec30ee877a388f8c7403a38952410"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkMapIPFunctionP</b> = void(*)(L *outKey, U *output, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:a447ec30ee877a388f8c7403a38952410"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a970040ba860fa32170cb42baf0e4799e"><td class="memTemplParams" colspan="2"><a id="a970040ba860fa32170cb42baf0e4799e"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:a970040ba860fa32170cb42baf0e4799e"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkMapIPFunctionP</b> = void(*)(U *output, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:a970040ba860fa32170cb42baf0e4799e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8180a9b7d03c0fd3ed9047a7baa0d444"><td class="memTemplParams" colspan="2"><a id="a8180a9b7d03c0fd3ed9047a7baa0d444"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a8180a9b7d03c0fd3ed9047a7baa0d444"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkMapIPFunctionP</b> = void(*)(L *outKey, U *output, size_t *outputDataSizes, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:a8180a9b7d03c0fd3ed9047a7baa0d444"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a08e4f6294cdac2a40b9ea934afd24fb9"><td class="memTemplParams" colspan="2"><a id="a08e4f6294cdac2a40b9ea934afd24fb9"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:a08e4f6294cdac2a40b9ea934afd24fb9"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkMapIPFunctionP</b> = void(*)(U *output, size_t *outputDataSizes, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:a08e4f6294cdac2a40b9ea934afd24fb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb84f3d27ffaf86addb7a4a28361308c"><td class="memTemplParams" colspan="2"><a id="adb84f3d27ffaf86addb7a4a28361308c"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:adb84f3d27ffaf86addb7a4a28361308c"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IflatMapIPFunctionP</b> = std::deque&lt; std::pair&lt; L, U &gt;&gt;(*)(T *&amp;input, size_t size)</td></tr>
-<tr class="separator:adb84f3d27ffaf86addb7a4a28361308c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8be14aec14e63089848ff35d39a4fcb3"><td class="memTemplParams" colspan="2"><a id="a8be14aec14e63089848ff35d39a4fcb3"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:a8be14aec14e63089848ff35d39a4fcb3"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>flatMapIPFunctionP</b> = std::deque&lt; U &gt;(*)(T *&amp;input, size_t size)</td></tr>
-<tr class="separator:a8be14aec14e63089848ff35d39a4fcb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7149a73ec5a64ae993c2b94fd6d2655f"><td class="memTemplParams" colspan="2"><a id="a7149a73ec5a64ae993c2b94fd6d2655f"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a7149a73ec5a64ae993c2b94fd6d2655f"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPflatMapIPFunctionP</b> = std::deque&lt; std::tuple&lt; L, U, size_t &gt;&gt;(*)(T *&amp;input, size_t size)</td></tr>
-<tr class="separator:a7149a73ec5a64ae993c2b94fd6d2655f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f7087e8794b547ec3f8a6e20b84a830"><td class="memTemplParams" colspan="2"><a id="a5f7087e8794b547ec3f8a6e20b84a830"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:a5f7087e8794b547ec3f8a6e20b84a830"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PflatMapIPFunctionP</b> = std::deque&lt; std::pair&lt; U, size_t &gt;&gt;(*)(T *&amp;input, size_t size)</td></tr>
-<tr class="separator:a5f7087e8794b547ec3f8a6e20b84a830"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab60edb026f84b2b9e7d1b0aca513f9f4"><td class="memTemplParams" colspan="2"><a id="ab60edb026f84b2b9e7d1b0aca513f9f4"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:ab60edb026f84b2b9e7d1b0aca513f9f4"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkFlatMapIPFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t &amp;outputSize, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:ab60edb026f84b2b9e7d1b0aca513f9f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a962c9de7711b1a49cb10f97eab741899"><td class="memTemplParams" colspan="2"><a id="a962c9de7711b1a49cb10f97eab741899"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:a962c9de7711b1a49cb10f97eab741899"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkFlatMapIPFunctionP</b> = void(*)(U *&amp;output, size_t &amp;outputSize, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:a962c9de7711b1a49cb10f97eab741899"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b7aa8d709aaac014b6e871861ff57f9"><td class="memTemplParams" colspan="2"><a id="a7b7aa8d709aaac014b6e871861ff57f9"></a>
-template&lt;typename K , typename T , typename L , typename U &gt; </td></tr>
-<tr class="memitem:a7b7aa8d709aaac014b6e871861ff57f9"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkFlatMapIPFunctionP</b> = void(*)(L *&amp;outKey, U *&amp;output, size_t *outputDataSizes, size_t &amp;outputSize, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:a7b7aa8d709aaac014b6e871861ff57f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab0f95fdc0f493e360f63060945416e14"><td class="memTemplParams" colspan="2"><a id="ab0f95fdc0f493e360f63060945416e14"></a>
-template&lt;typename K , typename T , typename U &gt; </td></tr>
-<tr class="memitem:ab0f95fdc0f493e360f63060945416e14"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>PbulkFlatMapIPFunctionP</b> = void(*)(U *&amp;output, size_t *outputDataSizes, size_t &amp;outputSize, K *inKey, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:ab0f95fdc0f493e360f63060945416e14"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af0621ccc9bcd5359cfc2dc460dfc4351"><td class="memTemplParams" colspan="2"><a id="af0621ccc9bcd5359cfc2dc460dfc4351"></a>
-template&lt;typename K , typename T &gt; </td></tr>
-<tr class="memitem:af0621ccc9bcd5359cfc2dc460dfc4351"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPreduceIPFunctionP</b> = std::tuple&lt; K, T *, size_t &gt;(*)(K keyA, T *a, size_t sizeA, K keyB, T *b, size_t sizeB)</td></tr>
-<tr class="separator:af0621ccc9bcd5359cfc2dc460dfc4351"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7c9588170de6c93258536baf80bd3102"><td class="memTemplParams" colspan="2"><a id="a7c9588170de6c93258536baf80bd3102"></a>
-template&lt;typename K , typename T &gt; </td></tr>
-<tr class="memitem:a7c9588170de6c93258536baf80bd3102"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPreduceByKeyIPFunctionP</b> = std::tuple&lt; K, T *, size_t &gt;(*)(K keyA, T **a, size_t *dataSizesA, size_t sizeA, K keyB, T **b, size_t *dataSizesB, size_t sizeB)</td></tr>
-<tr class="separator:a7c9588170de6c93258536baf80bd3102"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a80929daf5ea00aef1fcb81cd8aee74c1"><td class="memTemplParams" colspan="2"><a id="a80929daf5ea00aef1fcb81cd8aee74c1"></a>
-template&lt;typename K , typename T &gt; </td></tr>
-<tr class="memitem:a80929daf5ea00aef1fcb81cd8aee74c1"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IPbulkReduceIPFunctionP</b> = std::tuple&lt; K, T *, size_t &gt;(*)(K *key, T **input, size_t *inputDataSizes, size_t size)</td></tr>
-<tr class="separator:a80929daf5ea00aef1fcb81cd8aee74c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader">Grouped FDDs function pointer types</div></td></tr>
-<tr class="memitem:a9ec777a5b58919804e301ce1a5c98adc"><td class="memTemplParams" colspan="2"><a id="a9ec777a5b58919804e301ce1a5c98adc"></a>
-template&lt;typename K &gt; </td></tr>
-<tr class="memitem:a9ec777a5b58919804e301ce1a5c98adc"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>updateByKeyG2FunctionP</b> = void(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b)</td></tr>
-<tr class="separator:a9ec777a5b58919804e301ce1a5c98adc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a67daf7bef40755e03e80b4ac5c0e6034"><td class="memTemplParams" colspan="2"><a id="a67daf7bef40755e03e80b4ac5c0e6034"></a>
-template&lt;typename K &gt; </td></tr>
-<tr class="memitem:a67daf7bef40755e03e80b4ac5c0e6034"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>updateByKeyG3FunctionP</b> = void(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b, std::vector&lt; void * &gt; &amp;c)</td></tr>
-<tr class="separator:a67daf7bef40755e03e80b4ac5c0e6034"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a682408c556f96213a7ca446407c510da"><td class="memTemplParams" colspan="2"><a id="a682408c556f96213a7ca446407c510da"></a>
-template&lt;typename K &gt; </td></tr>
-<tr class="memitem:a682408c556f96213a7ca446407c510da"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkUpdateG2FunctionP</b> = void(*)(K *keyA, void *a, size_t na, K *keyB, void *b, size_t nb)</td></tr>
-<tr class="separator:a682408c556f96213a7ca446407c510da"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1550d5f0229f90a47d1264587fd6dc9"><td class="memTemplParams" colspan="2"><a id="ab1550d5f0229f90a47d1264587fd6dc9"></a>
-template&lt;typename K &gt; </td></tr>
-<tr class="memitem:ab1550d5f0229f90a47d1264587fd6dc9"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkUpdateG3FunctionP</b> = void(*)(K *keyA, void *a, size_t na, K *keyB, void *b, size_t nb, K *keyC, void *c, size_t nc)</td></tr>
-<tr class="separator:ab1550d5f0229f90a47d1264587fd6dc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a509cd598ec7468382878c53b0dc1324a"><td class="memTemplParams" colspan="2"><a id="a509cd598ec7468382878c53b0dc1324a"></a>
-template&lt;typename K , typename To &gt; </td></tr>
-<tr class="memitem:a509cd598ec7468382878c53b0dc1324a"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapByKeyG2FunctionP</b> = To(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b)</td></tr>
-<tr class="separator:a509cd598ec7468382878c53b0dc1324a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3b108dc8e2e7b776a6242449f506fcf0"><td class="memTemplParams" colspan="2"><a id="a3b108dc8e2e7b776a6242449f506fcf0"></a>
-template&lt;typename K , typename To &gt; </td></tr>
-<tr class="memitem:a3b108dc8e2e7b776a6242449f506fcf0"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mapByKeyG3FunctionP</b> = To(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b, std::vector&lt; void * &gt; &amp;c)</td></tr>
-<tr class="separator:a3b108dc8e2e7b776a6242449f506fcf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff7a388c8fbc8135045bd655c1b2dfac"><td class="memTemplParams" colspan="2"><a id="aff7a388c8fbc8135045bd655c1b2dfac"></a>
-template&lt;typename K , typename Ko , typename To &gt; </td></tr>
-<tr class="memitem:aff7a388c8fbc8135045bd655c1b2dfac"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapByKeyG2FunctionP</b> = std::pair&lt; Ko, To &gt;(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b)</td></tr>
-<tr class="separator:aff7a388c8fbc8135045bd655c1b2dfac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad646bdfb2c0a86f02cb17edb07e34552"><td class="memTemplParams" colspan="2"><a id="ad646bdfb2c0a86f02cb17edb07e34552"></a>
-template&lt;typename K , typename Ko , typename To &gt; </td></tr>
-<tr class="memitem:ad646bdfb2c0a86f02cb17edb07e34552"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ImapByKeyG3FunctionP</b> = std::pair&lt; Ko, To &gt;(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b, std::vector&lt; void * &gt; &amp;c)</td></tr>
-<tr class="separator:ad646bdfb2c0a86f02cb17edb07e34552"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6ed5b483dcd18176555f3532a9570d17"><td class="memTemplParams" colspan="2"><a id="a6ed5b483dcd18176555f3532a9570d17"></a>
-template&lt;typename K , typename To &gt; </td></tr>
-<tr class="memitem:a6ed5b483dcd18176555f3532a9570d17"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>flatMapByKeyG2FunctionP</b> = std::deque&lt; To &gt;(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b)</td></tr>
-<tr class="separator:a6ed5b483dcd18176555f3532a9570d17"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a247d6c8c992ecdfd9c525478d4fe4bb8"><td class="memTemplParams" colspan="2"><a id="a247d6c8c992ecdfd9c525478d4fe4bb8"></a>
-template&lt;typename K , typename To &gt; </td></tr>
-<tr class="memitem:a247d6c8c992ecdfd9c525478d4fe4bb8"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>flatMapByKeyG3FunctionP</b> = std::deque&lt; To &gt;(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b, std::vector&lt; void * &gt; &amp;c)</td></tr>
-<tr class="separator:a247d6c8c992ecdfd9c525478d4fe4bb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aab6ad08c8d74a2bd3b821944bc13b32a"><td class="memTemplParams" colspan="2"><a id="aab6ad08c8d74a2bd3b821944bc13b32a"></a>
-template&lt;typename K , typename Ko , typename To &gt; </td></tr>
-<tr class="memitem:aab6ad08c8d74a2bd3b821944bc13b32a"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IflatMapByKeyG2FunctionP</b> = std::deque&lt; std::pair&lt; Ko, To &gt;&gt;(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b)</td></tr>
-<tr class="separator:aab6ad08c8d74a2bd3b821944bc13b32a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade9ab0b2a30dceeb9a67985cefcb345f"><td class="memTemplParams" colspan="2"><a id="ade9ab0b2a30dceeb9a67985cefcb345f"></a>
-template&lt;typename K , typename Ko , typename To &gt; </td></tr>
-<tr class="memitem:ade9ab0b2a30dceeb9a67985cefcb345f"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IflatMapByKeyG3FunctionP</b> = std::deque&lt; std::pair&lt; Ko, To &gt;&gt;(*)(const K &amp;key, std::vector&lt; void * &gt; &amp;a, std::vector&lt; void * &gt; &amp;b, std::vector&lt; void * &gt; &amp;c)</td></tr>
-<tr class="separator:ade9ab0b2a30dceeb9a67985cefcb345f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff3cf5ee2922729ad44884888aee70ed"><td class="memTemplParams" colspan="2"><a id="aff3cf5ee2922729ad44884888aee70ed"></a>
-template&lt;typename K , typename To &gt; </td></tr>
-<tr class="memitem:aff3cf5ee2922729ad44884888aee70ed"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkFlatMapG2FunctionP</b> = std::deque&lt; To &gt;(*)(K *keyA, void *a, size_t na, K *keyB, void *b, size_t nb)</td></tr>
-<tr class="separator:aff3cf5ee2922729ad44884888aee70ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad94bbbac99a9dbc8c809b7adab93a16c"><td class="memTemplParams" colspan="2"><a id="ad94bbbac99a9dbc8c809b7adab93a16c"></a>
-template&lt;typename K , typename To &gt; </td></tr>
-<tr class="memitem:ad94bbbac99a9dbc8c809b7adab93a16c"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bulkFlatMapG3FunctionP</b> = std::deque&lt; To &gt;(*)(K *keyA, void *a, size_t na, K *keyB, void *b, size_t nb, K *keyC, void *c, size_t nc)</td></tr>
-<tr class="separator:ad94bbbac99a9dbc8c809b7adab93a16c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa0e002d973b8a83a0f17d105fa04b279"><td class="memTemplParams" colspan="2"><a id="aa0e002d973b8a83a0f17d105fa04b279"></a>
-template&lt;typename K , typename Ko , typename To &gt; </td></tr>
-<tr class="memitem:aa0e002d973b8a83a0f17d105fa04b279"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkFlatMapG2FunctionP</b> = std::deque&lt; std::pair&lt; Ko, To &gt;&gt;(*)(K *keyA, void *a, size_t na, K *keyB, void *b, size_t nb)</td></tr>
-<tr class="separator:aa0e002d973b8a83a0f17d105fa04b279"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a30be1380be69d2fe9b0a508ff350f60a"><td class="memTemplParams" colspan="2"><a id="a30be1380be69d2fe9b0a508ff350f60a"></a>
-template&lt;typename K , typename Ko , typename To &gt; </td></tr>
-<tr class="memitem:a30be1380be69d2fe9b0a508ff350f60a"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>IbulkFlatMapG3FunctionP</b> = std::deque&lt; std::pair&lt; Ko, To &gt;&gt;(*)(K *keyA, void *a, size_t na, K *keyB, void *b, size_t nb, K *keyC, void *c, size_t nc)</td></tr>
-<tr class="separator:a30be1380be69d2fe9b0a508ff350f60a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -827,16 +821,14 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classfaster_1_1workerIFddCore.html">workerIFddCore</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>libfaster main namespace </p>
-</div></div><!-- contents -->
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.8.12-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacefaster.html">faster</a></li>
-    <li class="footer">Generated on Tue Nov 22 2016 13:25:22 for libfaster API Documentation by
+    <li class="footer">Generated on Tue Nov 22 2016 15:52:53 for libfaster API Documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.12 </li>
   </ul>

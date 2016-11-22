@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['numprocs',['numProcs',['../classfaster_1_1fastContext.html#a287bc160898c677df176de122d9dfad9',1,'faster::fastContext']]]
+  ['isdriver',['isDriver',['../classfaster_1_1fastContext.html#a4c4b1bc0cfe9f4e4a7959cc176d2ec24',1,'faster::fastContext']]]
 ];

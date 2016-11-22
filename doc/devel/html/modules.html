@@ -1,3 +1,4 @@
+<!-- HTML header for doxygen 1.8.12-->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -5,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.12"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Faster: Modules</title>
+<title>libfaster API Documentation: Modules</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -19,7 +20,7 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
-<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="customdoxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -29,7 +30,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><img alt="Logo" src="Logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Faster
+   <div id="projectname">libfaster API Documentation
    &#160;<span id="projectnumber">Development Version</span>
    </div>
    <div id="projectbrief">Super fast distributted computing</div>
@@ -88,15 +89,22 @@ $(document).ready(function(){initNavTree('modules.html','');});
 <div class="contents">
 <div class="textblock">Here is a list of all modules:</div><div class="directory">
 <table class="directory">
-<tr id="row_0_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a class="el" href="group__registerGlobal.html" target="_self">RegisterGlobal</a></td><td class="desc">Registers a primitive global varible to be used inside used defined functions in distributted environment </td></tr>
+<tr id="row_0_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a class="el" href="group__update.html" target="_self">Update Operators</a></td><td class="desc">Run a iterative update operaton </td></tr>
+<tr id="row_1_"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a class="el" href="group__map.html" target="_self">Map Operators</a></td><td class="desc">Run a <b>n to n</b> map operaton </td></tr>
+<tr id="row_2_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a class="el" href="group__flatmap.html" target="_self">FlatMap Operators</a></td><td class="desc">Run a <b>n to m</b> flatMap operation </td></tr>
+<tr id="row_3_"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a class="el" href="group__reduce.html" target="_self">Reduce Operators</a></td><td class="desc">Run a <b>n to 1</b> reduce </td></tr>
+<tr id="row_4_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a class="el" href="group__bulk.html" target="_self">Bulk Operator Variants</a></td><td class="desc">A variant of original operators that receive multiple entries of a dataset at the same time </td></tr>
+<tr id="row_5_"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a class="el" href="group__bykey.html" target="_self">ByKey Operator Variants</a></td><td class="desc">A variant of original operators that groups entries by key to be processed </td></tr>
+<tr id="row_6_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a class="el" href="group__grouped.html" target="_self">Grouped Datasets Operators</a></td><td class="desc">Once the user run a faster::indexedFDD::cogroup() a grouped dataset will be created </td></tr>
 </table>
 </div><!-- directory -->
 </div><!-- contents -->
 </div><!-- doc-content -->
+<!-- HTML footer for doxygen 1.8.12-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Nov 21 2016 16:49:18 for Faster by
+    <li class="footer">Generated on Tue Nov 22 2016 15:52:56 for libfaster API Documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.12 </li>
   </ul>

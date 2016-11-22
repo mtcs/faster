@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['startworkers',['startWorkers',['../classfaster_1_1fastContext.html#a1f6b1c1a940d67b434ac95bad4770508',1,'faster::fastContext']]]
+  ['printheader',['printHeader',['../classfaster_1_1fastContext.html#a721a0db53e603bff27578e040b616f6f',1,'faster::fastContext']]],
+  ['printinfo',['printInfo',['../classfaster_1_1fastContext.html#a0258ce4c9efa6df4cdf46613132c9fd0',1,'faster::fastContext']]]
 ];
