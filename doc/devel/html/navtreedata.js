@@ -29,10 +29,10 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 ".html",
-"classfaster_1_1fastComm.html#a7e1ca7788c4310cb84640812fa50a012",
-"classfaster_1_1fdd_3_01T_01_5_01_4.html#ac930844af424e4434920531d285addaf",
-"classfaster_1_1workerFddCore.html#ae6834075d00c10b68b4ed8dc56a43ff1",
-"group__reduce.html#ga1e828ad9a768db382aef2adf878aa1b2"
+"classfaster_1_1fastScheduler.html",
+"classfaster_1_1indexedFdd_3_01K_00_01T_01_5_01_4.html#a0f89674fe2c844c623198bbdba8d58eb",
+"classtestfaster_1_1testFastComBuffer.html#a867020062814b49946f8ed59478e2be3",
+"workerIFddInstance2_8cpp_source.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

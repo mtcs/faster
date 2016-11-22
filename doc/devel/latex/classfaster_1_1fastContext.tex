@@ -9,7 +9,11 @@
 \subsection{Description}
 Framework context class. 
 
-The context manages communication, scheduler and start Workers. A context is needed to create datasets! \subsection*{Public Member Functions}
+The context manages communication, scheduler and start Workers. A context is needed to create datasets! 
+
+Definition at line 66 of file fast\+Context.\+h.
+
+\subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
 \hyperlink{classfaster_1_1fastContext_adf84c9fd9f1d768f1fb8ba8bdd13bb47}{fast\+Context} (int argc=0, char $\ast$$\ast$argv=N\+U\+LL)
@@ -93,6 +97,10 @@ void \hyperlink{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26}{up
 \end{DoxyParams}
 
 
+Definition at line 8 of file fast\+Context.\+cpp.
+
+
+
 \subsection{Member Function Documentation}
 \hypertarget{classfaster_1_1fastContext_a4c4b1bc0cfe9f4e4a7959cc176d2ec24}{}\label{classfaster_1_1fastContext_a4c4b1bc0cfe9f4e4a7959cc176d2ec24} 
 \index{faster\+::fast\+Context@{faster\+::fast\+Context}!is\+Driver@{is\+Driver}}
@@ -107,6 +115,10 @@ Checks for the driver process.
 \begin{DoxyReturn}{Returns}
 -\/ true if the process is the driver process 
 \end{DoxyReturn}
+
+
+Definition at line 76 of file fast\+Context.\+cpp.
+
 \hypertarget{classfaster_1_1fastContext_a287bc160898c677df176de122d9dfad9}{}\label{classfaster_1_1fastContext_a287bc160898c677df176de122d9dfad9} 
 \index{faster\+::fast\+Context@{faster\+::fast\+Context}!num\+Procs@{num\+Procs}}
 \index{num\+Procs@{num\+Procs}!faster\+::fast\+Context@{faster\+::fast\+Context}}
@@ -120,6 +132,10 @@ Return the number of processes running.
 \begin{DoxyReturn}{Returns}
 number of active processes 
 \end{DoxyReturn}
+
+
+Definition at line 150 of file fast\+Context.\+h.
+
 \hypertarget{classfaster_1_1fastContext_acb65e4cdd0eaae3bf4326247b822e025}{}\label{classfaster_1_1fastContext_acb65e4cdd0eaae3bf4326247b822e025} 
 \index{faster\+::fast\+Context@{faster\+::fast\+Context}!online\+Full\+Part\+Read@{online\+Full\+Part\+Read}}
 \index{online\+Full\+Part\+Read@{online\+Full\+Part\+Read}!faster\+::fast\+Context@{faster\+::fast\+Context}}
@@ -184,7 +200,11 @@ Reads a file with online parsing and mapping (?)
 
 Prints a header for task execution information. 
 
-To be used with \hyperlink{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26}{faster\+::fast\+Context\+::update\+Info()} \hypertarget{classfaster_1_1fastContext_a78d8eec46a44c600adb554bcdf8d8a2c}{}\label{classfaster_1_1fastContext_a78d8eec46a44c600adb554bcdf8d8a2c} 
+To be used with \hyperlink{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26}{faster\+::fast\+Context\+::update\+Info()} 
+
+Definition at line 334 of file fast\+Context.\+cpp.
+
+\hypertarget{classfaster_1_1fastContext_a78d8eec46a44c600adb554bcdf8d8a2c}{}\label{classfaster_1_1fastContext_a78d8eec46a44c600adb554bcdf8d8a2c} 
 \index{faster\+::fast\+Context@{faster\+::fast\+Context}!register\+Function@{register\+Function}}
 \index{register\+Function@{register\+Function}!faster\+::fast\+Context@{faster\+::fast\+Context}}
 \subsubsection{\texorpdfstring{register\+Function()}{registerFunction()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
@@ -201,6 +221,10 @@ Registering a user custom functions is necessary in order to pass it as paramete
 {\em funcP} & -\/ Function pointer to a user defined function. \\
 \hline
 \end{DoxyParams}
+
+
+Definition at line 48 of file fast\+Context.\+cpp.
+
 \hypertarget{classfaster_1_1fastContext_add296b9632bef0f4ceddbdc02a874bb4}{}\label{classfaster_1_1fastContext_add296b9632bef0f4ceddbdc02a874bb4} 
 \index{faster\+::fast\+Context@{faster\+::fast\+Context}!register\+Function@{register\+Function}}
 \index{register\+Function@{register\+Function}!faster\+::fast\+Context@{faster\+::fast\+Context}}
@@ -220,6 +244,10 @@ Registering a user custom functions is necessary in order to pass it as paramete
 {\em name} & -\/ Custom name to registered funciton. \\
 \hline
 \end{DoxyParams}
+
+
+Definition at line 53 of file fast\+Context.\+cpp.
+
 \hypertarget{classfaster_1_1fastContext_a21c563c0ba6075a6dc31faf14dccb165}{}\label{classfaster_1_1fastContext_a21c563c0ba6075a6dc31faf14dccb165} 
 \index{faster\+::fast\+Context@{faster\+::fast\+Context}!register\+Global@{register\+Global}}
 \index{register\+Global@{register\+Global}!faster\+::fast\+Context@{faster\+::fast\+Context}}
@@ -241,6 +269,10 @@ Gegisters a primitive global varible to be used inside used defined functions in
 {\em varP} & -\/ Global variable to be registered \\
 \hline
 \end{DoxyParams}
+
+
+Definition at line 353 of file fast\+Context.\+h.
+
 \hypertarget{classfaster_1_1fastContext_a569dc3296b036b0d159a35fd7eb37cbe}{}\label{classfaster_1_1fastContext_a569dc3296b036b0d159a35fd7eb37cbe} 
 \index{faster\+::fast\+Context@{faster\+::fast\+Context}!register\+Global@{register\+Global}}
 \index{register\+Global@{register\+Global}!faster\+::fast\+Context@{faster\+::fast\+Context}}
@@ -264,6 +296,10 @@ Gegisters a global array to be used inside used defined functions in distributte
 {\em s} & -\/ Size of the array \\
 \hline
 \end{DoxyParams}
+
+
+Definition at line 357 of file fast\+Context.\+h.
+
 \hypertarget{classfaster_1_1fastContext_a9cfc7e3b62baca68c7c5a1ddba548691}{}\label{classfaster_1_1fastContext_a9cfc7e3b62baca68c7c5a1ddba548691} 
 \index{faster\+::fast\+Context@{faster\+::fast\+Context}!register\+Global@{register\+Global}}
 \index{register\+Global@{register\+Global}!faster\+::fast\+Context@{faster\+::fast\+Context}}
@@ -285,6 +321,10 @@ Gegisters a global Vector to be used inside used defined functions in distributt
 {\em varP} & -\/ Global vector to be registered \\
 \hline
 \end{DoxyParams}
+
+
+Definition at line 362 of file fast\+Context.\+h.
+
 \hypertarget{classfaster_1_1fastContext_a1f6b1c1a940d67b434ac95bad4770508}{}\label{classfaster_1_1fastContext_a1f6b1c1a940d67b434ac95bad4770508} 
 \index{faster\+::fast\+Context@{faster\+::fast\+Context}!start\+Workers@{start\+Workers}}
 \index{start\+Workers@{start\+Workers}!faster\+::fast\+Context@{faster\+::fast\+Context}}
@@ -295,7 +335,11 @@ Gegisters a global Vector to be used inside used defined functions in distributt
 
 Start worker machines computation. 
 
-When this function is called, the driver processes and works processes diverge from execution. While the Driver process starts to execute user code, the worker processes start to waiting for tasks. Then workers should exit short after this function is called. \hypertarget{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26}{}\label{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26} 
+When this function is called, the driver processes and works processes diverge from execution. While the Driver process starts to execute user code, the worker processes start to waiting for tasks. Then workers should exit short after this function is called. 
+
+Definition at line 58 of file fast\+Context.\+cpp.
+
+\hypertarget{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26}{}\label{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26} 
 \index{faster\+::fast\+Context@{faster\+::fast\+Context}!update\+Info@{update\+Info}}
 \index{update\+Info@{update\+Info}!faster\+::fast\+Context@{faster\+::fast\+Context}}
 \subsubsection{\texorpdfstring{update\+Info()}{updateInfo()}}
@@ -306,6 +350,10 @@ When this function is called, the driver processes and works processes diverge f
 Prints information from tesk ran since last \hyperlink{classfaster_1_1fastContext_ae6e69c86414bc5333da72aef13257d26}{faster\+::fast\+Context\+::update\+Info()} called. 
 
 To be used with \hyperlink{classfaster_1_1fastContext_a721a0db53e603bff27578e040b616f6f}{faster\+::fast\+Context\+::print\+Header()} 
+
+Definition at line 331 of file fast\+Context.\+cpp.
+
+
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 
