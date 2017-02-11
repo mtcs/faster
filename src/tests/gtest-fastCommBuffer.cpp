@@ -176,7 +176,7 @@ TEST_F(testFastComBuffer10k, writePairInt){
 }
 
 TEST_F(testFastComBuffer10k, writeTupleInt4){
-	std::tuple<int,int,int,int> val = {0xFAFCDCEF,0xFAFCDCEF,0xFAFCDCEF,0xFAFCDCEF};
+	std::tuple<int,int,int,int> val = std::make_tuple(0xFAFCDCEF,0xFAFCDCEF,0xFAFCDCEF,0xFAFCDCEF);
 	testWrite(val, "\xEF\xDC\xFC\xFA\xEF\xDC\xFC\xFA\xEF\xDC\xFC\xFA\xEF\xDC\xFC\xFA", 16);
 }
 

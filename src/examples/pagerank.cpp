@@ -94,7 +94,7 @@ double getNewPR(const int & key UNUSED, vector<void *> & prL, vector<void *> & c
 	//if ( key == 1 )
 		//cerr << "]\n";
 
-	return abs(oldPR - pr);
+	return fabs(oldPR - pr);
 }
 
 pair<int,vector<int>> maxNodeId( const int & ka, vector<int> & a, const int & kb, vector<int> & b){

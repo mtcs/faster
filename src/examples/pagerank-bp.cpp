@@ -169,7 +169,7 @@ void getNewPR(int * prKeys, void * prVP, size_t npr, int * contKeys, void * cont
 	//#pragma omp parallel for
 	for ( size_t i = 0; i < npr; ++i ){
 		// Output PR error
-		error[i] = abs(error[i] + newPr[i]);
+		error[i] = fabs(error[i] + newPr[i]);
 		pr[i] += newPr[i];
 
 	}
