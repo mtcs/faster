@@ -7,6 +7,8 @@
 using namespace std;
 using namespace faster;
 
+namespace testfaster{
+
 TEST(testFddStorageCreate, CreateEmpty){
 	faster::fddStorage<int> storage(0);
 
@@ -84,7 +86,6 @@ TEST_F(testFddStorageFunctionsINT, Insert){
 	ASSERT_EQ(1234, storage[rawData.size()]);
 }
 
-namespace {
 	int main(int argc, char **argv) {
 
 		::testing::InitGoogleTest(&argc, argv);

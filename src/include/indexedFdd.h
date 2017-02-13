@@ -82,6 +82,15 @@ namespace faster{
 			//groupedFdd<K, T, FddTypes...> * cogroup(Args * ... args){
 				//return new groupedFdd<K, T, FddTypes...>(context, this, args...);
 			//}
+
+			/// @ingroup shuffle
+			/// @brief Groupes two datasets twogether according with the keys of the
+			/// first dataset.
+			///
+			/// @tparam U - Value type of the second dataset
+			/// @param fdd1 - second dataset
+			///
+			/// @return pointer to a dataset group
 			template<typename U>
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1){
 
@@ -91,6 +100,16 @@ namespace faster{
 				return new groupedFdd<K>(context, this, fdd1, start);
 			}
 
+			/// @ingroup shuffle
+			/// @brief Groupes tree datasets together according with the keys of the
+			/// first dataset.
+			///
+			/// @tparam U - Value type of the second dataset
+			/// @tparam V - Value type of the third dataset
+			/// @param fdd1 - second dataset
+			/// @param fdd2 - third dataset
+			///
+			/// @return
 			template<typename U, typename V>
 			groupedFdd<K> * cogroup(iFddCore<K,U> * fdd1, iFddCore<K,V> * fdd2){
 
@@ -100,23 +119,44 @@ namespace faster{
 				return new groupedFdd<K>(context, this, fdd1, fdd2, start);
 			}
 
+			/// @brief Count how many unique key there is in the dataset
+			///
+			/// @return a unordered_map (hash) of the key count.
 			std::unordered_map<K, size_t> countByKey();
 
+			/// @ingroup shuffle
+			/// @brief Groups distributed dataset by key.
+			///
+			/// @return pointer to itself
 			indexedFdd<K,T> * groupByKey();
 
+			/// @ingroup memmodel
+			/// @brief deallocates previously cached FDD
 			void discard(){
 				//std::cerr << "\033[0;31mDEL" << id << "\033[0m  ";
 				context->discardFDD(id);
 			}
 
+			/// @brief Writes FDD content to file
+			///
+			/// Every process will write its own file with a rank number between the
+			/// prefix and the suffix.
+			///
+			/// @param path - Prefix of the file path to be written
+			/// @param sufix - Sufix of the file path to be written
 			void writeToFile(std::string path, std::string sufix);
 
+			/// @brief Determines if a dataset is grouped by key
+			///
+			/// @return true is it has been groupe by key
 			bool isGroupedByKey() {
 				return groupedByKey;
 			}
+			/// @brief (UNUSED)
 			void setGroupedByKey(bool gbk) {
 				groupedByKey = gbk;
 			}
+			/// @brief (UNUSED)
 			void setGroupedByMap(bool gbm) {
 				groupedByMap = gbm;
 			}
@@ -134,146 +174,40 @@ namespace faster{
 		public:
 			// -------------- Constructors --------------- //
 
-			// Create a empty fdd
+			/// @brief Create a empty indexedFdd
 			indexedFdd(fastContext &c) : iFddCore<K,T>(c){
 				this->_tType = decodeType(typeid(T).hash_code());
 				this->id = c.createIFDD(this, typeid(K).hash_code(), typeid(T).hash_code());
 			}
 
-			// Create a empty fdd with a pre allocated size
+			/// @brief Create a empty indexedFdd with a pre allocated size
 			indexedFdd(fastContext &c, size_t s, const std::vector<size_t> & dataAlloc) : iFddCore<K,T>(c, s, dataAlloc){
 				this->_tType = decodeType(typeid(T).hash_code());
 				this->id = c.createIFDD(this, typeid(K).hash_code(), typeid(T).hash_code(), dataAlloc);
 			}
+
+			/// @brief Create a empty indexedFdd with a pre allocated size
 			indexedFdd(fastContext &c, size_t s) : indexedFdd(c, s, c.getAllocation(s)) { }
 
-			// Create a fdd from a array in memory
+			/// @brief Create a indexedFdd from a array in memory
 			indexedFdd(fastContext &c, K * keys, T * data, size_t size) : indexedFdd(c, size){
 				c.parallelizeI(this->id, keys, data, size);
 			}
 
-			// Create a fdd from file
+			/// @brief Create a indexedFdd from a file
 			indexedFdd(fastContext &c, std::string) { //: indexedFdd(c, size){
 				//this->onlineRead();
 			}
 
+			/// @brief Class Destructor.
+			/// WARNING: It will deallocate distributed memory
 			~indexedFdd(){
 			}
 
-			// -------------- FDD Functions --------------- //
-
-			//  Update
-			indexedFdd<K,T> * update(updateIFunctionP<K,T> funcP){
-				iFddCore<K,T>::update((void*) funcP, OP_Update);
-				return this;
-			}
-			// Map
-			template <typename L, typename U>
-			indexedFdd<L,U> * map( ImapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_Map);
-			}
-			template <typename L, typename U>
-			indexedFdd<L,U> * map( IPmapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_Map);
-			}
-			template <typename U>
-			fdd<U> * map( mapIFunctionP<K,T,U> funcP ){
-				return iFddCore<K,T>::template map<U>((void*) funcP, OP_Map);
-			}
-			template <typename U>
-			fdd<U> * map( PmapIFunctionP<K,T,U> funcP ){
-				return iFddCore<K,T>::template map<U>((void*) funcP, OP_Map);
-			}
-
-			// MapByKey
-			template <typename L, typename U>
-			indexedFdd<L,U> * mapByKey( ImapByKeyIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_MapByKey);
-			}
-			template <typename L, typename U>
-			indexedFdd<L,U> * mapByKey( IPmapByKeyIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_MapByKey);
-			}
-			template <typename L, typename U>
-			fdd<U> * mapByKey( mapByKeyIFunctionP<K,T,U> funcP ){
-				return iFddCore<K,T>::template map<U>((void*) funcP, OP_MapByKey);
-			}
-			template <typename L, typename U>
-			fdd<U> * mapByKey( PmapByKeyIFunctionP<K,T,U> funcP ){
-				return iFddCore<K,T>::template map<U>((void*) funcP, OP_MapByKey);
-			}
-
-
-			// BulkMap
-			template <typename L, typename U>
-			indexedFdd<L,U> * bulkMap( IbulkMapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_BulkMap);
-			}
-			template <typename L, typename U>
-			indexedFdd<L,U> * bulkMap( IPbulkMapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_BulkMap);
-			}
-			template <typename L, typename U>
-			fdd<U> * bulkMap( bulkMapIFunctionP<K,T,U> funcP ){
-				return iFddCore<K,T>::template map<U>((void*) funcP, OP_BulkMap);
-			}
-			template <typename L, typename U>
-			fdd<U> * bulkMap( PbulkMapIFunctionP<K,T,U> funcP ){
-				return iFddCore<K,T>::template map<U>((void*) funcP, OP_BulkMap);
-			}
-
-
-			// FlatMap
-			template <typename L, typename U>
-			indexedFdd<L,U> * flatMap( IflatMapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_FlatMap);
-			}
-			template <typename L, typename U>
-			indexedFdd<L,U> * flatMap( IPflatMapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_FlatMap);
-			}
-			template <typename L, typename U>
-			fdd<U> * flatMap( flatMapIFunctionP<K,T,U> funcP ){
-				return iFddCore<K,T>::template map<U>((void*) funcP, OP_FlatMap);
-			}
-			template <typename L, typename U>
-			fdd<U> * flatMap( PflatMapIFunctionP<K,T,U> funcP ){
-				return iFddCore<K,T>::template map<U>((void*) funcP, OP_FlatMap);
-			}
-
-
-			template <typename L, typename U>
-			indexedFdd<L,U> * bulkFlatMap( IbulkFlatMapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_BulkFlatMap);
-			}
-			template <typename L, typename U>
-			indexedFdd<L,U> * bulkFlatMap( IPbulkFlatMapIFunctionP<K,T,L,U> funcP ){
-				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_BulkFlatMap);
-			}
-			template <typename L, typename U>
-			fdd<U> * bulkFlatMap( bulkFlatMapIFunctionP<K,T,U> funcP ){
-				return iFddCore<K,T>::template map<U>((void*) funcP, OP_BulkFlatMap);
-			}
-			template <typename L, typename U>
-			fdd<U> * bulkFlatMap( PbulkFlatMapIFunctionP<K,T,U> funcP ){
-				return iFddCore<K,T>::template map<U>((void*) funcP, OP_BulkFlatMap);
-			}
-
-			// ------------------ Reduce ----------------- //
-
-			// Run a Reduce
-			std::pair<K,T> reduce( IreduceIFunctionP<K,T> funcP ){
-				return reduce((void*) funcP, OP_Reduce);
-			}
-			//indexedFdd<K,T> * std::pair<K,T> reduceByKey( IreduceByKeyIFunctionP<K,T> funcP ){
-				//return reduceByKey((void*) funcP, OP_Reduce);
-			//}
-			std::pair<K,T> bulkReduce( IbulkReduceIFunctionP<K,T> funcP ){
-				return reduce((void*) funcP, OP_BulkReduce);
-			}
-
 			// --------------- FDD Builtin functions ------------- //
-			// Collect a FDD
+			/// @brief Brings the distributted data from a indexedFDD to the driver memory
+			///
+			/// @return a vector with the content of the indexedFDD
 			std::vector<std::pair<K,T>> collect( ){
 				//std::cerr << " \033[0;31mSIZE: " << this->size << "\033[0m";
 				std::vector<std::pair<K,T>> data(this->size);
@@ -281,10 +215,180 @@ namespace faster{
 				return data;
 			}
 
+			/// @ingroup memmodel
+			/// @brief Prevents automatic memory deallocation from hapenning
+			///
+			/// @return pointer to the cached dataset (self)
 			indexedFdd<K,T> * cache(){
 				this->cached = true;
 				return this;
 			}
+
+			//  Update
+			/// @ingroup update
+			/// @brief updates the content of a indexedFDD
+			indexedFdd<K,T> * update(updateIFunctionP<K,T> funcP){
+				iFddCore<K,T>::update((void*) funcP, OP_Update);
+				return this;
+			}
+
+			// -------------- FDD Functions --------------- //
+
+			/// @addtogroup map
+			/// @{
+
+			// Map
+			/// @brief creates a indexedFdd<L,U>
+			template <typename L, typename U>
+			indexedFdd<L,U> * map( ImapIFunctionP<K,T,L,U> funcP ){
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_Map);
+			}
+			/// @brief creates a indexedFdd<L,U*>
+			template <typename L, typename U>
+			indexedFdd<L,U> * map( IPmapIFunctionP<K,T,L,U> funcP ){
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_Map);
+			}
+			/// @brief creates a fdd<U>
+			template <typename U>
+			fdd<U> * map( mapIFunctionP<K,T,U> funcP ){
+				return iFddCore<K,T>::template map<U>((void*) funcP, OP_Map);
+			}
+			/// @brief creates a fdd<U *>
+			template <typename U>
+			fdd<U> * map( PmapIFunctionP<K,T,U> funcP ){
+				return iFddCore<K,T>::template map<U>((void*) funcP, OP_Map);
+			}
+
+			// MapByKey
+			/// @ingroup bykey
+			/// @brief creates a indexedFdd<L,U>
+			template <typename L, typename U>
+			indexedFdd<L,U> * mapByKey( ImapByKeyIFunctionP<K,T,L,U> funcP ){
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_MapByKey);
+			}
+			/// @ingroup bykey
+			/// @brief creates a indexedFdd<L,U*>
+			template <typename L, typename U>
+			indexedFdd<L,U> * mapByKey( IPmapByKeyIFunctionP<K,T,L,U> funcP ){
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_MapByKey);
+			}
+			/// @ingroup bykey
+			/// @brief creates a fdd<U>
+			template <typename L, typename U>
+			fdd<U> * mapByKey( mapByKeyIFunctionP<K,T,U> funcP ){
+				return iFddCore<K,T>::template map<U>((void*) funcP, OP_MapByKey);
+			}
+			/// @ingroup bykey
+			/// @brief creates a fdd<U *>
+			template <typename L, typename U>
+			fdd<U> * mapByKey( PmapByKeyIFunctionP<K,T,U> funcP ){
+				return iFddCore<K,T>::template map<U>((void*) funcP, OP_MapByKey);
+			}
+
+
+			// BulkMap
+			/// @ingroup bulk
+			/// @brief creates a indexedFdd<L,U>
+			template <typename L, typename U>
+			indexedFdd<L,U> * bulkMap( IbulkMapIFunctionP<K,T,L,U> funcP ){
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_BulkMap);
+			}
+			/// @ingroup bulk
+			/// @brief creates a indexedFdd<L,U*>
+			template <typename L, typename U>
+			indexedFdd<L,U> * bulkMap( IPbulkMapIFunctionP<K,T,L,U> funcP ){
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_BulkMap);
+			}
+			/// @ingroup bulk
+			/// @brief creates a fdd<U>
+			template <typename L, typename U>
+			fdd<U> * bulkMap( bulkMapIFunctionP<K,T,U> funcP ){
+				return iFddCore<K,T>::template map<U>((void*) funcP, OP_BulkMap);
+			}
+			/// @ingroup bulk
+			/// @brief creates a fdd<U *>
+			template <typename L, typename U>
+			fdd<U> * bulkMap( PbulkMapIFunctionP<K,T,U> funcP ){
+				return iFddCore<K,T>::template map<U>((void*) funcP, OP_BulkMap);
+			}
+			/// @}
+
+
+			/// @addtogroup flatmap
+			/// @{
+
+			// FlatMap
+			/// @brief creates a indexedFdd<L,U>
+			template <typename L, typename U>
+			indexedFdd<L,U> * flatMap( IflatMapIFunctionP<K,T,L,U> funcP ){
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_FlatMap);
+			}
+			/// @brief creates a indexedFdd<L,U*>
+			template <typename L, typename U>
+			indexedFdd<L,U> * flatMap( IPflatMapIFunctionP<K,T,L,U> funcP ){
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_FlatMap);
+			}
+			/// @brief creates a fdd<U>
+			template <typename L, typename U>
+			fdd<U> * flatMap( flatMapIFunctionP<K,T,U> funcP ){
+				return iFddCore<K,T>::template map<U>((void*) funcP, OP_FlatMap);
+			}
+			/// @brief creates a fdd<U *>
+			template <typename L, typename U>
+			fdd<U> * flatMap( PflatMapIFunctionP<K,T,U> funcP ){
+				return iFddCore<K,T>::template map<U>((void*) funcP, OP_FlatMap);
+			}
+
+			// TODO add flatMapByKey
+
+
+			/// @ingroup bulk
+			/// @brief creates a indexedFdd<L,U>
+			template <typename L, typename U>
+			indexedFdd<L,U> * bulkFlatMap( IbulkFlatMapIFunctionP<K,T,L,U> funcP ){
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_BulkFlatMap);
+			}
+			/// @ingroup bulk
+			/// @brief creates a indexedFdd<L,U*>
+			template <typename L, typename U>
+			indexedFdd<L,U> * bulkFlatMap( IPbulkFlatMapIFunctionP<K,T,L,U> funcP ){
+				return iFddCore<K,T>::template mapI<L,U>((void*) funcP, OP_BulkFlatMap);
+			}
+			/// @ingroup bulk
+			/// @brief creates a fdd<U>
+			template <typename L, typename U>
+			fdd<U> * bulkFlatMap( bulkFlatMapIFunctionP<K,T,U> funcP ){
+				return iFddCore<K,T>::template map<U>((void*) funcP, OP_BulkFlatMap);
+			}
+			/// @ingroup bulk
+			/// @brief creates a fdd<U *>
+			template <typename L, typename U>
+			fdd<U> * bulkFlatMap( PbulkFlatMapIFunctionP<K,T,U> funcP ){
+				return iFddCore<K,T>::template map<U>((void*) funcP, OP_BulkFlatMap);
+			}
+			/// @}
+
+			// ------------------ Reduce ----------------- //
+			/// @addtogroup flatmap
+			/// @{
+
+			// Run a Reduce
+			/// @brief summarizes a fdd<K,T> into a single value of type T
+			std::pair<K,T> reduce( IreduceIFunctionP<K,T> funcP ){
+				return reduce((void*) funcP, OP_Reduce);
+			}
+			//indexedFdd<K,T> * std::pair<K,T> reduceByKey( IreduceByKeyIFunctionP<K,T> funcP ){
+				//return reduceByKey((void*) funcP, OP_Reduce);
+			//}
+
+			/// @brief summarizes a fdd<K,T> into a single value of type T using a bulk
+			/// function _pair<K,T> F(K, T, K, T)_
+			/// @ingroup bulk
+			std::pair<K,T> bulkReduce( IbulkReduceIFunctionP<K,T> funcP ){
+				return reduce((void*) funcP, OP_BulkReduce);
+			}
+			/// @}
+
 	};
 
 	template <typename K, typename T>

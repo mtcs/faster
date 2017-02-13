@@ -15,6 +15,7 @@ option(hdfsEnabled 	"Haddop File System (HDFS) support" ON)
 option(offloadingEnabled "Accelerator Offloading support" OFF)
 option(sanEnabled 	"Sanitizers debugging support" OFF)
 option(examplesAsTests 	"Use examples as tests" OFF)
+#option(dashboardSubmit 	"Submit tests to public dashboard" OFF)
 set(hadoopHome  	"/usr/lib/hadoop" CACHE STRING "Haddop File System (HDFS) home directory")
 set(jvmHome  		"/usr/lib/jvm/default" CACHE STRING "JVM home directory (for HDFS)")
 
@@ -60,6 +61,13 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	#set (EXTRA_LIBS efence ${EXTRA_LIBS}) # DEPRECATED
 
 	endif (NOT hdfsEnabled)
+
+	#if (dashboardSubmit)
+	#endif (dashboardSubmit)
+
+	# GPerfTools (NOT WORKING)
+	#set (EXTRA_LIBS profiler ${EXTRA_LIBS})
+
 
 else (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	message("----------- RELEASE MODE -----------")
