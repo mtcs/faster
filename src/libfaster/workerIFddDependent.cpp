@@ -10,6 +10,20 @@
 	using std::chrono::duration_cast;
 	using std::chrono::milliseconds;
 
+#ifdef cudaEnabled
+template <typename K, typename T>
+template <typename L, typename U>
+_global_ ImapI<<<>>>(L * ok, U * od, K * k, T * d, size_t s, ImapIFunctionP<K,T,L,U> mapFunc){
+	unsigned int i = threadIdx.x + blockIdx.x * blockDim.x;
+	if (i < s){
+		std::pair<L,U> r = mapFunc(k[i],d[i]);
+		ok[i] = r.first;
+		od[i] = r.second;
+	}
+
+}
+#endif // cudaEnabled
+
 // --------- MAP
 template <typename K, typename T>
 template <typename L, typename U>
@@ -22,6 +36,32 @@ void faster::_workerIFdd<K,T>::map (workerFddBase * dest, ImapIFunctionP<K,T,L,U
 
 	//std::cerr << "START\n" ;
 
+	#ifdef cudaEnabled
+	T * d_d;
+	K * d_ik;
+	L * d_ok;
+	U * d_od;
+	const unsigned int tpb = 512;
+	unsigned int nb = (s + tpb - 1) / tpb;
+
+	cudaMalloc((void **)d_d, s*sizeof(T));
+	cudaMalloc((void **)d_ik, s*sizeof(K));
+	cudaMalloc((void **)d_ok, s*sizeof(L));
+	cudaMalloc((void **)d_od, s*sizeof(U));
+
+	sudaMemcpy(d_d, d, s*sizeof(T), cudaMemcpyHostToDevice);
+	sudaMemcpy(d_ik, k, s*sizeof(K), cudaMemcpyHostToDevice);
+
+	ImapI<K,T,L,U><<<nb,tpb>>>(d_ik, d_d, s, mapFunc);
+
+	sudaMemcpy(d_d, d, s*sizeof(T), cudaMemcpyDeviceToHost);
+	sudaMemcpy(d_d, d, s*sizeof(T), cudaMemcpyDeviceToHost);
+
+	cudeFree(d_d);
+	cudeFree(d_ik);
+	cudeFree(d_ok);
+	cudeFree(d_od);
+	#else
 	//#pragma omp target map(to:ik,d) map(from:ok,od)
 	#pragma omp parallel for
 	for (size_t i = 0; i < s; ++i){
@@ -30,6 +70,7 @@ void faster::_workerIFdd<K,T>::map (workerFddBase * dest, ImapIFunctionP<K,T,L,U
 		od[i] = r.second;
 	}
 	//std::cerr << "END\n";
+	#endif // cudaEnabled
 }
 
 /*template <typename K, typename T>

@@ -12,7 +12,8 @@ set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )
 
 # Options and user variables
 option(hdfsEnabled 	"Haddop File System (HDFS) support" ON)
-option(offloadingEnabled "Accelerator Offloading support" OFF)
+#option(offloadingEnabled "Accelerator Offloading support" OFF)
+option(cudaEnabled "CUDA GPU acceleration support" OFF)
 option(sanEnabled 	"Sanitizers debugging support" OFF)
 option(examplesAsTests 	"Use examples as tests" OFF)
 #option(dashboardSubmit 	"Submit tests to public dashboard" OFF)
@@ -24,6 +25,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+if (cudeEnabled)
+	find_package(CUDA QUIET REQUIRED)
+endif (cudaEnabled)
 
 if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	message("----------- DEBUG MODE -----------")
@@ -77,10 +82,10 @@ else (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	#set (EXTRA_LIBS ${EXTRA_LIBS} tcmalloc)
 endif (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 
-if (offloadingEnabled)
-	add_definitions(-foffload=nvptx-none="-v")
-	add_definitions(--with-build-time-tools=/usr/local/nvptx-none/bin)
-endif (offloadingEnabled)
+#if (offloadingEnabled)
+#add_definitions(-foffload=nvptx-none="-v")
+#add_definitions(--with-build-time-tools=/usr/local/nvptx-none/bin)
+#endif (offloadingEnabled)
 
 
 if (hdfsEnabled)
