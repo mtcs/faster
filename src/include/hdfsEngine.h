@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <deque>
 #include <fcntl.h>
 
 namespace faster{
@@ -27,14 +28,29 @@ namespace faster{
 			std::vector<char> _buffer;
 			size_t read(char* v);
 
+			// getLine
+			const size_t _readBufferSize = 16*1024;
+			char * _readBuffer;
+			long int _readSize;
+			size_t _readOffset;
+			size_t _readPos;
+			bool _eof;
+
 		public:
-			hdfsFile(void * fs, std::string path, fileMode mode);
+			hdfsFile(void * fs, std::string & path, fileMode mode);
 			~hdfsFile();
 
 			void close();
+			bool good();
 
 			size_t read(char * v, size_t n);
 			size_t write(char * v, size_t n);
+			size_t seek(size_t offset);
+
+			std::string getLine(size_t offset, char sep);
+			std::string getLine(char sep);
+
+			std::vector<std::deque<int>> getBlocksLocations();
 
 			void del();
 	};
@@ -43,6 +59,7 @@ namespace faster{
 		private:
 			void * _fs;
 			bool _ready;
+			std::string _path;
 
 		public:
 			hdfsEngine();

@@ -116,8 +116,10 @@ namespace faster{
 	///@}
 
 
-	///@name Not Indexed FFDs function pointer types
-	///@{
+	// Not Indexed FFDs function pointer types
+	/// @addtogroup map
+	/// @{
+
 	template <typename T, typename U>
 	using mapFunctionP = U (*) (T & input);
 	template <typename T, typename L, typename U>
@@ -127,14 +129,22 @@ namespace faster{
 	template <typename T, typename L, typename U>
 	using IPmapFunctionP = std::tuple<L,U,size_t> (*) (T & input);
 
+	/// @ingroup bulk
 	template <typename T, typename U>
 	using bulkMapFunctionP = void (*) (U * output, T * input, size_t size);
+	/// @ingroup bulk
 	template <typename T, typename L, typename U>
 	using IbulkMapFunctionP = void (*) (L * outKey, U * output, T * input, size_t size);
+	/// @ingroup bulk
 	template <typename T, typename U>
 	using PbulkMapFunctionP = void (*) (U * output, size_t * outputDataSizes, T * input, size_t size);
+	/// @ingroup bulk
 	template <typename T, typename L, typename U>
 	using IPbulkMapFunctionP = void (*) (L * outKey, U * output, size_t * outputDataSizes, T * input, size_t size);
+	/// @}
+
+	/// @addtogroup flatmap
+	/// @{
 
 	template <typename T, typename U>
 	using flatMapFunctionP = std::deque<U> (*) (T & input);
@@ -145,24 +155,36 @@ namespace faster{
 	template <typename T, typename L, typename U>
 	using IPflatMapFunctionP = std::deque<std::tuple<L, U,size_t>>  (*) (T & input);
 
+	/// @ingroup bulk
 	template <typename T, typename U>
 	using bulkFlatMapFunctionP = void (*) (U *& output, size_t & outputSize, T * input, size_t size);
+	/// @ingroup bulk
 	template <typename T, typename L, typename U>
 	using IbulkFlatMapFunctionP = void (*) (L *& outKey, U *& output, size_t & outputSize, T * input, size_t size);
+	/// @ingroup bulk
 	template <typename T, typename U>
 	using PbulkFlatMapFunctionP = void (*) (U *& output, size_t *& outputDataSizes, size_t & outputSize, T * input, size_t size);
+	/// @ingroup bulk
 	template <typename T, typename L, typename U>
 	using IPbulkFlatMapFunctionP = void (*) (L *& outKey, U *& output, size_t *& outputDataSizes, size_t & outputSize, T * input, size_t size);
+	/// @}
+
+	/// @addtogroup reduce
+	/// @{
 
 	template <typename T>
 	using reduceFunctionP = T (*) (T & a, T & b);
 
+	/// @ingroup bulk
 	template <typename T>
 	using bulkReduceFunctionP = T (*) (T * input, size_t size);
 	///@}
+	///@}
 
-	///@name Pointer FDD function pointer types
-	///@{
+	// Pointer FDD function pointer types
+	/// @addtogroup map
+	/// @{
+
 	template <typename T, typename U>
 	using mapPFunctionP = U (*) (T * input, size_t size);
 	template <typename T, typename L, typename U>
@@ -173,15 +195,23 @@ namespace faster{
 	using IPmapPFunctionP = std::tuple<L,U,size_t> (*) (T * input, size_t size);
 
 
+	/// @ingroup bulk
 	template <typename T, typename U>
 	using bulkMapPFunctionP = void (*) (U * output, T ** input, size_t * inputDataSizes, size_t size);
+	/// @ingroup bulk
 	template <typename T, typename L, typename U>
 	using IbulkMapPFunctionP = void (*) (L * outKey, U * output, T ** input, size_t * inputDataSizes, size_t size);
+	/// @ingroup bulk
 	template <typename T, typename U>
 	using PbulkMapPFunctionP = void (*) (U * output, size_t * outputDataSizes, T ** input, size_t * inputDataSizes, size_t size);
+	/// @ingroup bulk
 	template <typename T, typename L, typename U>
 	using IPbulkMapPFunctionP = void (*) (L * outKey, U * output, size_t * outputDataSizes, T ** input, size_t * inputDataSizes, size_t size);
+	/// @}
 
+
+	/// @addtogroup flatmap
+	/// @{
 
 	template <typename T, typename U>
 	using flatMapPFunctionP = std::deque<U> (*) (T *& input, size_t size);
@@ -193,31 +223,47 @@ namespace faster{
 	using IPflatMapPFunctionP = std::deque<std::tuple<L, U, size_t>> (*) (T *& input, size_t size);
 
 
+	/// @ingroup bulk
 	template <typename T, typename U>
 	using bulkFlatMapPFunctionP = void (*) (U *& output, size_t & outputSize, T ** input, size_t * inputDataSizes, size_t size) ;
+	/// @ingroup bulk
 	template <typename T, typename L, typename U>
 	using IbulkFlatMapPFunctionP = void (*) (L *& outKey, U *& output, size_t & outputSize, T ** input, size_t * inputDataSizes, size_t size) ;
+	/// @ingroup bulk
 	template <typename T, typename U>
 	using PbulkFlatMapPFunctionP = void (*) (U *& output, size_t * outputDataSizes, size_t & outputSize, T ** input, size_t * inputDataSizes, size_t size);
+	/// @ingroup bulk
 	template <typename T, typename L, typename U>
 	using IPbulkFlatMapPFunctionP = void (*) (L *& outKey, U *& output, size_t * outputDataSizes, size_t & outputSize, T ** input, size_t * inputDataSizes, size_t size);
+	/// @}
 
 
 	// Reduce
+	/// @addtogroup reduce
+	/// @{
+
 	template <typename T>
 	using PreducePFunctionP = std::pair<T *, size_t> (*) (T * a, size_t sizeA, T * b, size_t sizeB);
 
+	/// @ingroup bulk
 	template <typename T>
 	using PbulkReducePFunctionP = std::pair<T *, size_t> (*) (T ** input, size_t * inputDataSizes, size_t size);
 	///@}
 
 	// --------------- Indexed FDDs -------------- //
-	///@name IFDD function pointer types
+	// IFDD function pointer types
+	/// @addtogroup update
 	/// @{
+
 	template <typename K, typename T>
 	using updateIFunctionP = void (*) (K & inKey, T & input);
+	/// @ingroup bykey
 	template <typename K, typename T>
 	using updateByKeyIFunctionP = void (*) (K & inKey, std::vector<T *> & input);
+	/// @}
+
+	/// @addtogroup map
+	/// @{
 
 	template <typename K, typename T, typename L, typename U>
 	using ImapIFunctionP = std::pair<L,U> (*) (const K & inKey, T & input);
@@ -239,23 +285,35 @@ namespace faster{
 	template <typename K, typename T, typename U>
 	using PmapByKeyIFunctionP = std::pair<U, size_t> (*) (const K & inKey, T * input, size_t size);
 	*/
+	/// @ingroup bykey
 	template <typename K, typename T, typename L, typename U>
 	using ImapByKeyIFunctionP = std::pair<L,U> (*) (const K & inKey, std::vector<T *> & input);
+	/// @ingroup bykey
 	template <typename K, typename T, typename U>
 	using mapByKeyIFunctionP = U (*) (const K & inKey, std::vector <T *> & input);
+	/// @ingroup bykey
 	template <typename K, typename T, typename L, typename U>
 	using IPmapByKeyIFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, std::vector <T *> & input);
+	/// @ingroup bykey
 	template <typename K, typename T, typename U>
 	using PmapByKeyIFunctionP = std::pair<U, size_t> (*) (const K & inKey, std::vector <T *> & input);
 
+	/// @ingroup bulk
 	template <typename K, typename T, typename L, typename U>
 	using IbulkMapIFunctionP = void (*) (L * outKey, U * output, K * inKey, T * input, size_t size);
+	/// @ingroup bulk
 	template <typename K, typename T, typename U>
 	using bulkMapIFunctionP = void (*) (U * output, K * inKey, T * input, size_t size);
+	/// @ingroup bulk
 	template <typename K, typename T, typename L, typename U>
 	using IPbulkMapIFunctionP = void (*) (L * outKey, U * output, size_t * outputDataSizes, K * inKey, T * input, size_t size);
+	/// @ingroup bulk
 	template <typename K, typename T, typename U>
 	using PbulkMapIFunctionP = void (*) (U * output, size_t * outputDataSizes, K * inKey, T * input, size_t size);
+	/// @}
+
+	/// @addtogroup flatmap
+	/// @{
 
 	template <typename K, typename T, typename L, typename U>
 	using IflatMapIFunctionP = std::deque<std::pair<L,U>> (*) (K inKey, T & input);
@@ -266,28 +324,40 @@ namespace faster{
 	template <typename K, typename T, typename U>
 	using PflatMapIFunctionP = std::deque<std::pair<U, size_t>>  (*) (K inKey, T & input);
 
+	/// @ingroup bulk
 	template <typename K, typename T, typename L, typename U>
 	using IbulkFlatMapIFunctionP = void (*) (L *& outKey, U *& output, size_t & outputSize, K * inKey, T * input, size_t size);
+	/// @ingroup bulk
 	template <typename K, typename T, typename U>
 	using bulkFlatMapIFunctionP = void (*) (U *& output, size_t & outputSize, K * inKey, T * input, size_t size);
+	/// @ingroup bulk
 	template <typename K, typename T, typename L, typename U>
 	using IPbulkFlatMapIFunctionP = void (*) (L *& outKey, U *& output, size_t *& outputDataSizes, size_t & outputSize, K * inKey, T * input, size_t size);
+	/// @ingroup bulk
 	template <typename K, typename T, typename U>
 	using PbulkFlatMapIFunctionP = void (*) (U *& output, size_t *& outputDataSizes, size_t & outputSize, K * inKey, T * input, size_t size);
+	/// @}
+
+	/// @addtogroup reduce
+	/// @{
 
 	template <typename K, typename T>
 	using IreduceIFunctionP = std::pair<K,T> (*) (const K & keyA, T & a, const K & keyB, T & b);
 
+	/// @ingroup bykey
 	template <typename K, typename T>
 	using IreduceByKeyIFunctionP = std::pair<K,T> (*) (const K & keyA, T * a, size_t sizeA, const K & keyB, T * b, size_t sizeB);
 
+	/// @ingroup bulk
 	template <typename K, typename T>
 	using IbulkReduceIFunctionP = std::pair<K,T> (*) (K * key, T * input, size_t size);
 	/// @}
 
-	///@name Pointer IFDD function pointer types
-	/// @{
+	// Pointer IFDD function pointer types
 	// Map
+	/// @addtogroup map
+	/// @{
+
 	template <typename K, typename T, typename L, typename U>
 	using ImapIPFunctionP = std::pair<L,U> (*) (K inKey, T * input, size_t size);
 	template <typename K, typename T, typename U>
@@ -297,24 +367,36 @@ namespace faster{
 	template <typename K, typename T, typename U>
 	using  PmapIPFunctionP = std::pair<U, size_t> (*) (K inKey, T * input, size_t size);
 
+	/// @ingroup bykey
 	template <typename K, typename T, typename L, typename U>
 	using ImapByKeyIPFunctionP = std::pair<L,U> (*) (const K & inKey, std::vector<std::pair<T*,size_t>>);
+	/// @ingroup bykey
 	template <typename K, typename T, typename U>
 	using  mapByKeyIPFunctionP = U (*) (const K & inKey, std::vector<std::pair<T*,size_t>>);
+	/// @ingroup bykey
 	template <typename K, typename T, typename L, typename U>
 	using IPmapByKeyIPFunctionP = std::tuple<L,U,size_t> (*) (const K & inKey, std::vector<std::pair<T*,size_t>>);
+	/// @ingroup bykey
 	template <typename K, typename T, typename U>
 	using  PmapByKeyIPFunctionP = std::pair<U, size_t> (*) (const K & inKey, std::vector<std::pair<T*,size_t>>);
 
+	/// @ingroup bulk
 	template <typename K, typename T, typename L, typename U>
 	using IbulkMapIPFunctionP = void (*) (L * outKey, U * output, K * inKey, T ** input, size_t * inputDataSizes, size_t size);
+	/// @ingroup bulk
 	template <typename K, typename T, typename U>
 	using  bulkMapIPFunctionP = void (*) (U * output, K * inKey, T ** input, size_t * inputDataSizes, size_t size);
+	/// @ingroup bulk
 	template <typename K, typename T, typename L, typename U>
 	using IPbulkMapIPFunctionP = void (*) (L * outKey, U * output, size_t * outputDataSizes, K * inKey, T ** input, size_t * inputDataSizes, size_t size);
+	/// @ingroup bulk
 	template <typename K, typename T, typename U>
 	using  PbulkMapIPFunctionP = void (*) (U * output, size_t * outputDataSizes, K * inKey, T ** input, size_t * inputDataSizes, size_t size);
+	/// @}
 
+
+	/// @addtogroup flatmap
+	/// @{
 
 	template <typename K, typename T, typename L, typename U>
 	using IflatMapIPFunctionP = std::deque<std::pair<L,U>> (*) (T *& input, size_t size);
@@ -326,43 +408,63 @@ namespace faster{
 	using PflatMapIPFunctionP = std::deque<std::pair<U, size_t>> (*) (T *& input, size_t size);
 
 
+	/// @ingroup bulk
 	template <typename K, typename T, typename L, typename U>
 	using IbulkFlatMapIPFunctionP = void (*) (L *& outKey, U *& output, size_t & outputSize, K * inKey, T ** input, size_t * inputDataSizes, size_t size) ;
+	/// @ingroup bulk
 	template <typename K, typename T, typename U>
 	using bulkFlatMapIPFunctionP = void (*) (U *& output, size_t & outputSize, K * inKey, T ** input, size_t * inputDataSizes, size_t size) ;
+	/// @ingroup bulk
 	template <typename K, typename T, typename L, typename U>
 	using IPbulkFlatMapIPFunctionP = void (*) (L *& outKey, U *& output, size_t * outputDataSizes, size_t & outputSize, K * inKey, T ** input, size_t * inputDataSizes, size_t size);
+	/// @ingroup bulk
 	template <typename K, typename T, typename U>
 	using PbulkFlatMapIPFunctionP = void (*) (U *& output, size_t * outputDataSizes, size_t & outputSize, K * inKey, T ** input, size_t * inputDataSizes, size_t size);
+	/// @}
 
 
 	// Reduce
+	/// @addtogroup reduce
+	/// @{
+
 	template <typename K, typename T>
 	using IPreduceIPFunctionP = std::tuple<K,T*,size_t> (*) (K keyA, T * a, size_t sizeA, K keyB, T * b, size_t sizeB);
 
+	/// @ingroup bykey
 	template <typename K, typename T>
 	using IPreduceByKeyIPFunctionP = std::tuple<K,T*,size_t> (*) (K keyA, T ** a, size_t * dataSizesA, size_t sizeA, K keyB, T ** b, size_t * dataSizesB, size_t sizeB);
 
+	/// @ingroup bulk
 	template <typename K, typename T>
 	using IPbulkReduceIPFunctionP = std::tuple<K,T*,size_t> (*) (K * key, T ** input, size_t * inputDataSizes, size_t size);
 	/// @}
 
 
-	/// @name Grouped FDDs function pointer types
+	// Grouped FDDs function pointer types
+	/// @addtogroup update
 	/// @{
+
+	/// @ingroup bykey
 	template <typename K>
 	using updateByKeyG2FunctionP = void (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b);
 
+	/// @ingroup bykey
 	template <typename K>
 	using updateByKeyG3FunctionP = void (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b, std::vector<void*> & c);
 
 
+	/// @ingroup bulk
 	template <typename K>
 	using bulkUpdateG2FunctionP = void (*) (K * keyA, void * a, size_t na, K * keyB, void * b, size_t nb);
 
+	/// @ingroup bulk
 	template <typename K>
 	using bulkUpdateG3FunctionP = void (*) (K * keyA, void * a, size_t na, K * keyB, void * b, size_t nb, K * keyC, void * c, size_t nc);
+	/// @}
 
+
+	/// @addtogroup map
+	/// @{
 
 	template <typename K, typename To>
 	using mapByKeyG2FunctionP = To (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b);
@@ -375,32 +477,44 @@ namespace faster{
 
 	template <typename K, typename Ko, typename To>
 	using ImapByKeyG3FunctionP = std::pair<Ko,To> (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b, std::vector<void*> & c);
+	/// @}
 
 
+	/// @addtogroup flatmap
+	/// @{
+
+	/// @ingroup bykey
 	template <typename K, typename To>
 	using flatMapByKeyG2FunctionP = std::deque<To> (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b);
 
+	/// @ingroup bykey
 	template <typename K, typename To>
 	using flatMapByKeyG3FunctionP = std::deque<To> (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b, std::vector<void*> & c);
 
+	/// @ingroup bykey
 	template <typename K, typename Ko, typename To>
 	using IflatMapByKeyG2FunctionP = std::deque<std::pair<Ko,To>> (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b);
 
+	/// @ingroup bykey
 	template <typename K, typename Ko, typename To>
 	using IflatMapByKeyG3FunctionP = std::deque<std::pair<Ko,To>> (*) (const K & key, std::vector<void*> & a, std::vector<void*> & b, std::vector<void*> & c);
 
-
+	/// @ingroup bulk
 	template <typename K, typename To>
 	using bulkFlatMapG2FunctionP = std::deque<To> (*) (K * keyA, void* a, size_t na, K * keyB, void* b, size_t nb);
 
+	/// @ingroup bulk
 	template <typename K, typename To>
 	using bulkFlatMapG3FunctionP = std::deque<To> (*) (K * keyA, void* a, size_t na, K * keyB, void* b, size_t nb, K * keyC, void* c, size_t nc);
 
+	/// @ingroup bulk
 	template <typename K, typename Ko, typename To>
 	using IbulkFlatMapG2FunctionP = std::deque<std::pair<Ko,To>> (*) (K * keyA, void* a, size_t na, K * keyB, void* b, size_t nb);
 
+	/// @ingroup bulk
 	template <typename K, typename Ko, typename To>
 	using IbulkFlatMapG3FunctionP = std::deque<std::pair<Ko,To>> (*) (K * keyA, void* a, size_t na, K * keyB, void* b, size_t nb, K * keyC, void* c, size_t nc);
+	/// @}
 
 
 	/*template <typename K>
@@ -468,7 +582,6 @@ namespace faster{
 	//using PPCountKeyMapT = std::unordered_map<K, std::pair<size_t, std::deque<int>> > ;
 
 
-	/// @}
 
 }
 #endif

@@ -18,14 +18,21 @@ namespace faster{
 			fddBase(): size(0){ }
 			virtual ~fddBase() {}
 
-			void setSize(size_t &s){ size = s; }
+			void setSize(size_t &s){ size = s; } // TODO Should be protected?
+
+			/// @brief Returns the size of the dataset
 			size_t getSize(){ return size; }
+
+			/// @brief Returns the identification number of the dataset
 			int getId(){return id;}
+
+			/// @brief Returns the allocation identification number of the dataset
 			const std::vector<size_t> & getAlloc(){ return dataAlloc; }
 
 			fddType tType(){ return _tType; }
 			fddType kType(){ return _kType; }
 
+			/// @brief Returns true if the dataset is cached
 			bool isCached(){ return cached; }
 
 			virtual void discard() = 0;

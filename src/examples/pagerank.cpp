@@ -133,7 +133,7 @@ int main(int argc, char ** argv){
 	fc.startWorkers();
 	if (!fc.isDriver())
 		return 0;
-	cerr << "------------ PageRank -------------";
+	cerr << "------------ PageRank -------------\n";
 
 	fc.printHeader();
 	cerr << "  Init Time: " << duration_cast<milliseconds>(system_clock::now() - start).count() << "ms\n";
@@ -193,8 +193,8 @@ int main(int argc, char ** argv){
 
 	pr->writeToFile(std::string("/tmp/pr"), std::string(".txt"));
 
-	auto duration = duration_cast<milliseconds>(system_clock::now() - start).count();
 	cerr << "  Write Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
+	auto duration = duration_cast<milliseconds>(system_clock::now() - start).count();
 	cerr << "PageRank in " << structure->getSize() << " node graph in "<< i << " iterations! In " << duration << "ms (error: " << error <<  ") \n";
 
 	//cerr << "PRESS ENTER TO CONTINUE\n";

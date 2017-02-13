@@ -7,7 +7,7 @@
 using namespace std;
 using namespace faster;
 
-TEST(testFddStorageCreate, CreateEmpty){
+TEST(testIFddStorageCreate, CreateEmpty){
 	faster::indexedFddStorage<int,int> storage(0);
 
 	EXPECT_EQ(0, storage.getSize())
@@ -16,7 +16,7 @@ TEST(testFddStorageCreate, CreateEmpty){
 	//	<< "Empty storage has internal storage not empty";
 }
 
-TEST(testFddStorageCreate, CreateNotEmpty){
+TEST(testIFddStorageCreate, CreateNotEmpty){
 	faster::indexedFddStorage<int,int> storage(1024);
 
 	EXPECT_EQ(1024, storage.getSize())
@@ -26,7 +26,7 @@ TEST(testFddStorageCreate, CreateNotEmpty){
 }
 
 template <typename K, typename T>
-class testFddStorageFunctions : public ::testing::Test {
+class testIFddStorageFunctions : public ::testing::Test {
 		protected:
 
 			faster::indexedFddStorage<K,T> storage;
@@ -45,9 +45,9 @@ class testFddStorageFunctions : public ::testing::Test {
 		virtual void TearDown() { }
 };
 
-typedef testFddStorageFunctions<int, int> testFddStorageFunctionsINT;
+typedef testIFddStorageFunctions<int, int> testIFddStorageFunctionsINT;
 
-TEST_F(testFddStorageFunctionsINT, Grow){
+TEST_F(testIFddStorageFunctionsINT, Grow){
 	const int size = 16*1024;
 	storage.grow(size);
 	storage.setSize(size);
@@ -63,7 +63,7 @@ TEST_F(testFddStorageFunctionsINT, Grow){
 	}
 }
 
-TEST_F(testFddStorageFunctionsINT, SetData){
+TEST_F(testIFddStorageFunctionsINT, SetData){
 
 	ASSERT_EQ(1024, storage.getSize())
 		<< "Storage has wrong size";
@@ -76,7 +76,7 @@ TEST_F(testFddStorageFunctionsINT, SetData){
 	}
 }
 
-TEST_F(testFddStorageFunctionsINT, Insert){
+TEST_F(testIFddStorageFunctionsINT, Insert){
 	int key = 1234;
 	int val = 1234;
 

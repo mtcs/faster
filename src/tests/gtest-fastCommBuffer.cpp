@@ -3,6 +3,8 @@
 #include "gtest/gtest.h"
 #include "fastCommBuffer.h"
 
+namespace testfaster{
+
 TEST(testFastComBufferCreate, CreateEmpty){
 	faster::fastCommBuffer buff(0);
 
@@ -207,7 +209,6 @@ TEST_F(testFastComBuffer10k, writeCustomStruct){
 	testWrite(val, "\xEF\xDC\xFC\xFA\xEF\xDC\xFC\xFA\xEF\xDC\xFC\xFA\xEF\xDC\xFC\xFA", 16);
 }// */
 
-namespace {
 	int main(int argc, char **argv) {
 		  ::testing::InitGoogleTest(&argc, argv);
 		    return RUN_ALL_TESTS();
