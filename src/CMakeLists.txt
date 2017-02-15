@@ -13,22 +13,19 @@ set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )
 # Options and user variables
 option(hdfsEnabled 	"Haddop File System (HDFS) support" ON)
 #option(offloadingEnabled "Accelerator Offloading support" OFF)
-option(cudaEnabled "CUDA GPU acceleration support" OFF)
 option(sanEnabled 	"Sanitizers debugging support" OFF)
 option(examplesAsTests 	"Use examples as tests" OFF)
 #option(dashboardSubmit 	"Submit tests to public dashboard" OFF)
 set(hadoopHome  	"/usr/lib/hadoop" CACHE STRING "Haddop File System (HDFS) home directory")
 set(jvmHome  		"/usr/lib/jvm/default" CACHE STRING "JVM home directory (for HDFS)")
+option(cudaEnabled "CUDA GPU acceleration support" OFF)
+set(cudaKitRoot "CUDA Dev Kit root dir" CACHE STRING "/opt/cuda/")
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
-if (cudeEnabled)
-	find_package(CUDA QUIET REQUIRED)
-endif (cudaEnabled)
 
 if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	message("----------- DEBUG MODE -----------")
@@ -42,8 +39,10 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	add_definitions(-fno-omit-frame-pointer)
 
 	# Coverage Tests
-	SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage" )
-	SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage -lgcov" )
+	if (NOT cudaEnabled)
+		SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage" )
+		SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage -lgcov" )
+	endif (NOT cudaEnabled)
 	find_program(CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
 	include(Dart)
 
@@ -81,6 +80,12 @@ else (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 	#set (EXTRA_LIBS ${EXTRA_LIBS} tcmalloc)
 endif (CMAKE_BUILD_TYPE MATCHES "DEBUG")
+
+if (cudaEnabled)
+	message("CUDA Enabled")
+	SET(CUDA_TOOLKIT_ROOT_DIR=cudaKitRoot)
+	SET(CUDA_HOST_COMPILER "${CUDA_TOOLKIT_ROOT_DIR}/bin/nvcc")
+endif (cudaEnabled)
 
 #if (offloadingEnabled)
 #add_definitions(-foffload=nvptx-none="-v")

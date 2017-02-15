@@ -28,6 +28,12 @@ link_directories(${MPI_CXX_LIBRARIES})
 #include_directories("/usr/include/openmpi/")
 set (EXTRA_LIBS ${EXTRA_LIBS} ${MPI_CXX_LIBRARIES})
 
+if (cudeEnabled)
+	find_package(CUDA QUIET REQUIRED)
+	SET(CUDA_PROPAGATE_HOST_FLAGS ON)
+	SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -gencode arch=compute_30,code=sm_30)
+	SET(CUDA_SEPARABLE_COMPILATION ON)
+endif (cudeEnabled)
 
 #set (MODULES ${MODULES} fdd.cpp ) # Pure templates now
 #set (MODULES ${MODULES} indexedFdd.cpp ) # Pure templates now
