@@ -61,8 +61,11 @@ pair<int, int>  breduce1(int * k, int * in, size_t size){
 
 
 pair<int, int> gmapbk1(const int & k, vector<void*> & input, vector<void*> & input2){
+	if (input2.size() == 0)
+		return make_pair(k, *( (int*) input.front() )) ;
+
 	*((int*)input2.front()) = *((int*)input.front());
-	return make_pair(k, *( (int*) input.front() ));
+	return make_pair(k, *( (int*) input.front() ) + *( (int*) input2.front() ));
 }
 
 deque<pair<int, int>> gfmapbk1(const int & k, vector<void*> & input, vector<void*> & input2){
@@ -70,29 +73,35 @@ deque<pair<int, int>> gfmapbk1(const int & k, vector<void*> & input, vector<void
 
 	auto a = *((int*)input.front());
 
-	*((int*)input2.front()) = a;
+	if( input2.size() > 0 )
+		*((int*)input2.front()) = a;
+
 	r.push_back(make_pair(k, *( (int*) input.front() )));
 
 	return r;
 }
 
-deque<pair<int, int>> gbfmap1(int * ka, void * a, size_t na, int * kb UNUSED, void * b, size_t nb UNUSED){
+deque<pair<int, int>> gbfmap1(int * ka, void * a, size_t na, int * kb UNUSED, void * b, size_t nb){
 	deque<pair<int, int>> r;
 
-	for ( size_t i = 0; i < na; i++ ){
-		((int*)b)[i] = ((int*)a)[i];
-		r.push_back(make_pair(ka[i], ((int*)a)[i]));
+	if ( nb > 0 ){
+		for ( size_t i = 0; (i < na) && (i < nb); i++ ){
+			//((int*)b)[i] = ((int*)a)[i];
+			r.push_back(make_pair(ka[i], ((int*)a)[i] + ((int*)b)[i]) );
+		}
 	}
 
 	return r;
 }
 
-void gupdatebk1(const int & k UNUSED, vector<void*> & input, vector<void*> & input2){
-	 *( (int*) input2.front() ) = *( (int*) input.front() ) ;
+void gupdatebk1(const int & k, vector<void*> & input, vector<void*> & input2){
+	if( input2.size() == 0 ) return;
+
+	*( (int*) input2.front() ) = k + *( (int*) input.front() ) ;
 }
 
-void gbupdate1(int * ka, void * a, size_t na, int * kb, void * b, size_t nb UNUSED){
-	for ( size_t i = 0; i < na; i++ ){
+void gbupdate1(int * ka, void * a, size_t na, int * kb, void * b, size_t nb){
+	for ( size_t i = 0; (i < na) && (i < nb); i++ ){
 		kb[i] = ka[i];
 		((int*)b)[i] = ((int*)a)[i];
 	}
@@ -206,9 +215,12 @@ int main(int argc, char ** argv){
 	cerr << "G.MapByKey" ;
 	for ( int i = 0; i < numRuns; i++){
 		auto result UNUSED = groupV[i]->mapByKey(gmapbk1);
+		//groupV[i]->discard();
+		result->discard();
 		dataV[i]->discard();
 		cerr << "." ;
 	}
+
 	cerr << "\n" ;
 	//fc.updateInfo();
 	//cerr << "\033[0;33mPRESS ENTER TO CONTINUE\033[0m\n";
@@ -257,8 +269,7 @@ int main(int argc, char ** argv){
 	cerr << "G.BulkFlatMap" ;
 	for ( int i = 0; i < numRuns; i++){
 		auto result UNUSED = groupV[i]->bulkFlatMap(gbfmap1);
-		//result->discard();
-		dataV[i]->discard();
+		result->discard();
 		cerr << "." ;
 	}
 	cerr << "\n" ;
@@ -267,6 +278,7 @@ int main(int argc, char ** argv){
 	cerr << "Recreate Data" ;
 	for ( int i = 0; i < numRuns; i++){
 		groupV[i]->discard();
+		dataV[i]->discard();
 	}
 	data->discard();
 	data = new indexedFdd<int,int>(fc, rawkeys.data(), rawdata.data(), numItems);

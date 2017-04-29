@@ -26,7 +26,7 @@ faster::fastComm::fastComm(int & argc, char ** argv){
 	if (!mpi_initialized){
 		std::atexit(exitCallback);
 		//std::cerr<< "INITIALIZING MPI!!!!!!!";
-		MPI_Init (0, NULL);
+		MPI_Init (NULL, NULL);
 	}
 
 	MPI_Comm_size (MPI_COMM_WORLD, &numProcs);

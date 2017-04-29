@@ -48,13 +48,17 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 		#add_definitions(-fsanitize=undefined)
 		add_definitions(-fsanitize=leak)
 		add_definitions(-fno-omit-frame-pointer)
+		#add_definitions(-static-libasan) # Extreme measures
 
-		set (EXTRA_LIBS asan ${EXTRA_LIBS})
 		#set (EXTRA_LIBS tsan ${EXTRA_LIBS})
 		#set (EXTRA_LIBS usan ${EXTRA_LIBS})
 		set (EXTRA_LIBS lsan ${EXTRA_LIBS})
-		#set (EXTRA_LIBS duma ${EXTRA_LIBS})
+		set (EXTRA_LIBS asan ${EXTRA_LIBS})
 	endif (sanEnabled)
+
+	#set (EXTRA_LIBS duma ${EXTRA_LIBS}) # DEPRECATED
+	set (EXTRA_LIBS efence ${EXTRA_LIBS}) # DEPRECATED
+
 	endif (NOT hdfsEnabled)
 
 else (CMAKE_BUILD_TYPE MATCHES "DEBUG")
