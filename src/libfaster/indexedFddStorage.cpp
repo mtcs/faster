@@ -26,10 +26,10 @@ faster::indexedFddStorageCore<K,T>::indexedFddStorageCore(size_t s){
 }
 template <class K, class T>
 faster::indexedFddStorageCore<K,T>::~indexedFddStorageCore(){
-	//if (localData != NULL){
+	if (localData != NULL){
 		delete [] localData;
 		delete [] localKeys;
-	//}
+	}
 }
 
 template <class K, class T>

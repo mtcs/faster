@@ -19,13 +19,13 @@ faster::procstat faster::getProcStat(){
 	stat.utime = tms0.tms_utime;
 	stat.stime = tms0.tms_stime;
 
-	std::ifstream statmFile("/proc/self/statm", std::ifstream::in);
-	if( statmFile.good() ){
-		statmFile >> dump;
-		statmFile >> stat.ram;
-		stat.ram *= (double)sysconf(_SC_PAGESIZE) / (1024 * 1024);
-	}
-	statmFile.close();
+	//std::ifstream statmFile("/proc/self/statm", std::ifstream::in);
+	//if( statmFile.good() ){
+		//statmFile >> dump;
+		//statmFile >> stat.ram;
+		//stat.ram *= (double)sysconf(_SC_PAGESIZE) / (1024 * 1024);
+	//}
+	//statmFile.close();
 
 	//std::cerr << "      getProcStat: " << stat.ram << " " << stat.utime << " " << stat.stime << "\n";
 

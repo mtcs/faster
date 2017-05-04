@@ -71,6 +71,9 @@ pair<int, int> gmapbk1(const int & k, vector<void*> & input, vector<void*> & inp
 deque<pair<int, int>> gfmapbk1(const int & k, vector<void*> & input, vector<void*> & input2){
 	deque<pair<int, int>> r;
 
+	if ( !input.size() ) return r;
+	if ( !input2.size() ) return r;
+
 	auto a = *((int*)input.front());
 
 	if( input2.size() > 0 )
@@ -126,6 +129,7 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &gupdatebk1, "G.UpdateByKey");
 	fc.registerFunction((void*) &gbupdate1, "G.BulkUpdate");
 
+	cerr << "Starting Workers" << '\n';
 	fc.startWorkers();
 	if (!fc.isDriver())
 		return 0;
@@ -260,7 +264,7 @@ int main(int argc, char ** argv){
 	cerr << "G.FlatMapByKey" ;
 	for ( int i = 0; i < numRuns; i++){
 		auto result = groupV[i]->flatMapByKey(gfmapbk1);
-		result->discard();
+		//result->discard();
 		cerr << "." ;
 	}
 	cerr << "\n" ;
@@ -279,6 +283,7 @@ int main(int argc, char ** argv){
 
 	cerr << "Recreate Data" ;
 	for ( int i = 0; i < numRuns; i++){
+		//dataV[i]->discard();
 		groupV[i]->discard();
 		dataV[i]->discard();
 	}
