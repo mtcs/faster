@@ -54,11 +54,12 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 			add_definitions(-fsanitize=leak)
 			add_definitions(-fno-omit-frame-pointer)
 
-			set (EXTRA_LIBS asan ${EXTRA_LIBS})
 			#set (EXTRA_LIBS tsan ${EXTRA_LIBS})
 			#set (EXTRA_LIBS usan ${EXTRA_LIBS})
 			set (EXTRA_LIBS lsan ${EXTRA_LIBS})
+			set (EXTRA_LIBS asan ${EXTRA_LIBS})
 			#set (EXTRA_LIBS duma ${EXTRA_LIBS})
+			set (EXTRA_LIBS ${EXTRA_LIBS} util)
 
 		endif (sanEnabled)
 	endif (NOT hdfsEnabled)
