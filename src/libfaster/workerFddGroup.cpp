@@ -39,8 +39,8 @@ std::vector< std::vector<void*>> faster::workerFddGroup<K>::findKeyInterval(size
 	//auto start2 = system_clock::now();
 
 	std::unordered_map<K, std::vector<void*>> keyLocations(keyCount.size()*1.3);
-	for ( auto it = keyCount.cbegin(); it != keyCount.end(); ++it ){
-		keyLocations[it->first].reserve(it->second);
+	for ( auto it : keyCount){
+		keyLocations[it.first].reserve(it.second);
 	}
 	keyCount.clear();
 

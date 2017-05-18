@@ -112,10 +112,10 @@ int main(int argc, char ** argv){
 
 		gradient = data->map(&getGradient)->reduce(&sumGradient);
 		fc.updateInfo();
-	cout << "Gradient: ";
-	for ( double x : gradient )
-		cout << x << " ";
-	cout << "\n";
+		cout << "Gradient: ";
+		for ( double x : gradient )
+			cout << x << " ";
+		cout << "\n";
 
 		for ( int i = 0; i < numDimensions; i++ ){
 			globalWeights[i] -= gradient[i];

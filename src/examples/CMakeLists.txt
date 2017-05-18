@@ -94,7 +94,7 @@ if (examplesAsTests)
 	mpi_test (pagerank-bp "../res/graph100-1.al")
 #mpi_test (pagerank-bp2 )
 	mpi_test (pagerank-bulk2 "../res/graph100-1.al")
-	mpi_test (kmeans "")
+	mpi_test (kmeans "../res/points100-5.txt")
 	mpi_test (logicreg "")
 endif (examplesAsTests)
 

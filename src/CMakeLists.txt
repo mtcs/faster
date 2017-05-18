@@ -57,7 +57,7 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	endif (sanEnabled)
 
 	#set (EXTRA_LIBS duma ${EXTRA_LIBS}) # DEPRECATED
-	set (EXTRA_LIBS efence ${EXTRA_LIBS}) # DEPRECATED
+	#set (EXTRA_LIBS efence ${EXTRA_LIBS}) # DEPRECATED
 
 	endif (NOT hdfsEnabled)
 

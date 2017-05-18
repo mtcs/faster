@@ -43,7 +43,7 @@ namespace faster {
 			template <typename T>
 			void write(T &v, size_t s){
 				grow(_size + s);
-				std::copy_n( (char*)&v, s , _data+_size );
+				std::copy_n( (char*)&v, s , _data + _size );
 
 				_size += s;
 			}

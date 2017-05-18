@@ -127,6 +127,8 @@ int main(int argc, char ** argv){
 	fc.registerFunction((void*) &gbupdate1, "G.BulkUpdate");
 
 	fc.startWorkers();
+	if (!fc.isDriver())
+		return 0;
 
 	int numItems = argc < 2 ? 100*1000 : atoi(argv[1]);
 	int numRuns = argc < 3 ? 100 : atoi(argv[2]);
@@ -216,7 +218,7 @@ int main(int argc, char ** argv){
 	for ( int i = 0; i < numRuns; i++){
 		auto result UNUSED = groupV[i]->mapByKey(gmapbk1);
 		//groupV[i]->discard();
-		result->discard();
+		//result->discard();
 		dataV[i]->discard();
 		cerr << "." ;
 	}
