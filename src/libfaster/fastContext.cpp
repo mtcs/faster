@@ -229,7 +229,10 @@ unsigned long int faster::fastContext::readFDD(fddBase * ref, const char * fileN
 			//dataPerProc += 1;
 		//comm->sendReadFDDFile(ref->getId(), std::string(fileName), dataPerProc, offset, i);
 		//offset += dataPerProc;
+		try{
 		comm->sendReadFDDFile(ref->getId(), std::string(fileName), dataAlloc[i], offset, i);
+		}catch (int e){
+		}
 		offset += dataAlloc[i];
 	}
 

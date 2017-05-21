@@ -50,7 +50,11 @@ namespace faster{
 				_spectrum = spectrum;
 			}
 			int get ( std::string key ){
-				return ( key[0] ) % _spectrum;
+				unsigned int hash = 5381;
+				for ( size_t i = 0; i < key.size(); i++){
+					hash = ((hash << 5) + hash) + key[i];
+				}
+				return ( hash ) % _spectrum;
 			}
 
 	};
