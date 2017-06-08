@@ -78,7 +78,6 @@ deque<pair<int, int>> gfmapbk1(const int & k, vector<void*> & input, vector<void
 
 	if( input2.size() > 0 )
 		*((int*)input2.front()) = a;
-
 	r.push_back(make_pair(k, *( (int*) input.front() )));
 
 	return r;
@@ -89,7 +88,6 @@ deque<pair<int, int>> gbfmap1(int * ka, void * a, size_t na, int * kb UNUSED, vo
 
 	if ( nb > 0 ){
 		for ( size_t i = 0; (i < na) && (i < nb); i++ ){
-			//((int*)b)[i] = ((int*)a)[i];
 			r.push_back(make_pair(ka[i], ((int*)a)[i] + ((int*)b)[i]) );
 		}
 	}
