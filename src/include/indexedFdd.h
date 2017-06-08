@@ -153,8 +153,8 @@ namespace faster{
 			}
 
 			// Create a fdd from file
-			indexedFdd(fastContext &c, std::string) { //: indexedFdd(c, size){
-				//this->onlineRead();
+			indexedFdd(fastContext &c, std::string) : indexedFdd(c){
+				this->onlineRead();
 			}
 
 			~indexedFdd(){
