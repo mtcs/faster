@@ -36,7 +36,13 @@ namespace faster{
 			size_t read(char * v, size_t n);
 			size_t write(char * v, size_t n);
 
+			char get();
+
 			void del();
+
+			bool good();
+
+			void seekg(size_t size, size_t offset);
 	};
 
 	class hdfsEngine{
