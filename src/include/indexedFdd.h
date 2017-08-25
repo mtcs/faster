@@ -194,9 +194,10 @@ namespace faster{
 				c.parallelizeI(this->id, keys, data, size);
 			}
 
-			/// @brief Create a indexedFdd from a file
-			indexedFdd(fastContext &c, std::string) { //: indexedFdd(c, size){
-				//this->onlineRead();
+
+			// Create a fdd from file
+			indexedFdd(fastContext &c, std::string) : indexedFdd(c){
+				this->onlineRead();
 			}
 
 			/// @brief Class Destructor.

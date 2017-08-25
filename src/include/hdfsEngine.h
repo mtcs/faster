@@ -52,7 +52,13 @@ namespace faster{
 
 			std::vector<std::deque<int>> getBlocksLocations();
 
+			char get();
+
 			void del();
+
+			bool good();
+
+			void seekg(size_t size, size_t offset);
 	};
 
 	class hdfsEngine{
