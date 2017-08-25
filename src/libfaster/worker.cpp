@@ -81,8 +81,8 @@ void faster::worker::calibrate(){
 
 	auto start = system_clock::now();
 	auto end = system_clock::now();
-	
-	#pragma omp parallel 
+
+	#pragma omp parallel
 	{
 		std::vector<double> v(TESTVECSIZE, 0);
 		double a = 0;
@@ -132,7 +132,7 @@ void faster::worker::writeFDDFile(unsigned long int id, std::string &path, std::
 
 	auto start = system_clock::now();
 	auto end = system_clock::now();
-	
+
 	src->writeToFile(&path, comm->getProcId(), &sufix);
 
 	auto duration = duration_cast<milliseconds>(end - start);
@@ -145,30 +145,30 @@ void faster::worker::writeFDDFile(unsigned long int id, std::string &path, std::
 	comm->sendTaskResult();
 }
 
-void resizeVector(std::tuple<void *, size_t, int> & var UNUSED){
-}
+//void resizeVector(std::tuple<void *, size_t, int> & var UNUSED){
+//}
 
 void faster::worker::updateGlobals(fastTask &task){
 	for ( size_t i = 0; i < task.globals.size(); i++){
 		int type = std::get<2>(task.globals[i]);
 		size_t s = std::get<1>(task.globals[i]);
 
-		if (type & VECTOR){
-			resizeVector((*globalTable)[i]);
-		}
+		//if (type & VECTOR){
+		//	resizeVector((*globalTable)[i]);
+		//}
 		if (type & POINTER){
 			char ** v = (char **) std::get<0>((*globalTable)[i]);
 			if (*v == NULL)
 				(*v) = new char[s];
 			std::memcpy(
-				*v, 
-				std::get<0>(task.globals[i]), 
+				*v,
+				std::get<0>(task.globals[i]),
 				s
 				);
 		}else{
 			std::memcpy(
-				std::get<0>((*globalTable)[i]), 
-				std::get<0>(task.globals[i]), 
+				std::get<0>((*globalTable)[i]),
+				std::get<0>(task.globals[i]),
 				s
 				);
 		}

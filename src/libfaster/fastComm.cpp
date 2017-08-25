@@ -91,6 +91,7 @@ void faster::fastComm::sendTask(fastTask &task){
 	buffer[0] << task.id << task.operationType << task.srcFDD << task.destFDD << task.functionId;
 	buffer[0] << size_t(task.globals.size());
 
+	// TODO Adapt to new global model
 	for ( size_t i = 0; i < task.globals.size(); i++){
 		size_t s = std::get<1>(task.globals[i]);
 		int type = std::get<2>(task.globals[i]);

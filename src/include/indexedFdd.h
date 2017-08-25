@@ -223,6 +223,10 @@ namespace faster{
 				this->cached = true;
 				return this;
 			}
+			indexedFdd<K,T> * dontCache(){
+				this->cached = false;
+				return this;
+			}
 
 			//  Update
 			/// @ingroup update
@@ -541,6 +545,10 @@ namespace faster{
 
 			indexedFdd<K,T*> * cache(){
 				this->cached = true;
+				return this;
+			}
+			indexedFdd<K,T*> * dontCache(){
+				this->cached = false;
 				return this;
 			}
 

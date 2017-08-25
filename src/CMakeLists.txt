@@ -54,6 +54,7 @@ if (CMAKE_BUILD_TYPE MATCHES "DEBUG")
 		add_definitions(-fsanitize=leak)
 		add_definitions(-fno-omit-frame-pointer)
 		#add_definitions(-static-libasan) # Extreme measures
+		add_definitions(-pie)
 
 		#set (EXTRA_LIBS tsan ${EXTRA_LIBS})
 		#set (EXTRA_LIBS usan ${EXTRA_LIBS})

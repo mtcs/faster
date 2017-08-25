@@ -152,6 +152,11 @@ namespace faster{
 				return this;
 			}
 
+			fdd<T> * dontCache(){
+				this->cached = false;
+				return this;
+			}
+
 			// -------------- FDD Functions --------------- //
 
 			// TODO add update
@@ -398,6 +403,10 @@ namespace faster{
 			}*/
 			fdd<T*> * cache(){
 				this->cached = true;
+				return this;
+			}
+			fdd<T*> * dontCache(){
+				this->cached = false;
 				return this;
 			}
 

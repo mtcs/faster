@@ -119,6 +119,10 @@ namespace faster{
 				this->cached = true;
 				return this;
 			}
+			groupedFdd<K> * dontCache(){
+				this->cached = false;
+				return this;
+			}
 
 			/// @brief deallocates previously cached fdd
 			void discard(){

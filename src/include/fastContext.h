@@ -351,16 +351,19 @@ namespace faster{
 
 	template <class T>
 	void fastContext::registerGlobal(T * varP){
+		// TODO Adapt to new global model
 		globalTable.insert( globalTable.end(), std::make_tuple(varP, sizeof(T), 0) );
 	}
 	template <class T>
 	void fastContext::registerGlobal(T ** varP, size_t s){
+		// TODO Adapt to new global model
 		globalTable.insert( globalTable.end(), std::make_tuple(varP, s, POINTER) );
 	}
 	// Still unimplemented
 	template <class T>
 	void fastContext::registerGlobal(std::vector<T> * varP){
-		globalTable.insert( globalTable.end(), std::make_tuple(varP, sizeof(T) * varP->size(), VECTOR) );
+		// TODO Adapt to new global model
+		globalTable.insert( globalTable.end(), std::make_tuple(varP->data(), sizeof(T) * varP->size(), VECTOR) );
 	}
 
 	/*template <typename T>
