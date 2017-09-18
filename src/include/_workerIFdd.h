@@ -40,17 +40,12 @@ namespace faster{
 			std::unordered_map<K, size_t> distributedMaxKeyCount(fastComm *comm, std::unordered_map<K, std::pair<size_t, std::deque<int>> > & keyPPMaxCount);
 
 			// Exchange Data By Key private functions
-			bool EDBKsendDataAsync(
+			inline bool EDBKsendDataAsync(
 					fastComm *comm,
 					int owner,
 					K & key,
 					T & data,
 					std::vector<size_t> & dataSize);
-			bool sendPending(
-					fastComm *comm,
-					std::vector< std::deque< std::pair<K,T> > > & pendingSend,
-					std::vector<size_t> & dataSize
-					);
 			void flushDataSend(
 					fastComm *comm,
 					std::vector<size_t> & dataSize);
@@ -62,17 +57,16 @@ namespace faster{
 					size_t & pos,
 					std::vector<bool> & deleted,
 					std::vector<size_t> & dataSize,
-					std::deque< std::pair<K,T> >  & recvData,
-					std::vector< std::deque< std::pair<K,T> > > & pendingSend,
+					std::vector< std::pair<K,T> >  & recvData,
 					bool & dirty);
 			bool EDBKRecvData(fastComm *comm,
 					size_t & pos,
 					size_t & posLimit,
 					std::vector<bool> & deleted,
-					std::deque< std::pair<K,T> >  & recvData,
+					std::vector< std::pair<K,T> >  & recvData,
 					int & peersFinised,
 					bool & dirty);
-			void EDBKFinishDataInsert(std::vector<bool> & deleted, std::deque< std::pair<K,T> >  & recvData, size_t & pos );
+			void EDBKFinishDataInsert(std::vector<bool> & deleted, std::vector< std::pair<K,T> >  & recvData, size_t & pos );
 			void EDBKShrinkData(std::vector<bool> & deleted, size_t & pos);
 
 			void findMyKeys(int numProcs, int Id);

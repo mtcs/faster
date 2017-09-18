@@ -132,12 +132,6 @@ namespace faster {
 			void read(T & v){
 				read( &v, sizeof(T) );
 			}
-			template <typename T>
-			void readVec(std::vector<T> & v, size_t s){
-				v.resize(s);
-				v.assign((T*) &_data[_size], (T*) &_data[_size + s] );
-				_size += s;
-			}
 			void read(std::vector<std::string> & v){
 				size_t s;
 				read(s);
@@ -148,14 +142,23 @@ namespace faster {
 			}
 			void readString(std::string & v, size_t s){
 				v.resize(s);
-				std::copy_n( _data + _size, s, (char*)v.data() );
+				std::copy_n( _data + _size, s, (char*) v.data() );
 				_size += s;
+			}
+			template <typename T>
+			void readVec(std::vector<T> & v, size_t s){
+				v.resize(s);
+				size_t stride = s*sizeof(T);
+				//v.assign((T*) &_data[_size], (T*) &_data[_size + stride] );
+				std::copy_n(_data + _size, stride, (char*) v.data());
+				//std::copy_n((T*) _data + _size, s,  v.data());
+				_size += stride;
 			}
 			template <typename T>
 			void read(std::vector<T> & v){
 				size_t size;
 				read(size);
-				readVec(v, size*sizeof(T));
+				readVec(v, size);
 			}
 			void read(std::string & s){
 				size_t size;

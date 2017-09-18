@@ -104,7 +104,7 @@ void faster::worker::run(){
 				//std::cerr << "    R:ReadFddFile \n" ;
 				comm->recvReadFDDFile(id, name, size, offset);
 				//std::cerr << "ID:" << id <<" F:" << name << "(offset:" << offset << ")";
-				readFDDFile(id, name, size, offset);
+				createFDDFromFile(id, name, size, offset);
 				//std::cerr << ".\n";
 				break;
 			case MSG_WRITEFDDFILE:

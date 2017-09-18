@@ -28,7 +28,7 @@ error = 10;
 pr = {}
 newpr = {}
 
-for node, neighbs in G.items(): 
+for node, neighbs in G.items():
     pr[node] = 1.0 / numNodes;
 
 iteration = 0
@@ -36,25 +36,25 @@ while ( iteration < 10) :
     print ( "Iteration:", iteration, file = sys.stderr, end = " ")
     iteration += 1
 
-    for node in G.keys(): 
+    for node in G.keys():
         newpr[node] = (1 - dumping) / numNodes
 
     # Give Pagerank
-    for node, neighbs in G.items(): 
+    for node, neighbs in G.items():
         if ( verbose > 1 ) :
             print("[{}:".format(node),file = sys.stderr, end = '')
-        for neighb in neighbs: 
+        for neighb in neighbs:
             if neighb not in newpr :
                 newpr[neighb] =  (1 - dumping) / numNodes
             contrib = dumping * pr[node] / len(neighbs)
-            if ( verbose > 1 ) :
+            if ( (verbose > 1) & (node == 1) ) :
                 print ( "{}>{} ".format(contrib, neighb), file = sys.stderr, end = '')
-            newpr[neighb] += contrib 
+            newpr[neighb] += contrib
         if ( verbose > 1 ) :
             print("]",file = sys.stderr)
 
     error = 0;
-    for node in G.keys(): 
+    for node in G.keys():
         # Calulate error
         error = max(error, abs(newpr[node] - pr[node]))
 
@@ -63,11 +63,12 @@ while ( iteration < 10) :
     newpr, pr = pr, newpr
 
     if ( verbose ) :
-        for node in sorted(G.keys()): 
+        for node in sorted(G.keys()):
             #print ( "{}:{:.5f}  ".format(node, pr[node]), file = sys.stderr, end = '')
-            print ( "{} {:.5f}  ".format(node, pr[node]), file = sys.stderr, end = '')
+            if ( node < 10 ) :
+                print ( "{} {:.8f}  ".format(node, pr[node]), file = sys.stderr, end = '')
             #print ( "{:.2f}".format(pr[node]), file = sys.stderr , end = ' ')
 
 
-for node in sorted(G.keys()): 
+for node in sorted(G.keys()):
     print ("{} {:.16f}".format(node, pr[node]))

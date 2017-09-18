@@ -38,6 +38,7 @@ namespace faster{
 	class fastSettings{
 		friend class fastContext;
 		public:
+			size_t messageSize = 2800;
 
 			/// @brief fastSetting default constructor
 			fastSettings() {
@@ -73,14 +74,15 @@ namespace faster{
 		friend class worker;
 
 		public:
+			fastContext();
 			/// @brief fastContext default constructor
 			///
 			/// @param argc - number of arguments from main
 			/// @param argv - arguments from main
-			fastContext( int argc=0, char ** argv=NULL);
+			fastContext( int & argc, char **& argv);
 
 			/// fastContext constructor with custom settings
-			fastContext( const fastSettings & s, int argc, char ** argv);
+			fastContext( const fastSettings & s, int & argc, char **& argv);
 
 			/// fastContext destructor
 			~fastContext();

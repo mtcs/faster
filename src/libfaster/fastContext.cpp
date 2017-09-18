@@ -5,14 +5,21 @@
 #include "fastContext.h"
 #include "misc.h"
 
-faster::fastContext::fastContext( int argc, char ** argv): fastContext(fastSettings(), argc, argv){
+faster::fastContext::fastContext(){
+	int c = 0;
+	char ** v = NULL;
+	fastContext(c,v);
+}
+
+faster::fastContext::fastContext( int & argc, char **& argv): fastContext(fastSettings(), argc, argv){
 }
 
 // Create a context with local as master
-faster::fastContext::fastContext(const fastSettings & s, int argc, char ** argv){
+faster::fastContext::fastContext(const fastSettings & s, int & argc, char **& argv){
 
 	settings = new fastSettings(s);
 	comm = new fastComm(argc, argv );
+	comm->maxMsgSize = s.messageSize;
 	scheduler = new fastScheduler( comm->numProcs, & funcName);
 	numFDDs = 0;
 	//numTasks = 0;

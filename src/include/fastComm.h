@@ -158,10 +158,10 @@ namespace faster{
 
 		public:
 
-		const size_t maxMsgSize = 15000;
+		size_t maxMsgSize = 1500;
 		//const size_t maxMsgSize = 3;
 
-		fastComm(int & argc, char ** argv);
+		fastComm(int & argc, char **& argv);
 		~fastComm();
 
 		int getProcId(){ return procId; }

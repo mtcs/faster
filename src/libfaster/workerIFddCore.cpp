@@ -184,13 +184,18 @@ void faster::workerIFddCore<K,T>::countByKey(fastComm *comm){
 
 }
 
-//void p(double & v){
-	//fprintf(stderr, "%.2lf ", v);
-//}
+template <typename T>
+void pri(T & v UNUSED){
+	std::cerr << v << " ";
+}
 
-//template <typename T>
-//void p(T & v UNUSED){
-//}
+template <typename T>
+void pri(std::vector<T> & v){
+	for ( auto & it : v ){
+		pri(it);
+	}
+}
+
 template <typename K, typename T>
 bool faster::workerIFddCore<K,T>::EDBKSendData(fastComm *comm, std::vector<size_t> & dataSize){
 	bool tryShrink = false;
@@ -217,6 +222,7 @@ bool faster::workerIFddCore<K,T>::EDBKSendData(fastComm *comm, std::vector<size_
 
 }
 
+
 // Checks for arriving data
 template <typename K, typename T>
 bool faster::workerIFddCore<K,T>::EDBKRecvData(
@@ -224,7 +230,7 @@ bool faster::workerIFddCore<K,T>::EDBKRecvData(
 		size_t & pos,
 		size_t & posLimit,
 		std::vector<bool> & deleted,
-		std::deque< std::pair<K,T> >  & recvData,
+		std::vector< std::pair<K,T> >  & recvData,
 		int & peersFinished,
 		bool & dirty
 		){
@@ -241,6 +247,7 @@ bool faster::workerIFddCore<K,T>::EDBKRecvData(
 		return true;
 	}
 
+	//if ( recvData.size() > (recvData.capacity() - comm->maxMsgSize) ) return false;
 	void * rData = comm->recvGroupByKeyData(rSize);
 
 	// Insert message into dataset or queue
@@ -249,7 +256,6 @@ bool faster::workerIFddCore<K,T>::EDBKRecvData(
 
 		rb >> numItems;
 		if (numItems > 0){
-			//std::cerr << "R";
 			dirty = true;
 		}
 
@@ -257,7 +263,7 @@ bool faster::workerIFddCore<K,T>::EDBKRecvData(
 		//for (int i = 0; i < rSize; ++i){
 			//fprintf(stderr, "%02x", ((char*) rData)[i]);
 		//}
-		//std::cerr << "\033[0;32mRECV" << numItems << "(" << rSize << ")\033[0m ";
+		//std::cerr << "\033[0;32mRECV " << numItems << "(" << rSize << ")\033[0m ";
 
 		for (size_t i = 0; i < numItems; ++i){
 			// Find a empty space in the local data
@@ -268,14 +274,17 @@ bool faster::workerIFddCore<K,T>::EDBKRecvData(
 			if (pos < posLimit){
 				// Insert inplace
 				rb >> keys[pos] >> data[pos];
-				//std::cerr << "\033[0;35m" << keys[pos] << "\033[0m ";
+				//std::cerr << "\033[0;32m" << keys[pos] << "\033[0m ";
+				//pri(data[pos]);
+				//std::cerr << ")  ";
 				deleted[pos] = false;
 				pos++;
 			}else{
 				// Put in a recv list
 				std::pair<K,T> p;
 				rb >> p.first >> p.second;
-				//std::cerr << "\033[0;35m" << p.first << "\033[0m ";
+				//std::cerr << "Q\033[0;33m" << p.first << "\033[0m ";
+				//pri(p.second);
 				recvData.push_back(std::move(p));
 			}
 		}
@@ -345,7 +354,7 @@ void faster::workerIFddCore<K,T>::EDBKShrinkData(std::vector<bool> & deleted, si
 template <typename K, typename T>
 void faster::workerIFddCore<K,T>::EDBKFinishDataInsert(
 		std::vector<bool> & deleted,
-		std::deque< std::pair<K,T> >  & recvData,
+		std::vector< std::pair<K,T> >  & recvData,
 		size_t & pos ){
 	K * keys = localData->getKeys();
 	T * data = localData->getData();
@@ -357,11 +366,11 @@ void faster::workerIFddCore<K,T>::EDBKFinishDataInsert(
 		while ( (pos < size) && (recvData.size() > 0) ) {
 			if ( deleted[pos] ){
 				// Insert inplace
-				auto & item = recvData.front();
+				auto & item = recvData.back();
 				//std::cerr << " \033[0;36m(" << item.first << ">" << pos << ")\033[0m";
 				keys[pos] = std::move(item.first);
 				data[pos] = std::move(item.second);
-				recvData.pop_front();
+				recvData.pop_back();
 				deleted[pos] = false;
 			}
 			pos++;
@@ -472,7 +481,7 @@ void faster::workerIFddCore<K,T>::exchangeDataByKeyMapped(fastComm *comm UNUSED)
 
 // Insert data into departure buffer and send if buffer is full
 template <typename K, typename T>
-bool faster::workerIFddCore<K,T>::EDBKsendDataAsync(
+inline bool faster::workerIFddCore<K,T>::EDBKsendDataAsync(
 		fastComm *comm,
 		int owner,
 		K & key,
@@ -489,6 +498,7 @@ bool faster::workerIFddCore<K,T>::EDBKsendDataAsync(
 	}
 
 	// Insert data Into buffer
+	//std::cerr << "\033[0;34m" << key << "\033[0m ";
 	buffer[owner] << key << data;
 	dataSize[owner]++;
 
@@ -544,35 +554,6 @@ void faster::workerIFddCore<K,T>::flushDataSend(
 	//std::cerr << "\033[0;33mSEND FINISHED\033[0m\n";
 }
 
-// Sends pending data
-template <typename K, typename T>
-bool faster::workerIFddCore<K,T>::sendPending(
-		fastComm *comm,
-		std::vector< std::deque< std::pair<K,T> > > & pendingSend,
-		std::vector<size_t> & dataSize
-		){
-	bool finished = true;
-
-	for ( int owner = 1; owner < comm->getNumProcs(); owner++){
-		if (pendingSend[owner].size() == 0) {
-			continue;
-		}
-		if (  comm->isSendBufferFree(owner) ){
-			//std::cerr << "sending " << pendingSend[owner].size() << " pending > " << owner << "\n";
-			while (pendingSend[owner].size() > 0){
-				std::pair<K,T> & p = pendingSend[owner].front();
-				if ( EDBKsendDataAsync(comm, owner, p.first, p.second, dataSize) ){
-					return false;
-				}
-				pendingSend[owner].pop_front();
-			}
-		}else{
-			finished = false;
-		}
-	}
-	return finished;
-}
-
 // Send data that belong to other machines
 template <typename K, typename T>
 bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
@@ -580,8 +561,7 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 		size_t & pos,
 		std::vector<bool> & deleted,
 		std::vector<size_t> & dataSize,
-		std::deque< std::pair<K,T> >  & recvData,
-		std::vector< std::deque< std::pair<K,T> > > & pendingSend,
+		std::vector< std::pair<K,T> >  & recvData,
 		bool & dirty) {
 
 	K * keys = localData->getKeys();
@@ -590,13 +570,16 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 	hasher<K> hash(comm->getNumProcs() - 1);
 	bool release = false;
 
-	sendPending(comm, pendingSend, dataSize);
+	//std::cerr << " recvData.size:" << recvData.size() << "\n";
+	//std::cerr << " sendBufferfree: " << comm->isSendBufferFree(1) << " " << comm->isSendBufferFree(1) << "\n";
+	//usleep(500000);
+	//std::cerr << "Send: ";
 
 	// Insert Data that dont belong to me in the message
 	while ( pos < size){
 		K & key = keys[pos];
 		int owner = 1 + hash.get(key);
-		//std::cerr << key;
+		//std::cerr << key << " ";
 
 		// If it is my item dont send it
 		if (owner == comm->getProcId()){
@@ -607,22 +590,19 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 		dirty = true;
 		// Enqueue for sending later if buffer occupied
 		if ( ! comm->isSendBufferFree(owner) ){
-			//usleep(1);
-			pendingSend[owner].push_back( std::make_pair( key, std::move(data[pos]) ) );
-			//return false;
+			return false;
 		}else{
-			//std::cerr << "\033[0;34m" << key << "\033[0m:" << owner << " ";
-
+			//std::cerr << "\033[0;34m> " << owner << "\033[0m ";
+			//pri(data[pos]);
 			release = EDBKsendDataAsync(comm, owner, key, data[pos], dataSize);
 		}
-		//std::cerr << "S";
 
 		// Place a received pair inplace
 		if (recvData.size() > 0){
 			// Replace deleted item data
-			keys[pos] = std::move(recvData.front().first);
-			data[pos] = std::move(recvData.front().second);
-			recvData.pop_front();
+			keys[pos] = std::move(recvData.back().first);
+			data[pos] = std::move(recvData.back().second);
+			recvData.pop_back();
 		}else{
 			// Just delete item;
 			deleted[pos] = true;
@@ -633,11 +613,6 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 			return false;
 
 	}
-	//std::cerr << "no more data to send\n ";
-
-	if ( ! sendPending(comm, pendingSend, dataSize) ){
-		return false;
-	}
 
 	// Wait for all buffers to be freed
 	for ( int owner = 1; owner < comm->getNumProcs(); owner++){
@@ -645,7 +620,6 @@ bool faster::workerIFddCore<K,T>::EDBKSendDataHashed(
 				continue;
 		}
 		if ( ! comm->isSendBufferFree(owner) ){
-			//std::cerr << "buffer "<< owner <<" not free\n ";
 			return false;
 		}
 	}
@@ -663,12 +637,12 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 	//int Ti[5];
 	//auto start = system_clock::now();
 
+	//std::cerr << "    \033[0;33mexchangeDataByKeyHashed\033[0m\n"; std::cerr.flush();
 	size_t size = localData->getSize();
-	//std::cerr << "    \033[0;33mExchange Data By Key ID:" << id << "(" << size << ")\033[0m\n";
+	//std::cerr << "    \033[0;33mExchange Data By Key ID:" << id << "(" << size << ")\033[0m\n"; std::cerr.flush();
 	std::vector<bool> deleted(size, false);
-	std::deque< std::pair<K,T> > recvData;
+	std::vector< std::pair<K,T> > recvData(0);
 	std::vector<size_t> dataSize(comm->getNumProcs(), 0);
-	std::vector< std::deque< std::pair<K,T> > > pendingSend(comm->getNumProcs());
 	size_t sendPos = 0;
 	size_t recvPos = 0;
 	bool dirty = false;
@@ -676,6 +650,8 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 	bool recvFinished = false;
 	int peersFinished = 0;
 
+	// Reserve buffers spaces
+	recvData.reserve(comm->getNumProcs()*comm->maxMsgSize);
 
 	comm->joinSlaves();
 	//std::cerr << "    JOINED\n"; std::cerr.flush();
@@ -685,10 +661,12 @@ bool faster::workerIFddCore<K,T>::exchangeDataByKeyHashed(fastComm *comm){
 
 	while ( ! (recvFinished & sendFinished) ){
 		//std::cerr << "."; std::cerr.flush();
+		//usleep(500000);
 		if ( ! sendFinished )
-			sendFinished |= EDBKSendDataHashed(comm, sendPos, deleted, dataSize, recvData, pendingSend, dirty);
+			sendFinished |= EDBKSendDataHashed(comm, sendPos, deleted, dataSize, recvData, dirty);
 		if ( ! recvFinished )
 			recvFinished |= EDBKRecvData(comm, recvPos, sendPos, deleted, recvData, peersFinished, dirty);
+		//std::cerr << " sp: " << sendPos << " rp: " << recvPos << "\n" ;
 	}
 	//std::cerr << " PF:" << peersFinished << " CONDITIONS:" << sendFinished << " " << recvFinished << "\n";
 
@@ -847,7 +825,7 @@ void faster::workerIFddCore<K,T>::groupByKey(fastComm *comm){
 	//comm->waitForReq(comm->getNumProcs()-1);
 	resultBuffer << size_t(localData->getSize());
 
-	//std::cerr << "    DONE rKM:" << Ti[0] << " fKM:" << Ti[1] << " eDBK:" << Ti[2]  << "\n";
+	//std::cerr << "    groupByKey DONE rKM:" << Ti[0] << " fKM:" << Ti[1] << " eDBK:" << Ti[2]  << "\n";
 }
 template <typename K, typename T>
 void faster::workerIFddCore<K,T>::groupByKeyHashed(fastComm *comm){
@@ -857,12 +835,14 @@ void faster::workerIFddCore<K,T>::groupByKeyHashed(fastComm *comm){
 	bool dirty = exchangeDataByKeyHashed(comm);
 
 	if (dirty){
-		//std::cerr << "S      findMyKeysByHash\n";
+		//std::cerr << "          findMyKeysByHash\n";
 		findMyKeysByHash(comm->getNumProcs());
+		//std::cerr << "          findMyKeysByHash DONE\n";
 	}
 
 
 	resultBuffer << size_t(localData->getSize());
+	//std::cerr << "       groupByKeyHashed DONE\n";
 }
 
 inline void parseData(std::string & item, std::string & d){

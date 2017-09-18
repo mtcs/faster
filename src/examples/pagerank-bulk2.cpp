@@ -56,7 +56,7 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 	vector<double> givePR(numNodes,0);
 
 	vector<size_t> prLocation(numNodes+1);
-	vector<bool> present(numNodes+1, false);
+	vector<bool> present(numNodes, false);
 	vector<double> newPR(numPresNodes, (1 - dumpingFactor) / numNodes);
 
 
@@ -65,32 +65,25 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 		exit(11);
 	}
 
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	for ( size_t i = 0; i < numPresNodes; ++i){
 		present[keys[i]] = true;
 		prLocation[prKeys[i]] = i;
 	}
 
-	#pragma omp parallel for schedule(dynamic, 200)
+	//#pragma omp parallel for schedule(dynamic, 200)
 	//#pragma omp parallel for
 	for ( size_t i = 0; i < numPresNodes; ++i){
-		double contrib = dumpingFactor * pr[prLocation[keys[i]]] / adjList[i].size();
-		for ( size_t j = 0; j < adjList[i].size(); ++j){
-			auto target = adjList[i][j];
-			/*if (target == 1){
-				cerr << "\033[0;36m" << keys[i]  << " PR:" << pr[prLocation[keys[i]]] << " D:(" << adjList[i].size() << ") S1 : "<< contrib ;
-				if ( present[target] ){
-					cerr << "[LOCAL]";
-				}
-				cerr << "\033[0m\n";
-			}// */
-
+		int key = keys[i];
+		double & vertexPR = pr[prLocation[key]];
+		double contrib = dumpingFactor * vertexPR / adjList[i].size();
+		for ( auto target : adjList[i]){
 			if ( present[target] ){
 				auto l = prLocation[target];
-				#pragma omp atomic
+				//#pragma omp atomic
 				newPR[ l ] += contrib;
 			}else{
-				#pragma omp atomic
+				//#pragma omp atomic
 				givePR[target] += contrib;
 			}
 		}
@@ -103,14 +96,13 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 			msgList.push_back(p);
 		}
 	}
+	givePR.clear();
 
 	// Calculate Page Rank Error
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	for ( size_t i = 0; i < numPresNodes; ++i){
 		errors[i] = newPR[i] - pr[i];
 		pr[i] = newPR[i];
-		//if ( prKeys[i] == 1 )
-			//cerr << "\033[0;36m" << " TPR:" << pr[i] << " D:(" << adjList[i].size() << ") S1 : " << newPR[i] << "\033[0m\n";
 	}
 
 	return msgList;
@@ -123,32 +115,35 @@ void getNewPR(int * prKeys, void * prVP, size_t npr, int * contKeys, void * cont
 
 	vector<double> newPr(npr, 0);
 	vector<size_t> prLocation(numNodes+1);
+	vector<bool> vpresent(numNodes, false);
 
 	if ( npr != nErrors ) {
 		cerr << "Internal unknown error!!!!!!";
 		exit(11);
 	}
 
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	for ( size_t i = 0; i < npr; ++i ){
 		prLocation[prKeys[i]] = i;
-		//eLocation[eKeys[i]] = i;
+		vpresent[prKeys[i]] = true;
 	}
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	for ( size_t i = 0; i < numContribs; ++i){
 		auto target = contKeys[i];
+		if (! vpresent[target])
+			continue;
 		size_t targetPrLoc = prLocation[target];
 		double cont = contrib[i];
 
 		//#pragma omp atomic
 		newPr[targetPrLoc] += cont;
-		//if ( target == 1 )
-			//cerr << "[\033[0;36m1 R:" << cont << "\033[0m] \n";
 	}
 
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	for ( size_t i = 0; i < npr; ++i ){
 		// Output PR error
+		//if ( prKeys[i] == 2 )
+		//	cerr << "[\033[0;35m" << prKeys[i] << " OPR:" << pr[i] << " CPR:" << newPr[i] << " NPR:" << pr[i] + newPr[i] << "\033[0m] ";
 		error[i] = fabs(error[i] + newPr[i]);
 		pr[i] += newPr[i];
 
@@ -176,14 +171,14 @@ pair<int,double> maxError(const int & ka, double & a, const int & kb, double & b
 		return make_pair(kb,b);
 }
 
-
-
 int main(int argc, char ** argv){
 	// Init Faster Framework
 
 	auto start = system_clock::now();
-
-	fastContext fc(argc, argv);
+	fastSettings settings;
+	if (argc > 3) settings.messageSize = atol(argv[3]);
+	fastContext fc(settings, argc, argv);
+	//fastContext fc(argc, argv);
 	fc.registerFunction((void*) &toAList, "toAList");
 	fc.registerFunction((void*) &createPR, "createPR");
 	fc.registerFunction((void*) &createErrors, "createErrors");
@@ -210,17 +205,19 @@ int main(int argc, char ** argv){
 	auto start2 = system_clock::now();
 	auto data = new fdd<string>(fc, argv[1]);
 	cerr << "  Read Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
+	//cerr << "\033[0;31mPRESS ENTER TO EXIT\033[0m\n"; cin.get();
 
 	cerr << "Convert to Adjacency List\n";
 	auto structure = data->map<int, vector<int>>(&toAList);
-	cerr << "GBK\n";
-	structure->groupByKey()->cache();
 	fc.updateInfo();
-	cerr << "REDUCE\n";
+	structure->groupByKey()->cache();
+	//cerr << "\033[0;31mPRESS ENTER TO EXIT\033[0m\n"; cin.get();
+	fc.updateInfo();
 
 	numNodes = structure->reduce(&maxNodeId).first + 1;
 	fc.updateInfo();
 	cerr << numNodes << " node Graph" << '\n';
+
 
 	cerr << "Init Pagerank" << '\n';
 	auto pr = structure->map<int, double>(&createPR)->cache();
@@ -234,20 +231,22 @@ int main(int argc, char ** argv){
 	while( i < 10 ){
 		cerr << "\033[1;32mIteration " << i++ << "\033[0m\n";
 		auto start2 = system_clock::now();
-		auto contribs = iterationData->bulkFlatMap(&givePageRank);
+		auto contribs = iterationData->bulkFlatMap(&givePageRank)->cache();
 		fc.updateInfo();
-		cerr << contribs->getSize() << " (" << contribs->getSize() << ") messages. \n";
+
+		cerr << contribs->getSize() << " (" << contribs->getSize() << ") messages. (" << contribs->getSize()*(sizeof(double) + sizeof(int))/1024/1024 << "MB)\n";
 
 		pr->cogroup(contribs, errors)->bulkUpdate(&getNewPR);
 		error = errors->reduce(&maxError).second;
 		fc.updateInfo();
 		cerr << "  Error " << error << " time:" << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 
-		//auto p = pr->collect();
-		//sort(p.begin(), p.end());
-		//for ( auto i = 0; i < 10 ; i++ ){
-			//fprintf(stderr, "\033[0;32m%d:%.8lf\033[0m\n", p[i].first, p[i].second);
-		//}
+		/*auto p = pr->collect();
+		sort(p.begin(), p.end());
+		for ( auto & it : p ){
+			fprintf(stderr, "\033[0;32m%d:%.8lf\033[0m  ", it.first, it.second);
+		} // */
+		//cerr << "\033[0;31mPRESS ENTER TO EXIT\033[0m\n"; cin.get();
 	}
 	start2 = system_clock::now();
 
@@ -257,8 +256,7 @@ int main(int argc, char ** argv){
 	cerr << "  Write Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 	cerr << "PageRank in " << structure->getSize() << " node graph in "<< i << " iterations! In " << duration << "ms (error: " << error <<  ") \n";
 
-	//cerr << "\033[0;31mPRESS ENTER TO EXIT\033[0m\n";
-	//cin.get();
+	//cerr << "\033[0;31mPRESS ENTER TO EXIT\033[0m\n"; cin.get();
 
 	return 0;
 }

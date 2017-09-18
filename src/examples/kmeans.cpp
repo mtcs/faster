@@ -177,12 +177,12 @@ int main(int argc, char ** argv){
 	// Init Faster Framework
 	auto start = system_clock::now();
 
-	if (argc >= 3) numDims = atoi(argv[1]);
-	if (argc >= 4) numCentroids = atoi(argv[2]);
+	fastContext fc(argc, argv);
+
+	if (argc >= 3) numDims = atoi(argv[2]);
+	if (argc >= 4) numCentroids = atoi(argv[3]);
 	globalCentroids.resize(numCentroids * numDims);
 	printf("   GlobalCentroids Size:%ld\n", globalCentroids.size());
-
-	fastContext fc(argc, argv);
 
 	fc.registerFunction((void*) &toVector, "toVectors");
 	fc.registerFunction((void*) &initAssignment, "initAssignment");
@@ -204,7 +204,7 @@ int main(int argc, char ** argv){
 
 	cerr << "Import Data\n";
 	auto start2 = system_clock::now();
-	auto strdata = new fdd<string>(fc, argv[3]);
+	auto strdata = new fdd<string>(fc, argv[1]);
 	cerr << "  Read Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 
 	cerr << "Convert to Vector\n";
@@ -258,7 +258,7 @@ int main(int argc, char ** argv){
 
 	int i = 0;
 	while( i < 10 ){
-		//cerr << "\033[1;32mIteration " << i++ << "\033[0m\n" ;
+		cerr << "\033[1;32mIteration " << i++ << "\033[0m\n" ;
 		start2 = system_clock::now();
 
 		// Update item centroid assignment

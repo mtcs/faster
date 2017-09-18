@@ -11,7 +11,9 @@ using namespace faster;
 namespace testfaster{
 
 	TEST(TestIndexedFddCreation, CreateEmptyIFDD){
-		fastContext fc(0, NULL);
+		int c = 0;
+		char ** v = NULL;
+		fastContext fc(c, v);
 		fc.startWorkers();
 		if (!fc.isDriver())
 			return;
@@ -30,7 +32,9 @@ namespace testfaster{
 	TEST(TestIndexedFddCreation, CreateIFDDFromMem){
 		const int NUMITEMS = 10*1000;
 
-		fastContext fc(0, NULL);
+		int c = 0;
+		char ** v = NULL;
+		fastContext fc(c, v);
 		fc.startWorkers();
 		if (!fc.isDriver()){
 			return;
@@ -83,6 +87,8 @@ namespace testfaster{
 		class TestIFDD : public ::testing::Test {
 			protected:
 
+				int argc = 0;
+				char ** argv = NULL;
 				fastContext fc;
 				vector<T> localKeyData;
 				vector<T> localData;

@@ -63,9 +63,9 @@ flags = [
 '-I', './include',
 '-I', '/usr/lib/hadoop/include/',
 '-isystem', '/usr/include/c++',
-'-isystem', '/usr/include/c++/6.2.1',
-'-isystem', '/usr/include/c++/6.2.1/x86_64-pc-linux-gnu',
-'-isystem', '/usr/include/c++/6.2.1/backward',
+'-isystem', '/usr/include/c++/7.1.1',
+'-isystem', '/usr/include/c++/7.1.1/x86_64-pc-linux-gnu',
+'-isystem', '/usr/include/c++/7.1.1/backward',
 '-isystem', '/usr/include/openmpi',
 '-fopenmp'
 ]

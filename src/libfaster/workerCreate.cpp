@@ -4,7 +4,9 @@
 #include "fastComm.h"
 #include "workerFdd.h"
 #include "worker.h"
+#ifdef hdfsEnabled
 #include "hdfsEngine.h"
+#endif
 
 void faster::worker::createFDD (unsigned long int id, fddType type, size_t size){
 	//std::cerr << "createFDD ";
@@ -15,6 +17,7 @@ void faster::worker::createFDD (unsigned long int id, fddType type, size_t size)
 
 
 void faster::worker::readHDFSFile(unsigned long int id, std::string &filename, size_t size, size_t offset){
+#ifdef hdfsEnabled
 	std::string line;
 	char c;
 	hdfsEngine fs;
@@ -63,16 +66,16 @@ void faster::worker::readHDFSFile(unsigned long int id, std::string &filename, s
 	//std::cerr << "    S:FDDInfo ";
 	comm->sendFDDInfo(newFdd->getSize());
 
+#endif
 }
 
-void faster::worker::readFile(unsigned long int id, std::string &filename, size_t size, size_t offset){
-	std::string line;
-	char c;
+void faster::worker::readFile(unsigned long int id, std::string & filename, size_t size, size_t offset){
+	//std::cerr << " readfile size:" << size++ << " offset:" << offset++ << "\n";
 
 	//workerFdd<std::string> * newFdd = new workerFdd<std::string>(id, String);
 	workerFdd * newFdd = new workerFdd(id, String);
 
-	if (newFdd == NULL) { std::cerr << "\nERROR: Could not find FDD!"; exit(201); }
+	if (newFdd == NULL) { std::cerr << "\nERROR: Could not find FDD!\n"; exit(201); }
 
 	fddList.insert(fddList.end(), newFdd);
 
@@ -84,27 +87,32 @@ void faster::worker::readFile(unsigned long int id, std::string &filename, size_
 		exit(202);
 	}
 
-
 	if( offset > 0){
-		inFile.seekg(offset-1, inFile.beg);
+		char c;
+		std::string line;
+		inFile.seekg(offset - 1, inFile.beg);
 		c = inFile.get();
 		// If the other process doesn't have this line, get it!
 		std::getline( inFile, line );
 		if ( c == '\n' ) {
 			//std::cerr << "(" << line << ")\n";
-			newFdd->insert(0, &line, 0);
+			if ( line.size() > 0 )
+				newFdd->insert(0, &line, 0);
 		}
 	}
 
 	// Start reading lines
-	while( size_t(inFile.tellg()) < (offset + size) ){
+	while( (!inFile.eof()) && (size_t(inFile.tellg()) < (offset + size)) ){
+		std::string line;
 		std::getline( inFile, line );
 
-		//std::cerr << line << "\n";
+		//std::cerr << "(" << line.size() << ") " << line << "\n";
 		//std::cerr << "[" << line << "]\n";
 
-		newFdd->insert(0, &line, 0);
+		if ( line.size() > 0 )
+			newFdd->insert(0, &line, 0);
 	}
+
 	inFile.close();
 
 	newFdd->shrink();
@@ -113,14 +121,15 @@ void faster::worker::readFile(unsigned long int id, std::string &filename, size_
 	comm->sendFDDInfo(newFdd->getSize());
 
 }
-void faster::worker::createFDDFromFile(unsigned long int id, std::string &filename, size_t size, size_t offset){
-	std::string fileType = filename.substr(0,7);
+void faster::worker::createFDDFromFile(unsigned long int id, std::string & filename, size_t size, size_t offset){
 
-	if(fileType.size() > 7){
+	if(filename.size() > 7){
+		std::string fileType = filename.substr(0,7);
 		if(! fileType.compare("hdfs://")){
 			readHDFSFile(id, filename, size, offset);
 		}else if(! fileType.compare("file://")){
-			readFile(id, filename.substr(6,filename.length()-7), size, offset);
+			std::string path = filename.substr(6, filename.length() - 7);
+			readFile(id, path, size, offset);
 		}else{
 			readFile(id, filename, size, offset);
 		}

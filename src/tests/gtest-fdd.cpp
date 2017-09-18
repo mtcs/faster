@@ -14,7 +14,7 @@ namespace testfaster{
 	// Test the creation of a empy dataset
 	template <typename T>
 	void createEmptyFDDtest(){
-		fastContext fc(0, NULL);
+		fastContext fc;
 		fc.startWorkers();
 		if (!fc.isDriver())
 			return;
@@ -78,7 +78,7 @@ namespace testfaster{
 	// Test the creation of a dataset from local data
 	template <typename T, int NUMITEMS = 10*1000>
 	void createFDDFromMemTest(){
-		fastContext fc(0, NULL);
+		fastContext fc;
 		fc.startWorkers();
 		T gambiarra = {};
 		if (!fc.isDriver()){
@@ -175,8 +175,6 @@ namespace testfaster{
 	template <typename T, int NUMITEMS = 10*1000>
 		class TestFDD : public ::testing::Test {
 			protected:
-
-
 
 				fastContext fc;
 				vector<T> localData;
