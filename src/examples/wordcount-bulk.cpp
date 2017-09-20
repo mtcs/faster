@@ -14,24 +14,35 @@ using std::chrono::system_clock;
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 
-deque<pair<string,int>> splitLine(string & line){
-	deque<pair<string,int>> result;
-	stringstream ss(line);
-	string token;
-
-	while (getline(ss, token, ' ')){
-		result.insert(result.end(), make_pair(token, 1));
+void updateOutput(string *& outKeys, int *& outCount, size_t & outSize, unordered_map<string,int> & wordcount){
+	outKeys = new string[wordcount.size()];
+	outCount = new int[wordcount.size()];
+	size_t i = 0;
+	for ( auto & it : wordcount ){
+		outKeys[i] = it.first;
+		outCount[i++] = it.second;
 	}
-
-	return result;
+	outSize = wordcount.size();
 }
 
-pair<string, int> countWords(const string & key, vector<int *> & countV){
-	int count = 0;
-	for ( auto v : countV){
-		count += *v;
+void countWords(string *& outKeys, int *& outCount, size_t & outSize, string * line, size_t inSize){
+	unordered_map<string,int> wordcount(inSize);
+	for ( size_t i = 0; i < inSize ; i++ ){
+		stringstream ss(line[i]);
+		string token;
+		while (getline(ss, token, ' ')){
+			wordcount[token] ++;
+		}
 	}
-	return make_pair(key, count);
+	updateOutput(outKeys, outCount, outSize, wordcount);
+}
+
+void mergeCounts(string *& outKeys, int *& outCount, size_t & outSize, string * inKey , int * count, size_t inSize){
+	unordered_map<string,int> wordcount(inSize);
+	for ( size_t i = 0; i < inSize ; i++ ){
+		wordcount[inKey[i]] += count[i];
+	}
+	updateOutput(outKeys, outCount, outSize, wordcount);
 }
 
 int main(int argc, char ** argv){
@@ -41,8 +52,8 @@ int main(int argc, char ** argv){
 	// Init Faster Framework
 	cout << "Init FastLib" << '\n';
 	fastContext fc(argc,argv);
-	fc.registerFunction((void*) &splitLine, "splitLine");
 	fc.registerFunction((void*) &countWords, "countWords");
+	fc.registerFunction((void*) &mergeCounts, "mergeCounts");
 	fc.startWorkers();
 	if (!fc.isDriver())
 		return 0;
@@ -55,12 +66,12 @@ int main(int argc, char ** argv){
 	fc.updateInfo();
 	cerr << "  Read Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 
-	cerr << "Convert to word count\n";
-	indexedFdd<string,int> * words = data->flatMap(&splitLine);
-	fc.updateInfo();
+	///cerr << "Convert to word count\n";
+	//indexedFdd<string,int> * words = data->flatMap(&splitLine);
+	//fc.updateInfo();
 
 	cerr << "Count words\n";
-	auto wordCount = words->mapByKey(&countWords)->groupByKey()->mapByKey(&countWords);
+	auto wordCount = data->bulkFlatMap(&countWords)->groupByKey()->bulkFlatMap(&mergeCounts);
 	fc.updateInfo();
 
 	start2 = system_clock::now();
