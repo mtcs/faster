@@ -22,10 +22,10 @@ pair<int,vector<float>> toVector(string & input){
 	stringstream ss(input);
 	vector<float> position;
 	position.reserve(2);
-	int key;
+	int key = 0;
 	float val;
 
-	ss >> key;
+	//ss >> key;
 
 	while(ss >> val){
 		position.insert(position.end(), val);
@@ -40,7 +40,7 @@ pair<int,vector<float>> initAssignment(const int & key UNUSED, vector<float> & p
 	return make_pair(0, position);
 }
 
-float vecDistanceToCentroids(vector<float> &a, int i){
+inline float vecDistanceToCentroids(vector<float> &a, int i){
 	//vector<float> dist(numDims);
 	float dist = 0;
 	for ( int d = 0; d < numDims ; d++ ){
@@ -64,7 +64,7 @@ float vecDistance(float aX, float aY, float bX, float bY){
 }
 
 void updateAssignment(int & key UNUSED, std::vector<float> & position){
-	float minDistance = vecDistanceToCentroids(position, 0);
+	float minDistance = vecDistanceToCentroids(position, key);
 
 	for ( int i = 1; i < numCentroids; i++ ){
 		float dist = vecDistanceToCentroids(position, i);
@@ -208,20 +208,20 @@ int main(int argc, char ** argv){
 	cerr << "  Read Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 
 	cerr << "Convert to Vector\n";
-	auto data = strdata->map(&toVector)->cache();
-	numItems = data->getSize();
+	auto clusterAssign = strdata->map(&toVector)->cache();
+	numItems = clusterAssign->getSize();
 	fc.updateInfo();
 	cerr << numItems << " items" << '\n';
 
 	cerr << "\033[1;33mInit K-Means (" << numCentroids << " centroids, " << numDims << " dimensions)\033[0m\n";
-	vector<float> maxV = data->reduce(&getMaxDimSizes).second;
-	vector<float> minV = data->reduce(&getMinDimSizes).second;
+	vector<float> maxV = clusterAssign->reduce(&getMaxDimSizes).second;
+	vector<float> minV = clusterAssign->reduce(&getMinDimSizes).second;
 	//cerr << "   X:[" << min[0] << " " << max[0] << "]\n";
 	//cerr << "   X:[" << min[1] << " " << max[1] << "]\n";
 	for ( int d = 0; d < numDims ; d++ ){
 		maxV[d] -= minV[d];
 	}
-	auto clusterAssign = data->map(initAssignment)->cache();
+	//auto clusterAssign = data->map(initAssignment)->cache();
 
 	auto initialCentroids = initGlobalCentroids(minV, maxV);
 
