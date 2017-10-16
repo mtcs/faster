@@ -458,7 +458,10 @@ bool faster::fastComm::isSendBufferFree(int i){
 		}
 
 		// check if buffer has been freed
+		//#pragma omp critical
+		//{
 		MPI_Test(&req[savepoint], &flag, MPI_STATUS_IGNORE);
+		//}
 		if (flag){
 			bufferBusy[i] = false;
 			return true;
@@ -475,6 +478,8 @@ void faster::fastComm::sendGroupByKeyData(int i){
 	if ( i > procId ){
 		savepoint -= 1;
 	}
+	//#pragma omp critical
+	//{
 	MPI_Isend(
 			buffer[i].data(),
 			buffer[i].size(),
@@ -484,6 +489,7 @@ void faster::fastComm::sendGroupByKeyData(int i){
 			MPI_COMM_WORLD,
 			&req[savepoint]);
 	bufferBusy[i] = true;
+	//}
 }
 
 void * faster::fastComm::recvGroupByKeyData(int & size){
@@ -492,6 +498,8 @@ void * faster::fastComm::recvGroupByKeyData(int & size){
 	int flag = 0;
 	void * data;
 
+	//#pragma omp critical
+	//{
 	MPI_Iprobe(
 			MPI_ANY_SOURCE,
 			MSG_GROUPBYKEYDATA,
@@ -508,6 +516,7 @@ void * faster::fastComm::recvGroupByKeyData(int & size){
 				bufferRecv[0]
 				);
 	}
+	//}
 
 	return data;
 }

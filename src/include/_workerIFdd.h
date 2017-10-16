@@ -56,16 +56,23 @@ namespace faster{
 					fastComm *comm,
 					size_t & pos,
 					std::vector<bool> & deleted,
-					std::vector<size_t> & dataSize,
-					std::vector< std::pair<K,T> >  & recvData,
-					bool & dirty);
-			bool EDBKRecvData(fastComm *comm,
+					bool & dirty
+					);
+			inline bool tryInsert( K * keys,
+					T * data,
+					K & insertKey,
+					T & insertData,
 					size_t & pos,
+					size_t & posLimit,
+					std::vector<bool> & deleted
+				      );
+			size_t EDBKRecvData(fastComm *comm,
 					size_t & posLimit,
 					std::vector<bool> & deleted,
 					std::vector< std::pair<K,T> >  & recvData,
 					int & peersFinised,
-					bool & dirty);
+					bool & dirty
+					);
 			void EDBKFinishDataInsert(std::vector<bool> & deleted, std::vector< std::pair<K,T> >  & recvData, size_t & pos );
 			void EDBKShrinkData(std::vector<bool> & deleted, size_t & pos);
 

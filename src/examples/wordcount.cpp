@@ -55,10 +55,11 @@ int main(int argc, char ** argv){
 	fc.updateInfo();
 	cerr << "  Read Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 
-	cerr << "Convert to word count\n";
+	cerr << "Convert to word count pair\n";
 	indexedFdd<string,int> * localWordCount = data->flatMap(&splitLine);
 	fc.updateInfo();
 
+	cerr << "Count words\n";
 	auto wordCount = localWordCount->mapByKey(&countWords)->groupByKey()->mapByKey(&countWords);
 	fc.updateInfo();
 

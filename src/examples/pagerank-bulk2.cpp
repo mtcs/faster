@@ -55,18 +55,21 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 	deque<pair<int,double>> msgList;
 	vector<double> givePR(numNodes,0);
 
-	vector<size_t> prLocation(numNodes+1);
+	vector<size_t> prLocation(numNodes);
 	vector<bool> present(numNodes, false);
 	vector<double> newPR(numPresNodes, (1 - dumpingFactor) / numNodes);
 
 
 	if ( (numPresNodes != nPR) || ( nPR != nErrors ) ) {
-		cerr << "Internal unknown error!!!!";
+		cerr << "Internal unknown error 1!!!!";
+		cerr << "NPR" << numPresNodes << " npr" << nPR << " nErrors" << nErrors << "\n";
 		exit(11);
 	}
 
 	//#pragma omp parallel for
 	for ( size_t i = 0; i < numPresNodes; ++i){
+		if (keys[i] == 2)
+			cerr << "FK2 in " << i << " ";
 		present[keys[i]] = true;
 		prLocation[prKeys[i]] = i;
 	}
@@ -74,15 +77,19 @@ deque<pair<int, double>> givePageRank(int * keys, void * adjListP, size_t numPre
 	//#pragma omp parallel for schedule(dynamic, 200)
 	//#pragma omp parallel for
 	for ( size_t i = 0; i < numPresNodes; ++i){
-		int key = keys[i];
+		int & key = keys[i];
 		double & vertexPR = pr[prLocation[key]];
 		double contrib = dumpingFactor * vertexPR / adjList[i].size();
-		for ( auto target : adjList[i]){
+		for ( auto & target : adjList[i] ){
 			if ( present[target] ){
+				if ( target == 2 )
+					cerr << "[\033[0;34m" << key << " " << contrib << ">" << target << "\033[0m] ";
 				auto l = prLocation[target];
 				//#pragma omp atomic
 				newPR[ l ] += contrib;
 			}else{
+				if ( target == 2 )
+					cerr << "L[\033[0;34m" << key << " " << contrib << ">" << target << "\033[0m] ";
 				//#pragma omp atomic
 				givePR[target] += contrib;
 			}
@@ -114,11 +121,11 @@ void getNewPR(int * prKeys, void * prVP, size_t npr, int * contKeys, void * cont
 	double * error = (double*) errorVP;
 
 	vector<double> newPr(npr, 0);
-	vector<size_t> prLocation(numNodes+1);
+	vector<size_t> prLocation(numNodes);
 	vector<bool> vpresent(numNodes, false);
 
 	if ( npr != nErrors ) {
-		cerr << "Internal unknown error!!!!!!";
+		cerr << "Internal unknown error 2!!!!!!";
 		exit(11);
 	}
 
@@ -134,6 +141,8 @@ void getNewPR(int * prKeys, void * prVP, size_t npr, int * contKeys, void * cont
 			continue;
 		size_t targetPrLoc = prLocation[target];
 		double cont = contrib[i];
+		if ( target == 2 )
+			cerr << "[\033[0;34m" << cont << ">" << target << "\033[0m] ";
 
 		//#pragma omp atomic
 		newPr[targetPrLoc] += cont;
@@ -142,8 +151,8 @@ void getNewPR(int * prKeys, void * prVP, size_t npr, int * contKeys, void * cont
 	//#pragma omp parallel for
 	for ( size_t i = 0; i < npr; ++i ){
 		// Output PR error
-		//if ( prKeys[i] == 2 )
-		//	cerr << "[\033[0;35m" << prKeys[i] << " OPR:" << pr[i] << " CPR:" << newPr[i] << " NPR:" << pr[i] + newPr[i] << "\033[0m] ";
+		if ( prKeys[i] == 2 )
+			cerr << "[\033[0;35m" << prKeys[i] << " OPR:" << pr[i] << " CPR:" << newPr[i] << " NPR:" << pr[i] + newPr[i] << "\033[0m] ";
 		error[i] = fabs(error[i] + newPr[i]);
 		pr[i] += newPr[i];
 
@@ -241,12 +250,15 @@ int main(int argc, char ** argv){
 		fc.updateInfo();
 		cerr << "  Error " << error << " time:" << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
 
-		/*auto p = pr->collect();
+		int j = 0;
+		auto p = pr->collect();
 		sort(p.begin(), p.end());
 		for ( auto & it : p ){
+			if (j++ >10) break;
 			fprintf(stderr, "\033[0;32m%d:%.8lf\033[0m  ", it.first, it.second);
 		} // */
 		//cerr << "\033[0;31mPRESS ENTER TO EXIT\033[0m\n"; cin.get();
+		//return(false);
 	}
 	start2 = system_clock::now();
 
