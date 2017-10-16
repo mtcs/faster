@@ -132,6 +132,14 @@ namespace faster{
 			/// @param varP - Global vector to be registered
 			template <class T>
 			void registerGlobal(std::vector<T> * varP);
+
+			/// @brief Gegisters a global Vector to be used inside used defined
+			///        functions in distributted environment.
+			///
+			/// @tparam T - Type of the global vector to be registered
+			/// @param varP - Global vector to be registered
+			template <class T>
+			void registerGlobal(std::vector<std::vector<T>> * varP);
 			/// @}
 
 			/// @brief Start worker machines computation
@@ -361,11 +369,17 @@ namespace faster{
 		// TODO Adapt to new global model
 		globalTable.insert( globalTable.end(), std::make_tuple(varP, s, POINTER) );
 	}
-	// Still unimplemented
 	template <class T>
 	void fastContext::registerGlobal(std::vector<T> * varP){
 		// TODO Adapt to new global model
 		globalTable.insert( globalTable.end(), std::make_tuple(varP->data(), sizeof(T) * varP->size(), VECTOR) );
+	}
+
+	template <class T>
+	void fastContext::registerGlobal(std::vector<std::vector<T>> * varP){
+		// TODO Adapt to new global model
+		for (auto & v: *varP)
+			globalTable.insert( globalTable.end(), std::make_tuple(v.data(), sizeof(T) * v.size(), VECTOR) );
 	}
 
 	/*template <typename T>

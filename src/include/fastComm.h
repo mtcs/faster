@@ -56,6 +56,7 @@ namespace faster{
 	#define MSG_FINISH 		0x8000 // */
 	enum msgTag : int {
 		MSG_TASK 	,
+		MSG_TASK_GLOBALS,
 		MSG_CREATEFDD 	,
 		MSG_CREATEIFDD 	,
 		MSG_CREATEGFDD 	,

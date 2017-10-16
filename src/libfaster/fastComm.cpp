@@ -93,22 +93,34 @@ void faster::fastComm::sendTask(fastTask &task){
 
 	buffer[0] << task.id << task.operationType << task.srcFDD << task.destFDD << task.functionId;
 	buffer[0] << size_t(task.globals.size());
+	for (int i = 1; i < numProcs; ++i){
+		MPI_Isend(buffer[0].data(), buffer[0].size(), MPI_BYTE, i, MSG_TASK, MPI_COMM_WORLD, &req[i-1]);
+	}
+
+	std::vector<std::vector<MPI_Request>> greq(task.globals.size());
+	std::vector<fastCommBuffer> buf(task.globals.size());
 
 	// TODO Adapt to new global model
 	for ( size_t i = 0; i < task.globals.size(); i++){
 		size_t s = std::get<1>(task.globals[i]);
 		int type = std::get<2>(task.globals[i]);
 		//std::cerr << "SEND Glob.: "<< i <<"T:" << type << " S:" << s << "\n";
-		buffer[0] << type;
-		buffer[0] << s;
-		buffer[0].write(std::get<0>(task.globals[i]), s);
+		buf[i].reset();
+		buf[i].grow(sizeof(int) + sizeof(size_t) + s);
+		buf[i] << type;
+		buf[i] << s;
+		buf[i].write(std::get<0>(task.globals[i]), s);
+		greq[i].resize(numProcs);
+		for (int j = 1; j < numProcs; ++j){
+			MPI_Isend(buf[i].data(), buf[i].size(), MPI_BYTE, j, MSG_TASK_GLOBALS, MPI_COMM_WORLD, &greq[i][j-1]);
+		}
 	}
 
-	for (int i = 1; i < numProcs; ++i){
-		MPI_Isend(buffer[0].data(), buffer[0].size(), MPI_BYTE, i, MSG_TASK, MPI_COMM_WORLD, &req[i-1]);
-	}
 	//MPI_Waitall( numProcs - 1, req, status);
 	MPI_Waitall( numProcs - 1, req, status);
+	for ( size_t i = 0; i < task.globals.size(); i++){
+		MPI_Waitall( numProcs - 1, greq[i].data(), status);
+	}
 }
 
 void faster::fastComm::recvTask(fastTask & task){
@@ -122,10 +134,15 @@ void faster::fastComm::recvTask(fastTask & task){
 	bufferRecv[0] >> task.id >> task.operationType >> task.srcFDD >> task.destFDD >> task.functionId;
 
 	bufferRecv[0] >> numGlobals;
+
+
 	for ( size_t i = 0; i < numGlobals; i++){
 		size_t varSize = 0;
 		char * var;
 		int varType;
+
+		bufferRecv[0].reset();
+		MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_TASK_GLOBALS, MPI_COMM_WORLD, &stat);
 
 		bufferRecv[0] >> varType;
 		bufferRecv[0] >> varSize;
