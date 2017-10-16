@@ -40,6 +40,10 @@ faster::fastComm::fastComm(int & argc, char **& argv){
 
 	MPI_Group origGroup;
 	MPI_Comm_group(MPI_COMM_WORLD, &origGroup);
+	// For Fault Tolerance
+	MPI_Comm_set_errhandler(MPI_COMM_WORLD, MPI_ERRORS_RETURN);
+
+	// Slave group
 	MPI_Group_incl(origGroup, numProcs-1, slaveIDs.data(), &slaveGroup);
 	MPI_Comm_create(MPI_COMM_WORLD, slaveGroup, &slaveComm);
 
