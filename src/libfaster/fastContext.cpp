@@ -8,7 +8,11 @@
 faster::fastContext::fastContext(){
 	int c = 0;
 	char ** v = NULL;
-	fastContext(c,v);
+	settings = new fastSettings();
+	comm = new fastComm(c, v );
+	//comm->maxMsgSize = s.messageSize;
+	scheduler = new fastScheduler( comm->numProcs, & funcName);
+	numFDDs = 0;
 }
 
 faster::fastContext::fastContext( int & argc, char **& argv): fastContext(fastSettings(), argc, argv){
