@@ -267,7 +267,7 @@ T faster::_workerFdd<T>::reduce (reduceFunctionP<T> reduceFunc){
 		for ( size_t i = nT; i < s; ++i){
 			partResult = reduceFunc(partResult, d[i]);
 		}
-		#pragma omp single
+		#pragma omp master
 		result = partResult;
 
 		#pragma omp barrier
