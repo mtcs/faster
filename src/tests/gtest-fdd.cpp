@@ -317,12 +317,12 @@ namespace testfaster{
 	typedef TestFDD<double>   TestFDDDouble;
 	typedef TestFDD<string>   TestFDDString;
 
-	TEST_F(TestFDDChar    , UpdateChar)    { updateTest(); }
-	TEST_F(TestFDDInt     , UpdateInt)     { updateTest(); }
-	TEST_F(TestFDDLongInt , UpdateLongInt) { updateTest(); }
-	TEST_F(TestFDDFloat   , UpdateFloat)   { updateTest(); }
-	TEST_F(TestFDDDouble  , UpdateDouble)  { updateTest(); }
-	TEST_F(TestFDDString  , UpdateString)  { updateTest(); }
+	//TEST_F(TestFDDChar    , UpdateChar)    { updateTest(); }
+	//TEST_F(TestFDDInt     , UpdateInt)     { updateTest(); }
+	//TEST_F(TestFDDLongInt , UpdateLongInt) { updateTest(); }
+	//TEST_F(TestFDDFloat   , UpdateFloat)   { updateTest(); }
+	//TEST_F(TestFDDDouble  , UpdateDouble)  { updateTest(); }
+	//TEST_F(TestFDDString  , UpdateString)  { updateTest(); }
 
 	TEST_F(TestFDDChar    , MapChar)    { mapTest(); }
 	TEST_F(TestFDDInt     , MapInt)     { mapTest(); }
