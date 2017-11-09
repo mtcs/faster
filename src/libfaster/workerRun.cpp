@@ -45,7 +45,7 @@ void faster::worker::run(){
 			case MSG_CREATEIFDD:
 				//std::cerr << "    R:CreateIFdd \n";
 				comm->recvCreateIFDD(id, kType, tType, size);
-				//std::cerr << "ID:" << id << " K:" << (int) kType << " T:" << (int) tType << " S:" << size << " ";
+				//std::cerr << "ID:" << id << " K:" << (int) kType << " T:" << (int) tType << " S:" << size << "\n";
 				createIFDD(id, kType, tType, size);
 				//std::cerr << ".\n";
 				break;

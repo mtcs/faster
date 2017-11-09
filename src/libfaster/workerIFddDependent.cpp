@@ -37,25 +37,25 @@ void faster::_workerIFdd<K,T>::map (workerFddBase * dest, ImapIFunctionP<K,T,L,U
 	//std::cerr << "START\n" ;
 
 	#ifdef cudaEnabled
-	T * d_d;
+	T * d_id;
 	K * d_ik;
 	L * d_ok;
 	U * d_od;
 	const unsigned int tpb = 512;
 	unsigned int nb = (s + tpb - 1) / tpb;
 
-	cudaMalloc((void **)d_d, s*sizeof(T));
-	cudaMalloc((void **)d_ik, s*sizeof(K));
-	cudaMalloc((void **)d_ok, s*sizeof(L));
-	cudaMalloc((void **)d_od, s*sizeof(U));
+	cudaMalloc((void **)&d_id, s*sizeof(T));
+	cudaMalloc((void **)&d_ik, s*sizeof(K));
+	cudaMalloc((void **)&d_ok, s*sizeof(L));
+	cudaMalloc((void **)&d_od, s*sizeof(U));
 
-	sudaMemcpy(d_d, d, s*sizeof(T), cudaMemcpyHostToDevice);
-	sudaMemcpy(d_ik, k, s*sizeof(K), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_id, d, s*sizeof(T), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_ik, k, s*sizeof(K), cudaMemcpyHostToDevice);
 
 	ImapI<K,T,L,U><<<nb,tpb>>>(d_ik, d_d, s, mapFunc);
 
-	sudaMemcpy(d_d, d, s*sizeof(T), cudaMemcpyDeviceToHost);
-	sudaMemcpy(d_d, d, s*sizeof(T), cudaMemcpyDeviceToHost);
+	cudaMemcpy(d, d_od, s*sizeof(T), cudaMemcpyDeviceToHost);
+	cudaMemcpy(k, d_ok, s*sizeof(T), cudaMemcpyDeviceToHost);
 
 	cudeFree(d_d);
 	cudeFree(d_ik);

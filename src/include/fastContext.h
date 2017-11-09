@@ -140,6 +140,14 @@ namespace faster{
 			/// @param varP - Global vector to be registered
 			template <class T>
 			void registerGlobal(std::vector<std::vector<T>> * varP);
+
+			/// @brief Gegisters a global Vector to be used inside used defined
+			///        functions in distributted environment.
+			///
+			/// @tparam T - Type of the global vector to be registered
+			/// @param varP - Global iunordered_map to be registered
+			template <class K, class T>
+			void registerGlobal(std::unordered_map<K, T> * varP);
 			/// @}
 
 			/// @brief Start worker machines computation
@@ -240,7 +248,7 @@ namespace faster{
 
 			unsigned long int readFDD(fddBase * ref, const char * fileName);
 			void getFDDInfo(size_t & size, std::vector<size_t> & dataAlloc);
-			void writeToFile(unsigned long int id,std::string & path, std::string & sufix);
+			void writeToFile(unsigned long int id, const std::string & path, const std::string & sufix);
 
 
 			unsigned long int enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size);
@@ -380,6 +388,19 @@ namespace faster{
 		// TODO Adapt to new global model
 		for (auto & v: *varP)
 			globalTable.insert( globalTable.end(), std::make_tuple(v.data(), sizeof(T) * v.size(), VECTOR) );
+	}
+	template <class K, class T>
+	void fastContext::registerGlobal(std::unordered_map<K, T> * varP){
+		// TODO Adapt to new global model
+		int typeCode = UMAP |
+			(decodeType(typeid(K).hash_code()) << 8) |
+			decodeType(typeid(T).hash_code());
+		//std::cerr << "TYPE: " << typeCode << " = "
+			//<< UMAP << " | "
+			//<< decodeType(typeid(K).hash_code()) << " | "
+			//<< decodeType(typeid(T).hash_code()) << " | "
+			//;
+		globalTable.insert( globalTable.end(), std::make_tuple(varP, varP->size(), typeCode ) );
 	}
 
 	/*template <typename T>

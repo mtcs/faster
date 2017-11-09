@@ -40,6 +40,7 @@ faster::fastComm::fastComm(int & argc, char **& argv){
 
 	MPI_Group origGroup;
 	MPI_Comm_group(MPI_COMM_WORLD, &origGroup);
+	//MPI_Comm_set_errhandler(MPI_COMM_WORLD, MPI_ERRORS_RETURN);
 	MPI_Group_incl(origGroup, numProcs-1, slaveIDs.data(), &slaveGroup);
 	MPI_Comm_create(MPI_COMM_WORLD, slaveGroup, &slaveComm);
 
@@ -88,8 +89,9 @@ void faster::fastComm::joinSlaves(){
 }
 
 void faster::fastComm::sendTask(fastTask &task){
+	//std::cerr << "SEND Task\n";
 	buffer[0].reset();
-	buffer[0].grow(48 + 8*task.globals.size() );
+	buffer[0].grow(128);
 
 	buffer[0] << task.id << task.operationType << task.srcFDD << task.destFDD << task.functionId;
 	buffer[0] << size_t(task.globals.size());
@@ -102,17 +104,28 @@ void faster::fastComm::sendTask(fastTask &task){
 
 	// TODO Adapt to new global model
 	for ( size_t i = 0; i < task.globals.size(); i++){
+		void * var = std::get<0>(task.globals[i]);
 		size_t s = std::get<1>(task.globals[i]);
 		int type = std::get<2>(task.globals[i]);
-		//std::cerr << "SEND Glob.: "<< i <<"T:" << type << " S:" << s << "\n";
+		//std::cerr << "SEND Glob.: "<< i << "T:" << type << " S:" << s << "\n";
+		//std::cerr << "\033[1;31mSGlob. Var:" ;
+		//for ( size_t j = 0 ; j < s ; j++ )
+			//std::cerr << std::hex << (short) ((char*)var)[j] << " ";
+		//std::cerr << "\033[0m\n" ;
 		buf[i].reset();
-		buf[i].grow(sizeof(int) + sizeof(size_t) + s);
+		buf[i].grow(sizeof(int) + sizeof(size_t) + s+16);
 		buf[i] << type;
 		buf[i] << s;
-		buf[i].write(std::get<0>(task.globals[i]), s);
+		buf[i].writeSafe(var, s);
 		greq[i].resize(numProcs);
+
+		//std::cerr << "\033[1;31mSGlob. Buffer:" ;
+		//for ( size_t j = 0 ; j < buf[i].size() ; j++ )
+			//std::cerr << std::hex << (short) buf[i].data()[j] << " ";
+		//std::cerr << "\033[0m\n" ;
+
 		for (int j = 1; j < numProcs; ++j){
-			MPI_Isend(buf[i].data(), buf[i].size(), MPI_BYTE, j, MSG_TASK_GLOBALS, MPI_COMM_WORLD, &greq[i][j-1]);
+			MPI_Isend(buf[i].data(), buf[i].size(), MPI_BYTE, j, MSG_TASK_GLOBALS, MPI_COMM_WORLD, &(greq[i][j-1]));
 		}
 	}
 
@@ -124,6 +137,7 @@ void faster::fastComm::sendTask(fastTask &task){
 }
 
 void faster::fastComm::recvTask(fastTask & task){
+	//std::cerr << "RECV Task\n";
 	MPI_Status stat;
 	size_t numGlobals = 0;
 
@@ -137,20 +151,34 @@ void faster::fastComm::recvTask(fastTask & task){
 
 
 	for ( size_t i = 0; i < numGlobals; i++){
+		int msgSize = 0;
 		size_t varSize = 0;
 		char * var;
 		int varType;
 
+		MPI_Status stat;
+		MPI_Probe(0, MSG_TASK_GLOBALS, MPI_COMM_WORLD, &stat);
+		MPI_Get_count(&stat, MPI_BYTE, &msgSize);
+		bufferRecv[0].grow(msgSize);
 		bufferRecv[0].reset();
 		MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, 0, MSG_TASK_GLOBALS, MPI_COMM_WORLD, &stat);
 
+		//std::cerr << "\033[1;31mRGlob. Buffer:" ;
+		//for ( size_t j = 0 ; j < 20 ; j++ )
+			//std::cerr << std::hex << (short) bufferRecv[0].data()[j] << " ";
+		//std::cerr << "\033[0m\n" ;
+
 		bufferRecv[0] >> varType;
 		bufferRecv[0] >> varSize;
-
 		//std::cerr << "RGlob.: T:" << varType << " S:" << varSize << "\n";
 
 		var = new char[varSize]();
 		bufferRecv[0].read(var, varSize);
+		//std::cerr << "\033[1;31mRGlob. Var:" ;
+		//for ( size_t j = 0 ; j < varSize ; j++ )
+			//std::cerr << std::hex << (short) var[j] << " ";
+		//std::cerr << "\033[0m\n" ;
+
 
 		task.globals.insert(task.globals.end(), std::make_tuple(var, varSize, varType));
 	}
@@ -163,8 +191,9 @@ void faster::fastComm::sendTaskResult(){
 	MPI_Send(resultBuffer.data(), resultBuffer.size() , MPI_BYTE, 0, MSG_TASKRESULT, MPI_COMM_WORLD);
 }
 
-void * faster::fastComm::recvTaskResult(unsigned long int & id, unsigned long int & sid, size_t & size, size_t & time, procstat & stat){
+void * faster::fastComm::recvTaskResult(unsigned long int & id, unsigned long int & sid, size_t & size, size_t & time, procstat & pstat){
 	int rsize;
+	MPI_Status stat;
 
 	MPI_Probe(MPI_ANY_SOURCE, MSG_TASKRESULT, MPI_COMM_WORLD, status);
 	MPI_Get_count(status, MPI_BYTE, &rsize);
@@ -174,9 +203,9 @@ void * faster::fastComm::recvTaskResult(unsigned long int & id, unsigned long in
 	bufferRecv[sid].grow(rsize);
 	bufferRecv[sid].reset();
 
-	MPI_Irecv(bufferRecv[sid].data(), bufferRecv[sid].free(), MPI_BYTE, sid, MSG_TASKRESULT, MPI_COMM_WORLD, &req[sid-1]);
+	MPI_Recv(bufferRecv[sid].data(), bufferRecv[sid].free(), MPI_BYTE, sid, MSG_TASKRESULT, MPI_COMM_WORLD, &stat);
 
-	bufferRecv[sid] >> id >> time >> stat >> size;
+	bufferRecv[sid] >> id >> time >> pstat >> size;
 
 	return bufferRecv[sid].pos();
 }
@@ -213,9 +242,8 @@ void faster::fastComm::sendCreateIFDD(unsigned long int id, fddType kType,  fddT
 	//char typeC = encodeFDDType(type);
 
 	buffer[dest].reset();
-	buffer[dest].grow(32);
+	buffer[dest].grow(sizeof(unsigned long int) + 2 * sizeof(fddType) + sizeof(size_t));
 
-	//buffer[dest] << id << typeC << size;
 	buffer[dest] << id << kType << tType << size;
 
 	//std::cerr << '(' << id << ' ' << (int) typeC << ":" << buffer[dest].size() << ')';
@@ -386,7 +414,7 @@ void faster::fastComm::recvReadFDDFile(unsigned long int &id, std::string & file
 	//std::cerr << filename << "\n";
 }
 
-void faster::fastComm::sendWriteFDDFile(unsigned long int id,std::string & path, std::string & sufix){
+void faster::fastComm::sendWriteFDDFile(unsigned long int id, const std::string & path, const std::string & sufix){
 
 	for (int dest = 1; dest < numProcs; ++dest){
 		buffer[dest].reset();

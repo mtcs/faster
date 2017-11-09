@@ -5,7 +5,12 @@
 #include "definitions.h"
 
 namespace faster{
+	template <typename K, typename T>
+	class iFddCore;
+
 	class fddBase{
+		template <typename K, typename T>
+		friend class iFddCore;
 		protected:
 			fddType _kType;
 			fddType _tType;

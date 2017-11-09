@@ -15,13 +15,19 @@ using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 
 deque<pair<string,int>> splitLine(string & line){
-	deque<pair<string,int>> result;
+	unordered_map<string,int> thermCount;
 	stringstream ss(line);
 	string token;
 
 	while (getline(ss, token, ' ')){
-		result.insert(result.end(), make_pair(token, 1));
+		auto it = thermCount.find(token);
+		if (it == thermCount.end())
+			thermCount[token] = 0;
+		else
+			it->second += 1;
 	}
+
+	deque<pair<string,int>> result(thermCount.begin(), thermCount.end());
 
 	return result;
 }

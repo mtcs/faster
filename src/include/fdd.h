@@ -62,7 +62,7 @@ namespace faster{
 			///
 			/// @param path - Prefix of the file path to be written
 			/// @param sufix - Sufix of the file path to be written
-			void writeToFile(std::string & path, std::string & sufix);
+			void writeToFile(const std::string & path, const std::string & sufix);
 
 			/// @brief (UNUSED)
 			void * getKeyMap() { return NULL; }
@@ -478,7 +478,7 @@ namespace faster{
 	}
 
 	template <typename T>
-	void fddCore<T>::writeToFile(std::string & path, std::string & sufix){
+	void fddCore<T>::writeToFile(const std::string & path, const std::string & sufix){
 		context->writeToFile(id, path, sufix);
 	}
 

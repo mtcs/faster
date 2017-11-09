@@ -30,6 +30,7 @@ namespace faster{
 			fastScheduler(unsigned int numProcs, std::vector<std::string> * funcName);
 			~fastScheduler();
 
+			void copyTaskGlobals(fastTask * newTask, std::vector< std::tuple<void*, size_t, int> > & globalTable);
 			fastTask * enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size, std::vector< std::tuple<void*, size_t, int> > & globalTable);
 			fastTask * enqueueTask(fddOpType opT, unsigned long int id, size_t size, std::vector< std::tuple<void*, size_t, int> > & globalTable);
 

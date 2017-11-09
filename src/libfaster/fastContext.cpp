@@ -271,7 +271,7 @@ void faster::fastContext::getFDDInfo(size_t & s, std::vector<size_t> & dataAlloc
 	}
 }
 
-void faster::fastContext::writeToFile(unsigned long int id,std::string & path, std::string & sufix){
+void faster::fastContext::writeToFile(unsigned long int id, const std::string & path, const std::string & sufix){
 	unsigned long int tid, sid;
 	system_clock::time_point start;
 
@@ -294,8 +294,8 @@ unsigned long int faster::fastContext::enqueueTask(fddOpType opT, unsigned long 
 	//}
 
 	// TODO do this later on a shceduler?
+	//std::cerr << "    S:Task ID:" << newTask->id << " FDD:" << idSrc << " FDD2:" << idRes << " F:" << funcId << '\n';
 	comm->sendTask(*newTask);
-	//std::cerr << "    S:Task ID:" << newTask->id << " FDD:" << idSrc << " F:" << funcId << '\n';
 
 	return newTask->id;
 }

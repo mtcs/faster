@@ -122,7 +122,7 @@ void faster::worker::readFile(unsigned long int id, std::string & filename, size
 
 }
 void faster::worker::createFDDFromFile(unsigned long int id, std::string & filename, size_t size, size_t offset){
-
+	//std::cerr << "CREATING FDD FROM FILE: [" << filename << "]\n";
 	if(filename.size() > 7){
 		std::string fileType = filename.substr(0,7);
 		if(! fileType.compare("hdfs://")){

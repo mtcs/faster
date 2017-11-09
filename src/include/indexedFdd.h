@@ -211,8 +211,10 @@ namespace faster{
 			/// @return a vector with the content of the indexedFDD
 			std::vector<std::pair<K,T>> collect( ){
 				//std::cerr << " \033[0;31mSIZE: " << this->size << "\033[0m";
+				//std::cerr << "\033[0;31mCOLLECT\033[0m";
 				std::vector<std::pair<K,T>> data(this->size);
 				this->context->collectFDD(data, this);
+				//std::cerr << "\033[0;31mCOLLECT DONE\033[0m";
 				return data;
 			}
 
@@ -596,11 +598,17 @@ namespace faster{
 
 		if ( (op & 0xff) & (OP_MapByKey | OP_FlatMapByKey | OP_FlatMap | OP_BulkFlatMap) ) {
 			size_t newSize = 0;
+			newFdd->dataAlloc.resize(context->numProcs());
 
+			//std::cerr << "   \033[1;31mRecv DataAlloc:";
 			for (int i = 1; i < context->numProcs(); ++i){
-				if (result[i].second > 0) newSize += * (size_t*) result[i].first;
+				if (result[i].second > 0) {
+					newFdd->dataAlloc[i] = * (size_t*) result[i].first;
+					newSize += newFdd->dataAlloc[i];
+					//std::cerr << newFdd->dataAlloc[i] << " ";
+				}
 			}
-
+			//std::cerr << "\033[0m\n";
 			newFdd->setSize(newSize);
 		}
 
@@ -854,7 +862,7 @@ namespace faster{
 			size = newSize;
 			groupedByKey = true;
 		}
-		//std::cerr << ". ";
+		//std::cerr << ".\n ";
 
 		return (indexedFdd<K,T> *)this;
 	}

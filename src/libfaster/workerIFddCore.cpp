@@ -504,7 +504,7 @@ inline bool faster::workerIFddCore<K,T>::EDBKsendDataAsync(
 
 	// Check to see if we reached the maximum message size
 	if ( buffer[owner].size() >= comm->maxMsgSize ){
-		//std::cerr << "Send Async" << owner << "("<< dataSize[owner] << "," << buffer[owner].size()  << ") ";
+		//std::cerr << "Send Async " << owner << "("<< dataSize[owner] << "," << buffer[owner].size()  << ") ";
 		//Send partial data
 		buffer[owner] << char(1);
 		buffer[owner].writePos(dataSize[owner], 0);

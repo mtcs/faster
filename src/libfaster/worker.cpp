@@ -148,29 +148,87 @@ void faster::worker::writeFDDFile(unsigned long int id, std::string &path, std::
 //void resizeVector(std::tuple<void *, size_t, int> & var UNUSED){
 //}
 
+template <class K>
+void readUmapStep2(void * src, size_t bsize, void * dest, int type){
+	faster::fastCommBuffer b(0);
+	b.setBuffer(src, bsize);
+	b.reset();
+	//std::cerr << "RBuffer:";
+	//for ( size_t i = 0 ; i < b.size() ; i++ ){
+		//std::cerr << std::hex << (short) b.data()[i] << " ";
+	//}
+	//std::cerr << "\n";
+	switch (type){
+		case Int:
+			//std::cerr << "DESERIALIZING UMAP<K,int>\n";
+			((std::unordered_map<K, int> *) dest) -> clear();
+			b >> *(std::unordered_map<K, int> *) dest;
+			break;
+		case Double:
+			//std::cerr << "DESERIALIZING UMAP<K,double>" << ((std::unordered_map<K, double> *) dest)->size() << "\n";
+			((std::unordered_map<K, double> *) dest)->clear();
+			b >> *(std::unordered_map<K, double> *) dest;
+			//std::cerr << "DESERIALIZATION DONE\n";
+			break;
+		default:
+			std::cerr << "ERROR unordered_map value type("<<type<<") not identified\n";
+	}
+}
+void readUmap(void * src, size_t bsize, void * dest, int type){
+	int ktype = (type >> 8) & 0xFF;
+	int ttype = type & 0xFF;
+	switch (ktype){
+		case Int:
+			//std::cerr << "DESERIALIZING UMAP<int,?>\n";
+			readUmapStep2<int>(src, bsize, dest, ttype);
+			break;
+		case String:
+			//std::cerr << "DESERIALIZING UMAP<string,?>\n";
+			readUmapStep2<std::string>(src, bsize, dest, ttype);
+			break;
+		default:
+			std::cerr << "ERROR: unordered_map key type("<<ktype<<") not identified\n";
+	}
+}
+
 void faster::worker::updateGlobals(fastTask &task){
 	for ( size_t i = 0; i < task.globals.size(); i++){
-		int type = std::get<2>(task.globals[i]);
+		void * data = std::get<0>(task.globals[i]);
 		size_t s = std::get<1>(task.globals[i]);
+		int type = std::get<2>(task.globals[i]);
 
 		//if (type & VECTOR){
 		//	resizeVector((*globalTable)[i]);
 		//}
+		//std::cerr << "Update Glob.: "<< i <<"T:" << type << " S:" << s << "\n";
+		//std::cerr << "\033[1;33mVar Buffer:";
+		//for ( size_t i = 0 ; i < s ; i++ ){
+		//	std::cerr << std::hex << (short) ((char*)data)[i] << " ";
+		//}
+		//std::cerr << "\033[0m\n";
 		if (type & POINTER){
-			char ** v = (char **) std::get<0>((*globalTable)[i]);
+			char ** v = (char **) &std::get<0>((*globalTable)[i]);
 			if (*v == NULL)
 				(*v) = new char[s];
 			std::memcpy(
 				*v,
-				std::get<0>(task.globals[i]),
+				data,
 				s
 				);
 		}else{
-			std::memcpy(
-				std::get<0>((*globalTable)[i]),
-				std::get<0>(task.globals[i]),
-				s
-				);
+			if (type & UMAP){
+				readUmap(
+					data,
+					s,
+					std::get<0>((*globalTable)[i]),
+					type);
+			}else{
+				std::memcpy(
+					std::get<0>((*globalTable)[i]),
+					data,
+					s
+					);
+			}
 		}
 
 		delete [] (char*) std::get<0>(task.globals[i]);

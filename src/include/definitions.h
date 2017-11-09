@@ -36,6 +36,7 @@ namespace faster{
 	#define FloatV		0x1008
 	#define DoubleV		0x1010
 	#define GroupFDD	0x8000
+	#define UMAP		0x00010000
 
 	/// @brief Dataset operation type
 	typedef unsigned int fddOpType;

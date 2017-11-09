@@ -263,8 +263,8 @@ namespace faster{
 		// THESE FUNCTIONS WILL BE DEPRECATED (THEY WILL BECOME TASKS)
 		void sendReadFDDFile(unsigned long int id, std::string filename, size_t size, size_t offset, int dest);
 		void recvReadFDDFile(unsigned long int &id, std::string & filename, size_t &size, size_t & offset);
-		void sendWriteFDDFile(unsigned long int id,std::string & path, std::string & sufix);
-		void recvWriteFDDFile(unsigned long int & id,std::string & path, std::string & sufix);
+		void sendWriteFDDFile(unsigned long int id, const std::string & path, const std::string & sufix);
+		void recvWriteFDDFile(unsigned long int & id, std::string & path, std::string & sufix);
 
 		void sendFDDInfo(size_t size);
 		void recvFDDInfo(size_t &size, int & src);
@@ -478,12 +478,19 @@ namespace faster{
 
 		buffer[0].reset();
 		buffer[0] << id << size;
+		//std::cerr << "Collecting local Data [" << id << ":" << size << "]\n";
 
 		buffer[0].grow(16 + getSize(keys, NULL, size) + getSize(data, NULL, size));
 
 		for( size_t i = 0; i < size; ++i ){
-			buffer[0] << keys[i] << data[i];
+			//std::cerr << keys[i] << " ";
+			buffer[0].write(keys[i]);
+			buffer[0].write(data[i]);
 		}
+		//for( size_t i = 0; i < buffer[0].size(); ++i ){
+		//	std::cerr << buffer[0].data()[i];
+		//}
+		//std::cerr << "\n";
 
 		MPI_Isend( buffer[0].data(), buffer[0].size(), MPI_BYTE, 0, MSG_COLLECTDATA , MPI_COMM_WORLD, req);
 	}
@@ -504,20 +511,25 @@ namespace faster{
 
 	template <typename T>
 	inline void fastComm::decodeCollect(T & item){
+		//std::cerr << "\033[0;34mG\033[0m" ;
 		bufferRecv[0] >> item;
 	}
 	template <typename T>
 	inline void fastComm::decodeCollect(std::pair<T*,size_t> & item){
+		//std::cerr << "\033[0;33mO\033[0m" ;
 		bufferRecv[0] >> item.second;
 		item.first = new T[item.second];
 		bufferRecv[0].read(item.first, item.second * sizeof(T) );
 	}
 	template <typename K, typename T>
 	inline void fastComm::decodeCollect(std::pair<K, T> & item){
+		//std::cerr << "\033[0;32mP\033[0m" ;
+		//std::cerr << item.first <<  " " ;
 		bufferRecv[0] >> item.first >> item.second;
 	}
 	template <typename K, typename T>
 	inline void fastComm::decodeCollect(std::tuple<K, T*, size_t> & item){
+		//std::cerr << "\033[0;31mT\033[0m" ;
 		bufferRecv[0]  >> std::get<0>(item) >> std::get<2>(item);
 		std::get<1>(item) = new T[std::get<2>(item)];
 		bufferRecv[0].read(std::get<1>(item), std::get<2>(item) * sizeof(T) );
@@ -525,7 +537,8 @@ namespace faster{
 
 	template <typename T>
 	void fastComm::recvFDDDataCollect(std::vector<T> & ret){
-		size_t count = 0, size;
+		//std::cerr << "\033[0;35mReceiving Collect Messages\033[0m";
+		size_t count = 0, itemsInMessage = 0;
 		unsigned long int id;
 		for (int i = 1; i < (numProcs); ++i){
 			MPI_Status stat;
@@ -533,14 +546,19 @@ namespace faster{
 
 			MPI_Probe(i, MSG_COLLECTDATA, MPI_COMM_WORLD, &stat);
 			MPI_Get_count(&stat, MPI_BYTE, &msgSize);
-			bufferRecv[0].reset();
 			bufferRecv[0].grow(msgSize);
+			bufferRecv[0].reset();
 
 			MPI_Recv(bufferRecv[0].data(), bufferRecv[0].free(), MPI_BYTE, i, MSG_COLLECTDATA, MPI_COMM_WORLD, &stat);
+			//for (size_t j = 0; j < msgSize; ++j){
+				//std::cerr << bufferRecv[0].data()[j];
+			//}
+			//std::cerr << "\n";
 
-			bufferRecv[0] >> id >> size;
-			//std::cerr << "[" << id << ":" << size<< "] " ;
-			for (size_t j = 0; j < size; ++j){
+			bufferRecv[0] >> id >> itemsInMessage;
+			//std::cerr << "\033[0;34mCollect Data[" << id << ":" << itemsInMessage << "] \033[0m" ;
+			//if (id > 10) exit(999);
+			for (size_t j = 0; j < itemsInMessage; ++j){
 				decodeCollect(ret[count]);
 				count ++;
 			}

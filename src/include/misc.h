@@ -17,12 +17,17 @@ namespace faster{
 			double ram;
 			long unsigned utime;
 			long unsigned stime;
+			procstat(){
+				ram = 0;
+				utime = 0;
+				stime = 0;
+			}
 	};
 
 	procstat getProcStat();
 
 	fddType decodeType(size_t typeCode);
-	
+
 	const std::string decodeOptype(fddOpType op);
 	const std::string decodeOptypeAb(fddOpType op);
 

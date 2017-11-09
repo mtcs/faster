@@ -11,6 +11,7 @@
 #include "sys/sysinfo.h"
 
 #include "fastScheduler.h"
+#include "fastCommBuffer.h"
 #include "fastTask.h"
 #include "misc.h"
 
@@ -38,6 +39,7 @@ void faster::fastScheduler::resetProcessWeights(){
 	//currentWeights[1] += currentWeights[2]/2;
 	//currentWeights[2] /= 2;
 }
+
 bool faster::fastScheduler::dataMigrationNeeded(){
 	return ( _dataMigrationNeeded && ( taskList.size() > 1 ) );
 }
@@ -128,12 +130,12 @@ void faster::fastScheduler::updateWeights(){
 		fastTask * lastTask = taskList.back();
 		std::vector<double> rate(numProcs, 0);
 
-		std::cerr << "      [ Exec.Times: ";
+		//std::cerr << "      [ Exec.Times: ";
 		for( i = 1; i < numProcs; ++i){
 			std::cerr << lastTask->times[i] << " ";
 			rate[i] = lastTask->allocation.get()[0][i]/(double)lastTask->times[i];
 		}
-		std::cerr << " ]\n";
+		//std::cerr << " ]\n";
 
 		double powersum = 0;
 		for( i = 1; i < numProcs; ++i){
@@ -190,6 +192,130 @@ std::shared_ptr <std::vector<double>> faster::fastScheduler::getNewAllocation(){
 	return r;
 }
 
+//template <class T>
+//int serilizeVar(char *& buffer, T & var, size_t pos, size_t & bsize){
+//	size_t s = sizeof(T);
+//	if (bsize < s){
+//		size_t newSize = 1.1*(bsize+s);
+//		buffer = (char*) realloc(buffer, newSize);
+//		bsize = newSize;
+//	}
+//	std::memcpy(&buffer[pos], & var, s);
+//	return sizeof(T);
+//}
+//template <class T>
+//int serilizeVar(char *& buffer, const T & var, size_t pos, size_t & bsize){
+//	size_t s = sizeof(T);
+//	if (bsize < s){
+//		size_t newSize = 1.1*(bsize+s);
+//		buffer = (char*) realloc(buffer, newSize);
+//		bsize = newSize;
+//	}
+//	std::memcpy(&buffer[pos], & var, s);
+//	return sizeof(T);
+//}
+//template <>
+//int serilizeVar(char *& buffer, std::string & var, size_t pos, size_t & bsize){
+//	size_t s = var.size();
+//	if (bsize < s){
+//		size_t newSize = 1.1*(bsize+s);
+//		buffer = (char*) realloc(buffer, newSize);
+//		bsize = newSize;
+//	}
+//	std::memcpy(&buffer[pos], var.data(), var.size());
+//	return var.size();
+//}
+//template <class K, class T>
+//int serilizeVar(char *& buffer, std::unordered_map<K,T> & var, size_t pos, size_t & bsize){
+//	pos += serilizeVar(&buffer[pos], var.size(), pos, bsize);
+//	for ( auto & it : var ){
+//		pos += serilizeVar(&buffer[pos], it.first, pos, bsize);
+//		pos += serilizeVar(&buffer[pos], it.second, pos, bsize);
+//	}
+//	return pos;
+//}
+
+template <class K>
+void * serilizeUMapStep2(void * umap, int type, size_t & s){
+	size_t bsize = 1024*1024;
+	char * buffer = new char[bsize];
+	faster::fastCommBuffer b(0);
+	b.setBuffer(buffer, bsize);
+	b.reset();
+	switch (type){
+		case Int:
+			//std::cerr << "SERIALIZING UMAP<K,int>\n";
+			//pos += serilizeVar(buffer, *(std::unordered_map<K, int> *)umap, pos, bsize);
+			b.write( *(std::unordered_map<K, int> *) umap );
+			break;
+		case Double:
+			//pos += serilizeVar(buffer, *(std::unordered_map<K, double> *)umap, pos, bsize);
+			//std::cerr << "SERIALIZING UMAP<K,double>" << ((std::unordered_map<K, double> *) umap )->size() << "\n";
+			//b.write<K,double>( *(std::unordered_map<K, double> *) umap );
+			b << *(const std::unordered_map<K, double> *) umap ;
+			//std::cerr << "SERIALIZATION DONE (" << b.size()/1024 << ")\n";
+			break;
+		default:
+			std::cerr << "ERROR unordered_map value type("<<type<<") not identified\n";
+	}
+	//std::cerr << "\033[1;33mBuffer:";
+	//for ( size_t i = 0 ; i < b.size() ; i++ ){
+		//std::cerr << std::hex << (short) b.data()[i] << " ";
+	//}
+	//std::cerr << "\033[0m\n";
+	s = b.size();
+	return b.data();
+
+}
+
+void * serilizeUMapStep1(void * umap, int type, size_t & s){
+	int ktype = (type >> 8) & 0xFF;
+	int ttype = type & 0xFF;
+	switch (ktype){
+		case Int:
+			//std::cerr << "SERIALIZING UMAP<int,?>\n";
+			return serilizeUMapStep2<int>(umap, ttype, s);
+		case String:
+			//std::cerr << "SERIALIZING UMAP<string,?>\n";
+			return serilizeUMapStep2<std::string>(umap, ttype, s);
+		default:
+			std::cerr << "ERROR: unordered_map key type("<<ktype<<") not identified\n";
+			return NULL;
+	}
+}
+
+void faster::fastScheduler::copyTaskGlobals(fastTask * newTask, std::vector< std::tuple<void*, size_t, int> > & globalTable){
+	//std::cerr << "COPY GLOBALS\n";
+
+	for ( size_t i = 0; i < globalTable.size(); i++){
+		void * var;
+		void * varPointer = std::get<0>(globalTable[i]);
+		size_t s = std::get<1>(globalTable[i]);
+		int type = std::get<2>(globalTable[i]);
+		//std::cerr << "T:" << type << " S:" << s << "\n";
+
+		if (type & POINTER){
+			//std::cerr << "POINTER ";
+			var = new char[s];
+			std::memcpy(var, *(char**)varPointer, s);
+		}else{
+			//std::cerr << "NOTPOINTER ";
+			if (type & UMAP){
+				var = serilizeUMapStep1(
+						varPointer,
+						type,
+						s
+						); // TODO change how this is done!!!! This  should be done by recursive serialization
+			}else{
+				var = new char[s];
+				std::memcpy(var, varPointer, s);
+			}
+		}
+
+		newTask->globals.insert(newTask->globals.end(), std::make_tuple(var, s, type) );
+	}
+}
+
 faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned long int idSrc, unsigned long int idRes, int funcId, size_t size, std::vector< std::tuple<void*, size_t, int> > & globalTable){
 	fastTask * newTask = new fastTask();
 	newTask->id = numTasks++;
@@ -204,22 +330,7 @@ faster::fastTask * faster::fastScheduler::enqueueTask(fddOpType opT, unsigned lo
 	newTask->times = std::vector<size_t>(numProcs, 0);
 	newTask->procstats = std::vector<procstat>(numProcs);
 
-	for ( size_t i = 0; i < globalTable.size(); i++){
-		size_t s = std::get<1>(globalTable[i]);
-		void * var = new char[s];
-		int type = std::get<2>(globalTable[i]);
-		//std::cerr << "T:" << type << " S:" << s << "\n";
-
-		if (type & POINTER){
-			//std::cerr << "POINTER ";
-			std::memcpy(var, *(char**)std::get<0>(globalTable[i]), s);
-		}else{
-			//std::cerr << "NOTPOINTER ";
-			std::memcpy(var, std::get<0>(globalTable[i]), s);
-		}
-
-		newTask->globals.insert(newTask->globals.end(), std::make_tuple(var, std::get<1>(globalTable[i]), type) );
-	}
+	copyTaskGlobals(newTask, globalTable);
 
 	taskList.insert(taskList.end(), newTask);
 
@@ -276,11 +387,15 @@ void faster::fastScheduler::printProcstats(fastTask * task){
 	mutime /= task->procstats.size()-1;
 	mstime /= task->procstats.size()-1;
 
-	fprintf(stderr, "\033[1;34m%4.1lf %3.1lf %3.1lf ", mram, mutime, mstime);
+	//fprintf(stderr, "\033[1;34m%4.1lf %3.1lf %3.1lf ", mram, mutime, mstime);
+	std::cerr << std::fixed << std::setprecision(1)
+		<< std::setw(6) << mram << " "
+		<< std::setw(5) << mutime << " " << mstime << " ";
 
 	std::cerr << "\033[0m| " ;
 	for ( size_t i = 0; i < task->procstats.size(); i++ ){
-		fprintf(stderr, "%4.1lf ", task->procstats[i].ram);
+		//fprintf(stderr, "%4.1lf ", task->procstats[i].ram);
+		std::cerr << std::setw(6) << task->procstats[i].ram << " ";
 	}
 
 }
@@ -294,7 +409,8 @@ void faster::fastScheduler::printTaskInfo(size_t taskID){
 
 
 	std::cerr << "\033[1;34m " ;
-	fprintf(stderr, "%2ld ", task->id);
+	//fprintf(stderr, "%2ld ", task->id);
+	std::cerr << std::setw(2) << task->id << " ";
 	if ((task->operationType & (OP_GENERICREDUCE | OP_GENERICMAP | OP_GENERICUPDATE) ) && ((*funcName)[task->functionId].size() > 0)){
 		std::cerr << decodeOptypeAb(task->operationType) << " " ;
 		std::cerr << std::setw(9) << (*funcName)[task->functionId] << "\t";
@@ -303,17 +419,25 @@ void faster::fastScheduler::printTaskInfo(size_t taskID){
 	}
 
 	std::cerr << "\033[0m " ;
-	fprintf(stderr, "%2d %2ld %2ld ", task->functionId, task->srcFDD, task->destFDD );
+	//fprintf(stderr, "%2d %2ld %2ld ", task->functionId, task->srcFDD, task->destFDD );
+	std::cerr << std::setw(2) << task->functionId << " "
+		<< task->srcFDD << " "
+		<< task->destFDD << " ";
 
 	std::cerr << "| \033[1;31m " ;
-	fprintf(stderr, "%5ld %6.1lf %3.1lf ", task->duration, m, sd/m);
+	//fprintf(stderr, "%5ld %6.1lf %3.1lf ", task->duration, m, sd/m);
+	std::cerr << std::setprecision(1)
+		<< std::setw(5) << task->duration << " "
+		<< std::setw(8) << m << " "
+		<< std::setw(5) << sd/m << " ";
 
 	std::cerr << "\033[0m| " ;
 	printProcstats(task);
 	std::cerr << "| " ;
 
 	for ( auto it2 = t.begin() ; it2 != t.end(); it2++){
-		fprintf(stderr, "%5ld ", *it2);
+		//fprintf(stderr, "%5ld ", *it2);
+		std::cerr << std::setw(2) << *it2 << " ";
 	}
 
 	std::cerr << "\n";
