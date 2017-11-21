@@ -40,7 +40,7 @@ pair<int,vector<float>> toVector(string & input){
 pair<int, vector<float>> multLines(const int & key, line_t & line){
 	pair<int, vector<float>> result;
 	result.first = key;
-	result.second.resize(batchSize);
+	result.second.resize(m2.size());
 	for ( size_t k = 0; k < batchSize ; k++ ){
 		result.second[k] = 0;
 	}
@@ -49,7 +49,7 @@ pair<int, vector<float>> multLines(const int & key, line_t & line){
 		for ( size_t j = 0; j < m2.size() ; j+=batchSize ){
 			for ( size_t l = i; l < i+batchSize ; l++ ){
 				for ( size_t m = j; m < j+batchSize ; m++ ){
-					result.second[m2[m].first] += line[l]*m2[m].second[l];
+					result.second[m2[m].first] += line[l] * m2[m].second[l];
 				}
 			}
 		}
@@ -92,7 +92,7 @@ int main(int argc, char ** argv){
 
 	if (argc > 3) matSize = atoi(argv[3]);
 	if (argc > 4) batchSize = atoi(argv[4]);
-	cerr << "Read M2 " << argv[2];
+	cerr << "Read M2 " << argv[2] << "\n";
 	readMatrix(argv[2], m2);
 	cerr << "\n";
 
@@ -120,7 +120,7 @@ int main(int argc, char ** argv){
 	numItems = m1->getSize();
 	fc.updateInfo();
 
-	cerr << "\033[1;33mInit MMult (" << numItems << " rank Matrix)\033[0m\n";
+	cerr << "\033[1;33mInit MMult (" << numItems << " rank Matrix) " << batchSize << " Batch \033[0m\n";
 
 	auto result = matMult(fc, m1);
 

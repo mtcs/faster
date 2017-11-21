@@ -70,15 +70,17 @@ void readMatrixBlock(ifstream & input, vector<pair<int,line_t>> & mat){
 	}
 }
 
-vector<line_t> matMult(fastContext & fc UNUSED, indexedFdd<int,line_t> * m1, string fileName){
+indexedFdd<int,line_t> * matMult(fastContext & fc UNUSED, indexedFdd<int,line_t> * m1, string fileName){
 	// Calculate result
 	ifstream input(fileName, std::ifstream::in);
 	m2.resize(batchSize);
 
     	// Alloc result matrix
 	vector<line_t> resultMat(matSize);
-	for ( auto & l : resultMat ){
-		l.resize(matSize);
+	vector<int> resultMatK(matSize);
+	for ( size_t i = 0; i < resultMat.size(); i++) {
+		resultMat[i].resize(matSize);
+		resultMatK[i] = i;
 	}
 
 	for ( size_t j = 0; j < matSize ; j+=batchSize ){
@@ -100,7 +102,7 @@ vector<line_t> matMult(fastContext & fc UNUSED, indexedFdd<int,line_t> * m1, str
 	}
 
 
-	return resultMat;
+	return (new indexedFdd<int,line_t> (fc, resultMatK.data(), resultMat.data(), matSize));
 }
 
 int main(int argc, char ** argv){
@@ -143,7 +145,7 @@ int main(int argc, char ** argv){
 
 	start2 = system_clock::now();
 
-	//result->writeToFile(std::string("/tmp/m3"), std::string(".txt"));
+	result->writeToFile(std::string("/tmp/fm3"), std::string(".txt"));
 
 	auto duration = duration_cast<milliseconds>(system_clock::now() - start).count();
 	cerr << "  Write Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";

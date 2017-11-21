@@ -60,11 +60,14 @@ void copyColumnsToGlobal(vector<pair<int,line_t>> & m2, size_t j){
 	}
 }
 
-vector<line_t> matMult(fastContext & fc UNUSED, indexedFdd<int,line_t> * m1, vector<pair<int,line_t>> & m2){
+indexedFdd<int,line_t> * matMult(fastContext & fc, indexedFdd<int,line_t> * m1, vector<pair<int,line_t>> & m2){
     	// Alloc result matrix
-	vector<line_t> resultMat(matSize);
-	for ( auto & l : resultMat ){
-		l.resize(matSize);
+	vector<int> resultMatK(matSize);
+	vector<line_t> resultMatV(matSize);
+	//for ( auto & l : resultMat ){
+	for ( size_t i = 0; i < resultMatV.size(); i++) {
+		resultMatV[i].resize(matSize);
+		resultMatK[i] = i;
 	}
 
 	for ( size_t j = 0; j < matSize ; j+=batchSize ){
@@ -80,14 +83,14 @@ vector<line_t> matMult(fastContext & fc UNUSED, indexedFdd<int,line_t> * m1, vec
 		// Save in result matrix
 		for ( auto & v : localNewLines ) {
 			for ( size_t k = 0; (k < batchSize) && ((j+k) < matSize) ; k++ ){
-				resultMat[v.first][m2[j+k].first] = v.second[k];
+				resultMatV[v.first][m2[j+k].first] = v.second[k];
 			}
 		}
 		fc.updateInfo();
 		newLines->discard();
 	}
 
-	return resultMat;
+	return (new indexedFdd<int,line_t> (fc, resultMatK.data(), resultMatV.data(), matSize));
 }
 
 int main(int argc, char ** argv){
@@ -135,7 +138,7 @@ int main(int argc, char ** argv){
 
 	start2 = system_clock::now();
 
-	//clusterAssign->writeToFile(std::string("/tmp/clusterAssign"), std::string(".txt"));
+	result->writeToFile(std::string("/tmp/fm3"), std::string(".txt"));
 
 	auto duration = duration_cast<milliseconds>(system_clock::now() - start).count();
 	cerr << "  Write Time: " << duration_cast<milliseconds>(system_clock::now() - start2).count() << "ms\n";
