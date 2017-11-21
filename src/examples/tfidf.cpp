@@ -30,7 +30,7 @@ deque<pair<string,int>> docThermCount(string & line){
 	return result;
 }
 
-pair<string, int> sumThemCount(const string & key, vector<int *> & countV){
+pair<string, int> sumThermCount(const string & key, vector<int *> & countV){
 	int count = 0;
 	for ( auto v : countV){
 		count += *v;
@@ -71,7 +71,7 @@ int main(int argc, char ** argv){
 	cout << "Init FastLib" << '\n';
 	fastContext fc(argc,argv);
 	fc.registerFunction((void*) &docThermCount, "docThermCount");
-	fc.registerFunction((void*) &sumThemCount, "sumThemCount");
+	fc.registerFunction((void*) &sumThermCount, "sumThermCount");
 	fc.registerFunction((void*) &getIDF, "getIDF");
 	fc.registerFunction((void*) &getTfidf, "getTfidf");
 	fc.registerGlobal(&numDocuments);
@@ -96,10 +96,10 @@ int main(int argc, char ** argv){
 	cerr << parcialThermCount->getSize() << " Therms\n";
 
 	cerr << "Count Therms\n";
-	auto thermCountByDoc = parcialThermCount->mapByKey(&sumThemCount);
+	auto thermCountByDoc = parcialThermCount->mapByKey(&sumThermCount);
 	fc.updateInfo();
 	cerr << thermCountByDoc->getSize() << " Therms\n";
-	thermCountByDoc = thermCountByDoc->groupByKey()->mapByKey(&sumThemCount);
+	thermCountByDoc = thermCountByDoc->groupByKey()->mapByKey(&sumThermCount);
 	fc.updateInfo();
 	cerr << thermCountByDoc->getSize() << " Therms\n";
 
