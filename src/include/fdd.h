@@ -281,6 +281,7 @@ namespace faster{
 
 	};
 
+	// DEPRECATED - This class specialization is deprecated and will be substituted by something nicer
 	template <class T>
 	class fdd<T *> : public fddCore<T>{
 		private:
@@ -524,7 +525,6 @@ namespace faster{
 			bulkReduceFunctionP<T> bulkReduceFunc = (bulkReduceFunctionP<T>) this->context->funcTable[funcId];
 			T * vals = new T[this->context->numProcs() - 1];
 
-			//#pragma omp parallel for
 			for (int i = 1; i < (this->context->numProcs() - 1); ++i){
 				fastCommBuffer buffer(0);
 
@@ -542,7 +542,6 @@ namespace faster{
 	template <typename T>
 	T fdd<T>::reduce( void * funcP, fddOpType op){
 		//std::cerr << "  Reduce ";
-		//T fddCore<T>::template reduce( int funcId, fddOpType op){
 		T result;
 		unsigned long int tid, sid;
 		int funcId = this->context->findFunc(funcP);
@@ -551,7 +550,6 @@ namespace faster{
 		size_t * rSize = new size_t[this->context->numProcs() - 1];
 
 		// Send task
-		//unsigned long int reduceTaskId =
 		auto start = system_clock::now();
 		this->context->enqueueTask(op, this->id, 0, funcId, this->size);
 
@@ -615,7 +613,6 @@ namespace faster{
 	template <typename T>
 	std::vector <T> fdd<T*>::reduceP(void * funcP, fddOpType op){
 		//std::cerr << "  Reduce";
-		//T fddCore<T>::template reduce( int funcId, fddOpType op){
 		// Decode function pointer
 		int funcId = this->context->findFunc(funcP);
 		T ** partResult = new T*[this->context->numProcs() -1];
@@ -624,7 +621,6 @@ namespace faster{
 		//std::cerr << " " << funcId << ".\n";
 
 		// Send task
-		//unsigned long int reduceTaskId =
 		auto start = system_clock::now();
 		this->context->enqueueTask(op, this->id, 0, funcId, this->size);
 
